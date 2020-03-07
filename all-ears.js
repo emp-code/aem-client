@@ -641,7 +641,7 @@ function AllEars(domain, serverPkHex, saltNormalHex, readyCallback) {
 	};
 
 	this.Account_Create = function(pk_hex, callback) {
-		_FetchEncrypted("account/create", sodium.from_hex(pk_hex), function(fetchOk, byteArray) {
+		_FetchEncrypted("account/create", sodium.from_hex(pk_hex), function(fetchOk) {
 			if (!fetchOk) {callback(false); return;}
 
 			_admin_userPkHex.push(pk_hex);
@@ -655,7 +655,7 @@ function AllEars(domain, serverPkHex, saltNormalHex, readyCallback) {
 	};
 
 	this.Account_Delete = function(pk_hex, callback) {
-		_FetchEncrypted("account/delete", sodium.from_hex(pk_hex), function(fetchOk, byteArray) {
+		_FetchEncrypted("account/delete", sodium.from_hex(pk_hex), function(fetchOk) {
 			if (!fetchOk) {callback(false); return;}
 
 			let num = -1;
@@ -685,7 +685,7 @@ function AllEars(domain, serverPkHex, saltNormalHex, readyCallback) {
 		upData[0] = level;
 		upData.set(sodium.from_hex(pk_hex), 1);
 
-		_FetchEncrypted("account/update", upData, function(fetchOk, byteArray) {
+		_FetchEncrypted("account/update", upData, function(fetchOk) {
 			if (!fetchOk) {callback(false); return;}
 
 			let num = -1;
@@ -717,7 +717,7 @@ function AllEars(domain, serverPkHex, saltNormalHex, readyCallback) {
 
 			const hash = sodium.crypto_pwhash(16, addr32, _AEM_SALT_NORMAL, _AEM_ARGON2_OPSLIMIT, _AEM_ARGON2_MEMLIMIT, sodium.crypto_pwhash_ALG_ARGON2ID13).slice(0, 13);
 
-			_FetchEncrypted("address/create", hash, function(fetchOk, byteArray) {
+			_FetchEncrypted("address/create", hash, function(fetchOk) {
 				if (!fetchOk) {callback(false); return;}
 
 				_userAddress.push(new _NewAddress(hash, addr32, false, true, false, false));
@@ -803,7 +803,7 @@ function AllEars(domain, serverPkHex, saltNormalHex, readyCallback) {
 		const msgId = new Uint8Array(16);
 		for (let i = 0; i < 16; i++) msgId[i] = sealBox[i * 64];
 
-		_FetchEncrypted("message/assign", sealBox, function(fetchOk, byteArray) {
+		_FetchEncrypted("message/assign", sealBox, function(fetchOk) {
 			if (!fetchOk) {callback(false); return;}
 
 			if (isFile)
@@ -1010,7 +1010,7 @@ function AllEars(domain, serverPkHex, saltNormalHex, readyCallback) {
 			data.set(id, i * 16);
 		}
 
-		_FetchEncrypted("message/delete", data, function(fetchOk, byteArray) {
+		_FetchEncrypted("message/delete", data, function(fetchOk) {
 			if (!fetchOk) {callback(false); return;}
 
 			for (let i = 0; i < hexIds.length; i++) {
