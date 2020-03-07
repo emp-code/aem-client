@@ -63,7 +63,7 @@ function addMsg(isInt, i) {
 	cellSubj.textContent = isInt? ae.GetIntMsgTitle(i) : ae.GetExtMsgTitle(i);
 
 	if (isInt) {
-		cellSnd1.textContent = isInt? ae.GetIntMsgFrom(i) : ae.GetIntMsgFrom(i);
+		cellSnd1.textContent = ae.GetIntMsgFrom(i);
 		cellSnd1.className = (ae.GetIntMsgFrom(i).length === 24) ? "mono" : "";
 	} else {
 		const from1 = ae.GetExtMsgFrom(i);
