@@ -8,11 +8,12 @@ module.exports = {
         "Atomics": "readonly",
         "SharedArrayBuffer": "readonly",
         "AllEars": "readonly",
-	"sodium": "readonly"
+        "sodium": "readonly"
     },
     "parserOptions": {
         "ecmaVersion": 2018
     },
     "rules": {
+        "no-console": "off"
     }
 };
