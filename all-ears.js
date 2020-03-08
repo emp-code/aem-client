@@ -437,6 +437,7 @@ function AllEars(readyCallback) {
 		_admin_userLevel.splice(0);
 	};
 
+	this.GetDomain = function() {return _AEM_DOMAIN;}
 	this.GetLevelMax = function() {return _AEM_USER_MAXLEVEL;};
 
 	this.GetAddress = function(num) {return _addr32_decode(_userAddress[num].addr32, _userAddress[num].is_shd);};
