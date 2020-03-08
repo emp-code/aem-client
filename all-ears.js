@@ -1,6 +1,6 @@
 "use strict";
 
-function AllEars(domain, serverPkHex, saltNormalHex, readyCallback) {
+function AllEars(readyCallback) {
 	try {
 		if (!window.isSecureContext
 		|| window.self !== window.top
@@ -9,8 +9,14 @@ function AllEars(domain, serverPkHex, saltNormalHex, readyCallback) {
 		) return readyCallback(false);
 	} catch(e) {return readyCallback(false);}
 
-	if (!domain || typeof(domain) !== "string")
-		domain = document.location.hostname;
+	const docDomain = document.documentElement.getAttribute("data-aedomain");
+	const docPubkey = document.documentElement.getAttribute("data-aepubkey");
+	const docSaltNm = document.documentElement.getAttribute("data-aesaltnm");
+
+	if (!docPubkey || !docSaltNm || docPubkey.length !== 64 || docSaltNm.length !== 32) {
+		readyCallback(false);
+		return;
+	}
 
 // Private constants - must match server
 	const _AEM_ADDR_FLAG_SHIELD = 128;
@@ -26,9 +32,11 @@ function AllEars(domain, serverPkHex, saltNormalHex, readyCallback) {
 	const _AEM_ARGON2_OPSLIMIT = 3;
 
 	const _AEM_ADDR32_CHARS = "0123456789abcdefghjkmnpqrstuwxyz";
-	const _AEM_PUBKEY_SERVER = sodium.from_hex(serverPkHex);
-	const _AEM_SALT_NORMAL = sodium.from_hex(saltNormalHex);
 	const _AEM_USER_MAXLEVEL = 3;
+
+	const _AEM_PUBKEY_SERVER = sodium.from_hex(docPubkey);
+	const _AEM_SALT_NORMAL = sodium.from_hex(docSaltNm);
+	const _AEM_DOMAIN = docDomain? docDomain : document.domain;
 
 // Private variables
 	const _maxStorage = [];
@@ -149,7 +157,7 @@ function AllEars(domain, serverPkHex, saltNormalHex, readyCallback) {
 		postMsg.set(nonce, sodium.crypto_box_PUBLICKEYBYTES);
 		postMsg.set(postBox, sodium.crypto_box_PUBLICKEYBYTES + sodium.crypto_box_NONCEBYTES);
 
-		_FetchBinary("https://" + domain + ":302/api/" + url, postMsg, function(success, encData) {
+		_FetchBinary("https://" + _AEM_DOMAIN + ":302/api/" + url, postMsg, function(success, encData) {
 			if (!success) {callback(false, null); return;}
 
 			try {
