@@ -162,6 +162,7 @@ document.getElementById("btn_enter").onclick = function() {
 
 	const btn = this;
 	btn.disabled = true;
+	document.getElementById("txt_skey").style.background = "#111";
 
 	ae.SetKeys(txtSkey.value, function(successSetKeys) {
 		if (successSetKeys) {
@@ -173,11 +174,13 @@ document.getElementById("btn_enter").onclick = function() {
 				} else {
 					console.log("Failed to enter");
 					btn.disabled = false;
+					document.getElementById("txt_skey").style.background = "#404b41";
 				}
 			});
 		} else {
 			console.log("Invalid format for key");
 			btn.disabled = false;
+			document.getElementById("txt_skey").style.background = "#404b41";
 		}
 	});
 };
