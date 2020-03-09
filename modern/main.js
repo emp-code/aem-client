@@ -156,6 +156,13 @@ document.getElementById("btn_refresh").onclick = function() {
 	});
 };
 
+document.getElementById("txt_skey").onkeyup = function(event) {
+	if (event.key === "Enter") {
+		event.preventDefault();
+		document.getElementById("btn_enter").click();
+	}
+};
+
 document.getElementById("btn_enter").onclick = function() {
 	const txtSkey = document.getElementById("txt_skey");
 	if (!txtSkey.reportValidity()) return;
