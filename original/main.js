@@ -494,6 +494,8 @@ function addAddress(num) {
 function clearMessages() {
 	document.getElementById("list_inbox").innerHTML = "<div>Received</div><div>Subject</div><div>Sender</div><div></div><div>Receiver</div><div>Delete</div>";
 	document.getElementById("list_sent").innerHTML = "<div>Sent</div><div>Subject</div><div>From</div><div>Receiver</div><div>Delete</div>";
+	document.getElementById("tbody_textnotes").innerHTML = "";
+	document.getElementById("tbody_filenotes").innerHTML = "";
 }
 
 function delMsgs(tblName, btnName) {
@@ -647,11 +649,6 @@ function reloadInterface() {
 
 	document.getElementById("gk_countrycount").textContent = gkCountryCount;
 
-	addMessages();
-
-	for (let i = ae.GetNoteCount() - 1; i >= 0; i--) {addNote(i);}
-	for (let i = ae.GetFileCount() - 1; i >= 0; i--) {addFile(i);}
-
 	if (ae.IsUserAdmin()) {
 		const tblLimits = document.getElementById("tbl_limits");
 		for (let i = 0; i < 4; i++) {
@@ -744,6 +741,8 @@ document.getElementById("btn_refresh").onclick = function() {
 		if (successBrowse) {
 			clearMessages();
 			addMessages();
+			for (let i = ae.GetNoteCount() - 1; i >= 0; i--) {addNote(i);}
+			for (let i = ae.GetFileCount() - 1; i >= 0; i--) {addFile(i);}
 			btn.disabled = false;
 		} else {
 			console.log("Failed to refresh");
