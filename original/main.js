@@ -469,9 +469,9 @@ function addAddress(num) {
 	if (cellAddr.textContent.length == 24) cellAddr.className = "mono";
 	cellAddr.onclick = function() {
 		if (cellAddr.textContent.length == 24)
-			navigator.clipboard.writeText(shieldMix(cellAddr.textContent) + "@" + ae.GetDomain);
+			navigator.clipboard.writeText(shieldMix(cellAddr.textContent) + "@" + ae.GetDomain());
 		else
-			navigator.clipboard.writeText(cellAddr.textContent + "@" + ae.GetDomain);
+			navigator.clipboard.writeText(cellAddr.textContent + "@" + ae.GetDomain());
 	};
 
 	cellChk1.innerHTML = ae.GetAddressAccExt(num) ? "<input type=\"checkbox\" checked=\"checked\">" : "<input type=\"checkbox\">";
@@ -487,7 +487,7 @@ function addAddress(num) {
 
 	const opt = document.createElement("option");
 	opt.value = cellAddr.textContent;
-	opt.textContent = cellAddr.textContent + "@" + ae.GetDomain;
+	opt.textContent = cellAddr.textContent + "@" + ae.GetDomain();
 	document.getElementById("send_from").appendChild(opt);
 }
 
