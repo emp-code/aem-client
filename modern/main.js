@@ -135,6 +135,13 @@ function addMessages() {
 	}
 }
 
+function clearMessages() {
+	document.getElementById("tbl_inbox").innerHTML = "";
+//	document.getElementById("tbl_sentm").innerHTML = "";
+//	document.getElementById("tbl_notes").innerHTML = "";
+//	document.getElementById("tbl_files").innerHTML = "";
+}
+
 function reloadInterface() {
 	document.getElementById("div_begin").hidden = true;
 	document.getElementById("div_main").style.display = "grid";
@@ -146,7 +153,7 @@ document.getElementById("btn_refresh").onclick = function() {
 
 	ae.Message_Browse(0, function(successBrowse) {
 		if (successBrowse) {
-//			clearMessages();
+			clearMessages();
 			addMessages();
 			btn.disabled = false;
 		} else {
