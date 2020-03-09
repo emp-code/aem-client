@@ -175,12 +175,14 @@ document.getElementById("btn_enter").onclick = function() {
 					console.log("Failed to enter");
 					btn.disabled = false;
 					document.getElementById("txt_skey").style.background = "#404b41";
+					txtSkey.focus();
 				}
 			});
 		} else {
 			console.log("Invalid format for key");
 			btn.disabled = false;
 			document.getElementById("txt_skey").style.background = "#404b41";
+			txtSkey.focus();
 		}
 	});
 };
