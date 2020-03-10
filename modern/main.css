@@ -13,7 +13,7 @@ html, body {
 	height: 100%;
 }
 
-@media only screen and not (pointer: none) {
+@media only screen and (hover: hover) {
 	#div_begin {
 		background: radial-gradient(#00000a, #001);
 		padding: 5vh 0;
