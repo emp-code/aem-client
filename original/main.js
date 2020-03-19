@@ -61,7 +61,7 @@ function addMessages() {
 		const tsExt = (numExt < maxExt) ? ae.GetExtMsgTime(numExt) : 0;
 		if (tsInt === 0 && tsExt === 0) break;
 
-		if (tsInt != 0 && (tsExt == 0 || tsInt > tsExt)) {
+		if (tsInt !== 0 && (tsExt === 0 || tsInt > tsExt)) {
 			if (i < (page * 20)) {
 				numInt++;
 				continue;
@@ -69,7 +69,7 @@ function addMessages() {
 
 			addIntMessage(numInt);
 			numInt++;
-		} else if (tsExt != 0) {
+		} else if (tsExt !== 0) {
 			if (i < (page * 20)) {
 				numExt++;
 				continue;
