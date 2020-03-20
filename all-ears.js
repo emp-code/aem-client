@@ -6,8 +6,8 @@ function AllEars(readyCallback) {
 		|| window.self !== window.top
 		|| document.compatMode == "BackCompat"
 		|| document.characterSet !== "UTF-8"
-		) return readyCallback(false);
-	} catch(e) {return readyCallback(false);}
+		) {readyCallback(false); return;}
+	} catch(e) {readyCallback(false); return;}
 
 	const docDomain = document.documentElement.getAttribute("data-aedomain");
 	const docPubkey = document.documentElement.getAttribute("data-aepubkey");
@@ -1108,5 +1108,5 @@ function AllEars(readyCallback) {
 		callback(sodium.to_hex(newKeys.publicKey), sodium.to_hex(newKeys.privateKey));
 	};
 
-	return readyCallback(true);
+	readyCallback(true);
 };
