@@ -1032,7 +1032,7 @@ function AllEars(readyCallback) {
 						if (id[k] !== _extMsg[j].id[k]) {matches = false; break;}
 					}
 
-					if (matches) _extMsg.splice(j, 1);
+					if (matches) {_extMsg.splice(j, 1); j--;}
 				}
 
 				for (let j = 0; j < _intMsg.length; j++) {
@@ -1042,7 +1042,7 @@ function AllEars(readyCallback) {
 						if (id[k] !== _intMsg[j].id[k]) {matches = false; break;}
 					}
 
-					if (matches) _intMsg.splice(j, 1);
+					if (matches) {_intMsg.splice(j, 1); j--;}
 				}
 
 				for (let j = 0; j < _textNote.length; j++) {
@@ -1052,7 +1052,7 @@ function AllEars(readyCallback) {
 						if (id[k] !== _textNote[j].id[k]) {matches = false; break;}
 					}
 
-					if (matches) _textNote.splice(j, 1);
+					if (matches) {_textNote.splice(j, 1); j--;}
 				}
 
 				for (let j = 0; j < _fileNote.length; j++) {
@@ -1062,7 +1062,7 @@ function AllEars(readyCallback) {
 						if (id[k] !== _fileNote[j].id[k]) {matches = false; break;}
 					}
 
-					if (matches) _fileNote.splice(j, 1);
+					if (matches) {_fileNote.splice(j, 1); j--;}
 				}
 			}
 
