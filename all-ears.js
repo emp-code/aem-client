@@ -93,14 +93,14 @@ function AllEars(readyCallback) {
 		this.to = to;
 		this.title = title;
 		this.body = body;
-	}
+	};
 
 	function _NewNote(id, ts, title, body) {
 		this.id = id;
 		this.timestamp = ts;
 		this.title = title;
 		this.body = body;
-	}
+	};
 
 	function _NewAddress(hash, addr32, is_shd, accExt, accInt, use_gk) {
 		this.hash = hash;
@@ -109,7 +109,7 @@ function AllEars(readyCallback) {
 		this.accExt = accExt;
 		this.accInt = accInt;
 		this.use_gk = use_gk;
-	}
+	};
 
 	const _FetchBinary = function(url, postData, callback) {
 		const nolang = new Headers();
@@ -437,7 +437,7 @@ function AllEars(readyCallback) {
 		_admin_userLevel.splice(0);
 	};
 
-	this.GetDomain = function() {return _AEM_DOMAIN;}
+	this.GetDomain = function() {return _AEM_DOMAIN;};
 	this.GetLevelMax = function() {return _AEM_USER_MAXLEVEL;};
 
 	this.GetAddress = function(num) {return _addr32_decode(_userAddress[num].addr32, _userAddress[num].is_shd);};
@@ -1109,4 +1109,4 @@ function AllEars(readyCallback) {
 	};
 
 	return readyCallback(true);
-}
+};
