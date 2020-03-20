@@ -466,9 +466,9 @@ function addAddress(num) {
 	const cellBtnD = row.insertCell(-1);
 
 	cellAddr.textContent = ae.GetAddress(num);
-	if (cellAddr.textContent.length == 24) cellAddr.className = "mono";
+	if (cellAddr.textContent.length === 24) cellAddr.className = "mono";
 	cellAddr.onclick = function() {
-		if (cellAddr.textContent.length == 24)
+		if (cellAddr.textContent.length === 24)
 			navigator.clipboard.writeText(shieldMix(cellAddr.textContent) + "@" + ae.GetDomain());
 		else
 			navigator.clipboard.writeText(cellAddr.textContent + "@" + ae.GetDomain());

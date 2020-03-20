@@ -193,7 +193,7 @@ function AllEars(readyCallback) {
 	};
 
 	const _addr32_decode = function(byteArray, is_shd) {
-		if (!byteArray || byteArray.length != 15) return "???";
+		if (!byteArray || byteArray.length !== 15) return "???";
 
 		const len = is_shd ? 24 : (byteArray[0] & 248) >> 3; // First five bits (128+64+32+16+8=248) store length for Normal addresses
 
