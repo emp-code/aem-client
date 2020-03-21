@@ -24,19 +24,18 @@ function AllEars(readyCallback) {
 	const _AEM_ADDR_FLAG_ACCINT = 2;
 	const _AEM_ADDR_FLAG_ACCEXT = 1;
 
+	const _AEM_ADDR32_CHARS = "0123456789abcdefghjkmnpqrstuwxyz";
 	const _AEM_BYTES_HEADBOX = 35;
 	const _AEM_BYTES_POST = 8192;
 	const _AEM_BYTES_PRIVATE = 4096 - 1 - sodium.crypto_box_PUBLICKEYBYTES - 700;
+	const _AEM_USER_MAXLEVEL = 3;
 
 	const _AEM_ARGON2_MEMLIMIT = 67108864;
 	const _AEM_ARGON2_OPSLIMIT = 3;
 
-	const _AEM_ADDR32_CHARS = "0123456789abcdefghjkmnpqrstuwxyz";
-	const _AEM_USER_MAXLEVEL = 3;
-
+	const _AEM_DOMAIN = docDomain? docDomain : document.domain;
 	const _AEM_PUBKEY_SERVER = sodium.from_hex(docPubkey);
 	const _AEM_SALT_NORMAL = sodium.from_hex(docSaltNm);
-	const _AEM_DOMAIN = docDomain? docDomain : document.domain;
 
 // Private variables
 	const _maxStorage = [];
@@ -93,14 +92,14 @@ function AllEars(readyCallback) {
 		this.to = to;
 		this.title = title;
 		this.body = body;
-	};
+	}
 
 	function _NewNote(id, ts, title, body) {
 		this.id = id;
 		this.timestamp = ts;
 		this.title = title;
 		this.body = body;
-	};
+	}
 
 	function _NewAddress(hash, addr32, is_shd, accExt, accInt, use_gk) {
 		this.hash = hash;
@@ -109,7 +108,7 @@ function AllEars(readyCallback) {
 		this.accExt = accExt;
 		this.accInt = accInt;
 		this.use_gk = use_gk;
-	};
+	}
 
 	const _FetchBinary = function(url, postData, callback) {
 		const nolang = new Headers();
@@ -1109,4 +1108,4 @@ function AllEars(readyCallback) {
 	};
 
 	readyCallback(true);
-};
+}
