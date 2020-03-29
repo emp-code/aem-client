@@ -173,6 +173,11 @@ html, body {
 	overflow-y: auto;
 }
 
+#midright > #msg > table span {
+	opacity: 0.5;
+	font-family: monospace, monospace;
+}
+
 .bot {
 	align-content: end;
 	display: flex;

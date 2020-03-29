@@ -36,6 +36,32 @@ function displayMsg(isInt, num) {
 	document.getElementById("msg").hidden = false;
 	document.getElementById("msg").getElementsByTagName("h1")[0].textContent = isInt ? ae.GetIntMsgTitle(num) : ae.GetExtMsgTitle(num);
 	document.getElementById("msg").getElementsByTagName("pre")[0].textContent = isInt ? ae.GetIntMsgBody(num) : ae.GetExtMsgBody(num);
+
+	document.getElementById("readmsg_to").textContent = isInt ? ae.GetIntMsgTo(num) : ae.GetExtMsgTo(num);
+
+	const ts = isInt? ae.GetIntMsgTime(num) : ae.GetExtMsgTime(num);
+	document.getElementById("readmsg_date").textContent = new Date(ts * 1000).toISOString().slice(0, 16).replace("T", " ");
+
+	if (!isInt) {
+		const cc = ae.GetExtMsgCountry(num);
+
+		document.getElementById("readmsg_greet").textContent = ae.GetExtMsgGreet(num);
+		document.getElementById("readmsg_ip").textContent = ae.GetExtMsgIp(num);
+		document.getElementById("readmsg_tls").textContent = ae.GetExtMsgTLS(num);
+		document.getElementById("readmsg_country").innerHTML = getCountryFlag(cc) + " " + getCountryName(cc);
+		document.getElementById("readmsg_envfrom").textContent = ae.GetExtMsgFrom(num);
+
+		let flagText = "";
+		if (!ae.GetExtMsgFlagPExt(num)) flagText += "<abbr title=\"The sender did not use the Extended (ESMTP) protocol\">SMTP</abbr> ";
+		if (!ae.GetExtMsgFlagQuit(num)) flagText += "<abbr title=\"The sender did not issue the required QUIT command\">QUIT</abbr> ";
+		if (ae.GetExtMsgFlagRare(num)) flagText += "<abbr title=\"The sender issued unusual command(s)\">RARE</abbr> ";
+		if (ae.GetExtMsgFlagFail(num)) flagText += "<abbr title=\"The sender issued invalid command(s)\">FAIL</abbr> ";
+		if (ae.GetExtMsgFlagPErr(num)) flagText += "<abbr title=\"The sender violated the protocol\">PROT</abbr> ";
+		document.getElementById("readmsg_flags").innerHTML = flagText.trim();
+	} else {
+		document.getElementById("readmsg_from").textContent = ae.GetIntMsgFrom(num);
+	}
+
 }
 
 // Interface
