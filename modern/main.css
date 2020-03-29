@@ -173,7 +173,7 @@ html, body {
 	overflow-y: auto;
 }
 
-#midright > #msg > table span {
+#midright > #msg > table {
 	opacity: 0.5;
 	font-family: monospace, monospace;
 }
