@@ -98,10 +98,6 @@ html, body {
 	grid-template-rows: 3em auto 3em;
 }
 
-#div_main a {
-	color: #fff;
-}
-
 #main1 {
 	box-shadow: -0.25em 0.25em black;
 }
@@ -134,20 +130,6 @@ html, body {
 #list_inbox > div {
 	display: grid;
 	grid-template-columns: auto 2fr 1fr 3em;
-}
-
-.top a {
-	opacity: 0.5;
-	text-decoration: none;
-}
-
-.bot a {
-	opacity: 0.3;
-	text-decoration: none;
-}
-
-#main2 .top a {
-	opacity: 0.1;
 }
 
 .top {
@@ -189,8 +171,20 @@ html, body {
 	align-items: center;
 }
 
-.top a, .bot a {
+.top button, .bot button {
+	background: #000011;
+	color: #fff;
+	padding: 0;
+	border: 0;
 	font-size: 1.5em;
+}
+
+.top button:enabled, .bot button:enabled {
+	opacity: 0.4;
+}
+
+.top button:disabled, .bot button:disabled {
+	opacity: 0.2;
 }
 
 #only {
