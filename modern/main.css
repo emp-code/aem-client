@@ -226,6 +226,7 @@ table {
 }
 
 #tbl_inbox tr:hover {
+	background: #1a1a1a;
 	cursor: pointer;
 }
 
@@ -241,10 +242,6 @@ table {
 
 #tbl_inbox tr > td:nth-child(5n) {
 	opacity: 0.5;
-}
-
-#tbl_inbox tr:hover {
-	background: #1a1a1a;
 }
 
 .mono {
