@@ -102,7 +102,7 @@ function addMsg(isInt, i) {
 
 //	divDel.innerHTML = "<input class=\"delMsg\" type=\"checkbox\" data-id=\"" + ae.GetIntMsgIdHex(i) + "\">";
 
-	cellSubj.onclick = function() {
+	row.onclick = function() {
 		displayMsg(isInt, i);
 	};
 /*

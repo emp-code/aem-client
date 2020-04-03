@@ -225,7 +225,7 @@ table {
 	opacity: 0.5;
 }
 
-#tbl_inbox tr > td:nth-child(2n) > span:hover {
+#tbl_inbox tr:hover {
 	cursor: pointer;
 }
 
