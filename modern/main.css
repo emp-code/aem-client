@@ -187,6 +187,10 @@ html, body {
 	opacity: 0.2;
 }
 
+.top button:enabled:hover, .bot button:enabled:hover {
+	cursor: pointer;
+}
+
 #only {
 	align-content: end;
 	overflow-y: auto;
