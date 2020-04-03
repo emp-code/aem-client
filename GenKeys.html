@@ -1,0 +1,46 @@
+<!doctype html>
+<html>
+<head>
+	<title>Generate keys for All-Ears Mail</title>
+
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta charset="utf-8">
+
+	<style>
+		body, input {
+			text-align: center;
+		}
+
+		input {
+			font-family: monospace, monospace;
+		}
+	</style>
+</head>
+<body>
+	<p>
+		<button type="button">Generate keys</button>
+	</p>
+
+	<p>
+		Public (for account creation):<br>
+		<input type="text" readonly="readonly" size="64" id="pkey">
+	</p>
+
+	<p>
+		Secret (for using All-Ears):<br>
+		<input type="text" readonly="readonly" size="64" id="skey">
+	</p>
+
+	<script src="https://cdn.jsdelivr.net/gh/jedisct1/libsodium.js@0.7.6/dist/browsers/sodium.js" integrity="sha384-RjKV8/F393aCBYpD9L99l8X0OovPryZ6+9uLMPLPzidGOOEramaPKs5oa5yV/vDM" crossorigin="anonymous"></script>
+
+	<script>
+		sodium.ready.then(function() {
+			document.getElementsByTagName("button")[0].onclick = function() {
+				const newKeys = sodium.crypto_box_keypair();
+				document.getElementById("pkey").value = sodium.to_hex(newKeys.publicKey);
+				document.getElementById("skey").value = sodium.to_hex(newKeys.privateKey);
+			}
+		});
+	</script>
+</body>
+</html>

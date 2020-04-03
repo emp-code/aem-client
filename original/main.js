@@ -681,13 +681,6 @@ function reloadInterface() {
 	}
 }
 
-function genKeys() {
-	ae.NewKeys(function(pk, sk) {
-		console.log("Public=" + pk);
-		console.log("Secret=" + sk);
-	});
-}
-
 document.getElementById("btn_inbox_prev").onclick = function() {
 	if (page > 0) {
 		page--;

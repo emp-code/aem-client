@@ -1102,10 +1102,5 @@ function AllEars(readyCallback) {
 		_FetchEncrypted("private/update", sodium.crypto_box_seal(privData, _userKeyPublic), function(fetchOk) {callback(fetchOk);});
 	};
 
-	this.NewKeys = function(callback) {
-		const newKeys = sodium.crypto_box_keypair();
-		callback(sodium.to_hex(newKeys.publicKey), sodium.to_hex(newKeys.privateKey));
-	};
-
 	readyCallback(true);
 }
