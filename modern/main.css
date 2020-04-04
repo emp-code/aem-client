@@ -6,6 +6,14 @@ html, body {
 
 *:focus {outline: none;}
 
+body > svg {
+	display: none;
+}
+
+#div_main svg {
+	height: 1em;
+}
+
 /* div_begin */
 #div_begin {
 	text-align: center;
@@ -52,7 +60,7 @@ html, body {
 	transition: background-color 0.5s ease-out;
 }
 
-#div_begin > div > main > div > button::-moz-focus-inner {
+button::-moz-focus-inner {
 	border: 0;
 }
 
@@ -181,15 +189,21 @@ html, body {
 }
 
 .top button:enabled, .bot button:enabled {
-	opacity: 0.4;
+	opacity: 0.25;
 }
 
 .top button:disabled, .bot button:disabled {
-	opacity: 0.2;
+	opacity: 0.0625;
 }
 
 .top button:enabled:hover, .bot button:enabled:hover {
 	cursor: pointer;
+	opacity: 0.5;
+}
+
+.top button:enabled:focus, .bot button:enabled:focus {
+	cursor: pointer;
+	opacity: 0.75;
 }
 
 #only {
