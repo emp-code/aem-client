@@ -190,20 +190,24 @@ button::-moz-focus-inner {
 
 .top button:enabled, .bot button:enabled {
 	opacity: 0.25;
+	transition: opacity 0.2s;
 }
 
 .top button:disabled, .bot button:disabled {
 	opacity: 0.0625;
+	transition: opacity 0.2s;
 }
 
 .top button:enabled:hover, .bot button:enabled:hover {
 	cursor: pointer;
 	opacity: 0.5;
+	transition: opacity 0.2s;
 }
 
 .top button:enabled:focus, .bot button:enabled:focus {
 	cursor: pointer;
 	opacity: 0.75;
+	transition: opacity 0.2s;
 }
 
 #only {
