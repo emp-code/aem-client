@@ -119,12 +119,13 @@ html, body {
 }
 
 #div_main pre {
-	white-space: pre-wrap;
-	font-family: sans-serif;
 	margin:0;
-	opacity: 0.55;
 	padding: 0 1em 0 1em;
+	opacity: 0.55;
+	white-space: pre-wrap;
 	word-wrap: break-word;
+	font-family: sans-serif;
+	text-rendering: optimizeLegibility;
 }
 
 #list_inbox > div {
