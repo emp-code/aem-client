@@ -176,6 +176,7 @@ function reloadInterface() {
 document.getElementById("btn_refresh").onclick = function() {
 	const btn = this;
 	btn.disabled = true;
+	btn.blur();
 
 	ae.Message_Browse(0, function(successBrowse) {
 		if (successBrowse) {
