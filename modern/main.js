@@ -35,6 +35,7 @@ function getCountryFlag(countryCode) {
 
 function displayMsg(isInt, num) {
 	document.getElementById("midright").scroll(0, 0);
+	document.getElementById("btn_reply").disabled = false;
 
 	document.getElementById("msg").hidden = false;
 	document.getElementById("msg").getElementsByTagName("h1")[0].textContent = isInt ? ae.GetIntMsgTitle(num) : ae.GetExtMsgTitle(num);
