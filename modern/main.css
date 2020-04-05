@@ -265,7 +265,6 @@ hr {
 	flex-flow: column;
 	padding: 0 1em 0 1em;
 	text-align: center;
-	color: #777;
 	height:100%;
 }
 
@@ -277,7 +276,7 @@ hr {
 	flex: 1 1 auto;
 }
 
-#div_write input, #div_write textarea, #div_write button, #div_write select {
+#main1 .mid input, #main1 .mid textarea, #main1 .mid button, #main1 .mid select {
 	background: #000;
 	color: #ccc;
 	border: 1px solid #333;
@@ -291,6 +290,28 @@ hr {
 #div_write textarea {
 	width: 100%;
 	height: 100%;
+}
+
+#div_notes table {
+	width: 100%;
+}
+
+#div_notes table tr td:last-of-type {
+	text-align: center;
+	width: 3em;
+}
+
+#div_notes tbody tr td:not(:last-of-type) {
+	opacity: 0.55;
+}
+
+#div_notes thead {
+	opacity: 0.4125;
+}
+
+#div_notes caption {
+	opacity: 0.4125;
+	font-weight: bold;
 }
 
 [hidden] {

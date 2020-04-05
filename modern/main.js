@@ -173,6 +173,15 @@ function clearMessages() {
 function reloadInterface() {
 	document.getElementById("div_begin").hidden = true;
 	document.getElementById("div_main").style.display = "grid";
+
+	// Contacts
+	for (let i = 0; i < ae.GetContactCount(); i++) {
+		addContact(
+			ae.GetContactMail(i),
+			ae.GetContactName(i),
+			ae.GetContactNote(i)
+		);
+	}
 }
 
 document.getElementById("btn_refresh").onclick = function() {
@@ -192,6 +201,23 @@ document.getElementById("btn_refresh").onclick = function() {
 	});
 };
 
+function addContact(mail, name, note) {
+	const tbl = document.getElementById("tbl_ctact");
+	const row = tbl.insertRow(-1);
+	const cellMail = row.insertCell(-1);
+	const cellName = row.insertCell(-1);
+	const cellNote = row.insertCell(-1);
+	const cellBtnD = row.insertCell(-1);
+
+	cellMail.textContent = mail;
+	cellName.textContent = name;
+	cellNote.textContent = note;
+	cellBtnD.innerHTML = "<button type=\"button\">X</button>";
+
+//	cellBtnD.onclick = 
+}
+
+// Tabs
 for (const btn1 of document.getElementById("main1").getElementsByClassName("top")[0].getElementsByTagName("button")) {
 	btn1.onclick = function() {
 		for (const btn2 of document.getElementById("main1").getElementsByClassName("top")[0].getElementsByTagName("button")) {
