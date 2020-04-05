@@ -259,3 +259,40 @@ hr {
 	color: #fff;
 	opacity: 0.1;
 }
+
+#div_write {
+	display: flex;
+	flex-flow: column;
+	padding: 0 1em 0 1em;
+	text-align: center;
+	color: #777;
+	height:100%;
+}
+
+.flex0 {
+	flex: 0 1 auto;
+}
+
+.flex1 {
+	flex: 1 1 auto;
+}
+
+#div_write input, #div_write textarea, #div_write button, #div_write select {
+	background: #000;
+	color: #ccc;
+	border: 1px solid #333;
+}
+
+#div_write input {
+	min-width: 50%;
+	text-align: center;
+}
+
+#div_write textarea {
+	width: 100%;
+	height: 100%;
+}
+
+[hidden] {
+  display: none !important;
+}
