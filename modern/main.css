@@ -141,14 +141,11 @@ button::-moz-focus-inner {
 	grid-template-columns: auto 2fr 1fr 3em;
 }
 
-.top {
+.top, .bot {
 	display: flex;
-	background: #001;
-	overflow:hidden;
-	white-space: nowrap;
-	text-align: center;
 	align-items: center;
 	justify-content: space-around;
+	background: #001;
 }
 
 .mid {
@@ -167,17 +164,6 @@ button::-moz-focus-inner {
 #midright > #msg > table {
 	opacity: 0.5;
 	font-family: monospace, monospace;
-}
-
-.bot {
-	align-content: end;
-	display: flex;
-	background: #001;
-	justify-content: space-around;
-	overflow:hidden;
-	white-space: nowrap;
-	text-align: center;
-	align-items: center;
 }
 
 .top button, .bot button {
