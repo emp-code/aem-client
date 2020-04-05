@@ -192,6 +192,16 @@ document.getElementById("btn_refresh").onclick = function() {
 	});
 };
 
+for (const btn1 of document.getElementById("main1").getElementsByClassName("top")[0].getElementsByTagName("button")) {
+	btn1.onclick = function() {
+		for (const btn2 of document.getElementById("main1").getElementsByClassName("top")[0].getElementsByTagName("button")) {
+			const isMatch = (btn1 === btn2);
+			btn2.disabled = isMatch;
+			document.getElementById("div_" + btn2.id.slice(4)).hidden = !isMatch;
+		};
+	};
+};
+
 document.getElementById("txt_skey").onkeyup = function(event) {
 	if (event.key === "Enter") {
 		event.preventDefault();

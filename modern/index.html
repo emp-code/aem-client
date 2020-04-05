@@ -32,14 +32,32 @@
 		<div id="div_main">
 			<div id="main1" class="main">
 				<nav class="top">
-					<button type="button" id=""><svg viewbox="0 0 96 64"><use xlink:href="#svg_inbx"/></svg></button>
-					<button type="button" id=""><svg viewbox="0 0 96 64"><use xlink:href="#svg_snbx"/></svg></button>
-					<button type="button" id=""><svg viewbox="0 0 96 64"><use xlink:href="#svg_writ"/></svg></button>
-					<button type="button" id=""><svg viewbox="0 0 96 64"><use xlink:href="#svg_note"/></svg></button>
-					<button type="button" id=""><svg viewbox="0 0 96 64"><use xlink:href="#svg_sett"/></svg></button>
+					<button type="button" id="btn_inbox" disabled="disabled"><svg viewbox="0 0 96 64"><use xlink:href="#svg_inbx"/></svg></button>
+					<button type="button" id="btn_snbox"><svg viewbox="0 0 96 64"><use xlink:href="#svg_snbx"/></svg></button>
+					<button type="button" id="btn_write"><svg viewbox="0 0 96 64"><use xlink:href="#svg_writ"/></svg></button>
+					<button type="button" id="btn_notes"><svg viewbox="0 0 96 64"><use xlink:href="#svg_note"/></svg></button>
+					<button type="button" id="btn_prefs"><svg viewbox="0 0 96 64"><use xlink:href="#svg_sett"/></svg></button>
 				</nav>
 				<div class="mid">
-					<table id="tbl_inbox"></table>
+					<div id="div_inbox">
+						<table id="tbl_inbox"></table>
+					</div>
+
+					<div id="div_snbox" hidden>
+						TODO: Sentbox
+					</div>
+
+					<div id="div_write" hidden>
+						TODO: Write
+					</div>
+
+					<div id="div_notes" hidden>
+						TODO: Notes
+					</div>
+
+					<div id="div_prefs" hidden>
+						TODO: Prefs
+					</div>
 				</div>
 				<nav class="bot">
 					<button type="button" id=""><svg viewbox="0 0 96 64"><use xlink:href="#svg_dele"/></svg></button>
