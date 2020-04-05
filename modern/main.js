@@ -182,6 +182,41 @@ function reloadInterface() {
 			ae.GetContactNote(i)
 		);
 	}
+
+	// Addresses
+	for (let i = 0; i < ae.GetAddressCount(); i++) {
+		addAddress(i);
+	}
+}
+
+function addAddress(num) {
+	const addrTable = document.getElementById("tbl_addrs");
+	const row = addrTable.insertRow(-1);
+	const cellAddr = row.insertCell(-1);
+	const cellChk1 = row.insertCell(-1);
+	const cellChk2 = row.insertCell(-1);
+	const cellChk3 = row.insertCell(-1);
+	const cellBtnD = row.insertCell(-1);
+
+	cellAddr.textContent = ae.GetAddress(num);
+	cellAddr.onclick = function() {
+		if (cellAddr.textContent.length === 24)
+			navigator.clipboard.writeText(shieldMix(cellAddr.textContent) + "@" + ae.GetDomain());
+		else
+			navigator.clipboard.writeText(cellAddr.textContent + "@" + ae.GetDomain());
+	};
+
+	cellChk1.innerHTML = ae.GetAddressAccExt(num) ? "<input type=\"checkbox\" checked=\"checked\">" : "<input type=\"checkbox\">";
+	cellChk2.innerHTML = ae.GetAddressAccInt(num) ? "<input type=\"checkbox\" checked=\"checked\">" : "<input type=\"checkbox\">";
+	cellChk3.innerHTML = ae.GetAddressUse_Gk(num) ? "<input type=\"checkbox\" checked=\"checked\">" : "<input type=\"checkbox\">";
+
+	cellBtnD.innerHTML = "<button type=\"button\">X</button>";
+//	cellBtnD.onclick = function() {deleteAddress(cellAddr.textContent);};
+
+	const opt = document.createElement("option");
+	opt.value = cellAddr.textContent;
+	opt.textContent = cellAddr.textContent + "@" + ae.GetDomain();
+	document.getElementById("write_from").appendChild(opt);
 }
 
 document.getElementById("btn_refresh").onclick = function() {

@@ -206,7 +206,7 @@ table, td {
 	overflow: hidden;
 }
 
-table {
+#div_inbox table {
 	table-layout:fixed;
 	width: 100%;
 }
@@ -296,7 +296,7 @@ hr {
 	width: 100%;
 }
 
-#div_notes table tr td:last-of-type {
+#div_notes table tr td:last-of-type, #table_addrs td:not(:first-of-type) {
 	text-align: center;
 	width: 3em;
 }
@@ -312,6 +312,18 @@ hr {
 #div_notes caption {
 	opacity: 0.4125;
 	font-weight: bold;
+}
+
+#table_addrs {
+	margin: auto;
+}
+
+#table_addrs thead td, #tbl_addrs td:not(:last-of-type) {
+	opacity: 0.6;
+}
+
+#tbl_addrs {
+	font-family: monospace, monospace;
 }
 
 [hidden] {
