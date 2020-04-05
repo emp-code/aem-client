@@ -20,6 +20,35 @@ textarea {
 table {
 	margin-left:auto;
 	margin-right:auto;
+	white-space: nowrap;
+	table-layout:fixed;
+}
+
+#div_inbox table {
+	max-width: 80em;
+}
+
+#div_inbox tr {
+	display: grid;
+	grid-template-columns: auto 3fr 1fr 1fr 1fr 3em;
+	border-bottom: 1px solid #ddd;
+}
+
+td {
+	margin: 0.1vh 0.4vw 0.1vh 0.4vw;
+	overflow:hidden;
+}
+
+#div_inbox td:not(:nth-child(3)):not(:last-child) {
+	text-align: left;
+}
+
+#div_inbox td:nth-child(3) {
+	text-align: right;
+}
+
+#div_inbox td:last-child {
+	text-align: center;
 }
 
 .bold {font-weight: bold;}
@@ -30,7 +59,7 @@ table {
 .flex {display: flex;}
 .flex input {flex: 1;}
 
-td, #readmsg_title, #readmsg_body {
+#readmsg_title, #readmsg_body {
 	white-space: pre-wrap;
 }
 
@@ -58,33 +87,6 @@ td, #readmsg_title, #readmsg_body {
 #tbl_limits th, #tbl_limits td {text-align: center;}
 
 #div_prefs_gatekeeper {margin: 0 auto;}
-
-#list_inbox, #list_sent {
-	display: grid;
-	margin: 0 auto;
-	max-width: 80em;
-}
-
-#list_inbox {grid-template-columns: auto 3fr 1fr 1fr 1fr 3em;}
-#list_sent  {grid-template-columns: auto 3fr 1fr 1fr 3em;}
-
-#list_inbox > div, #list_sent > div {
-	overflow: hidden;
-	text-align: left;
-	text-overflow: ellipsis;
-	white-space: nowrap;
-	line-height: 167%;
-	padding: 0 0.5em 0 0.5em;
-	border-bottom: 1px solid #ddd;
-}
-
-#list_inbox > div:nth-child(3n) {
-	text-align: right;
-}
-
-#list_inbox > div:nth-child(6n), #list_sent > div:nth-child(5n) {
-	text-align: center;
-}
 
 @media (prefers-color-scheme: dark) {
 	body, input, textarea, select, button, a {

@@ -82,50 +82,44 @@ function addMessages() {
 }
 
 function addExtMessage(i) {
-	const inbox = document.getElementById("list_inbox");
-	const sent = document.getElementById("list_sent");
+	const inbox = document.getElementById("tbd_inbox");
+	const snbox = document.getElementById("tbd_snbox");
 
 	const isSent = false;//ae.GetExtMsgIsSent(i);
-	const elmt = isSent ? sent : inbox;
+	const tbl = isSent ? snbox : inbox;
 
-	const divTime  = document.createElement("div");
-	const divSubj  = document.createElement("div");
-	const divFrom1 = document.createElement("div");
-	const divFrom2 = document.createElement("div");
-	const divTo    = document.createElement("div");
-	const divDel   = document.createElement("div");
+	const row = tbl.insertRow(-1);
+	const cellTime  = row.insertCell(-1);
+	const cellSubj  = row.insertCell(-1);
+	const cellFrom1 = row.insertCell(-1);
+	const cellFrom2 = row.insertCell(-1);
+	const cellTo    = row.insertCell(-1);
+	const cellDel   = row.insertCell(-1);
 
 	const ts = ae.GetExtMsgTime(i);
-	divTime.setAttribute("data-ts", ts);
-	divTime.textContent = new Date(ts * 1000).toISOString().slice(0, 16).replace("T", " ");
-	divTime.className = "mono";
+	cellTime.setAttribute("data-ts", ts);
+	cellTime.textContent = new Date(ts * 1000).toISOString().slice(0, 16).replace("T", " ");
+	cellTime.className = "mono";
 
-	divSubj.textContent = ae.GetExtMsgTitle(i);
+	cellSubj.textContent = ae.GetExtMsgTitle(i);
 
 	const from = ae.GetExtMsgFrom(i);
 	const from2 = from.substring(from.indexOf("@") + 1);
 	const cc = ae.GetExtMsgCountry(i);
 
-	divFrom1.textContent = from.substring(0, from.indexOf("@"));
-	divFrom2.innerHTML = "<abbr title=\"" + getCountryName(cc) + "\">" + getCountryFlag(cc) + "</abbr>";
+	cellFrom1.textContent = from.substring(0, from.indexOf("@"));
+	cellFrom2.innerHTML = "<abbr title=\"" + getCountryName(cc) + "\">" + getCountryFlag(cc) + "</abbr>";
 
 	const fromText = document.createElement("span");
 	fromText.textContent = " " + from2;
-	divFrom2.appendChild(fromText);
+	cellFrom2.appendChild(fromText);
 
-	divTo.textContent = ae.GetExtMsgTo(i);
-	divTo.className = (ae.GetExtMsgTo(i).length === 24) ? "mono" : "";
+	cellTo.textContent = ae.GetExtMsgTo(i);
+	cellTo.className = (ae.GetExtMsgTo(i).length === 24) ? "mono" : "";
 
-	divDel.innerHTML = "<input class=\"delMsg\" type=\"checkbox\" data-id=\"" + ae.GetExtMsgIdHex(i) + "\">";
+	cellDel.innerHTML = "<input class=\"delMsg\" type=\"checkbox\" data-id=\"" + ae.GetExtMsgIdHex(i) + "\">";
 
-	elmt.appendChild(divTime);
-	elmt.appendChild(divSubj);
-	elmt.appendChild(divFrom1);
-	elmt.appendChild(divFrom2);
-	elmt.appendChild(divTo);
-	elmt.appendChild(divDel);
-
-	divSubj.onclick = function() {
+	cellSubj.onclick = function() {
 		navMenu(-1);
 		document.getElementById("div_readmsg").hidden = false;
 		document.getElementById("readmsg_head").hidden = false;
@@ -155,8 +149,8 @@ function addExtMessage(i) {
 		document.getElementById("readmsg_to").className = (ae.GetExtMsgTo(i).length === 24) ? "mono" : "";
 	};
 
-	divDel.children[0].onchange = function() {
-		if (!divDel.children[0].checked) {
+	cellDel.children[0].onchange = function() {
+		if (!cellDel.children[0].checked) {
 			const checkboxes = elmt.getElementsByTagName("input");
 			let checked = false;
 
@@ -178,18 +172,19 @@ function addExtMessage(i) {
 }
 
 function addIntMessage(i) {
-	const inbox = document.getElementById("list_inbox");
-	const sent = document.getElementById("list_sent");
+	const inbox = document.getElementById("tbd_inbox");
+	const snbox = document.getElementById("tbd_snbox");
 
 	const isSent = ae.GetIntMsgIsSent(i);
-	const elmt = isSent ? sent : inbox;
+	const tbl = isSent ? snbox : inbox;
 
-	const divTime  = document.createElement("div");
-	const divSubj  = document.createElement("div");
-	const divFrom1 = document.createElement("div");
-	const divFrom2 = document.createElement("div");
-	const divTo    = document.createElement("div");
-	const divDel   = document.createElement("div");
+	const row = tbl.insertRow(-1);
+	const cellTime  = row.insertCell(-1);
+	const cellSubj  = row.insertCell(-1);
+	const cellFrom1 = row.insertCell(-1);
+	const cellFrom2 = row.insertCell(-1);
+	const cellTo    = row.insertCell(-1);
+	const cellDel   = row.insertCell(-1);
 
 	const ts = ae.GetIntMsgTime(i);
 	divTime.setAttribute("data-ts", ts);
@@ -492,8 +487,8 @@ function addAddress(num) {
 }
 
 function clearMessages() {
-	document.getElementById("list_inbox").innerHTML = "<div>Received</div><div>Subject</div><div>Sender</div><div></div><div>Receiver</div><div>Delete</div>";
-	document.getElementById("list_sent").innerHTML = "<div>Sent</div><div>Subject</div><div>From</div><div>Receiver</div><div>Delete</div>";
+	document.getElementById("tbd_inbox").innerHTML = "";
+	document.getElementById("tbd_snbox").innerHTML = "";
 	document.getElementById("tbody_textnotes").innerHTML = "";
 	document.getElementById("tbody_filenotes").innerHTML = "";
 }
