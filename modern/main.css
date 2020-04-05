@@ -316,14 +316,29 @@ hr {
 
 #table_addrs {
 	margin: auto;
+	border: 1px solid #333;
 }
 
 #table_addrs thead td, #tbl_addrs td:not(:last-of-type) {
 	opacity: 0.6;
 }
 
-#tbl_addrs {
+#table_addrs thead td:first-of-type {
+	text-align: right;
+}
+
+#tbl_addrs td:first-of-type, #table_addrs tfoot input {
 	font-family: monospace, monospace;
+	text-align: right;
+	font-size: 1em;
+}
+
+#table_addrs tfoot {
+	padding-top: 0.5em;
+}
+
+#tbl_addrs td:first-of-type {
+	padding-right: 2px;
 }
 
 [hidden] {
