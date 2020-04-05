@@ -309,14 +309,16 @@ hr {
 	opacity: 0.4125;
 }
 
-#div_notes caption {
+caption {
 	opacity: 0.4125;
 	font-weight: bold;
+	margin: 0.25em 0 0.25em 0;
 }
 
 #table_addrs {
 	margin: auto;
 	border: 1px solid #333;
+	border-spacing: 0.25vw;
 }
 
 #table_addrs thead td, #tbl_addrs td:not(:last-of-type) {
@@ -336,7 +338,6 @@ hr {
 #table_addrs tfoot td, #table_addrs tfoot button {
 	text-align: center;
 	font-family: monospace, monospace;
-	white-space: pre;
 }
 
 #tbl_addrs td:first-of-type {
