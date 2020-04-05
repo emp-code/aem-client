@@ -11,6 +11,7 @@ const ae = new AllEars(function(ok) {
 	}
 });
 
+let tab="inbox";
 let page=0;
 
 // Helper functions
@@ -219,21 +220,23 @@ function addAddress(num) {
 	document.getElementById("write_from").appendChild(opt);
 }
 
-document.getElementById("btn_refresh").onclick = function() {
+document.getElementById("btn_updt").onclick = function() {
 	const btn = this;
 	btn.disabled = true;
 	btn.blur();
 
-	ae.Message_Browse(0, function(successBrowse) {
-		if (successBrowse) {
-			clearMessages();
-			addMessages();
-			btn.disabled = false;
-		} else {
-			console.log("Failed to refresh");
-			btn.disabled = false;
-		}
-	});
+	if (tab === "inbox") {
+		ae.Message_Browse(0, function(successBrowse) {
+			if (successBrowse) {
+				clearMessages();
+				addMessages();
+				btn.disabled = false;
+			} else {
+				console.log("Failed to refresh");
+				btn.disabled = false;
+			}
+		});
+	}
 };
 
 function addContact(mail, name, note) {
@@ -253,12 +256,51 @@ function addContact(mail, name, note) {
 }
 
 // Tabs
+function setupButtons() {
+	switch(tab) {
+		case "inbox":
+		case "snbox":
+			document.getElementById("btn_dele").disabled = false;
+			document.getElementById("btn_left").disabled = false; // depends
+			document.getElementById("btn_cent").disabled = true;
+			document.getElementById("btn_rght").disabled = false;
+			document.getElementById("btn_updt").disabled = false;
+			break;
+		case "write":
+			document.getElementById("btn_dele").disabled = false; // depends
+			document.getElementById("btn_left").disabled = false; // depends
+			document.getElementById("btn_cent").disabled = true;
+			document.getElementById("btn_rght").disabled = false;
+			document.getElementById("btn_updt").disabled = true;
+			break;
+		case "notes":
+			document.getElementById("btn_dele").disabled = true;
+			document.getElementById("btn_left").disabled = false; // depends
+			document.getElementById("btn_cent").disabled = true;
+			document.getElementById("btn_rght").disabled = false; // depends
+			document.getElementById("btn_updt").disabled = true; // depends
+			break;
+		case "prefs":
+			document.getElementById("btn_dele").disabled = true;
+			document.getElementById("btn_left").disabled = false; // depends
+			document.getElementById("btn_cent").disabled = true;
+			document.getElementById("btn_rght").disabled = false; // depends
+			document.getElementById("btn_updt").disabled = true; // depends
+			break;
+	}
+}
+
 for (const btn1 of document.getElementById("main1").getElementsByClassName("top")[0].getElementsByTagName("button")) {
 	btn1.onclick = function() {
 		for (const btn2 of document.getElementById("main1").getElementsByClassName("top")[0].getElementsByTagName("button")) {
 			const isMatch = (btn1 === btn2);
 			btn2.disabled = isMatch;
 			document.getElementById("div_" + btn2.id.slice(4)).hidden = !isMatch;
+
+			if (isMatch) {
+				tab = btn2.id.slice(4);
+				setupButtons();
+			}
 		};
 	};
 };
@@ -284,7 +326,7 @@ document.getElementById("btn_enter").onclick = function() {
 				if (successBrowse) {
 					txtSkey.value = "";
 					reloadInterface();
-					document.getElementById("btn_refresh").click();
+					document.getElementById("btn_updt").click();
 				} else {
 					console.log("Failed to enter");
 					btn.disabled = false;
