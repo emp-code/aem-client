@@ -29,6 +29,7 @@ function AllEars(readyCallback) {
 	const _AEM_BYTES_POST = 8192;
 	const _AEM_BYTES_PRIVATE = 4096 - 1 - sodium.crypto_box_PUBLICKEYBYTES - 700;
 	const _AEM_USER_MAXLEVEL = 3;
+	const _AEM_ADDRESSES_PER_USER = 50;
 
 	const _AEM_ARGON2_MEMLIMIT = 67108864;
 	const _AEM_ARGON2_OPSLIMIT = 3;
@@ -438,6 +439,7 @@ function AllEars(readyCallback) {
 
 	this.GetDomain = function() {return _AEM_DOMAIN;};
 	this.GetLevelMax = function() {return _AEM_USER_MAXLEVEL;};
+	this.GetAddrPerUser = function() {return _AEM_ADDRESSES_PER_USER;};
 
 	this.GetAddress = function(num) {return _addr32_decode(_userAddress[num].addr32, _userAddress[num].is_shd);};
 	this.GetAddressAccExt = function(num) {return _userAddress[num].accExt;};
