@@ -333,12 +333,22 @@ hr {
 	font-size: 1em;
 }
 
-#table_addrs tfoot {
-	padding-top: 0.5em;
+#table_addrs tfoot td, #table_addrs tfoot button {
+	text-align: center;
+	font-family: monospace, monospace;
+	white-space: pre;
 }
 
 #tbl_addrs td:first-of-type {
 	padding-right: 2px;
+}
+
+.half {
+	opacity: 0.5;
+}
+
+#limit_normal, #limit_shield, #limit_total {
+	opacity: 0.8;
 }
 
 [hidden] {

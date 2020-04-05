@@ -189,6 +189,10 @@ function reloadInterface() {
 	for (let i = 0; i < ae.GetAddressCount(); i++) {
 		addAddress(i);
 	}
+
+	document.getElementById("limit_normal").textContent = (ae.GetAddressCountNormal() + "/" + ae.GetAddressLimitNormal(ae.GetUserLevel())).padStart(ae.GetAddressLimitNormal(ae.GetUserLevel()) > 9 ? 5 : 1);
+	document.getElementById("limit_shield").textContent = (ae.GetAddressCountShield() + "/" + ae.GetAddressLimitShield(ae.GetUserLevel())).padStart(ae.GetAddressLimitShield(ae.GetUserLevel()) > 9 ? 5 : 1);
+	document.getElementById("limit_total").textContent = ((ae.GetAddressCountNormal() + ae.GetAddressCountShield()) + "/" + ae.GetAddrPerUser()).padStart(5);
 }
 
 function addAddress(num) {
