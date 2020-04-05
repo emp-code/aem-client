@@ -11,7 +11,7 @@ body > svg {
 }
 
 #div_main svg {
-	height: 1em;
+	height: 1.5em;
 }
 
 /* div_begin */
@@ -171,7 +171,7 @@ button::-moz-focus-inner {
 	color: #fff;
 	padding: 0;
 	border: 0;
-	font-size: 1.5em;
+	height: 1.5em;
 }
 
 .top button:enabled, .bot button:enabled {
