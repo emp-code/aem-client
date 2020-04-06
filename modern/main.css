@@ -114,11 +114,6 @@ button::-moz-focus-inner {
 	box-shadow: 0.25em 0.25em black;
 }
 
-#div_main select {
-	font-family: monospace, monospace;
-	opacity: 0.75;
-}
-
 #div_main h1 {
 	padding: 0 1em 0 1em;
 	font-size: large;
@@ -277,10 +272,18 @@ hr {
 }
 
 #main1 .mid input, #main1 .mid textarea, #main1 .mid button, #main1 .mid select {
-	background: #000;
-	color: #ccc;
+	background: #080a08;
 	border: 1px solid #333;
+	color: #fff;
 	font-size: 1em;
+}
+
+#main1 .mid input, #main1 .mid button, #main1 .mid select {
+	opacity: 0.5;
+}
+
+#main1 .mid textarea {
+	opacity: 0.55;
 }
 
 #div_write input {
