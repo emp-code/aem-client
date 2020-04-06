@@ -114,9 +114,9 @@ button::-moz-focus-inner {
 	box-shadow: 0.25em 0.25em black;
 }
 
-#div_main code {
+#div_main select {
 	font-family: monospace, monospace;
-	opacity: 0.5;
+	opacity: 0.75;
 }
 
 #div_main h1 {
@@ -305,7 +305,7 @@ hr {
 	opacity: 0.55;
 }
 
-#div_notes thead {
+thead {
 	opacity: 0.4125;
 }
 
