@@ -248,7 +248,7 @@ table, td {
 	font-family: monospace, monospace;
 }
 
-#list_inbox > div > .center {
+.center {
 	text-align: center;
 }
 

@@ -330,6 +330,10 @@ function addContact(mail, name, note) {
 //	cellBtnD.onclick = 
 }
 
+document.getElementById("btn_newcontact").onclick = function() {
+	addContact("", "", "");
+}
+
 // Tabs
 function setupButtons() {
 	switch(tab) {
