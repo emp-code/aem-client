@@ -325,12 +325,8 @@ caption {
 	border-spacing: 0.25vw;
 }
 
-#table_addrs thead td, #tbl_addrs td:not(:last-of-type) {
-	opacity: 0.6;
-}
-
-#table_addrs thead td:first-of-type {
-	text-align: right;
+#tbl_addrs td:not(:last-of-type), #limit_normal, #limit_shield, #limit_total {
+	opacity: 0.55;
 }
 
 #tbl_addrs td:first-of-type, #table_addrs tfoot input {
@@ -350,10 +346,6 @@ caption {
 
 .half {
 	opacity: 0.5;
-}
-
-#limit_normal, #limit_shield, #limit_total {
-	opacity: 0.8;
 }
 
 [hidden] {
