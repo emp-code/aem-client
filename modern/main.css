@@ -250,11 +250,6 @@ table, td {
 	text-align: center;
 }
 
-hr {
-	color: #fff;
-	opacity: 0.1;
-}
-
 #div_write {
 	display: flex;
 	flex-flow: column;
@@ -321,8 +316,12 @@ caption {
 
 #table_addrs {
 	margin: auto;
-	border: 1px solid #333;
+	border: 1px solid #222;
 	border-spacing: 0.25vw;
+}
+
+hr {
+	color: #222;
 }
 
 #tbl_addrs td:not(:last-of-type), #limit_normal, #limit_shield, #limit_total {
