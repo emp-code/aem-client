@@ -172,6 +172,12 @@ function clearMessages() {
 //	document.getElementById("tbl_files").innerHTML = "";
 }
 
+function updateAddressCounts() {
+	document.getElementById("limit_normal").textContent = (ae.GetAddressCountNormal() + "/" + ae.GetAddressLimitNormal(ae.GetUserLevel())).padStart(ae.GetAddressLimitNormal(ae.GetUserLevel()) > 9 ? 5 : 1);
+	document.getElementById("limit_shield").textContent = (ae.GetAddressCountShield() + "/" + ae.GetAddressLimitShield(ae.GetUserLevel())).padStart(ae.GetAddressLimitShield(ae.GetUserLevel()) > 9 ? 5 : 1);
+	document.getElementById("limit_total").textContent = ((ae.GetAddressCountNormal() + ae.GetAddressCountShield()) + "/" + ae.GetAddrPerUser()).padStart(5);
+}
+
 function reloadInterface() {
 	document.getElementById("div_begin").hidden = true;
 	document.getElementById("div_main").style.display = "grid";
@@ -191,9 +197,7 @@ function reloadInterface() {
 	}
 
 	document.getElementById("table_addrs").getElementsByTagName("caption")[0].textContent = "Level " + ae.GetUserLevel() + " User";
-	document.getElementById("limit_normal").textContent = (ae.GetAddressCountNormal() + "/" + ae.GetAddressLimitNormal(ae.GetUserLevel())).padStart(ae.GetAddressLimitNormal(ae.GetUserLevel()) > 9 ? 5 : 1);
-	document.getElementById("limit_shield").textContent = (ae.GetAddressCountShield() + "/" + ae.GetAddressLimitShield(ae.GetUserLevel())).padStart(ae.GetAddressLimitShield(ae.GetUserLevel()) > 9 ? 5 : 1);
-	document.getElementById("limit_total").textContent = ((ae.GetAddressCountNormal() + ae.GetAddressCountShield()) + "/" + ae.GetAddrPerUser()).padStart(5);
+	updateAddressCounts();
 }
 
 function addAddress(num) {
@@ -309,6 +313,48 @@ for (const btn1 of document.getElementById("main1").getElementsByClassName("top"
 			}
 		};
 	};
+};
+
+function addressCreate(addr) {
+	const btnN = document.getElementById("btn_address_create_normal");
+	const btnS = document.getElementById("btn_address_create_shield");
+	btnN.disabled = true;
+	btnS.disabled = true;
+
+	ae.Address_Create(addr, function(success1) {
+		if (success1) {
+			ae.Private_Update(function(success2) {
+				addAddress(ae.GetAddressCount() - 1);
+				if (addr !== "SHIELD") document.getElementById("txt_address_create_normal").value = "";
+				updateAddressCounts();
+
+				if (!success2) console.log("Failed to update the Private field");
+
+				if (ae.GetAddressCountNormal() < ae.GetAddressLimitNormal(ae.GetUserLevel())) btnN.disabled = false;
+				if (ae.GetAddressCountShield() < ae.GetAddressLimitShield(ae.GetUserLevel())) btnS.disabled = false;
+			});
+		} else {
+			console.log("Failed to add address");
+
+			if (ae.GetAddressCountNormal() < ae.GetAddressLimitNormal(ae.GetUserLevel())) btnN.disabled = false;
+			if (ae.GetAddressCountShield() < ae.GetAddressLimitShield(ae.GetUserLevel())) btnS.disabled = false;
+		}
+	});
+}
+
+document.getElementById("btn_address_create_normal").onclick = function() {
+	if (ae.GetAddressCountNormal() >= ae.GetAddressLimitNormal(ae.GetUserLevel())) return;
+
+	const txtNewAddr = document.getElementById("txt_address_create_normal");
+	if (!txtNewAddr.reportValidity()) return;
+
+	addressCreate(txtNewAddr.value);
+}
+
+document.getElementById("btn_address_create_shield").onclick = function() {
+	if (ae.GetAddressCountShield() >= ae.GetAddressLimitShield(ae.GetUserLevel())) return;
+
+	addressCreate("SHIELD");
 };
 
 document.getElementById("txt_skey").onkeyup = function(event) {
