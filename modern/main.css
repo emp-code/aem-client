@@ -272,8 +272,8 @@ hr {
 }
 
 #main1 .mid input, #main1 .mid textarea, #main1 .mid button, #main1 .mid select {
-	background: #080a08;
-	border: 1px solid #333;
+	background: #000;
+	border: 1px solid #555;
 	color: #fff;
 	font-size: 1em;
 }
