@@ -336,7 +336,7 @@ caption {
 	font-size: 1em;
 }
 
-#table_addrs tfoot td, #table_addrs tfoot button {
+#table_addrs tfoot td, #table_addrs tfoot button, #write_recv {
 	text-align: center;
 	font-family: monospace, monospace;
 }
