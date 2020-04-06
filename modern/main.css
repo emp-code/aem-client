@@ -320,8 +320,9 @@ caption {
 	border-spacing: 0.25vw;
 }
 
-hr {
-	color: #222;
+#table_addrs > tfoot tr:first-of-type > td {
+	border-top: 1px solid #222;
+	height: 0.1em;
 }
 
 #tbl_addrs td:not(:last-of-type), #limit_normal, #limit_shield, #limit_total {
