@@ -200,6 +200,45 @@ function reloadInterface() {
 	updateAddressCounts();
 }
 
+function deleteAddress(addr) {
+	let btns = document.getElementById("tbl_addrs").getElementsByTagName("button");
+	for (let i = 0; i < btns.length; i++) btns[i].disabled = true;
+
+	let addressToDelete = -1;
+
+	for (let i = 0; i < ae.GetAddressCount(); i++) {
+		if (addr === ae.GetAddress(i)) {
+			addressToDelete = i;
+			break;
+		}
+	}
+
+	if (addressToDelete === -1) return;
+
+	ae.Address_Delete(addressToDelete, function(success) {
+		if (success) {
+			document.getElementById("tbl_addrs").deleteRow(addressToDelete);
+			document.getElementById("write_from").remove(addressToDelete);
+			updateAddressCounts();
+
+			if (ae.GetAddressCountNormal() < ae.GetAddressLimitNormal(ae.GetUserLevel())) document.getElementById("btn_address_create_normal").disabled = false;
+			if (ae.GetAddressCountShield() < ae.GetAddressLimitShield(ae.GetUserLevel())) document.getElementById("btn_address_create_shield").disabled = false;
+
+			ae.Private_Update(function(success2) {
+				if (!success2) console.log("Failed to update the Private field");
+
+				btns = document.getElementById("tbl_addrs").getElementsByTagName("button");
+				for (let i = 0; i < btns.length; i++) btns[i].disabled = false;
+			});
+		} else {
+			console.log("Failed to delete address");
+
+			btns = document.getElementById("tbl_addrs").getElementsByTagName("button");
+			for (let i = 0; i < btns.length; i++) btns[i].disabled = false;
+		}
+	});
+}
+
 function addAddress(num) {
 	const addrTable = document.getElementById("tbl_addrs");
 	const row = addrTable.insertRow(-1);
@@ -222,7 +261,7 @@ function addAddress(num) {
 	cellChk3.innerHTML = ae.GetAddressUse_Gk(num) ? "<input type=\"checkbox\" checked=\"checked\">" : "<input type=\"checkbox\">";
 
 	cellBtnD.innerHTML = "<button type=\"button\">X</button>";
-//	cellBtnD.onclick = function() {deleteAddress(cellAddr.textContent);};
+	cellBtnD.onclick = function() {deleteAddress(cellAddr.textContent);};
 
 	const opt = document.createElement("option");
 	opt.value = cellAddr.textContent;
