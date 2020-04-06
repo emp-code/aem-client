@@ -323,6 +323,10 @@ function addContact(mail, name, note) {
 	cellNote.textContent = note;
 	cellBtnD.innerHTML = "<button type=\"button\">X</button>";
 
+	cellMail.contentEditable = true;
+	cellName.contentEditable = true;
+	cellNote.contentEditable = true;
+
 //	cellBtnD.onclick = 
 }
 
