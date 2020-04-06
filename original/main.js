@@ -187,28 +187,21 @@ function addIntMessage(i) {
 	const cellDel   = row.insertCell(-1);
 
 	const ts = ae.GetIntMsgTime(i);
-	divTime.setAttribute("data-ts", ts);
-	divTime.textContent = new Date(ts * 1000).toISOString().slice(0, 16).replace("T", " ");
-	divTime.className = "mono";
+	cellTime.setAttribute("data-ts", ts);
+	cellTime.textContent = new Date(ts * 1000).toISOString().slice(0, 16).replace("T", " ");
+	cellTime.className = "mono";
 
-	divSubj.textContent = ae.GetIntMsgTitle(i);
+	cellSubj.textContent = ae.GetIntMsgTitle(i);
 
-	divFrom1.textContent = ae.GetIntMsgFrom(i);
-	divTo.textContent = ae.GetIntMsgTo(i);
+	cellFrom1.textContent = ae.GetIntMsgFrom(i);
+	cellTo.textContent = ae.GetIntMsgTo(i);
 
-	divTo.className = (ae.GetIntMsgTo(i).length === 24) ? "mono" : "";
-	divFrom1.className = (ae.GetIntMsgFrom(i).length === 24) ? "mono" : "";
+	cellTo.className = (ae.GetIntMsgTo(i).length === 24) ? "mono" : "";
+	cellFrom1.className = (ae.GetIntMsgFrom(i).length === 24) ? "mono" : "";
 
-	divDel.innerHTML = "<input class=\"delMsg\" type=\"checkbox\" data-id=\"" + ae.GetIntMsgIdHex(i) + "\">";
+	cellDel.innerHTML = "<input class=\"delMsg\" type=\"checkbox\" data-id=\"" + ae.GetIntMsgIdHex(i) + "\">";
 
-	elmt.appendChild(divTime);
-	elmt.appendChild(divSubj);
-	elmt.appendChild(divFrom1);
-	if (!isSent) elmt.appendChild(divFrom2);
-	elmt.appendChild(divTo);
-	elmt.appendChild(divDel);
-
-	divSubj.onclick = function() {
+	cellSubj.onclick = function() {
 		navMenu(-1);
 		document.getElementById("div_readmsg").hidden = false;
 		document.getElementById("readmsg_head").hidden = false;
@@ -225,8 +218,8 @@ function addIntMessage(i) {
 		document.getElementById("readmsg_to").className = (ae.GetIntMsgTo(i).length === 24) ? "mono" : "";
 	};
 
-	divDel.children[0].onchange = function() {
-		if (!divDel.children[0].checked) {
+	cellDel.children[0].onchange = function() {
+		if (!cellDel.children[0].checked) {
 			const checkboxes = elmt.getElementsByTagName("input");
 			let checked = false;
 
