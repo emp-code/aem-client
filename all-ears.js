@@ -24,6 +24,13 @@ function AllEars(readyCallback) {
 	const _AEM_ADDR_FLAG_ACCINT = 2;
 	const _AEM_ADDR_FLAG_ACCEXT = 1;
 
+	const _AEM_INFOBYTE_IS_ESMTP = 128; // Extended protocol version
+	const _AEM_INFOBYTE_CMD_QUIT =  64; // QUIT issued
+	const _AEM_INFOBYTE_CMD_RARE =  32; // Rare command (NOOP/RSET etc)
+	const _AEM_INFOBYTE_CMD_FAIL =  16; // Invalid command
+	const _AEM_INFOBYTE_PROTOERR =   8; // Protocol violation (commands out of order etc)
+	const _AEM_INFOBYTE_ISSHIELD =   4; // Is receiving address a Shield address?
+
 	const _AEM_ADDR32_CHARS = "0123456789abcdefghjkmnpqrstuwxyz";
 	const _AEM_BYTES_HEADBOX = 35;
 	const _AEM_BYTES_POST = 8192;
@@ -473,11 +480,11 @@ function AllEars(readyCallback) {
 	this.GetExtMsgHeaders = function(num) {return _extMsg[num].headers;};
 	this.GetExtMsgBody    = function(num) {return _extMsg[num].body;};
 
-	this.GetExtMsgFlagPErr = function(num) {return _extMsg[num].info &   8;}; // Protocol Error
-	this.GetExtMsgFlagFail = function(num) {return _extMsg[num].info &  16;}; // Invalid command used
-	this.GetExtMsgFlagRare = function(num) {return _extMsg[num].info &  32;}; // Rare/unusual command used
-	this.GetExtMsgFlagQuit = function(num) {return _extMsg[num].info &  64;}; // QUIT command issued
-	this.GetExtMsgFlagPExt = function(num) {return _extMsg[num].info & 128;}; // Protocol Extended (ESMTP)
+	this.GetExtMsgFlagPExt = function(num) {return _extMsg[num].info & _AEM_INFOBYTE_IS_ESMTP;};
+	this.GetExtMsgFlagQuit = function(num) {return _extMsg[num].info & _AEM_INFOBYTE_CMD_QUIT;};
+	this.GetExtMsgFlagRare = function(num) {return _extMsg[num].info & _AEM_INFOBYTE_CMD_RARE;};
+	this.GetExtMsgFlagFail = function(num) {return _extMsg[num].info & _AEM_INFOBYTE_CMD_FAIL;};
+	this.GetExtMsgFlagPErr = function(num) {return _extMsg[num].info & _AEM_INFOBYTE_PROTOERR;};
 
 	this.GetIntMsgCount = function() {return _intMsg.length;};
 	this.GetIntMsgIdHex  = function(num) {return sodium.to_hex(_intMsg[num].id);};
@@ -885,7 +892,7 @@ function AllEars(readyCallback) {
 						// msgHead[12] = SpamByte
 						const em_countrycode = new TextDecoder("utf-8").decode(msgHead.slice(13, 15));
 						// 16-19 unused
-						const em_to = _addr32_decode(msgHead.slice(20), (em_infobyte & 4) == 4);
+						const em_to = _addr32_decode(msgHead.slice(20), (em_infobyte & AEM_INFOBYTE_ISSHIELD) > 0);
 
 						// Bodybox
 						const msgBodyBrI8 = new Int8Array(msgBody);
