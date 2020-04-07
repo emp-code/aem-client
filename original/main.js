@@ -151,7 +151,7 @@ function addExtMessage(i) {
 
 	cellDel.children[0].onchange = function() {
 		if (!cellDel.children[0].checked) {
-			const checkboxes = elmt.getElementsByTagName("input");
+			const checkboxes = tbl.getElementsByTagName("input");
 			let checked = false;
 
 			for (let j = 0; j < checkboxes.length; j++) {
@@ -220,7 +220,7 @@ function addIntMessage(i) {
 
 	cellDel.children[0].onchange = function() {
 		if (!cellDel.children[0].checked) {
-			const checkboxes = elmt.getElementsByTagName("input");
+			const checkboxes = tbl.getElementsByTagName("input");
 			let checked = false;
 
 			for (let j = 0; j < checkboxes.length; j++) {
