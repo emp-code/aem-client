@@ -181,7 +181,7 @@ function addIntMessage(i) {
 	const row = tbl.insertRow(-1);
 	const cellTime  = row.insertCell(-1);
 	const cellSubj  = row.insertCell(-1);
-	const cellFrom1 = row.insertCell(-1);
+	row.insertCell(-1); // cellFrom1: empty
 	const cellFrom2 = row.insertCell(-1);
 	const cellTo    = row.insertCell(-1);
 	const cellDel   = row.insertCell(-1);
@@ -193,11 +193,11 @@ function addIntMessage(i) {
 
 	cellSubj.textContent = ae.GetIntMsgTitle(i);
 
-	cellFrom1.textContent = ae.GetIntMsgFrom(i);
+	cellFrom2.textContent = ae.GetIntMsgFrom(i);
 	cellTo.textContent = ae.GetIntMsgTo(i);
 
 	cellTo.className = (ae.GetIntMsgTo(i).length === 24) ? "mono" : "";
-	cellFrom1.className = (ae.GetIntMsgFrom(i).length === 24) ? "mono" : "";
+	cellFrom2.className = (ae.GetIntMsgFrom(i).length === 24) ? "mono" : "";
 
 	cellDel.innerHTML = "<input class=\"delMsg\" type=\"checkbox\" data-id=\"" + ae.GetIntMsgIdHex(i) + "\">";
 
