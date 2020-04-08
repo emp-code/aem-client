@@ -211,10 +211,10 @@ static int apiFetch(const char * const command, const void * const post, const s
 	memcpy(req + 63, host, lenHost);
 	memcpy(req + 63 + lenHost, ":302\r\n\r\n", 8);
 
-	// POST data: Nonce + our public key + the encrypted Box
+	// POST data: Our public key + nonce + the encrypted box
 	unsigned char * const postBegin = req + 71 + lenHost;
-	randombytes_buf(postBegin, crypto_box_NONCEBYTES);
-	crypto_scalarmult_base(postBegin + crypto_box_NONCEBYTES, usk);
+	crypto_scalarmult_base(postBegin, usk);
+	randombytes_buf(postBegin + crypto_box_PUBLICKEYBYTES, crypto_box_NONCEBYTES);
 
 	unsigned char boxBuf[AEM_HTTPS_POST_SIZE];
 	memcpy(boxBuf, post, lenPost);
