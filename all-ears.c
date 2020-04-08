@@ -201,7 +201,7 @@ static int apiFetch(const char * const command, const void * const post, const s
 	int ret = setupConnection(&sock, &ssl);
 	if (ret != 0) return -1;
 
-	const int lenReq = 71 + lenHost + crypto_box_NONCEBYTES + crypto_box_PUBLICKEYBYTES + AEM_HTTPS_POST_SIZE + crypto_box_MACBYTES;
+	const int lenReq = 71 + lenHost + crypto_box_PUBLICKEYBYTES + crypto_box_NONCEBYTES + AEM_HTTPS_POST_SIZE + crypto_box_MACBYTES;
 	unsigned char req[lenReq];
 
 	// HTTP headers
@@ -216,14 +216,13 @@ static int apiFetch(const char * const command, const void * const post, const s
 	crypto_scalarmult_base(postBegin, usk);
 	randombytes_buf(postBegin + crypto_box_PUBLICKEYBYTES, crypto_box_NONCEBYTES);
 
-	unsigned char boxBuf[AEM_HTTPS_POST_SIZE];
-	memcpy(boxBuf, post, lenPost);
-	randombytes_buf(boxBuf + lenPost, AEM_HTTPS_POST_SIZE - lenPost - 2);
+	unsigned char clear[AEM_HTTPS_POST_SIZE];
+	const uint16_t u16 = lenPost;
+	memcpy(clear, post, lenPost);
+	memcpy(clear + AEM_HTTPS_POST_SIZE - 2, &u16, 2);
 
-	uint16_t u16 = lenPost;
-	memcpy(boxBuf + AEM_HTTPS_POST_SIZE - 2, &u16, 2);
-
-	ret = crypto_box_easy(postBegin + crypto_box_NONCEBYTES + crypto_box_PUBLICKEYBYTES, boxBuf, AEM_HTTPS_POST_SIZE, postBegin, spk, usk);
+	ret = crypto_box_easy(postBegin + crypto_box_PUBLICKEYBYTES + crypto_box_NONCEBYTES, clear, AEM_HTTPS_POST_SIZE, postBegin, spk, usk);
+	sodium_memzero(clear, AEM_HTTPS_POST_SIZE);
 
 	int lenResponse = -1;
 	if (ret == 0) {
