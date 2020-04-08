@@ -892,7 +892,7 @@ function AllEars(readyCallback) {
 						// msgHead[12] = SpamByte
 						const em_countrycode = new TextDecoder("utf-8").decode(msgHead.slice(13, 15));
 						// 16-19 unused
-						const em_to = _addr32_decode(msgHead.slice(20), (em_infobyte & AEM_INFOBYTE_ISSHIELD) > 0);
+						const em_to = _addr32_decode(msgHead.slice(20), (em_infobyte & _AEM_INFOBYTE_ISSHIELD) > 0);
 
 						// Bodybox
 						const msgBodyBrI8 = new Int8Array(msgBody);
