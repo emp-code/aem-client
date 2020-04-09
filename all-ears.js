@@ -414,6 +414,7 @@ function AllEars(readyCallback) {
 			case 2: return "TLSv1.1";
 			case 3: return "TLSv1.2";
 			case 4: return "TLSv1.3";
+			default: return "TLSv1.?"
 		}
 	};
 
