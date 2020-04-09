@@ -141,7 +141,7 @@ function AllEars(readyCallback) {
 	};
 
 	const _FetchEncrypted = function(url, cleartext, callback) {
-		if (cleartext.length > _AEM_BYTES_POST) {callback(false); return;}
+		if (cleartext.length > _AEM_BYTES_POST) return callback(false);
 
 		// Cleartext is padded to _AEM_BYTES_POST bytes
 		const clearU8 = new Uint8Array(_AEM_BYTES_POST + 2);
@@ -171,16 +171,16 @@ function AllEars(readyCallback) {
 				const decData = sodium.crypto_box_open_easy(encData.slice(sodium.crypto_box_NONCEBYTES), encData.slice(0, sodium.crypto_box_NONCEBYTES), _AEM_PUBKEY_SERVER, _userKeySecret);
 
 				if (decData.length !== 33) {
-					callback(true, decData);
+					return callback(true, decData);
 				} else if (decData[0] === 255) {
-					callback(false, null);
+					return callback(false, null);
 				} else if (decData[0] === 0) {
-					callback(true, null);
+					return callback(true, null);
 				} else {
-					callback(true, decData.slice(1, 1 + decData[0]));
+					return callback(true, decData.slice(1, 1 + decData[0]));
 				}
 			} catch(e) {
-				callback(false, null);
+				return callback(false, null);
 			}
 		});
 	};
