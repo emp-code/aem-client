@@ -148,6 +148,7 @@ static int tlsRead(unsigned char * const data, const int maxLen) {
 }
 
 static void freeTls(void) {
+	mbedtls_ssl_free(&ssl);
 	mbedtls_ssl_config_free(&conf);
 	mbedtls_ctr_drbg_free(&ctr_drbg);
 	mbedtls_entropy_free(&entropy);
