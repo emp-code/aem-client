@@ -31,26 +31,29 @@
 #define AEM_LEVEL_MAX 3
 #define AEM_LEN_PERSONAL (4096 - crypto_box_PUBLICKEYBYTES - 1 - (AEM_ADDRESSES_PER_USER * 14))
 #define AEM_HEADBOX_SIZE 35 // Encrypted: (AEM_HEADBOX_SIZE + crypto_box_SEALBYTES)
-#define AEM_HTTPS_POST_SIZE 8192 // 8 KiB
+#define AEM_API_POST_SIZE 8192 // 8 KiB
+#define AEM_API_POST_BOXED_SIZE (crypto_box_NONCEBYTES + crypto_box_PUBLICKEYBYTES + AEM_API_POST_SIZE + 2 + crypto_box_MACBYTES)
 
 #define AEM_RESPONSE_204 "HTTP/1.1 204 aem\r\n"
 #define AEM_RESPONSE_204_LEN 18
 
 #define AEM_RESPONSE_SIZE_BROWSE (281 + 131240)
-#define AEM_RESPONSE_SIZE_GENERAL 350
+#define AEM_RESPONSE_SIZE_SHORT 350
+#define AEM_RESULT_SIZE_SHORT 33
 
 #define AEM_PORT_TOR 9050 // Tor port
 #define AEM_SOCKET_TIMEOUT 30 // Socket timeout in seconds
 
-mbedtls_ssl_config conf;
-mbedtls_entropy_context entropy;
-mbedtls_ctr_drbg_context ctr_drbg;
-mbedtls_x509_crt cacert;
+static mbedtls_ctr_drbg_context ctr_drbg;
+static mbedtls_entropy_context entropy;
+static mbedtls_ssl_config conf;
+static mbedtls_ssl_context ssl;
+static mbedtls_x509_crt cacert;
 
 static unsigned char spk[crypto_box_PUBLICKEYBYTES];
 static unsigned char usk[crypto_box_SECRETKEYBYTES];
 
-static char host[AEM_MAXLEN_HOST];
+static char host[AEM_MAXLEN_HOST + 1];
 static size_t lenHost = 0;
 
 static const int allears_csuite[] = {
@@ -115,12 +118,12 @@ static int torConnect(int * const sock) {
 	return 0;
 }
 
-static int tlsSend(mbedtls_ssl_context * const ssl, const unsigned char * const data, const size_t lenData) {
+static int tlsSend(const unsigned char * const data, const size_t lenData) {
 	size_t sentBytes = 0;
 
 	while (sentBytes < lenData) {
 		int ret;
-		do {ret = mbedtls_ssl_write(ssl, data + sentBytes, lenData - sentBytes);} while (ret == MBEDTLS_ERR_SSL_WANT_WRITE);
+		do {ret = mbedtls_ssl_write(&ssl, data + sentBytes, lenData - sentBytes);} while (ret == MBEDTLS_ERR_SSL_WANT_WRITE);
 		if (ret < 0) return sentBytes;
 		sentBytes += ret;
 	}
@@ -128,12 +131,12 @@ static int tlsSend(mbedtls_ssl_context * const ssl, const unsigned char * const 
 	return sentBytes;
 }
 
-static int tlsRead(mbedtls_ssl_context * const ssl, unsigned char * const data, const int maxLen) {
+static int tlsRead(unsigned char * const data, const int maxLen) {
 	int readBytes = 0;
 
 	while (readBytes < maxLen) {
 		int ret;
-		do {ret = mbedtls_ssl_read(ssl, data + readBytes, maxLen);} while (ret == MBEDTLS_ERR_SSL_WANT_READ);
+		do {ret = mbedtls_ssl_read(&ssl, data + readBytes, maxLen);} while (ret == MBEDTLS_ERR_SSL_WANT_READ);
 
 		if (ret == 0 || ret == MBEDTLS_ERR_SSL_PEER_CLOSE_NOTIFY) return readBytes; // Server closed the connection cleanly
 		if (ret < 0) return ret;
@@ -152,12 +155,15 @@ static void freeTls(void) {
 }
 
 static int setupTls() {
+	mbedtls_ssl_init(&ssl);
 	mbedtls_ctr_drbg_init(&ctr_drbg);
 	mbedtls_entropy_init(&entropy);
 	if (mbedtls_ctr_drbg_seed(&ctr_drbg, mbedtls_entropy_func, &entropy, NULL, 0)) return -1;
 
 	mbedtls_x509_crt_init(&cacert);
 	if (mbedtls_x509_crt_parse_path(&cacert, "/etc/ssl/certs/") != 0) return -1;
+
+	if (mbedtls_ssl_set_hostname(&ssl, host) != 0) return -1;
 
 	mbedtls_ssl_config_init(&conf);
 	if (mbedtls_ssl_config_defaults(&conf, MBEDTLS_SSL_IS_CLIENT, MBEDTLS_SSL_TRANSPORT_STREAM, MBEDTLS_SSL_PRESET_DEFAULT) != 0) return -1;
@@ -173,41 +179,40 @@ static int setupTls() {
 	mbedtls_ssl_conf_rng(&conf, mbedtls_ctr_drbg_random, &ctr_drbg);
 	mbedtls_ssl_conf_session_tickets(&conf, MBEDTLS_SSL_SESSION_TICKETS_DISABLED);
 	mbedtls_ssl_conf_sig_hashes(&conf, allears_hashes);
+
+	if (mbedtls_ssl_setup(&ssl, &conf) != 0) return -1;
 	return 0;
 }
 
-static int setupConnection(int * const sock, mbedtls_ssl_context *ssl) {
+static int setupConnection(int * const sock) {
 	int ret = torConnect(sock);
 	if (ret != 0) return -1;
 
-	mbedtls_ssl_init(ssl);
-	if (mbedtls_ssl_setup(ssl, &conf) != 0) return -1;
-	mbedtls_ssl_set_bio(ssl, sock, mbedtls_net_send, mbedtls_net_recv, NULL);
+	mbedtls_ssl_set_bio(&ssl, sock, mbedtls_net_send, mbedtls_net_recv, NULL);
 
-	while ((ret = mbedtls_ssl_handshake(ssl)) != 0) {
+	while ((ret = mbedtls_ssl_handshake(&ssl)) != 0) {
 		if (ret != MBEDTLS_ERR_SSL_WANT_READ && ret != MBEDTLS_ERR_SSL_WANT_WRITE) return -1;
 	}
 
-	if (mbedtls_ssl_get_verify_result(ssl) != 0) return -1; // Invalid cert
+	if (mbedtls_ssl_get_verify_result(&ssl) != 0) return -1; // Invalid cert
 
 	return 0;
 }
 
-static int apiFetch(const char * const command, const void * const post, const size_t lenPost, unsigned char * const response) {
+static int apiFetch(const char * const command, const void * const post, const size_t lenPost, unsigned char * const result) {
 	if (command == NULL || post == NULL || lenPost < 1) return -1;
 
 	int sock;
-	mbedtls_ssl_context ssl;
-	int ret = setupConnection(&sock, &ssl);
-	if (ret != 0) return -1;
+	int ret = setupConnection(&sock);
+	if (ret != 0) return -1; // Failed setting up connection
 
-	const int lenReq = 71 + lenHost + crypto_box_PUBLICKEYBYTES + crypto_box_NONCEBYTES + AEM_HTTPS_POST_SIZE + crypto_box_MACBYTES;
+	const int lenReq = 71 + lenHost + AEM_API_POST_BOXED_SIZE;
 	unsigned char req[lenReq];
 
 	// HTTP headers
 	memcpy(req, "POST /api/", 10);
 	memcpy(req + 10, command, 14);
-	memcpy(req + 24, " HTTP/1.1\r\nContent-Length: 8264\r\nHost: ", 39);
+	memcpy(req + 24, " HTTP/1.1\r\nContent-Length: 8266\r\nHost: ", 39);
 	memcpy(req + 63, host, lenHost);
 	memcpy(req + 63 + lenHost, ":302\r\n\r\n", 8);
 
@@ -216,39 +221,50 @@ static int apiFetch(const char * const command, const void * const post, const s
 	crypto_scalarmult_base(postBegin, usk);
 	randombytes_buf(postBegin + crypto_box_PUBLICKEYBYTES, crypto_box_NONCEBYTES);
 
-	unsigned char clear[AEM_HTTPS_POST_SIZE];
+	unsigned char clear[AEM_API_POST_SIZE + 2];
 	const uint16_t u16 = lenPost;
 	memcpy(clear, post, lenPost);
-	memcpy(clear + AEM_HTTPS_POST_SIZE - 2, &u16, 2);
+	memcpy(clear + AEM_API_POST_SIZE, &u16, 2);
 
-	ret = crypto_box_easy(postBegin + crypto_box_PUBLICKEYBYTES + crypto_box_NONCEBYTES, clear, AEM_HTTPS_POST_SIZE, postBegin, spk, usk);
-	sodium_memzero(clear, AEM_HTTPS_POST_SIZE);
+	ret = crypto_box_easy(postBegin + crypto_box_PUBLICKEYBYTES + crypto_box_NONCEBYTES, clear, AEM_API_POST_SIZE + 2, postBegin + crypto_box_PUBLICKEYBYTES, spk, usk);
+	sodium_memzero(clear, AEM_API_POST_SIZE + 2);
 
 	int lenResponse = -1;
 	if (ret == 0) {
-		if (tlsSend(&ssl, req, lenReq) == lenReq) {
-			if (response == NULL) {
-				unsigned char tmp[AEM_RESPONSE_SIZE_GENERAL + 1];
-				lenResponse = tlsRead(&ssl, tmp, AEM_RESPONSE_SIZE_GENERAL + 1);
-			} else {
-				lenResponse = tlsRead(&ssl, response, AEM_RESPONSE_SIZE_GENERAL + 1);
+		if (tlsSend(req, lenReq) == lenReq) {
+			unsigned char response[AEM_RESPONSE_SIZE_SHORT + 1];
+			lenResponse = tlsRead(response, AEM_RESPONSE_SIZE_SHORT + 1);
+			if (lenResponse == 0) {
+				lenResponse = -1; // Server refused to answer
+			} else if (lenResponse != AEM_RESPONSE_SIZE_SHORT) {
+				lenResponse = -1; // Invalid response size
+			} else if (result != NULL) {
+				lenResponse = result[AEM_RESPONSE_SIZE_SHORT - AEM_RESULT_SIZE_SHORT - 1];
+				memcpy(response, result + AEM_RESPONSE_SIZE_SHORT - AEM_RESULT_SIZE_SHORT, AEM_RESULT_SIZE_SHORT - 1);
 			}
 		}
 	}
 
 	close(sock);
 	mbedtls_ssl_close_notify(&ssl);
-	mbedtls_ssl_free(&ssl);
+	mbedtls_ssl_session_reset(&ssl);
 	return lenResponse;
 }
 
-int allears_address_lookup(const char * const addr) {
-	return apiFetch("address/lookup", addr, strlen(addr), NULL);
+int allears_address_lookup(const char * const query, unsigned char * const result) {
+	unsigned char data[AEM_RESULT_SIZE_SHORT - 1];
+	if (apiFetch("address/lookup", query, strlen(query), data) != 0) return -1;
+	memcpy(result, data, AEM_RESULT_SIZE_SHORT - 1);
+	return 0;
 }
 
-int allears_init(const char * const newHost, const size_t lenNewHost, const unsigned char newUsk[crypto_box_SECRETKEYBYTES]) {
+int allears_init(const char * const newHost, const size_t lenNewHost, const unsigned char newSpk[crypto_box_PUBLICKEYBYTES], const unsigned char newUsk[crypto_box_SECRETKEYBYTES]) {
 	if (lenNewHost > AEM_MAXLEN_HOST) return -1;
+	lenHost = lenNewHost;
 	memcpy(host, newHost, lenNewHost);
+	host[lenNewHost] = '\0';
+
+	memcpy(spk, newSpk, crypto_box_SECRETKEYBYTES);
 	memcpy(usk, newUsk, crypto_box_SECRETKEYBYTES);
 
 	return setupTls();
