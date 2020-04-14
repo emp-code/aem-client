@@ -1,4 +1,5 @@
 #ifndef AEM_CLIENT_H
+#define AEM_CLIENT_H
 
 #include <stddef.h>
 #include <sodium.h>
