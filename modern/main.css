@@ -157,6 +157,8 @@ button::-moz-focus-inner {
 }
 
 #midright > #msg > table {
+	width: 100%;
+	table-layout: fixed;
 	opacity: 0.5;
 	font-family: monospace, monospace;
 	padding-bottom: 0.25em;
