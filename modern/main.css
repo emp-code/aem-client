@@ -273,11 +273,24 @@ table, td {
 	flex: 1 1 auto;
 }
 
-#main1 .mid input, #main1 .mid textarea, #main1 .mid button, #main1 .mid select {
+#main1 .mid input, #main1 .mid textarea, #main1 .mid select, #main1 .mid button {
 	background: #000;
 	border: 1px solid #555;
-	color: #fff;
 	font-size: 1em;
+}
+
+#main1 .mid input, #main1 .mid textarea, #main1 .mid select {
+	color: #fff;
+}
+
+#main1 .mid button:enabled {
+	transition: color 0.2s ease-out;
+	color: #fff;
+}
+
+#main1 .mid button:disabled {
+	transition: color 0.2s ease-out;
+	color: #777;
 }
 
 #main1 .mid input, #main1 .mid button, #main1 .mid select {
