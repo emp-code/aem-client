@@ -296,10 +296,14 @@ table, td {
 	opacity: 0.5;
 }
 
-#div_write input {
-	min-width: 50%;
-	text-align: center;
+#div_write input, select {
+	min-width: 75%;
 }
+
+#div_write select, #write_recv {
+	font-family: monospace, monospace;
+}
+
 
 #div_write textarea {
 	width: 100%;
@@ -353,9 +357,8 @@ caption {
 	font-size: 1em;
 }
 
-#table_addrs tfoot td, #table_addrs tfoot button, #write_recv {
+#table_addrs tfoot td, #table_addrs tfoot button {
 	text-align: center;
-	font-family: monospace, monospace;
 }
 
 #tbl_addrs td:first-of-type {
