@@ -309,6 +309,7 @@ table, td {
 	height: 100%;
 	opacity: 0.55;
 	font-family: sans-serif;
+	resize: none;
 }
 
 #div_notes table {
