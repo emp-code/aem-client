@@ -182,15 +182,17 @@ button::-moz-focus-inner {
 }
 
 .top button:enabled:hover, .bot button:enabled:hover {
-	cursor: pointer;
 	opacity: 0.5;
 	transition: opacity 0.2s;
 }
 
 .top button:enabled:focus, .bot button:enabled:focus {
-	cursor: pointer;
 	opacity: 0.75;
 	transition: opacity 0.2s;
+}
+
+button:enabled:focus, button:enabled:hover {
+	cursor: pointer;
 }
 
 #only {
