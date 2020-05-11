@@ -195,11 +195,6 @@ button:enabled:focus, button:enabled:hover {
 	cursor: pointer;
 }
 
-#only {
-	align-content: end;
-	overflow-y: auto;
-}
-
 table, td {
 	white-space: nowrap;
 	overflow: hidden;
