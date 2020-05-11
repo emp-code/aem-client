@@ -338,7 +338,7 @@ function addContact(mail, name, note) {
 	cellName.contentEditable = true;
 	cellNote.contentEditable = true;
 
-//	cellBtnD.onclick = 
+	cellBtnD.onclick = function() {row.remove();};
 }
 
 document.getElementById("btn_newcontact").onclick = function() {
