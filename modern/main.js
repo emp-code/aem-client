@@ -43,6 +43,7 @@ function displayMsg(isInt, num) {
 		document.getElementById("write_recv").value = isInt ? ae.GetIntMsgFrom(num) : ae.GetExtMsgFrom(num);
 		document.getElementById("write_subj").value = "Re: " + (isInt ? ae.GetIntMsgTitle(num) : ae.GetExtMsgTitle(num));
 		document.getElementById("btn_write").click();
+		document.getElementById("write_body").focus();
 	};
 
 	document.getElementById("msg").hidden = false;
