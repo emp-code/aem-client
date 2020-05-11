@@ -35,15 +35,21 @@ function getCountryFlag(countryCode) {
 
 function displayMsg(isInt, num) {
 	document.getElementById("midright").scroll(0, 0);
+
+	const ts = isInt? ae.GetIntMsgTime(num) : ae.GetExtMsgTime(num);
+
 	document.getElementById("btn_reply").disabled = false;
+	document.getElementById("btn_reply").onclick = function() {
+		document.getElementById("write_recv").value = isInt ? ae.GetIntMsgFrom(num) : ae.GetExtMsgFrom(num);
+		document.getElementById("write_subj").value = "Re: " + (isInt ? ae.GetIntMsgTitle(num) : ae.GetExtMsgTitle(num));
+		document.getElementById("btn_write").click();
+	};
 
 	document.getElementById("msg").hidden = false;
 	document.getElementById("msg").getElementsByTagName("h1")[0].textContent = isInt ? ae.GetIntMsgTitle(num) : ae.GetExtMsgTitle(num);
 	document.getElementById("msg").getElementsByTagName("pre")[0].textContent = isInt ? ae.GetIntMsgBody(num) : ae.GetExtMsgBody(num);
 
 	document.getElementById("readmsg_to").textContent = isInt ? ae.GetIntMsgTo(num) : ae.GetExtMsgTo(num);
-
-	const ts = isInt? ae.GetIntMsgTime(num) : ae.GetExtMsgTime(num);
 	document.getElementById("readmsg_date").textContent = new Date(ts * 1000).toISOString().slice(0, 16).replace("T", " ");
 
 	if (!isInt) {
@@ -65,7 +71,6 @@ function displayMsg(isInt, num) {
 	} else {
 		document.getElementById("readmsg_from").textContent = ae.GetIntMsgFrom(num);
 	}
-
 }
 
 // Interface
