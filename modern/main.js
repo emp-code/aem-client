@@ -44,6 +44,11 @@ function displayMsg(isInt, num) {
 		document.getElementById("write_subj").value = "Re: " + (isInt ? ae.GetIntMsgTitle(num) : ae.GetExtMsgTitle(num));
 		document.getElementById("btn_write").click();
 		document.getElementById("write_body").focus();
+		for (const opt of document.getElementById("write_from").options) {
+			if (opt.value === (isInt ? ae.GetIntMsgTo(num) : ae.GetExtMsgTo(num))) {
+				opt.selected = true;
+			}
+		}
 	};
 
 	document.getElementById("msg").hidden = false;
