@@ -56,7 +56,7 @@ function displayMsg(isInt, num) {
 	document.getElementById("msg").getElementsByTagName("pre")[0].textContent = isInt ? ae.GetIntMsgBody(num) : ae.GetExtMsgBody(num);
 
 	document.getElementById("readmsg_to").textContent = isInt ? ae.GetIntMsgTo(num) : ae.GetExtMsgTo(num);
-	document.getElementById("readmsg_date").textContent = new Date(ts * 1000).toISOString().slice(0, 16).replace("T", " ");
+	document.getElementById("readmsg_date").textContent = new Date(ts * 1000).toISOString().slice(0, 19).replace("T", " ");
 
 	if (!isInt) {
 		const cc = ae.GetExtMsgCountry(num);
