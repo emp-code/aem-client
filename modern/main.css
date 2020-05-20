@@ -202,7 +202,7 @@ table, td {
 	overflow: hidden;
 }
 
-#div_inbox table {
+#tbl_inbox {
 	table-layout:fixed;
 	width: 100%;
 }
