@@ -48,10 +48,21 @@
 					</div>
 
 					<div id="div_write" hidden>
-						<p class="flex0"><select id="write_from" required></select></p>
-						<p class="flex0"><input id="write_recv" type="text" required placeholder="Receiver"></p>
-						<p class="flex0"><input id="write_subj" type="text" required placeholder="Subject"></p>
-						<p class="flex1"><textarea id="write_body" required placeholder="Message" spellcheck="true"></textarea></p>
+						<div id="div_write_1">
+							<p class="flex0"><select id="write_from" required></select></p>
+							<p class="flex0"><input id="write_recv" type="text" required placeholder="Receiver"></p>
+							<p class="flex0"><input id="write_subj" type="text" required placeholder="Subject"></p>
+							<p class="flex1"><textarea id="write_body" required placeholder="Message" spellcheck="true"></textarea></p>
+						</div>
+
+						<div id="div_write_2" hidden>
+							<p id="write2_recv"></p>
+							<p id="write2_pkey"></p>
+							<hr>
+							<p id="write2_from"></p>
+							<p id="write2_subj"></p>
+							<p id="write2_body"></p>
+						</div>
 					</div>
 
 					<div id="div_notes" hidden>
@@ -122,9 +133,9 @@
 			<div id="main2" class="main">
 				<nav class="top">
 					<button type="button" autocomplete="off" id="btn_top21" disabled="disabled"><svg viewbox="0 0 96 64"><use xlink:href="#svg_inbx"/></svg></button>
-					<button type="button" autocomplete="off" id="btn_top22" disabled="disabled"><svg viewbox="0 0 96 64"><use xlink:href="#svg_snbx"/></svg></button>
+					<button type="button" autocomplete="off" id="btn_mprev" disabled="disabled"><svg viewbox="0 0 96 64"><use xlink:href="#svg_snbx"/></svg></button>
 					<button type="button" autocomplete="off" id="btn_reply" disabled="disabled"><svg viewbox="0 0 96 64"><use xlink:href="#svg_writ"/></svg></button>
-					<button type="button" autocomplete="off" id="btn_top24" disabled="disabled"><svg viewbox="0 0 96 64"><use xlink:href="#svg_note"/></svg></button>
+					<button type="button" autocomplete="off" id="btn_mnext" disabled="disabled"><svg viewbox="0 0 96 64"><use xlink:href="#svg_note"/></svg></button>
 					<button type="button" autocomplete="off" id="btn_top25" disabled="disabled"><svg viewbox="0 0 96 64"><use xlink:href="#svg_sett"/></svg></button>
 				</nav>
 				<div id="midright" class="mid">

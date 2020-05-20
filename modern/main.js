@@ -43,6 +43,8 @@ function displayMsg(isInt, num) {
 		document.getElementById("write_recv").value = isInt ? ae.GetIntMsgFrom(num) : ae.GetExtMsgFrom(num);
 		document.getElementById("write_subj").value = "Re: " + (isInt ? ae.GetIntMsgTitle(num) : ae.GetExtMsgTitle(num));
 		document.getElementById("btn_write").click();
+		document.getElementById("div_write_1").hidden = false;
+		document.getElementById("div_write_2").hidden = true;
 		document.getElementById("write_body").focus();
 		for (const opt of document.getElementById("write_from").options) {
 			if (opt.value === (isInt ? ae.GetIntMsgTo(num) : ae.GetExtMsgTo(num))) {
@@ -345,6 +347,24 @@ document.getElementById("btn_newcontact").onclick = function() {
 	addContact("", "", "");
 }
 
+function sendMsg1() {
+	ae.Address_Lookup(document.getElementById("write_recv").value, function(pk) {
+		if (pk) {
+			document.getElementById("div_write_1").hidden = true;
+			document.getElementById("div_write_2").hidden = false;
+
+			document.getElementById("write2_from").textContent = document.getElementById("write_from").value + "@" + ae.GetDomain();
+			document.getElementById("write2_recv").textContent = document.getElementById("write_recv").value;
+			document.getElementById("write2_pkey").textContent = sodium.to_hex(pk);
+
+			document.getElementById("write2_subj").textContent = document.getElementById("write_subj").value;
+			document.getElementById("write2_body").textContent = document.getElementById("write_body").value;
+		} else {
+			console.log("Failed lookup");
+		}
+	});
+}
+
 // Tabs
 function setupButtons() {
 	switch(tab) {
@@ -362,6 +382,13 @@ function setupButtons() {
 			document.getElementById("btn_cent").disabled = true;
 			document.getElementById("btn_rght").disabled = false;
 			document.getElementById("btn_updt").disabled = true;
+
+			document.getElementById("btn_left").onclick = function() {
+				document.getElementById("div_write_1").hidden = false;
+				document.getElementById("div_write_2").hidden = true;
+			}
+
+			document.getElementById("btn_rght").onclick = sendMsg1;
 			break;
 		case "notes":
 			document.getElementById("btn_dele").disabled = true;

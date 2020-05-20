@@ -256,12 +256,15 @@ table, td {
 	padding-bottom: 0.25em;
 }
 
-#div_write {
+#div_write, #div_write_1 {
 	display: flex;
 	flex-flow: column;
 	padding: 0 1em 0 1em;
-	text-align: center;
 	height:100%;
+}
+
+#div_write_1 {
+	text-align: center;
 }
 
 .flex0 {
@@ -296,21 +299,48 @@ table, td {
 	opacity: 0.5;
 }
 
-#div_write input, select {
+#div_write_1 input, select {
 	min-width: 75%;
 }
 
-#div_write select, #write_recv {
+#div_write_1 select, #write_recv {
 	font-family: monospace, monospace;
 }
 
-
-#div_write textarea {
+#write_body {
 	width: 100%;
 	height: 100%;
 	opacity: 0.55;
 	font-family: sans-serif;
 	resize: none;
+}
+
+#div_write_2 hr {
+	opacity: 0.25;
+}
+
+#div_write_2 p {
+	opacity: 0.55;
+	white-space: pre-wrap;
+}
+
+#write2_recv {
+	width: 100%;
+	text-align: center;
+	font-weight: bold;
+}
+
+#write2_pkey {
+	font-family: monospace, monospace;
+	margin: 1em auto;
+	font-size: large;
+	max-width: 16ch;
+	word-break: break-all;
+}
+
+#write2_subj {
+	font-size: large;
+	font-weight: bold;
 }
 
 #div_notes table {
