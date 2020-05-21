@@ -351,24 +351,6 @@ document.getElementById("btn_newcontact").onclick = function() {
 	addContact("", "", "");
 }
 
-function sendMsg1() {
-	ae.Address_Lookup(document.getElementById("write_recv").value, function(pk) {
-		if (pk) {
-			document.getElementById("div_write_1").hidden = true;
-			document.getElementById("div_write_2").hidden = false;
-
-			document.getElementById("write2_from").textContent = document.getElementById("write_from").value + "@" + ae.GetDomain();
-			document.getElementById("write2_recv").textContent = document.getElementById("write_recv").value;
-			document.getElementById("write2_pkey").textContent = sodium.to_hex(pk);
-
-			document.getElementById("write2_subj").textContent = document.getElementById("write_subj").value;
-			document.getElementById("write2_body").textContent = document.getElementById("write_body").value;
-		} else {
-			console.log("Failed lookup");
-		}
-	});
-}
-
 // Tabs
 function setupButtons() {
 	switch(tab) {
@@ -379,37 +361,75 @@ function setupButtons() {
 			document.getElementById("btn_cent").disabled = true;
 			document.getElementById("btn_rght").disabled = false;
 			document.getElementById("btn_updt").disabled = false;
-			break;
+		break;
 		case "write":
 			document.getElementById("btn_dele").disabled = false; // depends
 			document.getElementById("btn_left").disabled = false; // depends
 			document.getElementById("btn_cent").disabled = true;
 			document.getElementById("btn_rght").disabled = false;
 			document.getElementById("btn_updt").disabled = true;
-
-			document.getElementById("btn_left").onclick = function() {
-				document.getElementById("div_write_1").hidden = false;
-				document.getElementById("div_write_2").hidden = true;
-			}
-
-			document.getElementById("btn_rght").onclick = sendMsg1;
-			break;
+		break;
 		case "notes":
 			document.getElementById("btn_dele").disabled = true;
 			document.getElementById("btn_left").disabled = false; // depends
 			document.getElementById("btn_cent").disabled = true;
 			document.getElementById("btn_rght").disabled = false; // depends
 			document.getElementById("btn_updt").disabled = true; // depends
-			break;
+		break;
 		case "prefs":
 			document.getElementById("btn_dele").disabled = true;
 			document.getElementById("btn_left").disabled = false; // depends
 			document.getElementById("btn_cent").disabled = true;
 			document.getElementById("btn_rght").disabled = false; // depends
 			document.getElementById("btn_updt").disabled = true; // depends
-			break;
+		break;
 	}
 }
+
+document.getElementById("btn_left").onclick = function() {
+	switch (tab) {
+		case "write":
+			document.getElementById("div_write_1").hidden = false;
+			document.getElementById("div_write_2").hidden = true;
+		break;
+	}
+
+	this.blur();
+};
+
+document.getElementById("btn_rght").onclick = function() {
+	switch (tab) {
+		case "write":
+			if (!document.getElementById("div_write_1").hidden) {
+				ae.Address_Lookup(document.getElementById("write_recv").value, function(pk) {
+					if (pk) {
+						document.getElementById("div_write_1").hidden = true;
+						document.getElementById("div_write_2").hidden = false;
+
+						document.getElementById("write2_from").textContent = document.getElementById("write_from").value + "@" + ae.GetDomain();
+						document.getElementById("write2_recv").textContent = document.getElementById("write_recv").value;
+						document.getElementById("write2_pkey").textContent = sodium.to_hex(pk);
+
+						document.getElementById("write2_subj").textContent = document.getElementById("write_subj").value;
+						document.getElementById("write2_body").textContent = document.getElementById("write_body").value;
+					} else {
+						console.log("Failed lookup");
+					}
+				});
+			} else if (!document.getElementById("div_write_2").hidden) {
+				ae.Message_Create(document.getElementById("write_subj").value, document.getElementById("write_body").value, document.getElementById("write_from").value, document.getElementById("write_recv").value, sodium.from_hex(document.getElementById("write2_pkey").textContent), function(success) {
+					if (success) {
+						console.log("Sent ok");
+					} else {
+						console.log("Failed sending");
+					}
+				});
+			}
+		break;
+	}
+
+	this.blur();
+};
 
 for (const btn1 of document.getElementById("main1").getElementsByClassName("top")[0].getElementsByTagName("button")) {
 	btn1.onclick = function() {
