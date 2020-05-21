@@ -391,6 +391,7 @@ document.getElementById("btn_left").onclick = function() {
 		case "write":
 			document.getElementById("div_write_1").hidden = false;
 			document.getElementById("div_write_2").hidden = true;
+			document.getElementById("write_body").focus();
 		break;
 	}
 
