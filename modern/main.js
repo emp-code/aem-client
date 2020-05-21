@@ -113,7 +113,7 @@ function addMsg(isInt, i) {
 
 	const ts = isInt? ae.GetIntMsgTime(i) : ae.GetExtMsgTime(i);
 	cellTime.setAttribute("data-ts", ts);
-	cellTime.textContent = new Date(ts * 1000).toISOString().slice(0, 16).replace("T", " ");
+	cellTime.textContent = new Date(ts * 1000).toISOString().slice(0, 10);
 
 	cellSubj.textContent = isInt? ae.GetIntMsgTitle(i) : ae.GetExtMsgTitle(i);
 
