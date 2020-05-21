@@ -61,6 +61,14 @@ function displayMsg(isInt, num) {
 	document.getElementById("readmsg_date").children[0].textContent = new Date(ts * 1000).toISOString().slice(0, 19).replace("T", " ");
 
 	if (!isInt) {
+		document.getElementById("readmsg_ip").hidden = false;
+		document.getElementById("readmsg_flags").hidden = false;
+		document.getElementById("readmsg_country").hidden = false;
+		document.getElementById("readmsg_tls").hidden = false;
+		document.getElementById("readmsg_greet").hidden = false;
+		document.getElementById("readmsg_timing").hidden = false;
+		document.getElementById("readmsg_envfrom").hidden = false;
+
 		const cc = ae.GetExtMsgCountry(num);
 
 		document.getElementById("readmsg_ip").children[0].textContent = ae.GetExtMsgIp(num);
@@ -77,6 +85,14 @@ function displayMsg(isInt, num) {
 		if (ae.GetExtMsgFlagPErr(num)) flagText += "<abbr title=\"The sender violated the protocol\">PROT</abbr> ";
 		document.getElementById("readmsg_flags").children[0].innerHTML = flagText.trim();
 	} else {
+		document.getElementById("readmsg_ip").hidden = true;
+		document.getElementById("readmsg_flags").hidden = true;
+		document.getElementById("readmsg_country").hidden = true;
+		document.getElementById("readmsg_tls").hidden = true;
+		document.getElementById("readmsg_greet").hidden = true;
+		document.getElementById("readmsg_timing").hidden = true;
+		document.getElementById("readmsg_envfrom").hidden = true;
+
 		document.getElementById("readmsg_from").textContent = ae.GetIntMsgFrom(num);
 	}
 }
