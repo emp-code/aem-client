@@ -170,12 +170,12 @@ function AllEars(readyCallback) {
 			try {
 				const decData = sodium.crypto_box_open_easy(encData.slice(sodium.crypto_box_NONCEBYTES), encData.slice(0, sodium.crypto_box_NONCEBYTES), _AEM_PUBKEY_SERVER, _userKeySecret);
 
-				if (decData.length === 33) { // short response
+				if (decData[0] === 255) { // error
+					return callback(false, null);
+				} else if (decData[0] === 0) { // no-content ok
+					return callback(true, null);
+				} else if (decData.length === 33) { // short response
 					return callback(true, decData.slice(1, 1 + decData[0]));
-				} else if (decData[0] === 255) {
-					return callback(false, null); // error
-				} else if (decData[0] === 0) {
-					return callback(true, null); // no-content ok
 				} else { // long response
 					return callback(true, decData);
 				}
