@@ -93,8 +93,8 @@ function displayMsg(isInt, num) {
 		document.getElementById("readmsg_timing").hidden = true;
 		document.getElementById("readmsg_envfrom").hidden = true;
 
-		var symbol = "<span title=\"Invalid level\">&#x26a0;</span>";
-		if (ae.GetIntMsgFrom(num) === "system") symbol = "<span title=\"System\">&#x1f162;</span>"; // S (System)
+		let symbol = "<span title=\"Invalid level\">&#x26a0;</span>";
+		if (ae.GetIntMsgFrom(num) === "system") {if (ae.GetIntMsgLevel(num) === 3) symbol = "<span title=\"System\">&#x1f162;</span>";} // S (System)
 		else if (ae.GetIntMsgLevel(num) === 0) symbol = "<span title=\"Level 0 User\">&#x1f10c;</span>"; // 0
 		else if (ae.GetIntMsgLevel(num) === 1) symbol = "<span title=\"Level 1 User\">&#x278a;</span>"; // 1
 		else if (ae.GetIntMsgLevel(num) === 2) symbol = "<span title=\"Level 2 User\">&#x278b;</span>"; // 2
