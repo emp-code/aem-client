@@ -473,7 +473,7 @@ function AllEars(readyCallback) {
 	this.GetExtMsgTime    = function(num) {return _extMsg[num].ts;};
 	this.GetExtMsgTLS     = function(num) {return _GetTlsVersion(_extMsg[num].tlsver) + " " + _GetCiphersuite(_extMsg[num].cs);};
 	this.GetExtMsgGreet   = function(num) {return _extMsg[num].greet;};
-	this.GetExtMsgIp      = function(num) {return "" + _extMsg[num].ip[0] + "." + _extMsg[num].ip[1] + "." + _extMsg[num].ip[2] + "." + _extMsg[num].ip[3];};
+	this.GetExtMsgIp      = function(num) {return String(_extMsg[num].ip[0] + "." + _extMsg[num].ip[1] + "." + _extMsg[num].ip[2] + "." + _extMsg[num].ip[3]);};
 	this.GetExtMsgCountry = function(num) {return _extMsg[num].countrycode;};
 	this.GetExtMsgFrom    = function(num) {return _extMsg[num].from;};
 	this.GetExtMsgTo      = function(num) {return _extMsg[num].to;};
