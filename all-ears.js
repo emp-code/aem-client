@@ -873,7 +873,7 @@ function AllEars(readyCallback) {
 						if ((msgHead[0] & 128) > 0) { // ExtMsg
 							_extMsg.push(new _NewExtMsg(msgId, Date.now() / 1000, null, 0, 0, null, 0, null, "system", "system", "(error)", null, "Decrypting BodyBox failed"));
 						} else {
-							_intMsg.push(new _NewIntMsg(msgId, false, 0, Date.now() / 1000, "system", "system", "(error)", "Decrypting BodyBox failed"));
+							_intMsg.push(new _NewIntMsg(msgId, false, 3, Date.now() / 1000, "system", "system", "(error)", "Decrypting BodyBox failed"));
 						}
 
 						offset += (kib * 1024);
