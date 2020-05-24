@@ -466,7 +466,7 @@ for (const btn1 of document.getElementById("main1").getElementsByClassName("top"
 				tab = btn2.id.slice(4);
 				setupButtons();
 			}
-		};
+		}
 	};
 };
 

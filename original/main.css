@@ -18,10 +18,10 @@ textarea {
 }
 
 table {
-	margin-left:auto;
-	margin-right:auto;
+	margin-left: auto;
+	margin-right: auto;
 	white-space: nowrap;
-	table-layout:fixed;
+	table-layout: fixed;
 }
 
 #div_inbox table {
@@ -36,7 +36,7 @@ table {
 
 td {
 	margin: 0.1vh 0.4vw 0.1vh 0.4vw;
-	overflow:hidden;
+	overflow: hidden;
 }
 
 #div_inbox td:not(:nth-child(3)):not(:last-child) {
@@ -81,7 +81,7 @@ td {
 
 #gatekeeper_domain, #gatekeeper_addr {width:100%;}
 
-#tbody_opt_addr {text-align:left;}
+#tbody_opt_addr {text-align: left;}
 
 #tbl_limits input {width: 3em;}
 #tbl_limits th, #tbl_limits td {text-align: center;}

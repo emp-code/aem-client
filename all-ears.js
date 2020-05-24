@@ -843,7 +843,7 @@ function AllEars(readyCallback) {
 
 			for (let msgNum = 0; msgNum < 128; msgNum++) {
 				const kib = browseData[msgNum];
-				if (kib == 0) break;
+				if (kib === 0) break;
 
 				const msgData = browseData.slice(offset, offset + (kib * 1024));
 
