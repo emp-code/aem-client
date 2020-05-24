@@ -876,8 +876,8 @@ function AllEars(readyCallback) {
 							_intMsg.push(new _NewIntMsg(msgId, false, 0, Date.now() / 1000, "system", "system", "(error)", "Decrypting BodyBox failed"));
 						}
 
-						console.log("Failed decrypting BodyBox");
-						break;
+						offset += (kib * 1024);
+						continue;
 					}
 
 					const lenBody = (1024 * kib) - _AEM_BYTES_HEADBOX - sodium.crypto_box_SEALBYTES - sodium.crypto_box_SEALBYTES;
@@ -933,8 +933,9 @@ function AllEars(readyCallback) {
 					let comboBox;
 					try {comboBox = sodium.crypto_box_seal_open(msgData, _userKeyPublic, _userKeySecret);}
 					catch(e) {
-						console.log("Failed decrypting ComboBox");
-						break;
+						_intMsg.push(new _NewIntMsg(msgId, false, 3, Date.now() / 1000, "system", "system", "(error)", "Could not decrypt message"));
+						offset += (kib * 1024);
+						continue;
 					}
 
 					/* ComboBox
