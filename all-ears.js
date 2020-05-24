@@ -773,7 +773,7 @@ function AllEars(readyCallback) {
 			if (_userAddress[i].accInt) flags |= _AEM_ADDR_FLAG_ACCINT;
 			if (_userAddress[i].use_gk) flags |= _AEM_ADDR_FLAG_USE_GK;
 
-			data[i * 14 + 13] = flags;
+			data[(i * 14) + 13] = flags;
 		}
 
 		_FetchEncrypted("address/update", data, function(fetchOk) {callback(fetchOk);});
