@@ -33,9 +33,8 @@ function AllEars(readyCallback) {
 	const _AEM_INFOBYTE_ISSHIELD =   4; // Is receiving address a Shield address?
 
 	const _AEM_ADDR32_CHARS = "0123456789abcdefghjkmnpqrstuwxyz";
-	const _AEM_BYTES_HEADBOX = 35;
 	const _AEM_BYTES_POST = 8192;
-	const _AEM_BYTES_PRIVATE = 4096 - 1 - sodium.crypto_box_PUBLICKEYBYTES - 700;
+	const _AEM_BYTES_PRIVATE = 4096 - 1 - sodium.crypto_box_PUBLICKEYBYTES - 450;
 	const _AEM_USER_MAXLEVEL = 3;
 	const _AEM_ADDRESSES_PER_USER = 50;
 
@@ -208,9 +207,9 @@ function AllEars(readyCallback) {
 	};
 
 	const _addr32_decode = function(byteArray, is_shd) {
-		if (!byteArray || byteArray.length !== 15) return "???";
+		if (!byteArray || byteArray.length !== 10) return "???";
 
-		const len = is_shd ? 24 : (byteArray[0] & 248) >> 3; // First five bits (128+64+32+16+8=248) store length for Normal addresses
+		const len = is_shd ? 16 : (byteArray[0] & 248) >> 3; // First five bits (128+64+32+16+8=248) store length for Normal addresses
 
 		let decoded = "";
 
@@ -244,9 +243,9 @@ function AllEars(readyCallback) {
 
 	// Only for Normal, not Shield addresses
 	const _addr32_encode = function(source) {
-		if (source.length < 1 || source.length > 23) return null;
+		if (source.length < 1 || source.length > 15) return null;
 
-		let encoded = new Uint8Array(15);
+		let encoded = new Uint8Array(10);
 		encoded[0] = source.length << 3; // First five bits store length
 
 		for (let i = 0; i < source.length; i++) {
@@ -576,14 +575,14 @@ function AllEars(readyCallback) {
 			// Addresses
 			let offset = 14;
 			for (let i = 0; i < browseData[13]; i++) {
-				const hash = browseData.slice(offset, offset + 13);
-				const accExt = (browseData[offset + 13] & _AEM_ADDR_FLAG_ACCEXT) > 0 ? true : false;
-				const accInt = (browseData[offset + 13] & _AEM_ADDR_FLAG_ACCINT) > 0 ? true : false;
-				const use_gk = (browseData[offset + 13] & _AEM_ADDR_FLAG_USE_GK) > 0 ? true : false;
-				const is_shd = (browseData[offset + 13] & _AEM_ADDR_FLAG_SHIELD) > 0 ? true : false;
+				const hash = browseData.slice(offset, offset + 8);
+				const accExt = (browseData[offset + 8] & _AEM_ADDR_FLAG_ACCEXT) > 0 ? true : false;
+				const accInt = (browseData[offset + 8] & _AEM_ADDR_FLAG_ACCINT) > 0 ? true : false;
+				const use_gk = (browseData[offset + 8] & _AEM_ADDR_FLAG_USE_GK) > 0 ? true : false;
+				const is_shd = (browseData[offset + 8] & _AEM_ADDR_FLAG_SHIELD) > 0 ? true : false;
 
 				_userAddress.push(new _NewAddress(hash, null, is_shd, accExt, accInt, use_gk));
-				offset += 14;
+				offset += 9;
 			}
 
 			// Private field
@@ -592,14 +591,14 @@ function AllEars(readyCallback) {
 
 			// Private - Address data
 			for (let i = 0; i < privData[0]; i++) {
-				const start = 1 + (i * 28);
-				const hash = privData.slice(start, start + 13);
-				const addr32 = privData.slice(start + 13, start + 28);
+				const start = 1 + (i * 18);
+				const hash = privData.slice(start, start + 8);
+				const addr32 = privData.slice(start + 8, start + 18);
 
 				for (let j = 0; j < _userAddress.length; j++) {
 					let wasFound = true;
 
-					for (let k = 0; k < 13; k ++) {
+					for (let k = 0; k < 8; k ++) {
 						if (hash[k] !== _userAddress[j].hash[k]) {
 							wasFound = false;
 							break;
@@ -614,7 +613,7 @@ function AllEars(readyCallback) {
 			}
 
 			// Private - Contacts
-			let privOffset = 1 + (privData[0] * 28);
+			let privOffset = 1 + (privData[0] * 18);
 			const contactCount = privData[privOffset];
 			privOffset++;
 
@@ -734,14 +733,23 @@ function AllEars(readyCallback) {
 			_FetchEncrypted("address/create", sodium.from_string("SHIELD"), function(fetchOk, byteArray) {
 				if (!fetchOk) {callback(false); return;}
 
-				_userAddress.push(new _NewAddress(byteArray.slice(0, 13), byteArray.slice(13, 28), true, true, false, false));
+				_userAddress.push(new _NewAddress(byteArray.slice(0, 8), byteArray.slice(8, 18), true, true, false, false));
 				callback(true);
 			});
 		} else {
 			const addr32 = _addr32_encode(addr);
 			if (addr32 === null) {callback(false); return;}
 
-			const hash = sodium.crypto_pwhash(16, addr32, _AEM_SALT_NORMAL, _AEM_ARGON2_OPSLIMIT, _AEM_ARGON2_MEMLIMIT, sodium.crypto_pwhash_ALG_ARGON2ID13).slice(0, 13);
+			const full = sodium.crypto_pwhash(16, addr32, _AEM_SALT_NORMAL, _AEM_ARGON2_OPSLIMIT, _AEM_ARGON2_MEMLIMIT, sodium.crypto_pwhash_ALG_ARGON2ID13);
+			const hash = new Uint8Array(8);
+			hash[0] = full[0] ^ full[8];
+			hash[1] = full[1] ^ full[9];
+			hash[2] = full[2] ^ full[10];
+			hash[3] = full[3] ^ full[11];
+			hash[4] = full[4] ^ full[12];
+			hash[5] = full[5] ^ full[13];
+			hash[6] = full[6] ^ full[14];
+			hash[7] = full[7] ^ full[15];
 
 			_FetchEncrypted("address/create", hash, function(fetchOk) {
 				if (!fetchOk) {callback(false); return;}
@@ -771,17 +779,17 @@ function AllEars(readyCallback) {
 	};
 
 	this.Address_Update = function(callback) {
-		const data = new Uint8Array(_userAddress.length * 14);
+		const data = new Uint8Array(_userAddress.length * 9);
 
 		for (let i = 0; i < _userAddress.length; i++) {
-			data.set(_userAddress[i].hash, (i * 14));
+			data.set(_userAddress[i].hash, (i * 9));
 
 			let flags = 0;
 			if (_userAddress[i].accExt) flags |= _AEM_ADDR_FLAG_ACCEXT;
 			if (_userAddress[i].accInt) flags |= _AEM_ADDR_FLAG_ACCINT;
 			if (_userAddress[i].use_gk) flags |= _AEM_ADDR_FLAG_USE_GK;
 
-			data[(i * 14) + 13] = flags;
+			data[(i * 9) + 8] = flags;
 		}
 
 		_FetchEncrypted("address/update", data, function(fetchOk) {callback(fetchOk);});
@@ -894,19 +902,19 @@ function AllEars(readyCallback) {
 
 						const msgCc = ((msgData[13] & 31) > 26 || (msgData[14] & 31) > 26) ? "??" : String.fromCharCode("A".charCodeAt(0) + (msgData[13] & 31)) + String.fromCharCode("A".charCodeAt(0) + (msgData[14] & 31));
 
-						// Infobytes [15], [16] unused
+						// Infobyte [15]
 
-						const msgShield = (msgData[17] & 128) > 0;
-						// & 128 unused: [18], [19], [20]
+						const msgShield = (msgData[16] & 128) > 0;
+						// & 128 unused: [17], [18], [19]
 
-						const lenGreet = msgData[17] & 127;
-						const lenRdns = msgData[18] & 127;
-						const lenCharset = msgData[19] & 127;
-						const lenEnvFrom = msgData[20] & 127;
+						const lenGreet = msgData[16] & 127;
+						const lenRdns = msgData[17] & 127;
+						const lenCharset = msgData[18] & 127;
+						const lenEnvFrom = msgData[19] & 127;
 
-						const msgTo = _addr32_decode(msgData.slice(21, 36), msgShield);
+						const msgTo = _addr32_decode(msgData.slice(20, 30), msgShield);
 
-						const msgBodyBr = new Int8Array(msgData.slice(36, msgData.length - padAmount - 64)); // 100-36=64 (Headers+Signature-Start)
+						const msgBodyBr = new Int8Array(msgData.slice(30, msgData.length - padAmount - 64));
 						const msgBodyU8 = new Uint8Array(window.BrotliDecode(msgBodyBr));
 						const msgBodyTx = new TextDecoder("utf-8").decode(msgBodyU8);
 
@@ -989,9 +997,9 @@ function AllEars(readyCallback) {
 		if (addr32_to === null) {callback(false); return;}
 
 		u8final.set(addr32_from);
-		u8final.set(addr32_to, 15);
-		u8final.set(to_pubkey, 30);
-		u8final.set(bodyBox, 30 + sodium.crypto_box_PUBLICKEYBYTES);
+		u8final.set(addr32_to, 10);
+		u8final.set(to_pubkey, 20);
+		u8final.set(bodyBox, 20 + sodium.crypto_box_PUBLICKEYBYTES);
 
 		_FetchEncrypted("message/create", u8final, function(fetchOk) {callback(fetchOk);});
 	};
@@ -1067,8 +1075,8 @@ function AllEars(readyCallback) {
 
 		for (let i = 0; i < _userAddress.length; i++) {
 			privData.set(_userAddress[i].hash, offset);
-			privData.set(_userAddress[i].addr32, offset + 13);
-			offset += 28;
+			privData.set(_userAddress[i].addr32, offset + 8);
+			offset += 18;
 		}
 
 		privData[offset] = _contactMail.length;
