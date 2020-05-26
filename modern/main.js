@@ -126,7 +126,7 @@ function addMsg(isInt, i) {
 
 	if (isInt) {
 		cellSnd1.textContent = ae.GetIntMsgFrom(i);
-		cellSnd1.className = (ae.GetIntMsgFrom(i).length === 24) ? "mono" : "";
+		cellSnd1.className = (ae.GetIntMsgFrom(i).length === 16) ? "mono" : "";
 	} else {
 		const from1 = ae.GetExtMsgFrom(i);
 		const from2 = from1.substring(from1.indexOf("@") + 1);
@@ -278,7 +278,7 @@ function deleteAddress(addr) {
 function shieldMix(addr) {
 	let newAddr = "";
 
-	for (let i = 0; i < 24; i++) {
+	for (let i = 0; i < 16; i++) {
 		switch (addr.charAt(i)) {
 			case '1':
 				newAddr += "1iIlL".charAt(Math.floor(Math.random() * 5));
@@ -308,7 +308,7 @@ function addAddress(num) {
 
 	cellAddr.textContent = ae.GetAddress(num);
 	cellAddr.onclick = function() {
-		if (cellAddr.textContent.length === 24)
+		if (cellAddr.textContent.length === 16)
 			navigator.clipboard.writeText(shieldMix(cellAddr.textContent) + "@" + ae.GetDomain());
 		else
 			navigator.clipboard.writeText(cellAddr.textContent + "@" + ae.GetDomain());
