@@ -25,13 +25,6 @@ function AllEars(readyCallback) {
 	const _AEM_ADDR_FLAG_ACCINT = 2;
 	const _AEM_ADDR_FLAG_ACCEXT = 1;
 
-	const _AEM_INFOBYTE_IS_ESMTP = 128; // Extended protocol version
-	const _AEM_INFOBYTE_CMD_QUIT =  64; // QUIT issued
-	const _AEM_INFOBYTE_CMD_RARE =  32; // Rare command (NOOP/RSET etc)
-	const _AEM_INFOBYTE_CMD_FAIL =  16; // Invalid command
-	const _AEM_INFOBYTE_PROTOERR =   8; // Protocol violation (commands out of order etc)
-	const _AEM_INFOBYTE_ISSHIELD =   4; // Is receiving address a Shield address?
-
 	const _AEM_ADDR32_CHARS = "0123456789abcdefghjkmnpqrstuwxyz";
 	const _AEM_BYTES_POST = 8192;
 	const _AEM_BYTES_PRIVATE = 4096 - 1 - sodium.crypto_box_PUBLICKEYBYTES - 450;
@@ -887,7 +880,7 @@ function AllEars(readyCallback) {
 				const msgTs = new Uint32Array(msgData.slice(2, 6).buffer)[0];
 
 				switch (msgInfo & 48) {
-					case 0: // ExtMsg
+					case 0: { // ExtMsg
 						const msgIp = msgData.slice(6, 10);
 						const msgCs = new Uint16Array(msgData.slice(10, 12).buffer)[0];
 						const msgTlsVer = msgData[12] >> 5;
@@ -934,7 +927,7 @@ function AllEars(readyCallback) {
 						const msgBody = body.slice(headersEnd + 2);
 
 						_extMsg.push(new _NewExtMsg(msgId, msgTs, msgIp, msgCc, msgCs, msgTlsVer, msgEsmtp, msgQuitR, msgProtV, msgInval, msgRares, msgAttach, msgGreet, msgRdns, msgCharset, msgEnvFrom, msgTo, msgHeaders, msgTitle, msgBody));
-					break;
+					break;}
 
 					case 16: // IntMsg
 						// TODO
