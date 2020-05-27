@@ -929,7 +929,7 @@ function AllEars(readyCallback) {
 						_extMsg.push(new _NewExtMsg(msgId, msgTs, msgIp, msgCc, msgCs, msgTlsVer, msgEsmtp, msgQuitR, msgProtV, msgInval, msgRares, msgAttach, msgGreet, msgRdns, msgCharset, msgEnvFrom, msgTo, msgHeaders, msgTitle, msgBody));
 					break;}
 
-					case 16: // IntMsg
+					case 16: { // IntMsg
 						const msgFromLv = msgData[6] & 3;
 						const msgFromPk = msgData.slice(7, 7 + sodium.crypto_box_PUBLICKEYBYTES);
 						const msgFrom = _addr32_decode(msgData.slice(7 + sodium.crypto_box_PUBLICKEYBYTES, 17 + sodium.crypto_box_PUBLICKEYBYTES));
@@ -954,7 +954,7 @@ function AllEars(readyCallback) {
 
 							_intMsg.push(new _NewIntMsg(msgId, msgTs, msgFromLv, msgFromPk, msgFrom, msgTo, msgTitle, msgBody));
 						}
-					break;
+					break;}
 
 					case 32: // Text
 						// TODO
