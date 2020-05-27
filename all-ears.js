@@ -91,11 +91,11 @@ function AllEars(readyCallback) {
 		this.body = body;
 	}
 
-	function _NewIntMsg(id, isSent, senderLevel, ts, from, to, title, body) {
+	function _NewIntMsg(id, ts, fromLv, fromPk, from, to, title, body) {
 		this.id = id;
-		this.isSent = isSent;
-		this.senderLevel = senderLevel;
 		this.ts = ts;
+		this.fromLv = fromLv;
+		this.fromPk = fromPk;
 		this.from = from;
 		this.to = to;
 		this.title = title;
@@ -489,10 +489,10 @@ function AllEars(readyCallback) {
 
 	this.GetIntMsgCount = function() {return _intMsg.length;};
 	this.GetIntMsgIdHex  = function(num) {return sodium.to_hex(_intMsg[num].id);};
-	this.GetIntMsgLevel  = function(num) {return _intMsg[num].senderLevel;};
 	this.GetIntMsgTime   = function(num) {return _intMsg[num].ts;};
+	this.GetIntMsgLevel  = function(num) {return _intMsg[num].fromLv;};
+	this.GetIntMsgFromPk = function(num) {return _intMsg[num].fromPk;};
 	this.GetIntMsgFrom   = function(num) {return _intMsg[num].from;};
-	this.GetIntMsgIsSent = function(num) {return _intMsg[num].isSent;};
 	this.GetIntMsgTo     = function(num) {return _intMsg[num].to;};
 	this.GetIntMsgTitle  = function(num) {return _intMsg[num].title;};
 	this.GetIntMsgBody   = function(num) {return _intMsg[num].body;};
@@ -868,7 +868,7 @@ function AllEars(readyCallback) {
 				let msgData;
 				try {msgData = sodium.crypto_box_seal_open(msgEnc, _userKeyPublic, _userKeySecret);}
 				catch(e) {
-					_intMsg.push(new _NewIntMsg(msgId, false, 3, Date.now() / 1000, "system", "system", "(error)", "Failed decrypting message"));
+					_intMsg.push(new _NewIntMsg(msgId, Date.now() / 1000, 3, null, "system", "system", "(error)", "Failed decrypting message"));
 					offset += (kib * 1024);
 					continue;
 				}
@@ -930,7 +930,30 @@ function AllEars(readyCallback) {
 					break;}
 
 					case 16: // IntMsg
-						// TODO
+						const msgFromLv = msgData[6] & 3;
+						const msgFromPk = msgData.slice(7, 7 + sodium.crypto_box_PUBLICKEYBYTES);
+						const msgFrom = _addr32_decode(msgData.slice(7 + sodium.crypto_box_PUBLICKEYBYTES, 17 + sodium.crypto_box_PUBLICKEYBYTES));
+						const msgTo = _addr32_decode(msgData.slice(17 + sodium.crypto_box_PUBLICKEYBYTES, 27 + sodium.crypto_box_PUBLICKEYBYTES));
+
+						const nonce = msgData.slice(27 + sodium.crypto_box_PUBLICKEYBYTES, 27 + sodium.crypto_box_PUBLICKEYBYTES + sodium.crypto_box_NONCEBYTES);
+						const msgEnc = msgData.slice(27 + sodium.crypto_box_PUBLICKEYBYTES + sodium.crypto_box_NONCEBYTES, msgData.length - padAmount - 64);
+						let msgBin;
+						let msgTitle;
+						let msgBody;
+
+						try {msgBin = sodium.crypto_box_open_easy(msgEnc, nonce, msgFromPk, _userKeySecret, null);}
+						catch(e) {
+							msgTitle = "(error)";
+							msgBody = e;
+						} finally {
+							if (msgBin) {
+								const msgText = sodium.to_string(msgBin);
+								msgTitle = msgText.slice(0, msgText.indexOf("\n"));
+								msgBody = msgText.slice(msgText.indexOf("\n"));
+							}
+
+							_intMsg.push(new _NewIntMsg(msgId, msgTs, msgFromLv, msgFromPk, msgFrom, msgTo, msgTitle, msgBody));
+						}
 					break;
 
 					case 32: // Text
@@ -956,45 +979,27 @@ function AllEars(readyCallback) {
 
 	this.Message_Create = function(title, body, addr_from, addr_to, to_pubkey, callback) {
 		if (typeof(title) !== "string" || typeof(body) !== "string" || typeof(addr_from) !== "string" || typeof(addr_to) !== "string" || to_pubkey.constructor !== Uint8Array || to_pubkey.length !== sodium.crypto_box_PUBLICKEYBYTES) {callback(false); return;}
-		/*
-			BodyBox
-				[2B uint16_t] Amount of padding
-				[-- char*] Title
-				[1B char] Linebreak (\n)
-				[-- char*] Message body
-		*/
 
-		const msg = sodium.from_string(title + '\n' + body);
-		// TODO: Check length
+		const nonce = new Uint8Array(sodium.crypto_box_NONCEBYTES);
+		window.crypto.getRandomValues(nonce);
 
-		const lenData = 2 + msg.length + sodium.crypto_box_SEALBYTES;
-		const lenBoxSet = lenData + _AEM_BYTES_HEADBOX + sodium.crypto_box_SEALBYTES;
-		const lenPad = (lenBoxSet % 1024 === 0) ? 0 : 1024 - (lenBoxSet % 1024);
-
-		const u8data = new Uint8Array(lenData + lenPad - sodium.crypto_box_SEALBYTES);
-
-		const u16pad = new Uint16Array([lenPad]);
-		const u8pad = new Uint8Array(u16pad.buffer);
-
-		u8data.set(u8pad);
-		u8data.set(msg, 2);
-
-		const bodyBox = sodium.crypto_box_seal(u8data, to_pubkey);
-
-		const u8final = new Uint8Array(bodyBox.length + 30 + sodium.crypto_box_PUBLICKEYBYTES);
+		const msg = sodium.from_string(title + "\n" + body);
+		const msgBox = sodium.crypto_box_easy(msg, nonce, to_pubkey, _userKeySecret, null);
 
 		const addr32_from = _addr32_encode(addr_from);
-		if (addr32_from === null) {callback(false); return;}
+		if (!addr32_from) {callback(false); return;}
 
 		const addr32_to = _addr32_encode(addr_to);
-		if (addr32_to === null) {callback(false); return;}
+		if (!addr32_to) {callback(false); return;}
 
-		u8final.set(addr32_from);
-		u8final.set(addr32_to, 10);
-		u8final.set(to_pubkey, 20);
-		u8final.set(bodyBox, 20 + sodium.crypto_box_PUBLICKEYBYTES);
+		const final = new Uint8Array(20 + sodium.crypto_box_PUBLICKEYBYTES + sodium.crypto_box_NONCEBYTES + msgBox.length);
+		final.set(addr32_from);
+		final.set(addr32_to, 10);
+		final.set(to_pubkey, 20);
+		final.set(nonce, 20 + sodium.crypto_box_PUBLICKEYBYTES);
+		final.set(msgBox, 20 + sodium.crypto_box_PUBLICKEYBYTES + sodium.crypto_box_NONCEBYTES);
 
-		_FetchEncrypted("message/create", u8final, function(fetchOk) {callback(fetchOk);});
+		_FetchEncrypted("message/create", final, function(fetchOk) {callback(fetchOk);});
 	};
 
 	this.Message_Delete = function(hexIds, callback) {

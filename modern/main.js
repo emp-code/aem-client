@@ -109,7 +109,7 @@ function addMsg(isInt, i) {
 	const inbox = document.getElementById("tbl_inbox");
 	const sent = document.getElementById("tbl_sent");
 
-	const isSent = isInt? ae.GetIntMsgIsSent(i) : false;
+	const isSent = false; //TODO
 	const table = isSent ? sent : inbox;
 
 	const row = table.insertRow(-1);
