@@ -868,7 +868,7 @@ function AllEars(readyCallback) {
 				let msgData;
 				try {msgData = sodium.crypto_box_seal_open(msgEnc, _userKeyPublic, _userKeySecret);}
 				catch(e) {
-					_intMsg.push(new _NewIntMsg(msgId, Date.now() / 1000, 3, null, "system", "system", "(error)", "Failed decrypting message"));
+					_intMsg.push(new _NewIntMsg(msgId, Date.now() / 1000, 3, null, "system", "system", "(error)", e));
 					offset += (kib * 1024);
 					continue;
 				}
