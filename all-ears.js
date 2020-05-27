@@ -14,7 +14,7 @@ function AllEars(readyCallback) {
 	const docSgnPub = document.documentElement.getAttribute("data-aesgnpub");
 	const docSaltNm = document.documentElement.getAttribute("data-aesaltnm");
 
-	if (!docApiPub || !docSaltNm || docApiPub.length !== 64 || docSaltNm.length !== 32) {
+	if (!docApiPub || !docSaltNm || docApiPub.length !== sodium.crypto_box_SECRETKEYBYTES * 2 || docSaltNm.length !== sodium.crypto_pwhash_SALTBYTES * 2) {
 		readyCallback(false);
 		return;
 	}
@@ -539,7 +539,7 @@ function AllEars(readyCallback) {
 	};
 
 	this.SetKeys = function(skey_hex, callback) {
-		if (typeof(skey_hex) !== "string" || skey_hex.length !== 64) {
+		if (typeof(skey_hex) !== "string" || skey_hex.length !== sodium.crypto_box_SECRETKEYBYTES * 2) {
 			_userKeySecret = null;
 			_userKeyPublic = null;
 			callback(false);
