@@ -877,6 +877,12 @@ function AllEars(readyCallback) {
 				const padAmount = msgInfo >> 6;
 				// msgInfo & 15 unused
 
+				const padA = msgData.slice(msgData.length - sodium.crypto_sign_BYTES - padAmount, msgData.length - sodium.crypto_sign_BYTES);
+				const padB = sodium.randombytes_buf_deterministic(padAmount, msgData.slice(0, sodium.randombytes_SEEDBYTES), null);
+				if (!padA || !padB || padA.length !== padB.length || !_arraysEqual(padA, padB)) {
+					console.log("Padding does not match");
+				}
+
 				const msgTs = new Uint32Array(msgData.slice(2, 6).buffer)[0];
 
 				switch (msgInfo & 48) {
