@@ -144,28 +144,28 @@ function AllEars(readyCallback) {
 	const _FetchEncrypted = function(url, cleartext, callback) {
 		if (cleartext.length > _AEM_BYTES_POST) return callback(false);
 
-		// Cleartext is padded to _AEM_BYTES_POST bytes
-		const clearU8 = new Uint8Array(_AEM_BYTES_POST + 2);
+		// postBox: the encrypted data to be sent
+		const clearU8 = new Uint8Array(_AEM_BYTES_POST);
 		clearU8.set(cleartext);
-
-		// Last two bytes store the length
-		const u16len = new Uint16Array([cleartext.length]);
-		const u8len = new Uint8Array(u16len.buffer);
-		clearU8.set(u8len, _AEM_BYTES_POST);
 
 		const nonce = new Uint8Array(sodium.crypto_box_NONCEBYTES);
 		window.crypto.getRandomValues(nonce);
-
-		// postBox: the encrypted data to be sent
 		const postBox = sodium.crypto_box_easy(clearU8, nonce, _AEM_API_PUBKEY, _userKeySecret);
 
-		// postMsg: User Public Key + Nonce + postBox
-		const postMsg = new Uint8Array(sodium.crypto_box_PUBLICKEYBYTES + sodium.crypto_box_NONCEBYTES + postBox.length);
-		postMsg.set(_userKeyPublic);
-		postMsg.set(nonce, sodium.crypto_box_PUBLICKEYBYTES);
-		postMsg.set(postBox, sodium.crypto_box_PUBLICKEYBYTES + sodium.crypto_box_NONCEBYTES);
+		// sealBox: URL + Length + UPK + Nonce for postBox
+		const sealClear = new Uint8Array(16 + sodium.crypto_box_PUBLICKEYBYTES + sodium.crypto_box_NONCEBYTES);
+		sealClear.set(new Uint8Array(new Uint16Array([cleartext.length]).buffer));
+		sealClear.set(sodium.from_string(url), 2);
+		sealClear.set(nonce, 16);
+		sealClear.set(_userKeyPublic, 16 + sodium.crypto_box_NONCEBYTES);
+		const sealBox = sodium.crypto_box_seal(sealClear, _AEM_API_PUBKEY);
 
-		_FetchBinary("https://" + _AEM_DOMAIN + ":302/api/" + url, postMsg, function(success, encData) {
+		// postMsg: sealBox + postBox
+		const postMsg = new Uint8Array(sealBox.length + postBox.length);
+		postMsg.set(sealBox);
+		postMsg.set(postBox, sealBox.length);
+
+		_FetchBinary("https://" + _AEM_DOMAIN + ":302/api", postMsg, function(success, encData) {
 			if (!success) {callback(false, null); return;}
 
 			try {
