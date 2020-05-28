@@ -14,7 +14,7 @@ function AllEars(readyCallback) {
 	const docSgnPub = document.documentElement.getAttribute("data-aesgnpub");
 	const docSaltNm = document.documentElement.getAttribute("data-aesaltnm");
 
-	if (!docApiPub || !docSaltNm || docApiPub.length !== sodium.crypto_box_SECRETKEYBYTES * 2 || docSaltNm.length !== sodium.crypto_pwhash_SALTBYTES * 2) {
+	if (!docApiPub || !docSaltNm || docApiPub.length !== sodium.crypto_box_SECRETKEYBYTES * 2 || docSgnPub.length !== sodium.crypto_sign_PUBLICKEYBYTES * 2 || docSaltNm.length !== sodium.crypto_pwhash_SALTBYTES * 2) {
 		readyCallback(false);
 		return;
 	}
@@ -36,6 +36,7 @@ function AllEars(readyCallback) {
 
 	const _AEM_DOMAIN = docDomain? docDomain : document.domain;
 	const _AEM_API_PUBKEY = sodium.from_hex(docApiPub);
+	const _AEM_SGN_PUBKEY = sodium.from_hex(docSgnPub);
 	const _AEM_SALT_NORMAL = sodium.from_hex(docSaltNm);
 
 // Private variables
@@ -880,7 +881,11 @@ function AllEars(readyCallback) {
 				const padA = msgData.slice(msgData.length - sodium.crypto_sign_BYTES - padAmount, msgData.length - sodium.crypto_sign_BYTES);
 				const padB = sodium.randombytes_buf_deterministic(padAmount, msgData.slice(0, sodium.randombytes_SEEDBYTES), null);
 				if (!padA || !padB || padA.length !== padB.length || !_arraysEqual(padA, padB)) {
-					console.log("Padding does not match");
+					console.log("Invalid padding");
+				}
+
+				if (!sodium.crypto_sign_verify_detached(msgData.slice(msgData.length - sodium.crypto_sign_BYTES), msgData.slice(0, msgData.length - sodium.crypto_sign_BYTES), _AEM_SGN_PUBKEY)) {
+					console.log("Invalid signature");
 				}
 
 				const msgTs = new Uint32Array(msgData.slice(2, 6).buffer)[0];
