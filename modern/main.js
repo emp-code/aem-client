@@ -176,25 +176,15 @@ function addMessages() {
 	let numExt = 0;
 	let numInt = 0;
 
-	for (let i = 0; i < (page * 20) + 20; i++) {
+	while(1) {
 		const tsInt = (numInt < maxInt) ? ae.GetIntMsgTime(numInt) : 0;
 		const tsExt = (numExt < maxExt) ? ae.GetExtMsgTime(numExt) : 0;
 		if (tsInt === 0 && tsExt === 0) break;
 
 		if (tsInt !== 0 && (tsExt === 0 || tsInt > tsExt)) {
-			if (i < (page * 20)) {
-				numInt++;
-				continue;
-			}
-
 			addMsg(true, numInt);
 			numInt++;
 		} else if (tsExt !== 0) {
-			if (i < (page * 20)) {
-				numExt++;
-				continue;
-			}
-
 			addMsg(false, numExt);
 			numExt++;
 		}
