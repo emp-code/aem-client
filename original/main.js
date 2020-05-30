@@ -718,7 +718,7 @@ document.getElementById("btn_refresh").onclick = function() {
 	const btn = this;
 	btn.disabled = true;
 
-	ae.Message_Browse(0, function(successBrowse) {
+	ae.Message_Browse(true, function(successBrowse) {
 		if (successBrowse) {
 			clearMessages();
 			addMessages();
