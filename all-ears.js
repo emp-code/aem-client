@@ -53,6 +53,8 @@ function AllEars(readyCallback) {
 	const _intMsg = [];
 	const _textNote = [];
 	const _fileNote = [];
+	const _lastMsgId = new Uint8Array(16);
+	const _nullMsgId = new Uint8Array(16);
 
 	const _gkCountry = [];
 	const _gkDomain  = [];
@@ -843,10 +845,12 @@ function AllEars(readyCallback) {
 		});
 	};
 
-	this.Message_Browse = function(page, callback) {
-		if (typeof(page) !== "number" || page < 0 || page > 255) {callback(false); return;}
+	this.Message_Browse = function(newest, callback) {
+		if (typeof(newest) !== "boolean") {callback(false); return;}
 
-		_FetchEncrypted("message/browse", new Uint8Array([page]), function(fetchOk, browseData) {
+		if (_arraysEqual(_lastMsgId, _nullMsgId)) newest = false;
+
+		_FetchEncrypted("message/browse", newest ? _nullMsgId : _lastMsgId, function(fetchOk, browseData) {
 			if (!fetchOk) {callback(false); return;}
 
 			let offset = 128;
@@ -864,6 +868,10 @@ function AllEars(readyCallback) {
 				if (_MsgExists(msgId)) {
 					offset += (kib * 1024);
 					continue;
+				}
+
+				if (!newest) {
+					for (let i = 0; i < 16; i++) _lastMsgId[i] = msgId[i];
 				}
 
 				let msgData;

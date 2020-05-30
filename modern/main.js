@@ -325,7 +325,7 @@ document.getElementById("btn_updt").onclick = function() {
 	if (tab === "inbox") {
 		document.getElementById("tbl_inbox").style.opacity = 0.5;
 
-		ae.Message_Browse(0, function(successBrowse) {
+		ae.Message_Browse(true, function(successBrowse) {
 			document.getElementById("tbl_inbox").style.opacity = 1;
 
 			if (successBrowse) {
