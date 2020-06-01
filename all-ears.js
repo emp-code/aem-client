@@ -58,6 +58,7 @@ function AllEars(readyCallback) {
 
 	let _totalMsgCount = 0;
 	let _totalMsgKilos = 0;
+	let _readyMsgKilos = 0;
 
 	const _gkCountry = [];
 	const _gkDomain  = [];
@@ -470,6 +471,7 @@ function AllEars(readyCallback) {
 
 	this.GetTotalMsgCount = function() {return _totalMsgCount;}
 	this.GetTotalMsgKilos = function() {return _totalMsgKilos;}
+	this.GetReadyMsgKilos = function() {return _readyMsgKilos;}
 
 	this.GetExtMsgCount = function() {return _extMsg.length;};
 	this.GetExtMsgIdHex   = function(num) {return sodium.to_hex(_extMsg[num].id);};
@@ -861,6 +863,7 @@ function AllEars(readyCallback) {
 			for (let msgNum = 0; msgNum < 128; msgNum++) {
 				const kib = browseData[msgNum];
 				if (kib === 0) break;
+				_readyMsgKilos += kib;
 
 				const msgEnc = browseData.slice(offset, offset + (kib * 1024));
 
