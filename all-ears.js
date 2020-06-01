@@ -170,21 +170,15 @@ function AllEars(readyCallback) {
 		_FetchBinary("https://" + _AEM_DOMAIN + ":302/api", postMsg, function(success, encData) {
 			if (!success) {callback(false, null); return;}
 
-			try {
-				const decData = sodium.crypto_box_open_easy(encData.slice(sodium.crypto_box_NONCEBYTES), encData.slice(0, sodium.crypto_box_NONCEBYTES), _AEM_API_PUBKEY, _userKeySecret);
+			let decData;
+			try {decData = sodium.crypto_box_open_easy(encData.slice(sodium.crypto_box_NONCEBYTES), encData.slice(0, sodium.crypto_box_NONCEBYTES), _AEM_API_PUBKEY, _userKeySecret);}
+			catch(e) {return callback(false, null);}
 
-				if (decData[0] === 255) { // error
-					return callback(false, null);
-				} else if (decData[0] === 0) { // no-content ok
-					return callback(true, null);
-				} else if (decData.length === 33) { // short response
-					return callback(true, decData.slice(1, 1 + decData[0]));
-				} else { // long response
-					return callback(true, decData);
-				}
-			} catch(e) {
-				return callback(false, null);
-			}
+			if (decData.length === 33) { // short response
+				if (decData[0] === 255) return callback(false, null); // error
+				else if (decData[0] === 0) return callback(true, null); // no-content ok
+				else return callback(true, decData.slice(1, 1 + decData[0]));
+			} else return callback(true, decData); // long response
 		});
 	};
 
