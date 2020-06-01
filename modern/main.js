@@ -189,6 +189,26 @@ function addMessages() {
 			numExt++;
 		}
 	}
+
+	if (ae.GetReadyMsgKilos() < ae.GetTotalMsgKilos()) {
+		const inbox = document.getElementById("tbl_inbox");
+		const row = inbox.insertRow(-1);
+		const cell = row.insertCell(-1);
+		cell.textContent = "Load more (" + (ae.GetTotalMsgKilos() - ae.GetReadyMsgKilos()) + " KiB left)"
+
+		row.onclick = function() {
+			this.onclick = "";
+
+			ae.Message_Browse(false, function(successBrowse) {
+				document.getElementById("tbl_inbox").style.opacity = 1;
+
+				if (successBrowse) {
+					clearMessages();
+					addMessages();
+				}
+			});
+		};
+	}
 }
 
 function clearMessages() {
