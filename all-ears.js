@@ -56,6 +56,9 @@ function AllEars(readyCallback) {
 	const _lastMsgId = new Uint8Array(16);
 	const _nullMsgId = new Uint8Array(16);
 
+	let _totalMsgCount = 0;
+	let _totalMsgKilos = 0;
+
 	const _gkCountry = [];
 	const _gkDomain  = [];
 	const _gkAddress = [];
@@ -465,6 +468,9 @@ function AllEars(readyCallback) {
 	this.GetAddressLimitNormal = function(lvl) {return _maxAddressNormal[lvl];};
 	this.GetAddressLimitShield = function(lvl) {return _maxAddressShield[lvl];};
 
+	this.GetTotalMsgCount = function() {return _totalMsgCount;}
+	this.GetTotalMsgKilos = function() {return _totalMsgKilos;}
+
 	this.GetExtMsgCount = function() {return _extMsg.length;};
 	this.GetExtMsgIdHex   = function(num) {return sodium.to_hex(_extMsg[num].id);};
 	this.GetExtMsgTime    = function(num) {return _extMsg[num].ts;};
@@ -846,6 +852,9 @@ function AllEars(readyCallback) {
 
 		_FetchEncrypted("message/browse", newest ? _nullMsgId : _lastMsgId, function(fetchOk, browseData) {
 			if (!fetchOk) {callback(false); return;}
+
+			_totalMsgCount = new Uint16Array(browseData.slice(browseData.length - 5, browseData.length - 3).buffer)[0];
+			_totalMsgKilos = new Uint32Array(new Uint8Array([browseData[browseData.length - 3], browseData[browseData.length - 2], browseData[browseData.length - 1], 0]))[0];
 
 			let offset = 128;
 
