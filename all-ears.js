@@ -469,9 +469,9 @@ function AllEars(readyCallback) {
 	this.GetAddressLimitNormal = function(lvl) {return _maxAddressNormal[lvl];};
 	this.GetAddressLimitShield = function(lvl) {return _maxAddressShield[lvl];};
 
-	this.GetTotalMsgCount = function() {return _totalMsgCount;}
-	this.GetTotalMsgKilos = function() {return _totalMsgKilos;}
-	this.GetReadyMsgKilos = function() {return _readyMsgKilos;}
+	this.GetTotalMsgCount = function() {return _totalMsgCount;};
+	this.GetTotalMsgKilos = function() {return _totalMsgKilos;};
+	this.GetReadyMsgKilos = function() {return _readyMsgKilos;};
 
 	this.GetExtMsgCount = function() {return _extMsg.length;};
 	this.GetExtMsgIdHex   = function(num) {return sodium.to_hex(_extMsg[num].id);};
