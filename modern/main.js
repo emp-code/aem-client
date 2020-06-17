@@ -451,7 +451,8 @@ document.getElementById("btn_rght").onclick = function() {
 					}
 				});
 			} else if (!document.getElementById("div_write_2").hidden) {
-				ae.Message_Create(document.getElementById("write_subj").value, document.getElementById("write_body").value, document.getElementById("write_from").value, document.getElementById("write_recv").value, sodium.from_hex(document.getElementById("write2_pkey").textContent), function(success) {
+				const topk = (document.getElementById("write2_recv").textContent.indexOf("@") > 0) ? null : sodium.from_hex(document.getElementById("write2_pkey").textContent);
+				ae.Message_Create(document.getElementById("write_subj").value, document.getElementById("write_body").value, document.getElementById("write_from").value, document.getElementById("write_recv").value, topk, function(success) {
 					if (success) {
 						console.log("Sent ok");
 					} else {

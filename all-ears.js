@@ -1003,7 +1003,16 @@ function AllEars(readyCallback) {
 	};
 
 	this.Message_Create = function(title, body, addr_from, addr_to, to_pubkey, callback) {
-		if (typeof(title) !== "string" || typeof(body) !== "string" || typeof(addr_from) !== "string" || typeof(addr_to) !== "string" || to_pubkey.constructor !== Uint8Array || to_pubkey.length !== sodium.crypto_box_PUBLICKEYBYTES) {callback(false); return;}
+		if (typeof(title) !== "string" || typeof(body) !== "string" || typeof(addr_from) !== "string" || typeof(addr_to) !== "string") {callback(false); return;}
+
+		if (!to_pubkey) { // Email
+			// 'x' is 01111000 in ASCII. Addr32 understands this as a length of 16, which is higher than the maximum 15.
+			_FetchEncrypted("message/create", sodium.from_string("x" + addr_from + "\n" + addr_to + "\n" + title + "\n" + body), function(fetchOk) {callback(fetchOk);});
+			return;
+		}
+
+		// Internal mail
+		if (to_pubkey.constructor !== Uint8Array || to_pubkey.length !== sodium.crypto_box_PUBLICKEYBYTES) {callback(false); return;}
 
 		const nonce = new Uint8Array(sodium.crypto_box_NONCEBYTES);
 		window.crypto.getRandomValues(nonce);
