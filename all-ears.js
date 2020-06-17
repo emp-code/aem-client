@@ -863,7 +863,6 @@ function AllEars(readyCallback) {
 			for (let msgNum = 0; msgNum < 128; msgNum++) {
 				const kib = browseData[msgNum];
 				if (kib === 0) break;
-				_readyMsgKilos += kib;
 
 				const msgEnc = browseData.slice(offset, offset + (kib * 1024));
 
@@ -875,6 +874,8 @@ function AllEars(readyCallback) {
 					offset += (kib * 1024);
 					continue;
 				}
+
+				_readyMsgKilos += kib;
 
 				if (!newest) {
 					for (let i = 0; i < 16; i++) _lastMsgId[i] = msgId[i];
