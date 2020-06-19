@@ -196,6 +196,15 @@ button:enabled:focus, button:enabled:hover {
 	cursor: pointer;
 }
 
+#div_inbox {
+	height: 100%;
+}
+
+tr {
+	height: 1.5em;
+	overflow: hidden;
+}
+
 table, td {
 	white-space: nowrap;
 	overflow: hidden;

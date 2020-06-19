@@ -170,22 +170,35 @@ function addMsg(isInt, i) {
 }
 
 function addMessages() {
+	const tbl = document.getElementById("tbl_inbox");
+	tbl.innerHTML = "";
+	const row = tbl.insertRow(-1);
+	const cell = row.insertCell(-1);
+	cell.textContent = "0";
+
+	const rowsPerPage = Math.floor(getComputedStyle(document.querySelector("#div_inbox")).height.replace("px", "") / getComputedStyle(document.querySelector("#tbl_inbox > tbody > tr:first-child")).height.replace("px", "")) - 1; // -1 allows space for 'load more'
+	if (typeof(rowsPerPage) !== "number") return;
+	let skipMsgs = rowsPerPage * page;
+
+	tbl.innerHTML = "";
+
 	const maxExt = ae.GetExtMsgCount();
 	const maxInt = ae.GetIntMsgCount();
 
 	let numExt = 0;
 	let numInt = 0;
+	let numAdd = 0;
 
-	while(1) {
+	while (numAdd < rowsPerPage) {
 		const tsInt = (numInt < maxInt) ? ae.GetIntMsgTime(numInt) : 0;
 		const tsExt = (numExt < maxExt) ? ae.GetExtMsgTime(numExt) : 0;
 		if (tsInt === 0 && tsExt === 0) break;
 
 		if (tsInt !== 0 && (tsExt === 0 || tsInt > tsExt)) {
-			addMsg(true, numInt);
+			if (skipMsgs > 0) skipMsgs--; else {addMsg(true, numInt); numAdd++;}
 			numInt++;
 		} else if (tsExt !== 0) {
-			addMsg(false, numExt);
+			if (skipMsgs > 0) skipMsgs--; else {addMsg(false, numExt); numAdd++;}
 			numExt++;
 		}
 	}
@@ -203,19 +216,14 @@ function addMessages() {
 				document.getElementById("tbl_inbox").style.opacity = 1;
 
 				if (successBrowse) {
-					clearMessages();
 					addMessages();
 				}
 			});
 		};
 	}
-}
 
-function clearMessages() {
-	document.getElementById("tbl_inbox").innerHTML = "";
-//	document.getElementById("tbl_sentm").innerHTML = "";
-//	document.getElementById("tbl_notes").innerHTML = "";
-//	document.getElementById("tbl_files").innerHTML = "";
+	document.getElementById("btn_left").disabled = (page === 0);
+	document.getElementById("btn_rght").disabled = ((rowsPerPage * page) + numAdd >= maxExt + maxInt);
 }
 
 function updateAddressCounts() {
@@ -349,7 +357,6 @@ document.getElementById("btn_updt").onclick = function() {
 			document.getElementById("tbl_inbox").style.opacity = 1;
 
 			if (successBrowse) {
-				clearMessages();
 				addMessages();
 				btn.disabled = false;
 			} else {
@@ -392,7 +399,7 @@ function setupButtons() {
 			document.getElementById("btn_dele").disabled = false;
 			document.getElementById("btn_left").disabled = false; // depends
 			document.getElementById("btn_cent").disabled = true;
-			document.getElementById("btn_rght").disabled = false;
+			document.getElementById("btn_rght").disabled = false; // depends
 			document.getElementById("btn_updt").disabled = false;
 		break;
 		case "write":
@@ -421,6 +428,10 @@ function setupButtons() {
 
 document.getElementById("btn_left").onclick = function() {
 	switch (tab) {
+		case "inbox":
+			page--;
+			addMessages();
+		break;
 		case "write":
 			document.getElementById("div_write_1").hidden = false;
 			document.getElementById("div_write_2").hidden = true;
@@ -433,6 +444,10 @@ document.getElementById("btn_left").onclick = function() {
 
 document.getElementById("btn_rght").onclick = function() {
 	switch (tab) {
+		case "inbox":
+			page++;
+			addMessages();
+		break;
 		case "write":
 			if (!document.getElementById("div_write_1").hidden) {
 				ae.Address_Lookup(document.getElementById("write_recv").value, function(pk) {
