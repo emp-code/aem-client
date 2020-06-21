@@ -11,10 +11,10 @@ function AllEars(readyCallback) {
 
 	const docDomain = document.documentElement.getAttribute("data-aedomain");
 	const docApiPub = document.documentElement.getAttribute("data-aeapipub");
-	const docSgnPub = document.documentElement.getAttribute("data-aesgnpub");
+	const docSigPub = document.documentElement.getAttribute("data-aesigpub");
 	const docSaltNm = document.documentElement.getAttribute("data-aesaltnm");
 
-	if (!docApiPub || !docSaltNm || docApiPub.length !== sodium.crypto_box_SECRETKEYBYTES * 2 || docSgnPub.length !== sodium.crypto_sign_PUBLICKEYBYTES * 2 || docSaltNm.length !== sodium.crypto_pwhash_SALTBYTES * 2) {
+	if (!docApiPub || !docSaltNm || docApiPub.length !== sodium.crypto_box_SECRETKEYBYTES * 2 || docSigPub.length !== sodium.crypto_sign_PUBLICKEYBYTES * 2 || docSaltNm.length !== sodium.crypto_pwhash_SALTBYTES * 2) {
 		readyCallback(false);
 		return;
 	}
@@ -36,7 +36,7 @@ function AllEars(readyCallback) {
 
 	const _AEM_DOMAIN = docDomain? docDomain : document.domain;
 	const _AEM_API_PUBKEY = sodium.from_hex(docApiPub);
-	const _AEM_SGN_PUBKEY = sodium.from_hex(docSgnPub);
+	const _AEM_SIG_PUBKEY = sodium.from_hex(docSigPub);
 	const _AEM_SALT_NORMAL = sodium.from_hex(docSaltNm);
 
 // Private variables
@@ -899,7 +899,7 @@ function AllEars(readyCallback) {
 					console.log("Invalid padding");
 				}
 
-				if (!sodium.crypto_sign_verify_detached(msgData.slice(msgData.length - sodium.crypto_sign_BYTES), msgData.slice(0, msgData.length - sodium.crypto_sign_BYTES), _AEM_SGN_PUBKEY)) {
+				if (!sodium.crypto_sign_verify_detached(msgData.slice(msgData.length - sodium.crypto_sign_BYTES), msgData.slice(0, msgData.length - sodium.crypto_sign_BYTES), _AEM_SIG_PUBKEY)) {
 					console.log("Invalid signature");
 				}
 
