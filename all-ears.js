@@ -949,7 +949,7 @@ function AllEars(readyCallback) {
 						const msgTitle = (titleStart < 0) ? "(Missing title)" : body.substr(titleStart + 9, titleEnd).trim();
 
 						const headersEnd = body.indexOf("\n\n");
-						const msgHeaders = body.slice(1, headersEnd);
+						const msgHeaders = body.slice(0, headersEnd);
 						const msgBody = body.slice(headersEnd + 2);
 
 						_extMsg.push(new _NewExtMsg(msgId, msgTs, msgIp, msgCc, msgCs, msgTlsVer, msgEsmtp, msgQuitR, msgProtV, msgInval, msgRares, msgAttach, msgGreet, msgRdns, msgCharset, msgEnvFrom, msgTo, msgHeaders, msgTitle, msgBody));
