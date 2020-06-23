@@ -1003,12 +1003,14 @@ function AllEars(readyCallback) {
 		});
 	};
 
-	this.Message_Create = function(title, body, addr_from, addr_to, to_pubkey, callback) {
+	this.Message_Create = function(title, body, addr_from, addr_to, replyId, to_pubkey, callback) {
 		if (typeof(title) !== "string" || typeof(body) !== "string" || typeof(addr_from) !== "string" || typeof(addr_to) !== "string") {callback(false); return;}
 
 		if (!to_pubkey) { // Email
+			if (typeof(replyId) !== "string") {callback(false); return;}
+
 			// 'x' is 01111000 in ASCII. Addr32 understands this as a length of 16, which is higher than the maximum 15.
-			_FetchEncrypted("message/create", sodium.from_string("x" + addr_from + "\n" + addr_to + "\n" + title + "\n" + body), function(fetchOk) {callback(fetchOk);});
+			_FetchEncrypted("message/create", sodium.from_string("x" + addr_from + "\n" + addr_to + "\n" + replyId + "\n" + title + "\n" + body), function(fetchOk) {callback(fetchOk);});
 			return;
 		}
 

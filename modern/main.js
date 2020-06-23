@@ -33,6 +33,21 @@ function getCountryFlag(countryCode) {
 	return "&#" + regionalIndicator1 + ";&#" + regionalIndicator2 + ";";
 }
 
+function getMsgId(num) {
+	let i;
+	if (ae.GetExtMsgHeaders(num).toLowerCase().slice(0, 11) === "message-id:") {
+		i = 0;
+	} else {
+		i = ae.GetExtMsgHeaders(num).toLowerCase().indexOf("\nmessage-id:");
+		if (i < 1) return "ERR";
+		i++;
+	}
+
+	const x = ae.GetExtMsgHeaders(num).slice(i + 11).trim();
+	if (x[0] !== "<") return "ERR2";
+	return x.slice(1, x.indexOf(">"));
+}
+
 function displayMsg(isInt, num) {
 	document.getElementById("midright").scroll(0, 0);
 
@@ -40,8 +55,9 @@ function displayMsg(isInt, num) {
 
 	document.getElementById("btn_reply").disabled = false;
 	document.getElementById("btn_reply").onclick = function() {
-		document.getElementById("write_recv").value = isInt ? ae.GetIntMsgFrom(num) : ae.GetExtMsgFrom(num);
+		document.getElementById("write_recv").value = isInt? ae.GetIntMsgFrom(num) : ae.GetExtMsgFrom(num);
 		document.getElementById("write_subj").value = "Re: " + (isInt ? ae.GetIntMsgTitle(num) : ae.GetExtMsgTitle(num));
+		document.getElementById("write_rply").textContent = (isInt? "" : getMsgId(num));
 		document.getElementById("btn_write").click();
 		document.getElementById("div_write_1").hidden = false;
 		document.getElementById("div_write_2").hidden = true;
@@ -460,6 +476,7 @@ document.getElementById("btn_rght").onclick = function() {
 						document.getElementById("write2_pkey").textContent = sodium.to_hex(pk);
 
 						document.getElementById("write2_subj").textContent = document.getElementById("write_subj").value;
+						document.getElementById("write2_rply").textContent = document.getElementById("write_rply").textContent;
 						document.getElementById("write2_body").textContent = document.getElementById("write_body").value;
 					} else {
 						console.log("Failed lookup");
@@ -467,7 +484,7 @@ document.getElementById("btn_rght").onclick = function() {
 				});
 			} else if (!document.getElementById("div_write_2").hidden) {
 				const topk = (document.getElementById("write2_recv").textContent.indexOf("@") > 0) ? null : sodium.from_hex(document.getElementById("write2_pkey").textContent);
-				ae.Message_Create(document.getElementById("write_subj").value, document.getElementById("write_body").value, document.getElementById("write_from").value, document.getElementById("write_recv").value, topk, function(success) {
+				ae.Message_Create(document.getElementById("write_subj").value, document.getElementById("write_body").value, document.getElementById("write_from").value, document.getElementById("write_recv").value, document.getElementById("write_rply").textContent, topk, function(success) {
 					if (success) {
 						console.log("Sent ok");
 					} else {
