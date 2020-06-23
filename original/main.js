@@ -772,7 +772,6 @@ document.getElementById("btn_send").onclick = function() {
 	const btn = this;
 	btn.disabled = true;
 
-	const scopy = document.getElementById("send_copy");
 	const sfrom = document.getElementById("send_from");
 	const stitle = document.getElementById("send_title");
 	const sto = document.getElementById("send_to");
