@@ -945,8 +945,8 @@ function AllEars(readyCallback) {
 						const body = msgBodyTx.slice(lenGreet + lenRdns + lenCharset + lenEnvFrom);
 
 						const titleStart = body.indexOf("\nSubject:");
-						const titleEnd = (titleStart < 0) ? -1 : body.slice(titleStart + 10).indexOf("\n");
-						const msgTitle = (titleStart < 0) ? "(Missing title)" : body.substr(titleStart + 10, titleEnd).trim();
+						const titleEnd = (titleStart < 0) ? -1 : body.slice(titleStart + 9).indexOf("\n");
+						const msgTitle = (titleStart < 0) ? "(Missing title)" : body.substr(titleStart + 9, titleEnd).trim();
 
 						const headersEnd = body.indexOf("\n\n");
 						const msgHeaders = body.slice(1, headersEnd);
