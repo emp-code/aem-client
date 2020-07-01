@@ -155,7 +155,11 @@ function addMsg(isInt, i) {
 		const cc = ae.GetExtMsgCountry(i);
 
 		cellSnd1.textContent = from1.substring(0, from1.indexOf("@"));
-		cellSnd2.innerHTML = "<abbr title=\"" + getCountryName(cc) + "\">" + getCountryFlag(cc) + "</abbr>";
+
+		const flag = document.createElement("abbr");
+		flag.textContent = getCountryFlag(cc);
+		flag.title = getCountryName(cc);
+		cellSnd2.appendChild(flag);
 
 		const fromText = document.createElement("span");
 		fromText.textContent = " " + from2;
