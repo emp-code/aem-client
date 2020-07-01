@@ -28,9 +28,10 @@ function getCountryName(countryCode) {
 }
 
 function getCountryFlag(countryCode) {
-	const regionalIndicator1 = 127462 + countryCode.codePointAt(0) - 65;
-	const regionalIndicator2 = 127462 + countryCode.codePointAt(1) - 65;
-	return "&#" + regionalIndicator1 + ";&#" + regionalIndicator2 + ";";
+	return sodium.to_string(new Uint8Array([
+		240, 159, 135, 166 + countryCode.codePointAt(0) - 65,
+		240, 159, 135, 166 + countryCode.codePointAt(1) - 65
+	]));
 }
 
 function getMsgId(num) {
@@ -87,7 +88,7 @@ function displayMsg(isInt, num) {
 		const cc = ae.GetExtMsgCountry(num);
 
 		document.getElementById("readmsg_ip").children[0].textContent = ae.GetExtMsgIp(num);
-		document.getElementById("readmsg_country").innerHTML = getCountryFlag(cc) + " " + getCountryName(cc);
+		document.getElementById("readmsg_country").textContent = getCountryFlag(cc) + " " + getCountryName(cc);
 		document.getElementById("readmsg_tls").children[0].textContent = ae.GetExtMsgTLS(num);
 		document.getElementById("readmsg_greet").children[0].textContent = ae.GetExtMsgGreet(num);
 		document.getElementById("readmsg_envfrom").textContent = ae.GetExtMsgFrom(num);
