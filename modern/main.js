@@ -523,7 +523,7 @@ for (const btn1 of document.getElementById("main1").getElementsByClassName("top"
 			}
 		}
 	};
-};
+}
 
 function addressCreate(addr) {
 	const btnN = document.getElementById("btn_address_create_normal");
