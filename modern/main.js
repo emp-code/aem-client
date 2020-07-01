@@ -78,7 +78,6 @@ function displayMsg(isInt, num) {
 
 	if (!isInt) {
 		document.getElementById("readmsg_ip").hidden = false;
-		document.getElementById("readmsg_flags").hidden = false;
 		document.getElementById("readmsg_country").hidden = false;
 		document.getElementById("readmsg_tls").hidden = false;
 		document.getElementById("readmsg_greet").hidden = false;
@@ -94,6 +93,8 @@ function displayMsg(isInt, num) {
 		document.getElementById("readmsg_envfrom").textContent = ae.GetExtMsgFrom(num);
 
 		let flagText = "";
+		if (!ae.GetExtMsgFlagVPad(num)) flagText += "<abbr title=\"Invalid padding\">PAD</abbr> ";
+		if (!ae.GetExtMsgFlagVSig(num)) flagText += "<abbr title=\"Invalid signature\">SIG</abbr> ";
 		if (!ae.GetExtMsgFlagPExt(num)) flagText += "<abbr title=\"The sender did not use the Extended (ESMTP) protocol\">SMTP</abbr> ";
 		if (!ae.GetExtMsgFlagQuit(num)) flagText += "<abbr title=\"The sender did not issue the required QUIT command\">QUIT</abbr> ";
 		if (ae.GetExtMsgFlagRare(num)) flagText += "<abbr title=\"The sender issued unusual command(s)\">RARE</abbr> ";
@@ -102,7 +103,6 @@ function displayMsg(isInt, num) {
 		document.getElementById("readmsg_flags").children[0].innerHTML = flagText.trim();
 	} else {
 		document.getElementById("readmsg_ip").hidden = true;
-		document.getElementById("readmsg_flags").hidden = true;
 		document.getElementById("readmsg_country").hidden = true;
 		document.getElementById("readmsg_tls").hidden = true;
 		document.getElementById("readmsg_greet").hidden = true;
@@ -115,6 +115,11 @@ function displayMsg(isInt, num) {
 		else if (ae.GetIntMsgLevel(num) === 1) symbol = "<span title=\"Level 1 User\">&#x278a;</span>"; // 1
 		else if (ae.GetIntMsgLevel(num) === 2) symbol = "<span title=\"Level 2 User\">&#x278b;</span>"; // 2
 		else if (ae.GetIntMsgLevel(num) === 3) symbol = "<span title=\"Administrator\">&#x1f150;</span>"; // A (Admin)
+
+		let flagText = "";
+		if (!ae.GetIntMsgFlagVPad(num)) flagText += "<abbr title=\"Invalid padding\">PAD</abbr> ";
+		if (!ae.GetIntMsgFlagVSig(num)) flagText += "<abbr title=\"Invalid signature\">SIG</abbr> ";
+		document.getElementById("readmsg_flags").children[0].innerHTML = flagText.trim();
 
 		document.getElementById("readmsg_from").innerHTML = symbol + " " + ae.GetIntMsgFrom(num);
 	}

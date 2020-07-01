@@ -75,7 +75,9 @@ function AllEars(readyCallback) {
 	const _admin_userLevel = [];
 
 // Private functions
-	function _NewExtMsg(id, ts, ip, cc, cs, tlsver, esmtp, quitR, protV, inval, rares, attach, greet, rdns, charset, envFrom, to, headers, title, body) {
+	function _NewExtMsg(validPad, validSig, id, ts, ip, cc, cs, tlsver, esmtp, quitR, protV, inval, rares, attach, greet, rdns, charset, envFrom, to, headers, title, body) {
+		this.validPad = validPad;
+		this.validSig = validSig;
 		this.id = id;
 		this.ts = ts;
 		this.ip = ip;
@@ -98,7 +100,9 @@ function AllEars(readyCallback) {
 		this.body = body;
 	}
 
-	function _NewIntMsg(id, ts, fromLv, fromPk, from, to, title, body) {
+	function _NewIntMsg(validPad, validSig, id, ts, fromLv, fromPk, from, to, title, body) {
+		this.validPad = validPad;
+		this.validSig = validSig;
 		this.id = id;
 		this.ts = ts;
 		this.fromLv = fromLv;
@@ -486,6 +490,8 @@ function AllEars(readyCallback) {
 	this.GetExtMsgHeaders = function(num) {return _extMsg[num].headers;};
 	this.GetExtMsgBody    = function(num) {return _extMsg[num].body;};
 
+	this.GetExtMsgFlagVPad = function(num) {return _extMsg[num].validPad;};
+	this.GetExtMsgFlagVSig = function(num) {return _extMsg[num].validSig;};
 	this.GetExtMsgFlagPExt = function(num) {return _extMsg[num].esmtp;};
 	this.GetExtMsgFlagQuit = function(num) {return _extMsg[num].quitR;};
 	this.GetExtMsgFlagRare = function(num) {return _extMsg[num].rares;};
@@ -501,6 +507,9 @@ function AllEars(readyCallback) {
 	this.GetIntMsgTo     = function(num) {return _intMsg[num].to;};
 	this.GetIntMsgTitle  = function(num) {return _intMsg[num].title;};
 	this.GetIntMsgBody   = function(num) {return _intMsg[num].body;};
+
+	this.GetIntMsgFlagVPad = function(num) {return _intMsg[num].validPad;};
+	this.GetIntMsgFlagVSig = function(num) {return _intMsg[num].validSig;};
 
 	this.GetNoteCount = function() {return _textNote.length;};
 	this.GetNoteIdHex = function(num) {return sodium.to_hex(_textNote[num].id);};
@@ -884,7 +893,7 @@ function AllEars(readyCallback) {
 				let msgData;
 				try {msgData = sodium.crypto_box_seal_open(msgEnc, _userKeyPublic, _userKeySecret);}
 				catch(e) {
-					_intMsg.push(new _NewIntMsg(msgId, Date.now() / 1000, 3, null, "system", "system", "(error)", e));
+					_intMsg.push(new _NewIntMsg(true, true, msgId, Date.now() / 1000, 3, null, "system", "system", "(error)", e));
 					offset += (kib * 1024);
 					continue;
 				}
@@ -895,13 +904,8 @@ function AllEars(readyCallback) {
 
 				const padA = msgData.slice(msgData.length - sodium.crypto_sign_BYTES - padAmount, msgData.length - sodium.crypto_sign_BYTES);
 				const padB = sodium.randombytes_buf_deterministic(padAmount, msgData.slice(0, sodium.randombytes_SEEDBYTES), null);
-				if (!padA || !padB || padA.length !== padB.length || !_arraysEqual(padA, padB)) {
-					console.log("Invalid padding");
-				}
-
-				if (!sodium.crypto_sign_verify_detached(msgData.slice(msgData.length - sodium.crypto_sign_BYTES), msgData.slice(0, msgData.length - sodium.crypto_sign_BYTES), _AEM_SIG_PUBKEY)) {
-					console.log("Invalid signature");
-				}
+				const validPad = (padA && padB && padA.length === padB.length && _arraysEqual(padA, padB));
+				const validSig = sodium.crypto_sign_verify_detached(msgData.slice(msgData.length - sodium.crypto_sign_BYTES), msgData.slice(0, msgData.length - sodium.crypto_sign_BYTES), _AEM_SIG_PUBKEY);
 
 				const msgTs = new Uint32Array(msgData.slice(2, 6).buffer)[0];
 
@@ -952,7 +956,7 @@ function AllEars(readyCallback) {
 						const msgHeaders = body.slice(0, headersEnd);
 						const msgBody = body.slice(headersEnd + 2);
 
-						_extMsg.push(new _NewExtMsg(msgId, msgTs, msgIp, msgCc, msgCs, msgTlsVer, msgEsmtp, msgQuitR, msgProtV, msgInval, msgRares, msgAttach, msgGreet, msgRdns, msgCharset, msgEnvFrom, msgTo, msgHeaders, msgTitle, msgBody));
+						_extMsg.push(new _NewExtMsg(validPad, validSig, msgId, msgTs, msgIp, msgCc, msgCs, msgTlsVer, msgEsmtp, msgQuitR, msgProtV, msgInval, msgRares, msgAttach, msgGreet, msgRdns, msgCharset, msgEnvFrom, msgTo, msgHeaders, msgTitle, msgBody));
 					break;}
 
 					case 16: { // IntMsg
@@ -978,7 +982,7 @@ function AllEars(readyCallback) {
 								msgBody = msgText.slice(msgText.indexOf("\n"));
 							}
 
-							_intMsg.push(new _NewIntMsg(msgId, msgTs, msgFromLv, msgFromPk, msgFrom, msgTo, msgTitle, msgBody));
+							_intMsg.push(new _NewIntMsg(validPad, validSig, msgId, msgTs, msgFromLv, msgFromPk, msgFrom, msgTo, msgTitle, msgBody));
 						}
 					break;}
 
