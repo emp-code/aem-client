@@ -116,13 +116,12 @@ function displayMsg(isInt, num) {
 		else if (ae.GetIntMsgLevel(num) === 1) symbol = "<span title=\"Level 1 User\">&#x278a;</span>"; // 1
 		else if (ae.GetIntMsgLevel(num) === 2) symbol = "<span title=\"Level 2 User\">&#x278b;</span>"; // 2
 		else if (ae.GetIntMsgLevel(num) === 3) symbol = "<span title=\"Administrator\">&#x1f150;</span>"; // A (Admin)
+		document.getElementById("readmsg_from").innerHTML = symbol + " " + ae.GetIntMsgFrom(num);
 
 		let flagText = "";
 		if (!ae.GetIntMsgFlagVPad(num)) flagText += "<abbr title=\"Invalid padding\">PAD</abbr> ";
 		if (!ae.GetIntMsgFlagVSig(num)) flagText += "<abbr title=\"Invalid signature\">SIG</abbr> ";
 		document.getElementById("readmsg_flags").children[0].innerHTML = flagText.trim();
-
-		document.getElementById("readmsg_from").innerHTML = symbol + " " + ae.GetIntMsgFrom(num);
 	}
 }
 
