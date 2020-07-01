@@ -194,7 +194,7 @@ function addMsg(isInt, i) {
 */
 }
 
-function addMessages() {
+function getRowsPerPage() {
 	const tbl = document.getElementById("tbl_inbox");
 	tbl.innerHTML = "";
 	const row = tbl.insertRow(-1);
@@ -202,10 +202,13 @@ function addMessages() {
 	cell.textContent = "0";
 
 	const rowsPerPage = Math.floor(getComputedStyle(document.querySelector("#div_inbox")).height.replace("px", "") / getComputedStyle(document.querySelector("#tbl_inbox > tbody > tr:first-child")).height.replace("px", "")) - 1; // -1 allows space for 'load more'
-	if (typeof(rowsPerPage) !== "number") return;
-	let skipMsgs = rowsPerPage * page;
-
 	tbl.innerHTML = "";
+	return rowsPerPage;
+}
+
+function addMessages() {
+	const rowsPerPage = getRowsPerPage();
+	let skipMsgs = rowsPerPage * page;
 
 	const maxExt = ae.GetExtMsgCount();
 	const maxInt = ae.GetIntMsgCount();
