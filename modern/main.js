@@ -4,7 +4,7 @@ sodium.ready.then(function() {
 
 const ae = new AllEars(function(ok) {
 	if (ok) {
-		document.getElementById("txt_skey").style.background = "#404b41";
+		document.getElementById("txt_skey").style.background = "#466";
 		document.getElementById("txt_skey").maxLength = "64";
 	} else {
 		console.log("Failed to load All-Ears");
@@ -592,14 +592,14 @@ document.getElementById("btn_enter").onclick = function() {
 				} else {
 					console.log("Failed to enter");
 					btn.disabled = false;
-					document.getElementById("txt_skey").style.background = "#404b41";
+					document.getElementById("txt_skey").style.background = "#466";
 					txtSkey.focus();
 				}
 			});
 		} else {
 			console.log("Invalid format for key");
 			btn.disabled = false;
-			document.getElementById("txt_skey").style.background = "#404b41";
+			document.getElementById("txt_skey").style.background = "#466";
 			txtSkey.focus();
 		}
 	});

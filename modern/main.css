@@ -53,9 +53,9 @@ body > svg {
 
 #div_begin > div > main > div > input {
 	display: block;
-	background: #111;
-	border: 0.125em inset #999;
-	color: #111;
+	background: #233;
+	border: 0.25em solid #233;
+	color: #233;
 	border-radius: 1em;
 	text-align: center;
 	transition: background-color 0.5s ease-out;
