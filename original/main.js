@@ -42,9 +42,10 @@ function getCountryName(countryCode) {
 }
 
 function getCountryFlag(countryCode) {
-	const regionalIndicator1 = 127462 + countryCode.codePointAt(0) - 65;
-	const regionalIndicator2 = 127462 + countryCode.codePointAt(1) - 65;
-	return "&#" + regionalIndicator1 + ";&#" + regionalIndicator2 + ";";
+	return sodium.to_string(new Uint8Array([
+		240, 159, 135, 166 + countryCode.codePointAt(0) - 65,
+		240, 159, 135, 166 + countryCode.codePointAt(1) - 65
+	]));
 }
 
 function addMessages() {
@@ -108,7 +109,11 @@ function addExtMessage(i) {
 	const cc = ae.GetExtMsgCountry(i);
 
 	cellFrom1.textContent = from.substring(0, from.indexOf("@"));
-	cellFrom2.innerHTML = "<abbr title=\"" + getCountryName(cc) + "\">" + getCountryFlag(cc) + "</abbr>";
+
+	const flag = document.createElement("abbr");
+	flag.textContent = getCountryFlag(cc);
+	flag.title = getCountryName(cc);
+	cellFrom2.appendChild(flag);
 
 	const fromText = document.createElement("span");
 	fromText.textContent = " " + from2;
@@ -129,7 +134,7 @@ function addExtMessage(i) {
 		document.getElementById("readmsg_tls").textContent = ae.GetExtMsgTLS(i);
 		document.getElementById("readmsg_ip").textContent = ae.GetExtMsgIp(i);
 
-		document.getElementById("readmsg_country").innerHTML = getCountryName(cc) + " " + getCountryFlag(cc);
+		document.getElementById("readmsg_country").textContent = getCountryName(cc) + " " + getCountryFlag(cc);
 
 		let flagText = "";
 		if (!ae.GetExtMsgFlagPExt(i)) flagText += "<abbr title=\"The sender did not use the Extended (ESMTP) protocol\">SMTP</abbr> ";
