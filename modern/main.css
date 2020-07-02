@@ -31,22 +31,24 @@ body > svg {
 
 #div_begin > div {
 	display: inline-block;
-	padding: 1em 2em 1.3em 2em;
-	background: #110a04;
-	border: 0.375em double #664422;
+	padding: 1em 2em 1em 2em;
+
+	border: 0.4em double #642;
+	box-shadow: 0 0.4em #321;
+	background: #0d0804;
 	border-radius: 2em;
-	box-shadow: 0 0.375em #332211;
 }
 
 #div_begin > div > header > * {margin: 0;}
 
 #div_begin > div > main > div {
 	padding: 2em;
-	border: 0.25em double #464c5d;
-	background: #0d0e11;
-	border-radius: 1.333em;
 	margin: 1.5em 0 1.75em 0;
-	box-shadow: 0 0.25em #23262e;
+
+	border: 0.2em double #446;
+	box-shadow: 0 0.2em #223;
+	background: #09090d;
+	border-radius: 1em;
 }
 
 #div_begin > div > main > div > input {
@@ -64,7 +66,7 @@ button::-moz-focus-inner {
 }
 
 #div_begin > div > main > div > button {
-	background-image: radial-gradient(circle, #464c5d, #0d0e11);
+	background-image: radial-gradient(circle, #446, #09090d);
 	border-radius: 3em;
 	margin-top: 2em;
 	width: 3em;
@@ -72,11 +74,11 @@ button::-moz-focus-inner {
 }
 
 #div_begin > div > header, footer {
-	color: #bf7f40;
+	color: #b3773b;
 }
 
 #div_begin > div, #div_begin > div a {
-	color: #bf7f40;
+	color: #b3773b;
 }
 
 #div_begin > div > footer {
