@@ -2,6 +2,16 @@ html, body {
 	margin: 0;
 	padding: 0;
 	height: 100%;
+	background: #00000a;
+}
+
+@media only screen and (hover: hover) {
+	#div_begin {
+		height: 100%;
+		background: radial-gradient(#00000a, #001);
+		padding-top: 5vh;
+		box-sizing: border-box;
+	}
 }
 
 *:focus {outline: none;}
@@ -14,24 +24,33 @@ body > svg {
 	height: 1.5em;
 }
 
-/* div_begin */
-#div_begin {
-	text-align: center;
-	background: #00000a;
-	height: 100%;
+button::-moz-focus-inner {
+	border: 0;
 }
 
-@media only screen and (hover: hover) {
-	#div_begin {
-		background: radial-gradient(#00000a, #001);
-		padding: 5vh 0;
-		box-sizing: border-box;
-	}
+noscript {
+	color: #fff;
+}
+
+/* -- Entry Screen -- */
+#div_begin {
+	text-align: center;
+}
+
+#div_begin > div * {
+	margin: 0;
+	padding: 0;
 }
 
 #div_begin > div {
-	display: inline-block;
-	padding: 1em 2em 1em 2em;
+	display: inline-grid;
+	grid-template-columns: auto;
+	grid-template-rows: 1fr auto 1fr;
+
+	place-items: center center;
+	place-content: center center;
+
+	padding: 0 2em 0 2em;
 
 	border: 0.4em double #642;
 	box-shadow: 0 0.4em #321;
@@ -39,19 +58,22 @@ body > svg {
 	border-radius: 2em;
 }
 
-#div_begin > div > header > * {margin: 0;}
+#div_begin header, footer, a {
+	color: #b3773b;
+}
 
-#div_begin > div > main > div {
-	padding: 2em;
-	margin: 1.5em 0 1.75em 0;
+#div_begin header, footer {
+	margin: 1.25em 0 1.25em 0;
+}
 
+#div_begin main {
 	border: 0.2em double #446;
 	box-shadow: 0 0.2em #223;
 	background: #09090d;
 	border-radius: 1em;
 }
 
-#div_begin > div > main > div > input {
+#div_begin main input {
 	display: block;
 	background: #233;
 	border: 0.25em solid #233;
@@ -59,33 +81,18 @@ body > svg {
 	border-radius: 1em;
 	text-align: center;
 	transition: background-color 0.5s ease-out;
+	margin: 2em;
 }
 
-button::-moz-focus-inner {
-	border: 0;
-}
-
-#div_begin > div > main > div > button {
+#div_begin main button {
 	background-image: radial-gradient(circle, #446, #09090d);
 	border-radius: 3em;
-	margin-top: 2em;
 	width: 3em;
 	height: 3em;
+	margin-bottom: 2em;
 }
 
-#div_begin > div > header, footer {
-	color: #b3773b;
-}
-
-#div_begin > div, #div_begin > div a {
-	color: #b3773b;
-}
-
-#div_begin > div > footer {
-	margin-top: 0;
-}
-
-/*div_main*/
+/* -- User Entered -- */
 #div_main {
 	scrollbar-color: #222 #333;
 	padding: 2em;
