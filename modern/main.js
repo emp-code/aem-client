@@ -580,7 +580,7 @@ document.getElementById("btn_enter").onclick = function() {
 
 	const btn = this;
 	btn.disabled = true;
-	document.getElementById("txt_skey").style.background = "#111";
+	document.getElementById("txt_skey").style.background = "#233";
 
 	ae.SetKeys(txtSkey.value, function(successSetKeys) {
 		if (successSetKeys) {
