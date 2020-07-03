@@ -2,7 +2,7 @@
 
 function AllEars(readyCallback) {
 	try {
-		if (!window.isSecureContext
+		if ((!window.isSecureContext && !document.domain.endsWith(".onion"))
 		|| window.self !== window.top
 		|| document.compatMode == "BackCompat"
 		|| document.characterSet !== "UTF-8"
