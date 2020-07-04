@@ -4,6 +4,7 @@ function AllEars(readyCallback) {
 	try {
 		if ((!window.isSecureContext && !document.domain.endsWith(".onion"))
 		|| window.self !== window.top
+		|| window.opener !== null
 		|| document.compatMode == "BackCompat"
 		|| document.characterSet !== "UTF-8"
 		) {readyCallback(false); return;}
