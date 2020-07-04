@@ -417,7 +417,7 @@ function addContact(mail, name, note) {
 
 document.getElementById("btn_newcontact").onclick = function() {
 	addContact("", "", "");
-}
+};
 
 document.getElementById("btn_savecontacts").onclick = function() {
 	while (ae.GetContactCount() > 0) {
@@ -438,7 +438,7 @@ document.getElementById("btn_savecontacts").onclick = function() {
 			console.log("Failed contacts update");
 		}
 	});
-}
+};
 
 // Tabs
 function setupButtons() {
@@ -580,7 +580,7 @@ document.getElementById("btn_address_create_normal").onclick = function() {
 	if (!txtNewAddr.reportValidity()) return;
 
 	addressCreate(txtNewAddr.value);
-}
+};
 
 document.getElementById("btn_address_create_shield").onclick = function() {
 	if (ae.GetAddressCountShield() >= ae.GetAddressLimitShield(ae.GetUserLevel())) return;
