@@ -419,6 +419,27 @@ document.getElementById("btn_newcontact").onclick = function() {
 	addContact("", "", "");
 }
 
+document.getElementById("btn_savecontacts").onclick = function() {
+	while (ae.GetContactCount() > 0) {
+		ae.DeleteContact(0);
+	}
+
+	for (const row of document.getElementById("tbl_ctact").rows) {
+		ae.AddContact(row.cells[0].textContent, row.cells[1].textContent, row.cells[2].textContent);
+	}
+
+	const btn = this;
+	btn.disabled = true;
+
+	ae.Private_Update(function(success) {
+		btn.disabled = false;
+
+		if (!success) {
+			console.log("Failed contacts update");
+		}
+	});
+}
+
 // Tabs
 function setupButtons() {
 	switch(tab) {
