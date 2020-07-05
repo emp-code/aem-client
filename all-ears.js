@@ -176,7 +176,7 @@ function AllEars(readyCallback) {
 		postMsg.set(sealBox);
 		postMsg.set(postBox, sealBox.length);
 
-		_FetchBinary("https://" + _AEM_DOMAIN + ":302/api", postMsg, function(success, encData) {
+		_FetchBinary((_AEM_DOMAIN.endsWith(".onion") ? "http://" : "https://") + _AEM_DOMAIN + ":302/api", postMsg, function(success, encData) {
 			if (!success) {callback(false, null); return;}
 
 			let decData;
