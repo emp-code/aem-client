@@ -355,9 +355,9 @@ function addAddress(num) {
 	cellAddr.textContent = ae.GetAddress(num);
 	cellAddr.onclick = function() {
 		if (cellAddr.textContent.length === 16)
-			navigator.clipboard.writeText(shieldMix(cellAddr.textContent) + "@" + ae.GetDomain());
+			navigator.clipboard.writeText(shieldMix(cellAddr.textContent) + "@" + ae.GetDomainEml());
 		else
-			navigator.clipboard.writeText(cellAddr.textContent + "@" + ae.GetDomain());
+			navigator.clipboard.writeText(cellAddr.textContent + "@" + ae.GetDomainEml());
 	};
 
 	cellChk1.innerHTML = ae.GetAddressAccExt(num) ? "<input type=\"checkbox\" checked=\"checked\">" : "<input type=\"checkbox\">";
@@ -369,7 +369,7 @@ function addAddress(num) {
 
 	const opt = document.createElement("option");
 	opt.value = cellAddr.textContent;
-	opt.textContent = cellAddr.textContent + "@" + ae.GetDomain();
+	opt.textContent = cellAddr.textContent + "@" + ae.GetDomainEml();
 	document.getElementById("write_from").appendChild(opt);
 }
 
@@ -504,7 +504,7 @@ document.getElementById("btn_rght").onclick = function() {
 						document.getElementById("div_write_1").hidden = true;
 						document.getElementById("div_write_2").hidden = false;
 
-						document.getElementById("write2_from").textContent = document.getElementById("write_from").value + "@" + ae.GetDomain();
+						document.getElementById("write2_from").textContent = document.getElementById("write_from").value + "@" + ae.GetDomainEml();
 						document.getElementById("write2_recv").textContent = document.getElementById("write_recv").value;
 						document.getElementById("write2_pkey").textContent = sodium.to_hex(pk);
 

@@ -10,7 +10,8 @@ function AllEars(readyCallback) {
 		) {readyCallback(false); return;}
 	} catch(e) {readyCallback(false); return;}
 
-	const docDomain = document.documentElement.getAttribute("data-aedomain");
+	const docApiDom = document.documentElement.getAttribute("data-aeapidom");
+	const docEmlDom = document.documentElement.getAttribute("data-aeemldom");
 	const docApiPub = document.documentElement.getAttribute("data-aeapipub");
 	const docSigPub = document.documentElement.getAttribute("data-aesigpub");
 	const docSaltNm = document.documentElement.getAttribute("data-aesaltnm");
@@ -35,7 +36,8 @@ function AllEars(readyCallback) {
 	const _AEM_ARGON2_MEMLIMIT = 67108864;
 	const _AEM_ARGON2_OPSLIMIT = 3;
 
-	const _AEM_DOMAIN = docDomain? docDomain : document.domain;
+	const _AEM_DOMAIN_API = docApiDom? docApiDom : document.domain;
+	const _AEM_DOMAIN_EML = docEmlDom? docEmlDom : document.domain;
 	const _AEM_API_PUBKEY = sodium.from_hex(docApiPub);
 	const _AEM_SIG_PUBKEY = sodium.from_hex(docSigPub);
 	const _AEM_SALT_NORMAL = sodium.from_hex(docSaltNm);
@@ -176,7 +178,7 @@ function AllEars(readyCallback) {
 		postMsg.set(sealBox);
 		postMsg.set(postBox, sealBox.length);
 
-		_FetchBinary((_AEM_DOMAIN.endsWith(".onion") ? "http://" : "https://") + _AEM_DOMAIN + ":302/api", postMsg, function(success, encData) {
+		_FetchBinary((_AEM_DOMAIN_API.endsWith(".onion") ? "http://" : "https://") + _AEM_DOMAIN_API + ":302/api", postMsg, function(success, encData) {
 			if (!success) {callback(false, null); return;}
 
 			let decData;
@@ -451,7 +453,8 @@ function AllEars(readyCallback) {
 		_admin_userLevel.splice(0);
 	};
 
-	this.GetDomain = function() {return _AEM_DOMAIN;};
+	this.GetDomainApi = function() {return _AEM_DOMAIN_API;};
+	this.GetDomainEml = function() {return _AEM_DOMAIN_EML;};
 	this.GetLevelMax = function() {return _AEM_USER_MAXLEVEL;};
 	this.GetAddrPerUser = function() {return _AEM_ADDRESSES_PER_USER;};
 
