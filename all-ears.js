@@ -869,7 +869,7 @@ function AllEars(readyCallback) {
 			if (!fetchOk) {callback(false); return;}
 
 			_totalMsgCount = new Uint16Array(browseData.slice(browseData.length - 5, browseData.length - 3).buffer)[0];
-			_totalMsgKilos = new Uint32Array(new Uint8Array([browseData[browseData.length - 3], browseData[browseData.length - 2], browseData[browseData.length - 1], 0]))[0];
+			_totalMsgKilos = new Uint32Array(new Uint8Array([browseData[browseData.length - 3], browseData[browseData.length - 2], browseData[browseData.length - 1], 0]).buffer)[0];
 
 			let offset = 128;
 
