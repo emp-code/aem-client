@@ -392,6 +392,21 @@ function addAddress(num) {
 	document.getElementById("write_from").appendChild(opt);
 }
 
+document.getElementById("btn_dele").onclick = function() {
+	this.blur();
+
+	if (tab === TAB_WRITE) {
+		tabs[tab].cur = 0;
+		updateTab();
+
+		document.getElementById("write_recv").value = "";
+		document.getElementById("write_subj").value = "";
+		document.getElementById("write_body").value = "";
+
+		document.getElementById("write_recv").focus();
+	}
+}
+
 document.getElementById("btn_updt").onclick = function() {
 	const btn = this;
 	btn.disabled = true;
