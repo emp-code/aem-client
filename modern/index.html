@@ -90,7 +90,6 @@
 
 					<div id="div_admin" hidden>
 						<table id="table_addrs">
-							<caption class="half"></caption>
 							<thead>
 								<tr>
 									<th>Address</th>
@@ -396,6 +395,7 @@
 								<button type="button" autocomplete="off" id="btn_gkdomain_del">Del</button>
 							</div>
 						</div>
+
 						<div hidden id="div_acc">
 							<table>
 								<thead>
@@ -434,22 +434,52 @@
 								</tbody>
 							</table>
 
+							<hr>
+
 							<table>
+								<caption>My account</caption>
 								<thead>
 									<tr>
-										<td>Public key</td>
+										<td><abbr title="Level">Lvl</abbr></td>
 										<td><abbr title="Mebibytes">MiB</abbr></td>
 										<td><abbr title="Normal addresses">Nrm</abbr></td>
 										<td><abbr title="Shield addresses">Shd</abbr></td>
-										<td><abbr title="Level">Lvl</abbr></td>
-										<td colspan="2">Adjust level</td>
-										<td>Destroy</td>
 									</tr>
 								</thead>
 								<tbody>
+									<tr>
+										<td></td>
+										<td></td>
+										<td></td>
+										<td></td>
+									</tr>
 								</tbody>
 							</table>
+
+							<hr>
+
+							<p><input type="checkbox"> <span class="half">I want to <b>downgrade my account</b></span></p>
+							<p><button type="button" autocomplete="off" disabled="disabled">Downgrade my account</button></p>
+							<hr>
+							<p><input type="checkbox"> <span class="half">I want to <b>destroy my account</span></b></p>
+							<p><button type="button" autocomplete="off" disabled="disabled">Destroy my account</button></p>
 						</div>
+
+						<table hidden id="tbl_accs">
+							<thead>
+								<tr>
+									<td>Public key</td>
+									<td><abbr title="Mebibytes">MiB</abbr></td>
+									<td><abbr title="Normal addresses">Nrm</abbr></td>
+									<td><abbr title="Shield addresses">Shd</abbr></td>
+									<td><abbr title="Level">Lvl</abbr></td>
+									<td colspan="2">Adjust level</td>
+									<td>Destroy</td>
+								</tr>
+							</thead>
+							<tbody  id="tbd_accs">
+							</tbody>
+						</table>
 					</div>
 				</div>
 				<nav class="bot">

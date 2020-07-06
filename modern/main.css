@@ -287,8 +287,12 @@ table, td {
 #div_gk .flex {display: flex;}
 #div_gk .flex input {flex: 1;}
 
-#div_acc > table {
+#div_acc > table, #tbl_accs {
 	margin: 0 auto 0 auto;
+}
+
+#div_acc > p {
+	text-align: center;
 }
 
 #div_notes table {
@@ -355,7 +359,7 @@ table, td {
 	resize: none;
 }
 
-#div_write_2 hr {
+hr {
 	opacity: 0.25;
 }
 

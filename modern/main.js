@@ -23,7 +23,7 @@ const tabs = [
 	new TabState(0, 0, false, true), // Outbx
 	new TabState(0, 2, true, false), // Write
 	new TabState(0, 0, false, false), // Notes
-	new TabState(0, 2, false, true) // Admin
+	new TabState(0, 3, false, true) // Admin
 ];
 
 let tab = 0;
@@ -302,7 +302,6 @@ function reloadAccount() {
 		addAddress(i);
 	}
 
-	document.getElementById("table_addrs").getElementsByTagName("caption")[0].textContent = "Level " + ae.GetUserLevel() + " User";
 	updateAddressCounts();
 }
 
@@ -533,9 +532,10 @@ function updateTab() {
 		break;
 
 		case TAB_ADMIN:
-			for (let i = 0; i < 3; i++) {
+			for (let i = 0; i <= tabs[tab].max; i++) {
 				document.getElementById("div_admin").children[i].hidden = (i !== tabs[tab].cur);
 			}
+		break;
 	}
 
 	document.getElementById("btn_left").disabled = (tabs[tab].cur === 0);
