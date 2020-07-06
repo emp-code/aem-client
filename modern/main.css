@@ -287,6 +287,10 @@ table, td {
 #div_gk .flex {display: flex;}
 #div_gk .flex input {flex: 1;}
 
+#div_acc > table {
+	margin: 0 auto 0 auto;
+}
+
 #div_notes table {
 	border-bottom: 1px solid #333;
 	padding-bottom: 0.25em;
