@@ -280,6 +280,14 @@ function updateAddressCounts() {
 }
 
 function reloadAccount() {
+	// Admin stuff
+	const tblLimits = document.getElementById("tbl_limits");
+	for (let i = 0; i < 4; i++) {
+		tblLimits.rows[i].cells[1].children[0].value = ae.GetStorageLimit(i);
+		tblLimits.rows[i].cells[2].children[0].value = ae.GetAddressLimitNormal(i);
+		tblLimits.rows[i].cells[3].children[0].value = ae.GetAddressLimitShield(i);
+	}
+
 	// Contacts
 	for (let i = 0; i < ae.GetContactCount(); i++) {
 		addContact(
