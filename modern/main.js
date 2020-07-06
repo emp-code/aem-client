@@ -617,6 +617,9 @@ document.getElementById("btn_address_create_shield").onclick = function() {
 	addressCreate("SHIELD");
 };
 
+document.getElementById("chk_downme").onclick = function() {document.getElementById("btn_downme").disabled = !this.checked;};
+document.getElementById("chk_killme").onclick = function() {document.getElementById("btn_killme").disabled = !this.checked;};
+
 document.getElementById("txt_skey").onkeyup = function(event) {
 	if (event.key === "Enter") {
 		event.preventDefault();
