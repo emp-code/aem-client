@@ -288,6 +288,12 @@ function reloadAccount() {
 		tblLimits.rows[i].cells[3].children[0].value = ae.GetAddressLimitShield(i);
 	}
 
+	const tblMe = document.getElementById("tbd_myacc");
+	tblMe.rows[0].cells[0].textContent = ae.GetUserLevel();
+	tblMe.rows[0].cells[1].textContent = Math.round(ae.GetTotalMsgKilos() / 1024) +  "/" + (ae.GetStorageLimit(ae.GetUserLevel()) + 1);
+	tblMe.rows[0].cells[2].textContent = ae.GetAddressCountNormal() + "/" + ae.GetAddressLimitNormal(ae.GetUserLevel());
+	tblMe.rows[0].cells[3].textContent = ae.GetAddressCountShield() + "/" + ae.GetAddressLimitShield(ae.GetUserLevel());
+
 	// Contacts
 	for (let i = 0; i < ae.GetContactCount(); i++) {
 		addContact(
