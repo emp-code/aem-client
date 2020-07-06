@@ -482,13 +482,13 @@ function updateTab() {
 
 		case TAB_WRITE:
 			switch (tabs[tab].cur) {
-				case 0:
+				case 0: // Write
 					document.getElementById("div_write_1").hidden = false;
 					document.getElementById("div_write_2").hidden = true;
 					document.getElementById("write_body").focus();
 				break;
 
-				case 1:
+				case 1: // Verify
 					ae.Address_Lookup(document.getElementById("write_recv").value, function(pk) {
 						if (pk) {
 							document.getElementById("div_write_1").hidden = true;
@@ -507,15 +507,22 @@ function updateTab() {
 					});
 				break;
 
-				case 2:
-					const topk = (document.getElementById("write2_recv").textContent.indexOf("@") > 0) ? null : sodium.from_hex(document.getElementById("write2_pkey").textContent);
-					ae.Message_Create(document.getElementById("write_subj").value, document.getElementById("write_body").value, document.getElementById("write_from").value, document.getElementById("write_recv").value, document.getElementById("write_rply").textContent, topk, function(success) {
-						if (success) {
-							console.log("Sent ok");
-						} else {
-							console.log("Failed sending");
+				case 2: // Send
+					ae.Message_Create(
+						document.getElementById("write_subj").value,
+						document.getElementById("write_body").value,
+						document.getElementById("write_from").value,
+						document.getElementById("write_recv").value,
+						document.getElementById("write_rply").textContent,
+						(document.getElementById("write2_recv").textContent.indexOf("@") > 0) ? null : sodium.from_hex(document.getElementById("write2_pkey").textContent),
+						function(success) {
+							if (success) {
+								console.log("Sent ok");
+							} else {
+								console.log("Failed sending");
+							}
 						}
-					});
+					);
 				break;
 			}
 		break;
