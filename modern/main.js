@@ -23,7 +23,7 @@ const tabs = [
 	new TabState(0, 0, false, true), // Outbx
 	new TabState(0, 2, true, false), // Write
 	new TabState(0, 0, false, false), // Notes
-	new TabState(0, 0, false, true) // Admin
+	new TabState(0, 2, false, true) // Admin
 ];
 
 let tab = 0;
@@ -523,6 +523,11 @@ function updateTab() {
 				break;
 			}
 		break;
+
+		case TAB_ADMIN:
+			for (let i = 0; i < 3; i++) {
+				document.getElementById("div_admin").children[i].hidden = (i !== tabs[tab].cur);
+			}
 	}
 
 	document.getElementById("btn_left").disabled = (tabs[tab].cur === 0);
