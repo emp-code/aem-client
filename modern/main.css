@@ -274,6 +274,13 @@ table, td {
 	margin: 0 auto;
 }
 
+#div_gk > p {
+	margin: 0;
+	text-align: center;
+	opacity: 0.5;
+	font-weight: bold;
+}
+
 #div_notes table {
 	border-bottom: 1px solid #333;
 	padding-bottom: 0.25em;
