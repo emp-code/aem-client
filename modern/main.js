@@ -279,10 +279,7 @@ function updateAddressCounts() {
 	document.getElementById("limit_total").textContent = ((ae.GetAddressCountNormal() + ae.GetAddressCountShield()) + "/" + ae.GetAddrPerUser()).padStart(5);
 }
 
-function reloadInterface() {
-	document.getElementById("div_begin").hidden = true;
-	document.getElementById("div_main").style.display = "grid";
-
+function reloadAccount() {
 	// Contacts
 	for (let i = 0; i < ae.GetContactCount(); i++) {
 		addContact(
@@ -627,7 +624,11 @@ document.getElementById("btn_enter").onclick = function() {
 			ae.Account_Browse(0, function(successBrowse) {
 				if (successBrowse) {
 					txtSkey.value = "";
-					reloadInterface();
+
+					reloadAccount();
+					document.getElementById("div_begin").hidden = true;
+					document.getElementById("div_main").style.display = "grid";
+
 					document.getElementById("btn_updt").click();
 				} else {
 					console.log("Failed to enter");
