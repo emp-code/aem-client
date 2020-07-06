@@ -405,7 +405,7 @@ document.getElementById("btn_dele").onclick = function() {
 
 		document.getElementById("write_recv").focus();
 	}
-}
+};
 
 document.getElementById("btn_updt").onclick = function() {
 	const btn = this;
