@@ -377,6 +377,24 @@
 								<option value="UY">South America/Uruguay</option>
 								<option value="VE">South America/Venezuela</option>
 							</select>
+
+							<p>Forbidden domains</p>
+							<select id="gatekeeper_domain" multiple="multiple" autocomplete="off" size="8">
+							</select>
+							<div class="flex">
+								<input id="txt_gkdomain" type="text" pattern="[0-9a-z.-]{1,100}\.[a-z.]{2,50}">
+								<button type="button" autocomplete="off" id="btn_gkdomain_add">Add</button>
+								<button type="button" autocomplete="off" id="btn_gkdomain_del">Del</button>
+							</div>
+
+							<p>Forbidden senders</p>
+							<select id="gatekeeper_sender" multiple="multiple" autocomplete="off" size="8">
+							</select>
+							<div class="flex">
+								<input id="txt_gkdomain" type="text" pattern="[0-9a-z.-]{1,100}\.[a-z.]{2,50}">
+								<button type="button" autocomplete="off" id="btn_gkdomain_add">Add</button>
+								<button type="button" autocomplete="off" id="btn_gkdomain_del">Del</button>
+							</div>
 						</div>
 						<div hidden>
 							TODO: Accounts

@@ -275,11 +275,17 @@ table, td {
 }
 
 #div_gk > p {
-	margin: 0;
 	text-align: center;
 	opacity: 0.5;
 	font-weight: bold;
 }
+
+#div_gk > p:first-of-type {margin: 0;}
+#div_gk > p:not(:first-of-type) {margin: 1em 0 0 0;}
+
+#div_gk select {width: 100%;}
+#div_gk .flex {display: flex;}
+#div_gk .flex input {flex: 1;}
 
 #div_notes table {
 	border-bottom: 1px solid #333;
