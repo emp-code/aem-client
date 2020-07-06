@@ -11,8 +11,27 @@ const ae = new AllEars(function(ok) {
 	}
 });
 
-let tab="inbox";
-let page=0;
+function TabState(cur, max, btnDele, btnUpdt) {
+	this.cur = cur;
+	this.max = max;
+	this.btnDele = btnDele;
+	this.btnUpdt = btnUpdt;
+}
+
+const tabs = [
+	new TabState(0, 0, false, true), // Inbox
+	new TabState(0, 0, false, true), // Outbx
+	new TabState(0, 2, true, false), // Write
+	new TabState(0, 0, false, true), // Notes
+	new TabState(0, 0, false, false) // Admin
+];
+
+let tab = 0;
+const TAB_INBOX = 0;
+const TAB_OUTBX = 1;
+const TAB_WRITE = 2;
+const TAB_NOTES = 3;
+const TAB_ADMIN = 4;
 
 // Helper functions
 function getCountryName(countryCode) {
@@ -128,7 +147,7 @@ function displayMsg(isInt, num) {
 // Interface
 function addMsg(isInt, i) {
 	const inbox = document.getElementById("tbl_inbox");
-	const sent = document.getElementById("tbl_sent");
+	const sent = document.getElementById("tbl_outbx");
 
 	const isSent = false; //TODO
 	const table = isSent ? sent : inbox;
@@ -201,17 +220,19 @@ function getRowsPerPage() {
 	const cell = row.insertCell(-1);
 	cell.textContent = "0";
 
-	const rowsPerPage = Math.floor(getComputedStyle(document.querySelector("#div_inbox")).height.replace("px", "") / getComputedStyle(document.querySelector("#tbl_inbox > tbody > tr:first-child")).height.replace("px", "")) - 1; // -1 allows space for 'load more'
+	const rowsPerPage = Math.floor(getComputedStyle(document.getElementById("div_inbox")).height.replace("px", "") / getComputedStyle(document.querySelector("#tbl_inbox > tbody > tr:first-child")).height.replace("px", "")) - 1; // -1 allows space for 'load more'
 	tbl.innerHTML = "";
 	return rowsPerPage;
 }
 
 function addMessages() {
 	const rowsPerPage = getRowsPerPage();
-	let skipMsgs = rowsPerPage * page;
+	let skipMsgs = rowsPerPage * tabs[TAB_INBOX].cur;
 
 	const maxExt = ae.GetExtMsgCount();
 	const maxInt = ae.GetIntMsgCount();
+
+	tabs[TAB_INBOX].max = Math.floor((maxExt + maxInt) / rowsPerPage);
 
 	let numExt = 0;
 	let numInt = 0;
@@ -245,13 +266,11 @@ function addMessages() {
 
 				if (successBrowse) {
 					addMessages();
+					if (tabs[tab].cur < tabs[tab].max) document.getElementById("btn_rght").disabled = false;
 				}
 			});
 		};
 	}
-
-	document.getElementById("btn_left").disabled = (page === 0);
-	document.getElementById("btn_rght").disabled = ((rowsPerPage * page) + numAdd >= maxExt + maxInt);
 }
 
 function updateAddressCounts() {
@@ -378,7 +397,7 @@ document.getElementById("btn_updt").onclick = function() {
 	btn.disabled = true;
 	btn.blur();
 
-	if (tab === "inbox") {
+	if (tab === TAB_INBOX) {
 		document.getElementById("tbl_inbox").style.opacity = 0.5;
 
 		ae.Message_Browse(true, function(successBrowse) {
@@ -440,109 +459,82 @@ document.getElementById("btn_savecontacts").onclick = function() {
 	});
 };
 
-// Tabs
-function setupButtons() {
-	switch(tab) {
-		case "inbox":
-		case "snbox":
-			document.getElementById("btn_dele").disabled = false;
-			document.getElementById("btn_left").disabled = false; // depends
-			document.getElementById("btn_cent").disabled = true;
-			document.getElementById("btn_rght").disabled = false; // depends
-			document.getElementById("btn_updt").disabled = false;
+function updateTab() {
+	switch (tab) {
+		case TAB_INBOX:
+			addMessages();
 		break;
-		case "write":
-			document.getElementById("btn_dele").disabled = false; // depends
-			document.getElementById("btn_left").disabled = false; // depends
-			document.getElementById("btn_cent").disabled = true;
-			document.getElementById("btn_rght").disabled = false;
-			document.getElementById("btn_updt").disabled = true;
-		break;
-		case "notes":
-			document.getElementById("btn_dele").disabled = true;
-			document.getElementById("btn_left").disabled = false; // depends
-			document.getElementById("btn_cent").disabled = true;
-			document.getElementById("btn_rght").disabled = false; // depends
-			document.getElementById("btn_updt").disabled = true; // depends
-		break;
-		case "prefs":
-			document.getElementById("btn_dele").disabled = true;
-			document.getElementById("btn_left").disabled = false; // depends
-			document.getElementById("btn_cent").disabled = true;
-			document.getElementById("btn_rght").disabled = false; // depends
-			document.getElementById("btn_updt").disabled = true; // depends
+
+		case TAB_WRITE:
+			switch (tabs[tab].cur) {
+				case 0:
+					document.getElementById("div_write_1").hidden = false;
+					document.getElementById("div_write_2").hidden = true;
+					document.getElementById("write_body").focus();
+				break;
+
+				case 1:
+					ae.Address_Lookup(document.getElementById("write_recv").value, function(pk) {
+						if (pk) {
+							document.getElementById("div_write_1").hidden = true;
+							document.getElementById("div_write_2").hidden = false;
+
+							document.getElementById("write2_from").textContent = document.getElementById("write_from").value + "@" + ae.GetDomainEml();
+							document.getElementById("write2_recv").textContent = document.getElementById("write_recv").value;
+							document.getElementById("write2_pkey").textContent = sodium.to_hex(pk);
+
+							document.getElementById("write2_subj").textContent = document.getElementById("write_subj").value;
+							document.getElementById("write2_rply").textContent = document.getElementById("write_rply").textContent;
+							document.getElementById("write2_body").textContent = document.getElementById("write_body").value;
+						} else {
+							console.log("Failed lookup");
+						}
+					});
+				break;
+
+				case 2:
+					const topk = (document.getElementById("write2_recv").textContent.indexOf("@") > 0) ? null : sodium.from_hex(document.getElementById("write2_pkey").textContent);
+					ae.Message_Create(document.getElementById("write_subj").value, document.getElementById("write_body").value, document.getElementById("write_from").value, document.getElementById("write_recv").value, document.getElementById("write_rply").textContent, topk, function(success) {
+						if (success) {
+							console.log("Sent ok");
+						} else {
+							console.log("Failed sending");
+						}
+					});
+				break;
+			}
 		break;
 	}
 }
 
 document.getElementById("btn_left").onclick = function() {
-	switch (tab) {
-		case "inbox":
-			page--;
-			addMessages();
-		break;
-		case "write":
-			document.getElementById("div_write_1").hidden = false;
-			document.getElementById("div_write_2").hidden = true;
-			document.getElementById("write_body").focus();
-		break;
-	}
-
+	tabs[tab].cur--;
+	if (tabs[tab].cur === 0) this.disabled = true;
+	if (tabs[tab].cur < tabs[tab].max) document.getElementById("btn_rght").disabled = false;
+	updateTab();
 	this.blur();
 };
 
 document.getElementById("btn_rght").onclick = function() {
-	switch (tab) {
-		case "inbox":
-			page++;
-			addMessages();
-		break;
-		case "write":
-			if (!document.getElementById("div_write_1").hidden) {
-				ae.Address_Lookup(document.getElementById("write_recv").value, function(pk) {
-					if (pk) {
-						document.getElementById("div_write_1").hidden = true;
-						document.getElementById("div_write_2").hidden = false;
-
-						document.getElementById("write2_from").textContent = document.getElementById("write_from").value + "@" + ae.GetDomainEml();
-						document.getElementById("write2_recv").textContent = document.getElementById("write_recv").value;
-						document.getElementById("write2_pkey").textContent = sodium.to_hex(pk);
-
-						document.getElementById("write2_subj").textContent = document.getElementById("write_subj").value;
-						document.getElementById("write2_rply").textContent = document.getElementById("write_rply").textContent;
-						document.getElementById("write2_body").textContent = document.getElementById("write_body").value;
-					} else {
-						console.log("Failed lookup");
-					}
-				});
-			} else if (!document.getElementById("div_write_2").hidden) {
-				const topk = (document.getElementById("write2_recv").textContent.indexOf("@") > 0) ? null : sodium.from_hex(document.getElementById("write2_pkey").textContent);
-				ae.Message_Create(document.getElementById("write_subj").value, document.getElementById("write_body").value, document.getElementById("write_from").value, document.getElementById("write_recv").value, document.getElementById("write_rply").textContent, topk, function(success) {
-					if (success) {
-						console.log("Sent ok");
-					} else {
-						console.log("Failed sending");
-					}
-				});
-			}
-		break;
-	}
-
+	tabs[tab].cur++;
+	if (tabs[tab].cur === tabs[tab].max) this.disabled = true;
+	document.getElementById("btn_left").disabled = false;
+	updateTab();
 	this.blur();
 };
 
-for (const btn1 of document.getElementById("main1").getElementsByClassName("top")[0].getElementsByTagName("button")) {
-	btn1.onclick = function() {
-		for (const btn2 of document.getElementById("main1").getElementsByClassName("top")[0].getElementsByTagName("button")) {
-			const isMatch = (btn1 === btn2);
-			btn2.disabled = isMatch;
-			document.getElementById("div_" + btn2.id.slice(4)).hidden = !isMatch;
+const buttons = document.querySelector("#main1 > .top").getElementsByTagName("button");
+for (let i = 0; i < buttons.length; i++) {
+	buttons[i].onclick = function() {
+		tab = i;
 
-			if (isMatch) {
-				tab = btn2.id.slice(4);
-				setupButtons();
-			}
+		for (let j = 0; j < buttons.length; j++) {
+			document.querySelector("#main1 > .mid").children[j].hidden = (tab !== j);
+			buttons[j].disabled = (tab === j);
 		}
+
+		document.getElementById("btn_left").disabled = (tabs[tab].cur === 0);
+		document.getElementById("btn_rght").disabled = (tabs[tab].cur === tabs[tab].max);
 	};
 }
 
