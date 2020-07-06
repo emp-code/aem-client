@@ -560,6 +560,8 @@ for (let i = 0; i < buttons.length; i++) {
 
 		document.getElementById("btn_left").disabled = (tabs[tab].cur === 0);
 		document.getElementById("btn_rght").disabled = (tabs[tab].cur === tabs[tab].max);
+		document.getElementById("btn_dele").disabled = !tabs[tab].btnDele;
+		document.getElementById("btn_updt").disabled = !tabs[tab].btnUpdt;
 	};
 }
 
