@@ -218,14 +218,14 @@ function addMessages() {
 	let numAdd = 0;
 
 	while (numAdd < rowsPerPage) {
-		const tsInt = (numInt < maxInt) ? ae.GetIntMsgTime(numInt) : 0;
-		const tsExt = (numExt < maxExt) ? ae.GetExtMsgTime(numExt) : 0;
-		if (tsInt === 0 && tsExt === 0) break;
+		const tsInt = (numInt < maxInt) ? ae.GetIntMsgTime(numInt) : -1;
+		const tsExt = (numExt < maxExt) ? ae.GetExtMsgTime(numExt) : -1;
+		if (tsInt === -1 && tsExt === -1) break;
 
-		if (tsInt !== 0 && (tsExt === 0 || tsInt > tsExt)) {
+		if (tsInt !== -1 && (tsExt === -1 || tsInt > tsExt)) {
 			if (skipMsgs > 0) skipMsgs--; else {addMsg(true, numInt); numAdd++;}
 			numInt++;
-		} else if (tsExt !== 0) {
+		} else if (tsExt !== -1) {
 			if (skipMsgs > 0) skipMsgs--; else {addMsg(false, numExt); numAdd++;}
 			numExt++;
 		}
