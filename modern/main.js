@@ -22,8 +22,8 @@ const tabs = [
 	new TabState(0, 0, false, true), // Inbox
 	new TabState(0, 0, false, true), // Outbx
 	new TabState(0, 2, true, false), // Write
-	new TabState(0, 0, false, true), // Notes
-	new TabState(0, 0, false, false) // Admin
+	new TabState(0, 0, false, false), // Notes
+	new TabState(0, 0, false, true) // Admin
 ];
 
 let tab = 0;
