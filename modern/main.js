@@ -527,7 +527,6 @@ function updateTab() {
 		case TAB_ADMIN:
 			for (let i = 0; i < 3; i++) {
 				document.getElementById("div_admin").children[i].hidden = (i !== tabs[tab].cur);
-				if (i === 1) document.getElementById("div_admin").children[i].style.width = getComputedStyle(document.getElementById("gatekeeper_country")).width;
 			}
 	}
 

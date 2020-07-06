@@ -269,6 +269,11 @@ table, td {
 	text-align: center;
 }
 
+#div_gk {
+	max-width: max-content;
+	margin: 0 auto;
+}
+
 #div_notes table {
 	border-bottom: 1px solid #333;
 	padding-bottom: 0.25em;
