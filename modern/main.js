@@ -520,6 +520,9 @@ function updateTab() {
 			}
 		break;
 	}
+
+	document.getElementById("btn_left").disabled = (tabs[tab].cur === 0);
+	document.getElementById("btn_rght").disabled = (tabs[tab].cur === tabs[tab].max);
 }
 
 document.getElementById("btn_left").onclick = function() {
