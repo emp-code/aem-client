@@ -279,6 +279,20 @@ function updateAddressCounts() {
 	document.getElementById("limit_total").textContent = ((ae.GetAddressCountNormal() + ae.GetAddressCountShield()) + "/" + ae.GetAddrPerUser()).padStart(5);
 }
 
+function addAccountToTable(i) {
+	const tblAccs = document.getElementById("tbd_accs");
+	const row = tblAccs.insertRow(-1);
+	let cell;
+	cell = row.insertCell(-1); cell.textContent = ae.Admin_GetUserPkHex(i);
+	cell = row.insertCell(-1); cell.textContent = ae.Admin_GetUserSpace(i);
+	cell = row.insertCell(-1); cell.textContent = ae.Admin_GetUserNAddr(i);
+	cell = row.insertCell(-1); cell.textContent = ae.Admin_GetUserSAddr(i);
+	cell = row.insertCell(-1); cell.textContent = ae.Admin_GetUserLevel(i);
+	cell = row.insertCell(-1); cell.innerHTML = "<button type=\"button\" autocomplete=\"off\">+</button>";
+	cell = row.insertCell(-1); cell.innerHTML = "<button type=\"button\" autocomplete=\"off\">&minus;</button>";
+	cell = row.insertCell(-1); cell.innerHTML = "<button type=\"button\" autocomplete=\"off\">X</button>";
+}
+
 function reloadAccount() {
 	// Limits
 	const tblLimits = document.getElementById("tbl_limits");
@@ -292,7 +306,7 @@ function reloadAccount() {
 	const tblAccs = document.getElementById("tbd_accs");
 
 	// All: Our account
-	let row = tblAccs.insertRow(-1);
+	const row = tblAccs.insertRow(-1);
 	let cell;
 	cell = row.insertCell(-1); cell.textContent = ae.GetUserPkHex();
 	cell = row.insertCell(-1); cell.textContent = Math.round(ae.GetTotalMsgKilos() / 1024);
@@ -306,15 +320,7 @@ function reloadAccount() {
 	// Admin: Other accounts
 	if (ae.IsUserAdmin()) {
 		for (let i = 0; i < ae.Admin_GetUserCount(); i++) {
-			row = tblAccs.insertRow(-1);
-			cell = row.insertCell(-1); cell.textContent = ae.Admin_GetUserPkHex(i);
-			cell = row.insertCell(-1); cell.textContent = ae.Admin_GetUserSpace(i);
-			cell = row.insertCell(-1); cell.textContent = ae.Admin_GetUserNAddr(i);
-			cell = row.insertCell(-1); cell.textContent = ae.Admin_GetUserSAddr(i);
-			cell = row.insertCell(-1); cell.textContent = ae.Admin_GetUserLevel(i);
-			cell = row.insertCell(-1); cell.innerHTML = "<button type=\"button\" autocomplete=\"off\">+</button>";
-			cell = row.insertCell(-1); cell.innerHTML = "<button type=\"button\" autocomplete=\"off\">&minus;</button>";
-			cell = row.insertCell(-1); cell.innerHTML = "<button type=\"button\" autocomplete=\"off\">X</button>";
+			addAccountToTable(i);
 		}
 	}
 
@@ -649,6 +655,22 @@ document.getElementById("btn_address_create_shield").onclick = function() {
 
 	addressCreate("SHIELD");
 };
+
+document.getElementById("btn_reg").onclick = function() {
+	const btn = document.getElementById("btn_reg");
+	const txt = document.getElementById("txt_reg");
+	if (!txt.reportValidity()) return;
+	btn.disabled = true;
+
+	ae.Account_Create(txt.value, function(success) {
+		if (success) {
+			addAccountToTable(ae.Admin_GetUserCount() - 1);
+			txt.value = "";
+		}
+
+		btn.disabled = false;
+	});
+}
 
 document.getElementById("chk_downme").onclick = function() {document.getElementById("btn_downme").disabled = !this.checked;};
 document.getElementById("chk_killme").onclick = function() {document.getElementById("btn_killme").disabled = !this.checked;};
