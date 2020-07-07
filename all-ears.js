@@ -649,7 +649,7 @@ function AllEars(readyCallback) {
 			}
 
 			// Admin Data
-			if (_userLevel == _AEM_USER_MAXLEVEL) {
+			if (_userLevel === _AEM_USER_MAXLEVEL) {
 				const userCount = new Uint32Array(browseData.slice(offset, offset + 4).buffer)[0];
 				offset += 4;
 
