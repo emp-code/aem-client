@@ -472,6 +472,7 @@ function AllEars(readyCallback) {
 	this.GetAddressCountShield = function() {return _GetAddressCount(true);};
 
 	this.IsUserAdmin = function() {return (_userLevel === _AEM_USER_MAXLEVEL);};
+	this.GetUserPkHex = function() {return sodium.to_hex(_userKeyPublic);};
 	this.GetUserLevel = function() {return _userLevel;};
 	this.GetStorageLimit = function(lvl) {return _maxStorage[lvl];};
 	this.GetAddressLimitNormal = function(lvl) {return _maxAddressNormal[lvl];};
