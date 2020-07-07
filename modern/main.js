@@ -318,6 +318,9 @@ function reloadAccount() {
 		}
 	}
 
+	document.getElementById("txt_reg").disabled = !ae.IsUserAdmin();
+	document.getElementById("btn_reg").disabled = !ae.IsUserAdmin();
+
 	// Contacts
 	for (let i = 0; i < ae.GetContactCount(); i++) {
 		addContact(
