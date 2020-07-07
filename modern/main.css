@@ -369,7 +369,7 @@ table, td {
 	min-width: 75%;
 }
 
-#div_write_1 select, #write_recv {
+#div_write_1 select, #write_recv, #txt_reg {
 	font-family: monospace, monospace;
 }
 
