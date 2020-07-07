@@ -280,7 +280,7 @@ function updateAddressCounts() {
 }
 
 function reloadAccount() {
-	// Admin stuff
+	// Limits
 	const tblLimits = document.getElementById("tbl_limits");
 	for (let i = 0; i < 4; i++) {
 		tblLimits.rows[i].cells[1].children[0].value = ae.GetStorageLimit(i) + 1;
@@ -288,11 +288,35 @@ function reloadAccount() {
 		tblLimits.rows[i].cells[3].children[0].value = ae.GetAddressLimitShield(i);
 	}
 
-	const tblMe = document.getElementById("tbd_myacc");
-	tblMe.rows[0].cells[0].textContent = ae.GetUserLevel();
-	tblMe.rows[0].cells[1].textContent = Math.round(ae.GetTotalMsgKilos() / 1024) +  "/" + (ae.GetStorageLimit(ae.GetUserLevel()) + 1);
-	tblMe.rows[0].cells[2].textContent = ae.GetAddressCountNormal() + "/" + ae.GetAddressLimitNormal(ae.GetUserLevel());
-	tblMe.rows[0].cells[3].textContent = ae.GetAddressCountShield() + "/" + ae.GetAddressLimitShield(ae.GetUserLevel());
+	// Accounts
+	const tblAccs = document.getElementById("tbd_accs");
+
+	// All: Our account
+	let row = tblAccs.insertRow(-1);
+	let cell;
+	cell = row.insertCell(-1); cell.textContent = ae.GetUserPkHex();
+	cell = row.insertCell(-1); cell.textContent = Math.round(ae.GetTotalMsgKilos() / 1024);
+	cell = row.insertCell(-1); cell.textContent = ae.GetAddressCountNormal();
+	cell = row.insertCell(-1); cell.textContent = ae.GetAddressCountShield();
+	cell = row.insertCell(-1); cell.textContent = ae.GetUserLevel();
+	cell = row.insertCell(-1); cell.innerHTML = "<button type=\"button\" autocomplete=\"off\" disabled=\"disabled\">+</button>";
+	cell = row.insertCell(-1); cell.innerHTML = "<button id=\"btn_downme\" type=\"button\" autocomplete=\"off\" disabled=\"disabled\">&minus;</button>";
+	cell = row.insertCell(-1); cell.innerHTML = "<button id=\"btn_killme\" type=\"button\" autocomplete=\"off\" disabled=\"disabled\">X</button>";
+
+	// Admin: Other accounts
+	if (ae.IsUserAdmin()) {
+		for (let i = 0; i < ae.Admin_GetUserCount(); i++) {
+			row = tblAccs.insertRow(-1);
+			cell = row.insertCell(-1); cell.textContent = ae.Admin_GetUserPkHex(i);
+			cell = row.insertCell(-1); cell.textContent = ae.Admin_GetUserSpace(i);
+			cell = row.insertCell(-1); cell.textContent = ae.Admin_GetUserNAddr(i);
+			cell = row.insertCell(-1); cell.textContent = ae.Admin_GetUserSAddr(i);
+			cell = row.insertCell(-1); cell.textContent = ae.Admin_GetUserLevel(i);
+			cell = row.insertCell(-1); cell.innerHTML = "<button type=\"button\" autocomplete=\"off\">+</button>";
+			cell = row.insertCell(-1); cell.innerHTML = "<button type=\"button\" autocomplete=\"off\">&minus;</button>";
+			cell = row.insertCell(-1); cell.innerHTML = "<button type=\"button\" autocomplete=\"off\">X</button>";
+		}
+	}
 
 	// Contacts
 	for (let i = 0; i < ae.GetContactCount(); i++) {
