@@ -300,6 +300,19 @@ table, td {
 	font-family: monospace, monospace;
 }
 
+#tbd_accs td:nth-child(2),
+#tbd_accs td:nth-child(3),
+#tbd_accs td:nth-child(4) {
+	text-align: right;
+}
+
+#tbd_accs td:nth-child(5),
+#tbd_accs td:nth-child(6),
+#tbd_accs td:nth-child(7),
+#tbd_accs td:nth-child(8) {
+	text-align: center;
+}
+
 #div_acc > p {
 	text-align: center;
 }
