@@ -341,6 +341,12 @@ table, td {
 	flex: 1 1 auto;
 }
 
+.grid0 {
+	display: grid;
+	grid-template-columns: auto auto auto;
+	justify-content: space-between;
+}
+
 #main1 .mid input, #main1 .mid textarea, #main1 .mid select, #main1 .mid button {
 	background: #000;
 	border: 1px solid #555;
