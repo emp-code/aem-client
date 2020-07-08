@@ -670,7 +670,7 @@ document.getElementById("btn_reg").onclick = function() {
 
 		btn.disabled = false;
 	});
-}
+};
 
 document.getElementById("chk_downme").onclick = function() {document.getElementById("btn_downme").disabled = !this.checked;};
 document.getElementById("chk_killme").onclick = function() {document.getElementById("btn_killme").disabled = !this.checked;};
