@@ -69,23 +69,60 @@
 					</div>
 
 					<div id="div_notes" hidden>
-						<table>
-							<thead>
-								<tr>
-									<th>Email</th>
-									<th>Name</th>
-									<th>Notes</th>
-									<th>Del</th>
-								</tr>
-							</thead>
-							<tbody id="tbl_ctact">
-							</tbody>
-						</table>
+						<div>
+							<table>
+								<thead>
+									<tr>
+										<th>Email</th>
+										<th>Name</th>
+										<th>Notes</th>
+										<th>Del</th>
+									</tr>
+								</thead>
+								<tbody id="tbl_ctact">
+								</tbody>
+							</table>
 
-						<p class="center">
-							<button type="button" autocomplete="off" id="btn_newcontact">New</button>
-							<button type="button" autocomplete="off" id="btn_savecontacts">Save</button>
-						</p>
+							<p class="center">
+								<button type="button" autocomplete="off" id="btn_newcontact">New</button>
+								<button type="button" autocomplete="off" id="btn_savecontacts">Save</button>
+							</p>
+						</div>
+
+						<div id="div_notepad" hidden>
+							<p class="flex1"><textarea id="txt_notepad" placeholder="Notepad"></textarea></p>
+						</div>
+
+						<div hidden>
+							<table>
+								<thead>
+									<tr>
+										<th>Title</th>
+										<th>Format</th>
+										<th>Size</th>
+										<th>Del</th>
+									</tr>
+								</thead>
+								<tbody id="tbl_texts">
+								</tbody>
+							</table>
+						</div>
+
+						<div hidden>
+							<table>
+								<thead>
+									<tr>
+										<th>Name</th>
+										<th>Type</th>
+										<th>Size</th>
+										<th>Attach</th>
+										<th>Del</th>
+									</tr>
+								</thead>
+								<tbody id="tbl_files">
+								</tbody>
+							</table>
+						</div>
 					</div>
 
 					<div id="div_admin" hidden>

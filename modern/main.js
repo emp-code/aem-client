@@ -22,7 +22,7 @@ const tabs = [
 	new TabState(0, 0, false, true), // Inbox
 	new TabState(0, 0, false, true), // Outbx
 	new TabState(0, 2, true, false), // Write
-	new TabState(0, 0, false, false), // Notes
+	new TabState(0, 3, false, false), // Notes
 	new TabState(0, 3, false, true) // Admin
 ];
 
@@ -567,6 +567,12 @@ function updateTab() {
 						}
 					);
 				break;
+			}
+		break;
+
+		case TAB_NOTES:
+			for (let i = 0; i <= tabs[tab].max; i++) {
+				document.getElementById("div_notes").children[i].hidden = (i !== tabs[tab].cur);
 			}
 		break;
 

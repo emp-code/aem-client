@@ -322,7 +322,7 @@ table, td {
 	padding-bottom: 0.25em;
 }
 
-#div_write, #div_write_1 {
+#div_write, #div_write_1, #div_notepad {
 	display: flex;
 	flex-flow: column;
 	padding: 0 1em 0 1em;
@@ -373,12 +373,16 @@ table, td {
 	font-family: monospace, monospace;
 }
 
-#write_body {
+#write_body, #txt_notepad {
 	width: 100%;
 	height: 100%;
 	opacity: 0.55;
 	font-family: sans-serif;
 	resize: none;
+}
+
+#div_notes, #div_notes > div {
+	height: 100%;
 }
 
 hr {
