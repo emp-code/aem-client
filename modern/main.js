@@ -273,6 +273,20 @@ function addMessages() {
 	}
 }
 
+function addNotes() {
+	const tbl = document.getElementById("tbd_texts");
+
+	for (let i = 0; i < ae.GetNoteCount(); i++) {
+		const row = tbl.insertRow(-1);
+		let cell;
+		cell = row.insertCell(-1); cell.textContent = new Date(ae.GetNoteTime(i) * 1000).toISOString().slice(0, 10);
+		cell = row.insertCell(-1); cell.textContent = ae.GetNoteTitle(i);
+		cell = row.insertCell(-1); cell.textContent = ""; // Format
+		cell = row.insertCell(-1); cell.textContent = ""; // Size
+		cell = row.insertCell(-1); cell.innerHTML = "<button type=\"button\">X</button>";
+	}
+}
+
 function updateAddressCounts() {
 	document.getElementById("limit_normal").textContent = (ae.GetAddressCountNormal() + "/" + ae.GetAddressLimitNormal(ae.GetUserLevel())).padStart(ae.GetAddressLimitNormal(ae.GetUserLevel()) > 9 ? 5 : 1);
 	document.getElementById("limit_shield").textContent = (ae.GetAddressCountShield() + "/" + ae.GetAddressLimitShield(ae.GetUserLevel())).padStart(ae.GetAddressLimitShield(ae.GetUserLevel()) > 9 ? 5 : 1);
@@ -463,6 +477,7 @@ document.getElementById("btn_updt").onclick = function() {
 
 			if (successBrowse) {
 				addMessages();
+				addNotes();
 				btn.disabled = false;
 			} else {
 				console.log("Failed to refresh");
@@ -680,6 +695,21 @@ document.getElementById("btn_reg").onclick = function() {
 
 document.getElementById("chk_downme").onclick = function() {document.getElementById("btn_downme").disabled = !this.checked;};
 document.getElementById("chk_killme").onclick = function() {document.getElementById("btn_killme").disabled = !this.checked;};
+
+document.getElementById("btn_notepad_savesep").onclick = function() {
+	const np = document.getElementById("txt_notepad");
+	np.disabled = true;
+
+	ae.Message_StoreT("title", np.value, false, function(success) {
+		if (success) {
+			np.value = "";
+			addNotes();
+		}
+
+		console.log("Failed to add text");
+		np.disabled = false;
+	});
+};
 
 document.getElementById("txt_skey").onkeyup = function(event) {
 	if (event.key === "Enter") {

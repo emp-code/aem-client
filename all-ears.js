@@ -116,7 +116,7 @@ function AllEars(readyCallback) {
 		this.body = body;
 	}
 
-	function _NewNote(id, ts, title, body) {
+	function _NewTextNote(id, ts, title, body) {
 		this.id = id;
 		this.timestamp = ts;
 		this.title = title;
@@ -807,60 +807,6 @@ function AllEars(readyCallback) {
 		_FetchEncrypted("address/update", data, function(fetchOk) {callback(fetchOk);});
 	};
 
-	// Creates Text/File Note in a ComboBox, and asks the server to store it. Title + Data = 8138 bytes max. Fully private.
-	this.Message_Assign = function(isFile, title, body, callback) {
-		/* ComboBox
-			[4B uint32] Timestamp
-			[2B uint16] Info
-				32768-2048: Title/Filename length (5 bits, 1-32)
-				1024: Type (On=File, Off=Text)
-				512-1: Amount of padding (10 bits, 0-1023)
-			[1-32B uint8] Title/Filename
-			[-- uint8] Message data
-		*/
-
-		if (typeof(isFile) !== "boolean" || typeof(title) !== "string" || body.constructor !== Uint8Array || title.length < 1 || body.length < 1) {callback(false); return;}
-
-		const u8title = sodium.from_string(title);
-
-		const lenData = 6 + u8title.length + body.length + sodium.crypto_box_SEALBYTES;
-		const lenPad = (lenData % 1024 === 0) ? 0 : 1024 - (lenData % 1024);
-
-		if (lenData + lenPad > _AEM_BYTES_POST) {callback(false); return;}
-
-		let info = lenPad | ((title.length - 1) << 11);
-		if (isFile) info += 1024;
-
-		const u16info = new Uint16Array([info]);
-		const u8info = new Uint8Array(u16info.buffer);
-
-		const u32time = new Uint32Array([Date.now() / 1000]);
-		const u8time = new Uint8Array(u32time.buffer);
-
-		const u8data = new Uint8Array(lenData + lenPad - sodium.crypto_box_SEALBYTES);
-		u8data.set(u8time);
-		u8data.set(u8info, 4);
-		u8data.set(u8title, 6);
-		u8data.set(body, 6 + u8title.length);
-
-		const sealBox = sodium.crypto_box_seal(u8data, _userKeyPublic);
-
-		// Message ID: Every 64th byte of first kilo of encrypted data
-		const msgId = new Uint8Array(16);
-		for (let i = 0; i < 16; i++) msgId[i] = sealBox[i * 64];
-
-		_FetchEncrypted("message/assign", sealBox, function(fetchOk) {
-			if (!fetchOk) {callback(false); return;}
-
-			if (isFile)
-				_fileNote.push(new _NewNote(msgId, Date.now() / 1000, title, body));
-			else
-				_textNote.push(new _NewNote(msgId, Date.now() / 1000, title, sodium.to_string(body)));
-
-			callback(true);
-		});
-	};
-
 	this.Message_Browse = function(newest, callback) {
 		if (typeof(newest) !== "boolean") {callback(false); return;}
 
@@ -991,9 +937,18 @@ function AllEars(readyCallback) {
 						}
 					break;}
 
-					case 32: // Text
-						// TODO
-					break;
+					case 32: { // Text
+//						if ((msgData[0] & 128) === 128) {
+							// TODO: Brotli decompress
+//						}
+
+						// (msgData[0] & 64) --> format
+
+						const msgTitle = sodium.to_string(msgData.slice(6, 6 + (msgData[6] & 63)));
+//						const msgBody = sodium.to_string(msgData.slice(6 + (msgData[6] & 63)));
+
+						_textNote.push(new _NewTextNote(msgId, msgTs, msgTitle, msgBody));
+					break;}
 
 					case 48: // File
 						// TODO
@@ -1107,6 +1062,38 @@ function AllEars(readyCallback) {
 				}
 			}
 
+			callback(true);
+		});
+	};
+
+
+	this.Message_StoreF = function(callback) {
+		// TODO
+		callback(false);
+	}
+
+	this.Message_StoreT = function(title, body, format, callback) {
+		if (typeof(title) !== "string" || typeof(body) !== "string" || title.length < 1 || body.length < 1) {callback(false); return;}
+
+		const u8title = sodium.from_string(title);
+		if (u8title.length > 64) {callback(false); return;}
+		const u8body = sodium.from_string(body);
+
+		const lenData = 1 + u8title.length + u8body.length;
+		if (lenData > _AEM_BYTES_POST) {callback(false); return;}
+
+		const u8data = new Uint8Array(lenData);
+		u8data[0] = u8title.length + 1;
+		if (format) u8data[0] += 64;
+		// 128 set by server
+
+		u8data.set(u8title, 1);
+		u8data.set(u8body, 1 + u8title.length);
+
+		_FetchEncrypted("message/storet", u8data, function(fetchOk) {
+			if (!fetchOk) {callback(false); return;}
+
+			_textNote.push(new _NewTextNote(null, Date.now() / 1000, title, body)); //TODO: msgId
 			callback(true);
 		});
 	};
