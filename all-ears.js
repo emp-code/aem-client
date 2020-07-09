@@ -860,35 +860,37 @@ function AllEars(readyCallback) {
 
 				const msgTs = new Uint32Array(msgData.slice(2, 6).buffer)[0];
 
+				msgData = msgData.slice(6, msgData.length - padAmount - sodium.crypto_sign_BYTES);
+
 				switch (msgInfo & 48) {
 					case 0: { // ExtMsg
-						const msgIp = msgData.slice(6, 10);
-						const msgCs = new Uint16Array(msgData.slice(10, 12).buffer)[0];
-						const msgTlsVer = msgData[12] >> 5;
-						const msgAttach = msgData[12] & 31;
+						const msgIp = msgData.slice(0, 4);
+						const msgCs = new Uint16Array(msgData.slice(4, 6).buffer)[0];
+						const msgTlsVer = msgData[6] >> 5;
+						const msgAttach = msgData[6] & 31;
 
-						const msgEsmtp = (msgData[13] & 128) > 0;
-						const msgQuitR = (msgData[13] & 64) > 0;
-						const msgProtV = (msgData[13] & 32) > 0;
-						const msgInval = (msgData[14] & 128) > 0;
-						const msgRares = (msgData[14] & 64) > 0;
-						// [14] & 32 unused
+						const msgEsmtp = (msgData[7] & 128) > 0;
+						const msgQuitR = (msgData[7] & 64) > 0;
+						const msgProtV = (msgData[7] & 32) > 0;
+						const msgInval = (msgData[8] & 128) > 0;
+						const msgRares = (msgData[8] & 64) > 0;
+						// [8] & 32 unused
 
-						const msgCc = ((msgData[13] & 31) > 26 || (msgData[14] & 31) > 26) ? "??" : String.fromCharCode("A".charCodeAt(0) + (msgData[13] & 31)) + String.fromCharCode("A".charCodeAt(0) + (msgData[14] & 31));
+						const msgCc = ((msgData[7] & 31) > 26 || (msgData[8] & 31) > 26) ? "??" : String.fromCharCode("A".charCodeAt(0) + (msgData[7] & 31)) + String.fromCharCode("A".charCodeAt(0) + (msgData[8] & 31));
 
-						// Infobyte [15]
+						// Infobyte [9]
 
-						const msgShield = (msgData[16] & 128) > 0;
-						// & 128 unused: [17], [18], [19]
+						const msgShield = (msgData[10] & 128) > 0;
+						// & 128 unused: [11], [12], [13]
 
-						const lenGreet = msgData[16] & 127;
-						const lenRdns = msgData[17] & 127;
-						const lenCharset = msgData[18] & 127;
-						const lenEnvFrom = msgData[19] & 127;
+						const lenGreet = msgData[10] & 127;
+						const lenRdns = msgData[11] & 127;
+						const lenCharset = msgData[12] & 127;
+						const lenEnvFrom = msgData[13] & 127;
 
-						const msgTo = _addr32_decode(msgData.slice(20, 30), msgShield);
+						const msgTo = _addr32_decode(msgData.slice(14, 24), msgShield);
 
-						const msgBodyBr = new Int8Array(msgData.slice(30, msgData.length - padAmount - 64));
+						const msgBodyBr = new Int8Array(msgData.slice(24));
 						const msgBodyU8 = new Uint8Array(window.BrotliDecode(msgBodyBr));
 						const msgBodyTx = new TextDecoder("utf-8").decode(msgBodyU8);
 
@@ -911,13 +913,13 @@ function AllEars(readyCallback) {
 					break;}
 
 					case 16: { // IntMsg
-						const msgFromLv = msgData[6] & 3;
-						const msgFromPk = msgData.slice(7, 7 + sodium.crypto_box_PUBLICKEYBYTES);
-						const msgFrom = _addr32_decode(msgData.slice(7 + sodium.crypto_box_PUBLICKEYBYTES, 17 + sodium.crypto_box_PUBLICKEYBYTES));
-						const msgTo = _addr32_decode(msgData.slice(17 + sodium.crypto_box_PUBLICKEYBYTES, 27 + sodium.crypto_box_PUBLICKEYBYTES));
+						const msgFromLv = msgData[0] & 3;
+						const msgFromPk = msgData.slice(1, 1 + sodium.crypto_box_PUBLICKEYBYTES);
+						const msgFrom = _addr32_decode(msgData.slice(1 + sodium.crypto_box_PUBLICKEYBYTES, 11 + sodium.crypto_box_PUBLICKEYBYTES));
+						const msgTo = _addr32_decode(msgData.slice(11 + sodium.crypto_box_PUBLICKEYBYTES, 21 + sodium.crypto_box_PUBLICKEYBYTES));
 
-						const nonce = msgData.slice(27 + sodium.crypto_box_PUBLICKEYBYTES, 27 + sodium.crypto_box_PUBLICKEYBYTES + sodium.crypto_box_NONCEBYTES);
-						const msgEnc = msgData.slice(27 + sodium.crypto_box_PUBLICKEYBYTES + sodium.crypto_box_NONCEBYTES, msgData.length - padAmount - 64);
+						const nonce = msgData.slice(21 + sodium.crypto_box_PUBLICKEYBYTES, 21 + sodium.crypto_box_PUBLICKEYBYTES + sodium.crypto_box_NONCEBYTES);
+						const msgEnc = msgData.slice(21 + sodium.crypto_box_PUBLICKEYBYTES + sodium.crypto_box_NONCEBYTES);
 						let msgBin;
 						let msgTitle;
 						let msgBody;
@@ -944,8 +946,8 @@ function AllEars(readyCallback) {
 
 						// (msgData[0] & 64) --> format
 
-						const msgTitle = sodium.to_string(msgData.slice(6, 6 + (msgData[6] & 63)));
-//						const msgBody = sodium.to_string(msgData.slice(6 + (msgData[6] & 63)));
+						const msgTitle = sodium.to_string(msgData.slice(1, msgData[0] & 63));
+						const msgBody = sodium.to_string(msgData.slice(msgData[0] & 63));
 
 						_textNote.push(new _NewTextNote(msgId, msgTs, msgTitle, msgBody));
 					break;}
