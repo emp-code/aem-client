@@ -287,7 +287,8 @@ table, td {
 #div_gk .flex {display: flex;}
 #div_gk .flex input {flex: 1;}
 
-#div_acc > table, #tbl_accs {
+#div_acc > table, #fs_accs {
+	border: 0;
 	margin: 0 auto 0 auto;
 }
 

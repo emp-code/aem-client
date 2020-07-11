@@ -293,6 +293,21 @@ function updateAddressCounts() {
 	document.getElementById("limit_total").textContent = ((ae.GetAddressCountNormal() + ae.GetAddressCountShield()) + "/" + ae.GetAddrPerUser()).padStart(5);
 }
 
+function adjustLevel(pubkey, level, c) {
+	const fs = document.getElementById("fs_accs");
+	fs.disabled = true;
+
+	ae.Account_Update(pubkey, level, function(success) {
+		fs.disabled = false;
+
+		if (success) {
+			c[4].textContent = level;
+			c[5].children[0].disabled = (level === 3);
+			c[6].children[0].disabled = (level === 0);
+		}
+	});
+}
+
 function addAccountToTable(i) {
 	const tblAccs = document.getElementById("tbd_accs");
 	const row = tblAccs.insertRow(-1);
@@ -302,8 +317,15 @@ function addAccountToTable(i) {
 	cell = row.insertCell(-1); cell.textContent = ae.Admin_GetUserNAddr(i);
 	cell = row.insertCell(-1); cell.textContent = ae.Admin_GetUserSAddr(i);
 	cell = row.insertCell(-1); cell.textContent = ae.Admin_GetUserLevel(i);
+
 	cell = row.insertCell(-1); cell.innerHTML = "<button type=\"button\" autocomplete=\"off\">+</button>";
+	cell.children[0].onclick = function() {const c = this.parentElement.parentElement.cells; adjustLevel(c[0].textContent, parseInt(c[4].textContent) + 1, c);};
+	cell.children[0].disabled = (ae.Admin_GetUserLevel(i) === 3);
+
 	cell = row.insertCell(-1); cell.innerHTML = "<button type=\"button\" autocomplete=\"off\">&minus;</button>";
+	cell.children[0].onclick = function() {const c = this.parentElement.parentElement.cells; adjustLevel(c[0].textContent, parseInt(c[4].textContent) - 1, c);};
+	cell.children[0].disabled = (ae.Admin_GetUserLevel(i) === 0);
+
 	cell = row.insertCell(-1); cell.innerHTML = "<button type=\"button\" autocomplete=\"off\">X</button>";
 }
 
