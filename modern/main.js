@@ -327,6 +327,12 @@ function addAccountToTable(i) {
 	cell.children[0].disabled = (ae.Admin_GetUserLevel(i) === 0);
 
 	cell = row.insertCell(-1); cell.innerHTML = "<button type=\"button\" autocomplete=\"off\">X</button>";
+	cell.children[0].onclick = function() {
+		const tr = this.parentElement.parentElement;
+		ae.Account_Delete(tr.cells[0].textContent, function(success) {
+			tr.remove();
+		});
+	};
 }
 
 function reloadAccount() {
