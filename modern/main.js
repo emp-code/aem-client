@@ -330,7 +330,7 @@ function addAccountToTable(i) {
 	cell.children[0].onclick = function() {
 		const tr = this.parentElement.parentElement;
 		ae.Account_Delete(tr.cells[0].textContent, function(success) {
-			tr.remove();
+			if (success) tr.remove();
 		});
 	};
 }
