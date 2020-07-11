@@ -356,8 +356,22 @@ function reloadAccount() {
 	cell = row.insertCell(-1); cell.textContent = ae.GetAddressCountShield();
 	cell = row.insertCell(-1); cell.textContent = ae.GetUserLevel();
 	cell = row.insertCell(-1); cell.innerHTML = "<button type=\"button\" autocomplete=\"off\" disabled=\"disabled\">+</button>";
+
 	cell = row.insertCell(-1); cell.innerHTML = "<button id=\"btn_downme\" type=\"button\" autocomplete=\"off\" disabled=\"disabled\">&minus;</button>";
+	cell.children[0].onclick = function() {
+		const newLevel = parseInt(row.cells[4].textContent) - 1;
+		ae.Account_Update(ae.GetUserPkHex(), newLevel, function(success) {
+			row.cells[4].textContent = newLevel;
+		});
+	};
+
 	cell = row.insertCell(-1); cell.innerHTML = "<button id=\"btn_killme\" type=\"button\" autocomplete=\"off\" disabled=\"disabled\">X</button>";
+	cell.children[0].onclick = function() {
+		const tr = this.parentElement.parentElement;
+		ae.Account_Delete(ae.GetUserPkHex(), function(success) {
+			row.remove();
+		});
+	};
 
 	// Admin: Other accounts
 	if (ae.IsUserAdmin()) {
