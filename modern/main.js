@@ -361,7 +361,7 @@ function reloadAccount() {
 	cell.children[0].onclick = function() {
 		const newLevel = parseInt(row.cells[4].textContent) - 1;
 		ae.Account_Update(ae.GetUserPkHex(), newLevel, function(success) {
-			row.cells[4].textContent = newLevel;
+			if (success) row.cells[4].textContent = newLevel;
 		});
 	};
 
@@ -369,7 +369,7 @@ function reloadAccount() {
 	cell.children[0].onclick = function() {
 		const tr = this.parentElement.parentElement;
 		ae.Account_Delete(ae.GetUserPkHex(), function(success) {
-			row.remove();
+			if (success) row.remove();
 		});
 	};
 
