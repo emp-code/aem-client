@@ -367,7 +367,6 @@ function reloadAccount() {
 
 	cell = row.insertCell(-1); cell.innerHTML = "<button id=\"btn_killme\" type=\"button\" autocomplete=\"off\" disabled=\"disabled\">X</button>";
 	cell.children[0].onclick = function() {
-		const tr = this.parentElement.parentElement;
 		ae.Account_Delete(ae.GetUserPkHex(), function(success) {
 			if (success) row.remove();
 		});
