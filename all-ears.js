@@ -565,8 +565,11 @@ function AllEars(readyCallback) {
 			return;
 		}
 
-		_userKeySecret = sodium.from_hex(skey_hex);
-		_userKeyPublic = sodium.crypto_scalarmult_base(_userKeySecret);
+		const boxSeed = sodium.crypto_kdf_derive_from_key(sodium.crypto_box_SEEDBYTES, 1, "AEM-Usr0", sodium.from_hex(skey_hex));
+		const boxKeys = sodium.crypto_box_seed_keypair(boxSeed);
+
+		_userKeyPublic = boxKeys.publicKey;
+		_userKeySecret = boxKeys.privateKey;
 		callback(true);
 	};
 

@@ -43,9 +43,12 @@
 	<script>
 		sodium.ready.then(function() {
 			document.getElementsByTagName("button")[0].onclick = function() {
-				const newKeys = sodium.crypto_box_keypair();
-				document.getElementById("pkey").value = sodium.to_hex(newKeys.publicKey);
-				document.getElementById("skey").value = sodium.to_hex(newKeys.privateKey);
+				const newKey = sodium.crypto_kdf_keygen();
+				const boxSeed = sodium.crypto_kdf_derive_from_key(sodium.crypto_box_SEEDBYTES, 1, "AEM-Usr0", newKey);
+				const boxKeys = sodium.crypto_box_seed_keypair(boxSeed);
+
+				document.getElementById("pkey").value = sodium.to_hex(boxKeys.publicKey);
+				document.getElementById("skey").value = sodium.to_hex(newKey);
 			}
 		});
 	</script>
