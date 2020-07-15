@@ -1075,7 +1075,7 @@ function AllEars(readyCallback) {
 	this.Message_StoreF = function(callback) {
 		// TODO
 		callback(false);
-	}
+	};
 
 	this.Message_StoreT = function(title, body, format, callback) {
 		if (typeof(title) !== "string" || typeof(body) !== "string" || title.length < 1 || body.length < 1) {callback(false); return;}
