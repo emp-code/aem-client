@@ -254,6 +254,7 @@ function addMessages() {
 
 function addUploads() {
 	const tbl = document.getElementById("tbd_uploads");
+	tbl.innerHTML = "";
 
 	for (let i = 0; i < ae.GetUplMsgCount(); i++) {
 		const row = tbl.insertRow(-1);
