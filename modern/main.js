@@ -252,7 +252,7 @@ function addMessages() {
 	}
 }
 
-function addUploaded() {
+function addUploads() {
 	const tbl = document.getElementById("tbd_uploads");
 
 	for (let i = 0; i < ae.GetUplMsgCount(); i++) {
@@ -497,7 +497,7 @@ document.getElementById("btn_updt").onclick = function() {
 
 			if (successBrowse) {
 				addMessages();
-				addUploaded();
+				addUploads();
 				btn.disabled = false;
 			} else {
 				console.log("Failed to refresh");
@@ -723,7 +723,7 @@ document.getElementById("btn_notepad_savesep").onclick = function() {
 	ae.Message_Upload("title", np.value, false, function(success) {
 		if (success) {
 			np.value = "";
-			addUploaded();
+			addUploads();
 		}
 
 		console.log("Failed to add text");
