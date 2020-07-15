@@ -606,7 +606,15 @@ function AllEars(readyCallback) {
 
 			// Private field
 			const privNonce = browseData.slice(offset, offset + sodium.crypto_secretbox_NONCEBYTES);
-			const privData = sodium.crypto_secretbox_open_easy(browseData.slice(offset + sodium.crypto_secretbox_NONCEBYTES, offset + _AEM_BYTES_PRIVATE), privNonce, _userKeySymmetric);
+			let privData;
+
+			try {privData = sodium.crypto_secretbox_open_easy(browseData.slice(offset + sodium.crypto_secretbox_NONCEBYTES, offset + _AEM_BYTES_PRIVATE), privNonce, _userKeySymmetric);}
+			catch {
+				console.log("Private data field decryption failed");
+				callback(true);
+				return;
+			}
+
 			offset += _AEM_BYTES_PRIVATE;
 
 			// Private - Address data
