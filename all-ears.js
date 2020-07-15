@@ -955,22 +955,25 @@ function AllEars(readyCallback) {
 						}
 					break;}
 
-					case 32: { // Text
-//						if ((msgData[0] & 128) === 128) {
-							// TODO: Brotli decompress
+					case 32: { // Upload
+						const nonce = msgData.slice(0, sodium.crypto_secretbox_NONCEBYTES);
+						const dec = sodium.crypto_secretbox_open_easy(msgData.slice(sodium.crypto_secretbox_NONCEBYTES), nonce, _userKeySymmetric);
+
+//						if ((dec[0] & 128) === 128) {
+							// File, not text
 //						}
 
-						// (msgData[0] & 64) --> format
+						// (dec[0] & 64) --> format
 
-						const msgTitle = sodium.to_string(msgData.slice(1, msgData[0] & 63));
-						const msgBody = sodium.to_string(msgData.slice(msgData[0] & 63));
+						const lenTitle = (dec[0] & 63) + 1;
+						const msgTitle = sodium.to_string(dec.slice(1, 1 + lenTitle));
+						const msgBody = sodium.to_string(dec.slice(1 + lenTitle));
 
 						_textNote.push(new _NewTextNote(msgId, msgTs, msgTitle, msgBody));
 					break;}
 
-					case 48: // File
-						// TODO
-					break;
+					case 48: { // Unused
+					break;}
 				}
 
 				offset += (kib * 1024);
@@ -1093,31 +1096,34 @@ function AllEars(readyCallback) {
 		});
 	};
 
-
-	this.Message_StoreF = function(callback) {
-		// TODO
-		callback(false);
-	};
-
-	this.Message_StoreT = function(title, body, format, callback) {
-		if (typeof(title) !== "string" || typeof(body) !== "string" || title.length < 1 || body.length < 1) {callback(false); return;}
+	this.Message_Upload = function(title, body, format, callback) {
+		if (typeof(title) !== "string" || title.length < 1 || body.length < 1) {callback(false); return;}
 
 		const u8title = sodium.from_string(title);
 		if (u8title.length > 64) {callback(false); return;}
-		const u8body = sodium.from_string(body);
+		const u8body = (typeof(body) === "string") ? sodium.from_string(body) : body;
 
 		const lenData = 1 + u8title.length + u8body.length;
-		if (lenData > _AEM_BYTES_POST) {callback(false); return;}
+		if (lenData + sodium.crypto_secretbox_NONCEBYTES + sodium.crypto_secretbox_MACBYTES > _AEM_BYTES_POST) {callback(false); return;}
 
 		const u8data = new Uint8Array(lenData);
-		u8data[0] = u8title.length + 1;
-		if (format) u8data[0] += 64;
-		// 128 set by server
+		u8data[0] = u8title.length - 1;
+		if (body.constructor === Uint8Array) u8data[0] |= 128;
+		if (format) u8data[0] |= 64;
 
 		u8data.set(u8title, 1);
 		u8data.set(u8body, 1 + u8title.length);
 
-		_FetchEncrypted("message/storet", u8data, function(fetchOk) {
+		const nonce = new Uint8Array(sodium.crypto_secretbox_NONCEBYTES);
+		window.crypto.getRandomValues(nonce);
+
+		const sbox = sodium.crypto_secretbox_easy(u8data, nonce, _userKeySymmetric);
+
+		const final = new Uint8Array(nonce.length + sbox.length);
+		final.set(nonce);
+		final.set(sbox, sodium.crypto_secretbox_NONCEBYTES);
+
+		_FetchEncrypted("message/upload", final, function(fetchOk) {
 			if (!fetchOk) {callback(false); return;}
 
 			_textNote.push(new _NewTextNote(null, Date.now() / 1000, title, body)); //TODO: msgId
@@ -1158,7 +1164,7 @@ function AllEars(readyCallback) {
 		const nonce = new Uint8Array(sodium.crypto_secretbox_NONCEBYTES);
 		window.crypto.getRandomValues(nonce);
 
-		const sbox = sodium.crypto_secretbox_easy(privData, nonce, _userKeySymmetric)
+		const sbox = sodium.crypto_secretbox_easy(privData, nonce, _userKeySymmetric);
 
 		const final = new Uint8Array(nonce.length + sbox.length);
 		final.set(nonce);
