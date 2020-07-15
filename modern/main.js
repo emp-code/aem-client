@@ -89,6 +89,15 @@ function displayMsg(isInt, num) {
 		}
 	};
 
+	document.getElementById("btn_mdele").disabled = false;
+	document.getElementById("btn_mdele").onclick = function() {
+		this.blur();
+
+		ae.Message_Delete(isInt? ae.GetIntMsgIdHex(num) : ae.GetExtMsgIdHex(num), function(success) {
+			if (!success) console.log("Failed delete");
+		});
+	}
+
 	document.getElementById("msg").hidden = false;
 	document.getElementById("msg").getElementsByTagName("h1")[0].textContent = isInt ? ae.GetIntMsgTitle(num) : ae.GetExtMsgTitle(num);
 	document.getElementById("msg").getElementsByTagName("pre")[0].textContent = isInt ? ae.GetIntMsgBody(num) : ae.GetExtMsgBody(num);
