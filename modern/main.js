@@ -750,7 +750,7 @@ document.getElementById("btn_notepad_savesep").onclick = function() {
 	const np = document.getElementById("txt_notepad");
 	np.disabled = true;
 
-	ae.Message_StoreT("title", np.value, false, function(success) {
+	ae.Message_Upload("title", np.value, false, function(success) {
 		if (success) {
 			np.value = "";
 			addNotes();
