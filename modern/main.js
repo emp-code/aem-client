@@ -155,11 +155,7 @@ function displayMsg(isInt, num) {
 
 // Interface
 function addMsg(isInt, i) {
-	const inbox = document.getElementById("tbl_inbox");
-	const sent = document.getElementById("tbl_outbx");
-
-	const isSent = false; //TODO
-	const table = isSent ? sent : inbox;
+	const table = document.getElementById("tbl_inbox");
 
 	const row = table.insertRow(-1);
 	const cellTime = row.insertCell(-1);
