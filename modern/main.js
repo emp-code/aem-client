@@ -193,33 +193,9 @@ function addMsg(isInt, i) {
 		cellSnd2.appendChild(fromText);
 	}
 
-//	divDel.innerHTML = "<input class=\"delMsg\" type=\"checkbox\" data-id=\"" + ae.GetIntMsgIdHex(i) + "\">";
-
 	row.onclick = function() {
 		displayMsg(isInt, i);
 	};
-/*
-	cellDel.children[0].onchange = function() {
-		if (!divDel.children[0].checked) {
-			const checkboxes = elmt.getElementsByTagName("input");
-			let checked = false;
-
-			for (let j = 0; j < checkboxes.length; j++) {
-				if (checkboxes[j].checked) {
-					checked = true;
-					break;
-				}
-			}
-
-			if (!checked) {
-				document.getElementById(isSent ? "btn_sentdel" : "btn_msgdel").hidden = true;
-				return;
-			}
-		}
-
-		document.getElementById(isSent? "btn_sentdel" : "btn_msgdel").hidden = false;
-	};
-*/
 }
 
 function getRowsPerPage() {
