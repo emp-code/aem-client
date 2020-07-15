@@ -49,6 +49,7 @@ function AllEars(readyCallback) {
 
 	let _userKeyPublic;
 	let _userKeySecret;
+	let _userKeySymmetric;
 
 	let _userLevel = 0;
 	const _userAddress = [];
@@ -570,6 +571,9 @@ function AllEars(readyCallback) {
 
 		_userKeyPublic = boxKeys.publicKey;
 		_userKeySecret = boxKeys.privateKey;
+
+		_userKeySymmetric = sodium.crypto_kdf_derive_from_key(sodium.crypto_secretbox_KEYBYTES, 5, "AEM-Usr0", sodium.from_hex(skey_hex));
+
 		callback(true);
 	};
 
@@ -601,7 +605,8 @@ function AllEars(readyCallback) {
 			}
 
 			// Private field
-			const privData = sodium.crypto_box_seal_open(browseData.slice(offset, offset + _AEM_BYTES_PRIVATE), _userKeyPublic, _userKeySecret);
+			const privNonce = browseData.slice(offset, offset + sodium.crypto_secretbox_NONCEBYTES);
+			const privData = sodium.crypto_secretbox_open_easy(browseData.slice(offset + sodium.crypto_secretbox_NONCEBYTES, offset + _AEM_BYTES_PRIVATE), privNonce, _userKeySymmetric);
 			offset += _AEM_BYTES_PRIVATE;
 
 			// Private - Address data
@@ -1113,7 +1118,7 @@ function AllEars(readyCallback) {
 	};
 
 	this.Private_Update = function(callback) {
-		const privData = new Uint8Array(_AEM_BYTES_PRIVATE - sodium.crypto_box_SEALBYTES);
+		const privData = new Uint8Array(_AEM_BYTES_PRIVATE - sodium.crypto_secretbox_NONCEBYTES - sodium.crypto_secretbox_MACBYTES);
 		privData[0] = _userAddress.length;
 
 		let offset = 1;
@@ -1142,7 +1147,16 @@ function AllEars(readyCallback) {
 			offset += cNote.length;
 		}
 
-		_FetchEncrypted("private/update", sodium.crypto_box_seal(privData, _userKeyPublic), function(fetchOk) {callback(fetchOk);});
+		const nonce = new Uint8Array(sodium.crypto_secretbox_NONCEBYTES);
+		window.crypto.getRandomValues(nonce);
+
+		const sbox = sodium.crypto_secretbox_easy(privData, nonce, _userKeySymmetric)
+
+		const final = new Uint8Array(nonce.length + sbox.length);
+		final.set(nonce);
+		final.set(sbox, sodium.crypto_secretbox_NONCEBYTES);
+
+		_FetchEncrypted("private/update", final, function(fetchOk) {callback(fetchOk);});
 	};
 
 	readyCallback(true);
