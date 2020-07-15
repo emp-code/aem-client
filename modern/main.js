@@ -22,7 +22,7 @@ const tabs = [
 	new TabState(0, 0, false, true), // Inbox
 	new TabState(0, 0, false, true), // Outbx
 	new TabState(0, 2, true, false), // Write
-	new TabState(0, 3, false, false), // Notes
+	new TabState(0, 2, false, false), // Notes
 	new TabState(0, 3, false, true) // Admin
 ];
 
@@ -282,14 +282,14 @@ function addMessages() {
 	}
 }
 
-function addNotes() {
-	const tbl = document.getElementById("tbd_texts");
+function addUploaded() {
+	const tbl = document.getElementById("tbd_uploads");
 
-	for (let i = 0; i < ae.GetNoteCount(); i++) {
+	for (let i = 0; i < ae.GetUplMsgCount(); i++) {
 		const row = tbl.insertRow(-1);
 		let cell;
-		cell = row.insertCell(-1); cell.textContent = new Date(ae.GetNoteTime(i) * 1000).toISOString().slice(0, 10);
-		cell = row.insertCell(-1); cell.textContent = ae.GetNoteTitle(i);
+		cell = row.insertCell(-1); cell.textContent = new Date(ae.GetUplMsgTime(i) * 1000).toISOString().slice(0, 10);
+		cell = row.insertCell(-1); cell.textContent = ae.GetUplMsgTitle(i);
 		cell = row.insertCell(-1); cell.textContent = ""; // Format
 		cell = row.insertCell(-1); cell.textContent = ""; // Size
 		cell = row.insertCell(-1); cell.innerHTML = "<button type=\"button\">X</button>";
@@ -527,7 +527,7 @@ document.getElementById("btn_updt").onclick = function() {
 
 			if (successBrowse) {
 				addMessages();
-				addNotes();
+				addUploaded();
 				btn.disabled = false;
 			} else {
 				console.log("Failed to refresh");
@@ -753,7 +753,7 @@ document.getElementById("btn_notepad_savesep").onclick = function() {
 	ae.Message_Upload("title", np.value, false, function(success) {
 		if (success) {
 			np.value = "";
-			addNotes();
+			addUploaded();
 		}
 
 		console.log("Failed to add text");

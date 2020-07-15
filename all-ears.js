@@ -55,8 +55,7 @@ function AllEars(readyCallback) {
 	const _userAddress = [];
 	const _extMsg = [];
 	const _intMsg = [];
-	const _textNote = [];
-	const _fileNote = [];
+	const _uplMsg = [];
 	const _lastMsgId = new Uint8Array(16);
 	const _nullMsgId = new Uint8Array(16);
 
@@ -117,7 +116,7 @@ function AllEars(readyCallback) {
 		this.body = body;
 	}
 
-	function _NewTextNote(id, ts, title, body) {
+	function _NewUplMsg(id, ts, title, body) {
 		this.id = id;
 		this.timestamp = ts;
 		this.title = title;
@@ -283,10 +282,9 @@ function AllEars(readyCallback) {
 	const _MsgExists = function(id) {
 		let found = false;
 
-		_extMsg.forEach(function(msg)   {if (_arraysEqual(msg.id, id)) found = true;}); if (found) return true;
-		_intMsg.forEach(function(msg)   {if (_arraysEqual(msg.id, id)) found = true;}); if (found) return true;
-		_textNote.forEach(function(msg) {if (_arraysEqual(msg.id, id)) found = true;}); if (found) return true;
-		_fileNote.forEach(function(msg) {if (_arraysEqual(msg.id, id)) found = true;}); if (found) return true;
+		_extMsg.forEach(function(msg) {if (_arraysEqual(msg.id, id)) found = true;}); if (found) return true;
+		_intMsg.forEach(function(msg) {if (_arraysEqual(msg.id, id)) found = true;}); if (found) return true;
+		_uplMsg.forEach(function(msg) {if (_arraysEqual(msg.id, id)) found = true;}); if (found) return true;
 
 		return false;
 	};
@@ -436,8 +434,7 @@ function AllEars(readyCallback) {
 		_userAddress.splice(0);
 		_extMsg.splice(0);
 		_intMsg.splice(0);
-		_textNote.splice(0);
-		_fileNote.splice(0);
+		_uplMsg.splice(0);
 
 		_gkCountry.splice(0);
 		_gkDomain .splice(0);
@@ -517,18 +514,11 @@ function AllEars(readyCallback) {
 	this.GetIntMsgFlagVPad = function(num) {return _intMsg[num].validPad;};
 	this.GetIntMsgFlagVSig = function(num) {return _intMsg[num].validSig;};
 
-	this.GetNoteCount = function() {return _textNote.length;};
-	this.GetNoteIdHex = function(num) {return sodium.to_hex(_textNote[num].id);};
-	this.GetNoteTime  = function(num) {return _textNote[num].timestamp;};
-	this.GetNoteTitle = function(num) {return _textNote[num].title;};
-	this.GetNoteBody  = function(num) {return _textNote[num].body;};
-
-	this.GetFileCount = function() {return _fileNote.length;};
-	this.GetFileIdHex = function(num) {return sodium.to_hex(_fileNote[num].id);};
-	this.GetFileTime = function(num) {return _fileNote[num].timestamp;};
-	this.GetFileName = function(num) {return _fileNote[num].title;};
-	this.GetFileSize = function(num) {return _fileNote[num].body.length;};
-	this.GetFileBlob = function(num) {return new Blob([_fileNote[num].body.buffer]);};
+	this.GetUplMsgCount = function() {return _uplMsg.length;};
+	this.GetUplMsgIdHex = function(num) {return sodium.to_hex(_uplMsg[num].id);};
+	this.GetUplMsgTime  = function(num) {return _uplMsg[num].timestamp;};
+	this.GetUplMsgTitle = function(num) {return _uplMsg[num].title;};
+	this.GetUplMsgBody  = function(num) {return (typeof(uplMsg[num].body) === "string") ? _uplMsg[num].body : new Blob([_uplMsg[num].body.buffer]);};
 
 	this.GetGatekeeperCountry = function() {return _gkCountry;};
 	this.GetGatekeeperDomain  = function() {return _gkDomain;};
@@ -959,17 +949,13 @@ function AllEars(readyCallback) {
 						const nonce = msgData.slice(0, sodium.crypto_secretbox_NONCEBYTES);
 						const dec = sodium.crypto_secretbox_open_easy(msgData.slice(sodium.crypto_secretbox_NONCEBYTES), nonce, _userKeySymmetric);
 
-//						if ((dec[0] & 128) === 128) {
-							// File, not text
-//						}
-
 						// (dec[0] & 64) --> format
 
 						const lenTitle = (dec[0] & 63) + 1;
 						const msgTitle = sodium.to_string(dec.slice(1, 1 + lenTitle));
-						const msgBody = sodium.to_string(dec.slice(1 + lenTitle));
+						const msgBody = (dec[0] & 128) ? dec.slice(1 + lenTitle) : sodium.to_string(dec.slice(1 + lenTitle));
 
-						_textNote.push(new _NewTextNote(msgId, msgTs, msgTitle, msgBody));
+						_uplMsg.push(new _NewUplMsg(msgId, msgTs, msgTitle, msgBody));
 					break;}
 
 					case 48: { // Unused
@@ -979,10 +965,9 @@ function AllEars(readyCallback) {
 				offset += (kib * 1024);
 			}
 
-			_extMsg.sort((a, b)   => (a.ts < b.ts) ? 1 : -1);
-			_intMsg.sort((a, b)   => (a.ts < b.ts) ? 1 : -1);
-			_fileNote.sort((a, b) => (a.ts < b.ts) ? 1 : -1);
-			_textNote.sort((a, b) => (a.ts < b.ts) ? 1 : -1);
+			_extMsg.sort((a, b) => (a.ts < b.ts) ? 1 : -1);
+			_intMsg.sort((a, b) => (a.ts < b.ts) ? 1 : -1);
+			_uplMsg.sort((a, b) => (a.ts < b.ts) ? 1 : -1);
 
 			callback(true);
 		});
@@ -1071,24 +1056,14 @@ function AllEars(readyCallback) {
 					if (matches) {_intMsg.splice(j, 1); j--;}
 				}
 
-				for (let j = 0; j < _textNote.length; j++) {
+				for (let j = 0; j < _uplMsg.length; j++) {
 					let matches = true;
 
 					for (let k = 0; k < 16; k++) {
-						if (id[k] !== _textNote[j].id[k]) {matches = false; break;}
+						if (id[k] !== _uplMsg[j].id[k]) {matches = false; break;}
 					}
 
-					if (matches) {_textNote.splice(j, 1); j--;}
-				}
-
-				for (let j = 0; j < _fileNote.length; j++) {
-					let matches = true;
-
-					for (let k = 0; k < 16; k++) {
-						if (id[k] !== _fileNote[j].id[k]) {matches = false; break;}
-					}
-
-					if (matches) {_fileNote.splice(j, 1); j--;}
+					if (matches) {_uplMsg.splice(j, 1); j--;}
 				}
 			}
 
@@ -1126,7 +1101,7 @@ function AllEars(readyCallback) {
 		_FetchEncrypted("message/upload", final, function(fetchOk) {
 			if (!fetchOk) {callback(false); return;}
 
-			_textNote.push(new _NewTextNote(null, Date.now() / 1000, title, body)); //TODO: msgId
+			_uplMsg.push(new _NewUplMsg(null, Date.now() / 1000, title, body)); //TODO: msgId
 			callback(true);
 		});
 	};
