@@ -595,10 +595,10 @@ function AllEars(readyCallback) {
 			let offset = 14;
 			for (let i = 0; i < browseData[13]; i++) {
 				const hash = browseData.slice(offset, offset + 8);
-				const accExt = (browseData[offset + 8] & _AEM_ADDR_FLAG_ACCEXT) > 0 ? true : false;
-				const accInt = (browseData[offset + 8] & _AEM_ADDR_FLAG_ACCINT) > 0 ? true : false;
-				const use_gk = (browseData[offset + 8] & _AEM_ADDR_FLAG_USE_GK) > 0 ? true : false;
-				const is_shd = (browseData[offset + 8] & _AEM_ADDR_FLAG_SHIELD) > 0 ? true : false;
+				const accExt = (browseData[offset + 8] & _AEM_ADDR_FLAG_ACCEXT) > 0;
+				const accInt = (browseData[offset + 8] & _AEM_ADDR_FLAG_ACCINT) > 0;
+				const use_gk = (browseData[offset + 8] & _AEM_ADDR_FLAG_USE_GK) > 0;
+				const is_shd = (browseData[offset + 8] & _AEM_ADDR_FLAG_SHIELD) > 0;
 
 				_userAddress.push(new _NewAddress(hash, null, is_shd, accExt, accInt, use_gk));
 				offset += 9;
