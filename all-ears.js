@@ -1009,15 +1009,24 @@ function AllEars(readyCallback) {
 	};
 
 	this.Message_Delete = function(hexIds, callback) {
-		const delCount = hexIds.length;
+		let data;
 
-		const data = new Uint8Array(delCount * 16);
+		if (typeof(hexIds) === "object") {
+			const delCount = hexIds.length;
 
-		for (let i = 0; i < hexIds.length; i++) {
-			const id = sodium.from_hex(hexIds[i]);
-			if (id.length !== 16) {callback(false); return;}
+			data = new Uint8Array(delCount * 16);
 
-			data.set(id, i * 16);
+			for (let i = 0; i < hexIds.length; i++) {
+				const id = sodium.from_hex(hexIds[i]);
+				if (id.length !== 16) {callback(false); return;}
+
+				data.set(id, i * 16);
+			}
+		} else if (typeof(hexIds) === "string") {
+			data = sodium.from_hex(hexIds);
+		} else {
+			callback(false);
+			return;
 		}
 
 		_FetchEncrypted("message/delete", data, function(fetchOk) {
