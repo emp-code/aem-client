@@ -68,6 +68,16 @@ function getMsgId(num) {
 	return x.slice(1, x.indexOf(">"));
 }
 
+function displayFile(num) {
+	document.getElementById("midright").scroll(0, 0);
+	document.getElementById("btn_reply").disabled = true;
+	document.getElementById("btn_mdele").disabled = true;
+
+	document.getElementById("midright").children[0].hidden = true;
+	document.getElementById("midright").children[1].textContent = ae.GetUplMsgTitle(num);
+	document.getElementById("midright").children[2].textContent = ae.GetUplMsgBody(num);
+}
+
 function displayMsg(isInt, num) {
 	document.getElementById("midright").scroll(0, 0);
 
@@ -260,7 +270,10 @@ function addUploads() {
 		const row = tbl.insertRow(-1);
 		let cell;
 		cell = row.insertCell(-1); cell.textContent = new Date(ae.GetUplMsgTime(i) * 1000).toISOString().slice(0, 10);
+
 		cell = row.insertCell(-1); cell.textContent = ae.GetUplMsgTitle(i);
+		cell.onclick = function() {displayFile(this.parentElement.rowIndex - 1);};
+
 		cell = row.insertCell(-1); cell.textContent = ""; // Format
 		cell = row.insertCell(-1); cell.textContent = ""; // Size
 
