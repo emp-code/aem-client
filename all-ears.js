@@ -289,6 +289,49 @@ function AllEars(readyCallback) {
 		return false;
 	};
 
+	const _GetFileType = function(filename) {
+		if (!filename) return null;
+
+		const ext = filename.lastIndexOf(".");
+		if (ext < 0) return null;
+
+		switch (filename.substr(ext + 1)) {
+			case "bat":
+			case "c":
+			case "c++":
+			case "cc":
+			case "cpp":
+			case "css":
+			case "csv":
+			case "cxx":
+			case "h":
+			case "h++":
+			case "hh":
+			case "hpp":
+			case "htm":
+			case "html":
+			case "hxx":
+			case "ini":
+			case "java":
+			case "js":
+			case "json":
+			case "log":
+			case "lua":
+			case "md":
+			case "php":
+			case "py":
+			case "rb":
+			case "rs":
+			case "sh":
+			case "txt":
+			case "vbs":
+			case "xml":
+			case "yaml":
+			case "yml":
+				return "text";
+		}
+	}
+
 	const _GetCiphersuite = function(cs) {
 		if (typeof(cs) !== "number") return "(Error reading ciphersuite value)";
 
@@ -518,7 +561,8 @@ function AllEars(readyCallback) {
 	this.GetUplMsgIdHex = function(num) {return sodium.to_hex(_uplMsg[num].id);};
 	this.GetUplMsgTime  = function(num) {return _uplMsg[num].timestamp;};
 	this.GetUplMsgTitle = function(num) {return _uplMsg[num].title;};
-	this.GetUplMsgBody  = function(num) {return _uplMsg[num].body};
+	this.GetUplMsgBody  = function(num) {return _uplMsg[num].body;};
+	this.GetUplMsgType  = function(num) {return _GetFileType(_uplMsg[num].title);};
 
 	this.GetGatekeeperCountry = function() {return _gkCountry;};
 	this.GetGatekeeperDomain  = function() {return _gkDomain;};
