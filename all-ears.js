@@ -518,7 +518,7 @@ function AllEars(readyCallback) {
 	this.GetUplMsgIdHex = function(num) {return sodium.to_hex(_uplMsg[num].id);};
 	this.GetUplMsgTime  = function(num) {return _uplMsg[num].timestamp;};
 	this.GetUplMsgTitle = function(num) {return _uplMsg[num].title;};
-	this.GetUplMsgBody  = function(num) {return (typeof(uplMsg[num].body) === "string") ? _uplMsg[num].body : new Blob([_uplMsg[num].body.buffer]);};
+	this.GetUplMsgBody  = function(num) {return (typeof(_uplMsg[num].body) === "string") ? _uplMsg[num].body : new Blob([_uplMsg[num].body.buffer]);};
 
 	this.GetGatekeeperCountry = function() {return _gkCountry;};
 	this.GetGatekeeperDomain  = function() {return _gkDomain;};
