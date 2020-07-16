@@ -68,7 +68,15 @@ function getMsgId(num) {
 	return x.slice(1, x.indexOf(">"));
 }
 
+function clearDisplay() {
+	const el = document.getElementById("midright").children[2];
+	if (el.children.length > 0) URL.revokeObjectURL(el.children[0].src);
+	el.innerHTML = "";
+}
+
 function displayFile(num) {
+	clearDisplay();
+
 	document.getElementById("midright").scroll(0, 0);
 	document.getElementById("btn_reply").disabled = true;
 	document.getElementById("btn_mdele").disabled = true;
@@ -90,6 +98,8 @@ function displayFile(num) {
 }
 
 function displayMsg(isInt, num) {
+	clearDisplay();
+
 	document.getElementById("midright").scroll(0, 0);
 
 	const ts = isInt? ae.GetIntMsgTime(num) : ae.GetExtMsgTime(num);
