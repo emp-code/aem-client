@@ -518,7 +518,7 @@ function AllEars(readyCallback) {
 	this.GetUplMsgIdHex = function(num) {return sodium.to_hex(_uplMsg[num].id);};
 	this.GetUplMsgTime  = function(num) {return _uplMsg[num].timestamp;};
 	this.GetUplMsgTitle = function(num) {return _uplMsg[num].title;};
-	this.GetUplMsgBody  = function(num) {return (typeof(_uplMsg[num].body) === "string") ? _uplMsg[num].body : new Blob([_uplMsg[num].body.buffer]);};
+	this.GetUplMsgBody  = function(num) {return _uplMsg[num].body};
 
 	this.GetGatekeeperCountry = function() {return _gkCountry;};
 	this.GetGatekeeperDomain  = function() {return _gkDomain;};
@@ -953,7 +953,7 @@ function AllEars(readyCallback) {
 
 						const lenTitle = (dec[0] & 63) + 1;
 						const msgTitle = sodium.to_string(dec.slice(1, 1 + lenTitle));
-						const msgBody = (dec[0] & 128) ? dec.slice(1 + lenTitle) : sodium.to_string(dec.slice(1 + lenTitle));
+						const msgBody = dec.slice(1 + lenTitle);
 
 						_uplMsg.push(new _NewUplMsg(msgId, msgTs, msgTitle, msgBody));
 					break;}

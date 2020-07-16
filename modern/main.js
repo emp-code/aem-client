@@ -75,7 +75,7 @@ function displayFile(num) {
 
 	document.getElementById("midright").children[0].hidden = true;
 	document.getElementById("midright").children[1].textContent = ae.GetUplMsgTitle(num);
-	document.getElementById("midright").children[2].textContent = ae.GetUplMsgBody(num);
+	document.getElementById("midright").children[2].textContent = sodium.to_string(ae.GetUplMsgBody(num));
 }
 
 function displayMsg(isInt, num) {
