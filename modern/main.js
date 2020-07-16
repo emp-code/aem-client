@@ -755,6 +755,32 @@ document.getElementById("btn_notepad_saveupl").onclick = function() {
 	});
 };
 
+document.getElementById("btn_upload").onclick = function() {
+	const fileSelector = document.createElement("input");
+	fileSelector.type = "file";
+	fileSelector.click();
+
+	const f = fileSelector.files[0];
+
+	const btn = this;
+	btn.disabled = true;
+
+	const reader = new FileReader();
+	reader.onload = function() {
+		ae.Message_Upload(fileSelector.files[0].name, new Uint8Array(reader.result), function(success) {
+			if (success) {
+				addUploads();
+			} else {
+				console.log("Failed upload");
+			}
+
+			btn.disabled = false;
+		});
+	};
+
+	reader.readAsArrayBuffer(fileSelector.files[0]);
+};
+
 document.getElementById("txt_skey").onkeyup = function(event) {
 	if (event.key === "Enter") {
 		event.preventDefault();
