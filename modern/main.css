@@ -164,7 +164,7 @@ noscript {
 	overflow-y: auto;
 }
 
-#midright > #msg > table {
+#midright > table {
 	width: 100%;
 	table-layout: fixed;
 	opacity: 0.5;

@@ -98,9 +98,9 @@ function displayMsg(isInt, num) {
 		});
 	};
 
-	document.getElementById("msg").hidden = false;
-	document.getElementById("msg").getElementsByTagName("h1")[0].textContent = isInt ? ae.GetIntMsgTitle(num) : ae.GetExtMsgTitle(num);
-	document.getElementById("msg").getElementsByTagName("pre")[0].textContent = isInt ? ae.GetIntMsgBody(num) : ae.GetExtMsgBody(num);
+	document.getElementById("midright").children[0].hidden = false;
+	document.getElementById("midright").children[1].textContent = isInt ? ae.GetIntMsgTitle(num) : ae.GetExtMsgTitle(num);
+	document.getElementById("midright").children[2].textContent = isInt ? ae.GetIntMsgBody(num) : ae.GetExtMsgBody(num);
 
 	document.getElementById("readmsg_to").textContent = isInt ? ae.GetIntMsgTo(num) : ae.GetExtMsgTo(num);
 	document.getElementById("readmsg_date").children[0].textContent = new Date(ts * 1000).toISOString().slice(0, 19).replace("T", " ");
