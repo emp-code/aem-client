@@ -744,7 +744,7 @@ document.getElementById("btn_notepad_saveupl").onclick = function() {
 	let fname = prompt("Save as...", "Untitled");
 	if (!fname.endsWith(".txt")) fname += ".txt";
 
-	ae.Message_Upload(fname, np.value, false, function(success) {
+	ae.Message_Upload(fname, np.value, function(success) {
 		if (success) {
 			np.value = "";
 			addUploads();

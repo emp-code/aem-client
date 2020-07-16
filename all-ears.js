@@ -1069,7 +1069,7 @@ function AllEars(readyCallback) {
 		});
 	};
 
-	this.Message_Upload = function(title, body, format, callback) {
+	this.Message_Upload = function(title, body, callback) {
 		if (typeof(title) !== "string" || title.length < 1 || body.length < 1) {callback(false); return;}
 
 		const u8title = sodium.from_string(title);
@@ -1081,8 +1081,7 @@ function AllEars(readyCallback) {
 
 		const u8data = new Uint8Array(lenData);
 		u8data[0] = u8title.length - 1;
-		if (body.constructor === Uint8Array) u8data[0] |= 128;
-		if (format) u8data[0] |= 64;
+//		if () u8data[0] |= 64; // unused
 
 		u8data.set(u8title, 1);
 		u8data.set(u8body, 1 + u8title.length);
