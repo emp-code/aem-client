@@ -83,7 +83,7 @@ function displayFile(num) {
 
 		case "image":
 			const img = document.createElement("img");
-			img.src = URL.createObjectURL(new Blob([ae.GetUplMsgBody(num).buffer])); // new Blob([_fileNote[num].body.buffer]);
+			img.src = URL.createObjectURL(new Blob([ae.GetUplMsgBody(num).buffer]));
 			document.getElementById("midright").children[2].appendChild(img);
 		break;
 	}
