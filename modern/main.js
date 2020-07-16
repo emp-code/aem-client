@@ -23,7 +23,7 @@ const tabs = [
 	new TabState(0, 0, false, true), // Outbx
 	new TabState(0, 2, true, false), // Write
 	new TabState(0, 2, false, false), // Notes
-	new TabState(0, 3, false, true) // Admin
+	new TabState(0, 3, false, true) // Tools
 ];
 
 let tab = 0;
@@ -31,7 +31,7 @@ const TAB_INBOX = 0;
 const TAB_OUTBX = 1;
 const TAB_WRITE = 2;
 const TAB_NOTES = 3;
-const TAB_ADMIN = 4;
+const TAB_TOOLS = 4;
 
 // Helper functions
 function getCountryName(countryCode) {
@@ -612,9 +612,9 @@ function updateTab() {
 			}
 		break;
 
-		case TAB_ADMIN:
+		case TAB_TOOLS:
 			for (let i = 0; i <= tabs[tab].max; i++) {
-				document.getElementById("div_admin").children[i].hidden = (i !== tabs[tab].cur);
+				document.getElementById("div_tools").children[i].hidden = (i !== tabs[tab].cur);
 			}
 		break;
 	}
