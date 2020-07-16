@@ -85,15 +85,15 @@ function displayFile(num) {
 	document.getElementById("midright").children[1].textContent = ae.GetUplMsgTitle(num);
 
 	switch (ae.GetUplMsgType(num)) {
-		case "text":
+		case "text": {
 			document.getElementById("midright").children[2].textContent = sodium.to_string(ae.GetUplMsgBody(num));
-		break;
+		break;}
 
-		case "image":
+		case "image": {
 			const img = document.createElement("img");
 			img.src = URL.createObjectURL(new Blob([ae.GetUplMsgBody(num).buffer]));
 			document.getElementById("midright").children[2].appendChild(img);
-		break;
+		break;}
 	}
 }
 
