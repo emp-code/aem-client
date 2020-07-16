@@ -96,7 +96,7 @@ function displayMsg(isInt, num) {
 		ae.Message_Delete(isInt? ae.GetIntMsgIdHex(num) : ae.GetExtMsgIdHex(num), function(success) {
 			if (!success) console.log("Failed delete");
 		});
-	}
+	};
 
 	document.getElementById("msg").hidden = false;
 	document.getElementById("msg").getElementsByTagName("h1")[0].textContent = isInt ? ae.GetIntMsgTitle(num) : ae.GetExtMsgTitle(num);
