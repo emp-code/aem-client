@@ -74,11 +74,17 @@ function displayFile(num) {
 	document.getElementById("btn_mdele").disabled = true;
 
 	document.getElementById("midright").children[0].hidden = true;
+	document.getElementById("midright").children[1].textContent = ae.GetUplMsgTitle(num);
 
 	switch (ae.GetUplMsgType(num)) {
 		case "text":
-			document.getElementById("midright").children[1].textContent = ae.GetUplMsgTitle(num);
 			document.getElementById("midright").children[2].textContent = sodium.to_string(ae.GetUplMsgBody(num));
+		break;
+
+		case "image":
+			const img = document.createElement("img");
+			img.src = URL.createObjectURL(new Blob([ae.GetUplMsgBody(num).buffer])); // new Blob([_fileNote[num].body.buffer]);
+			document.getElementById("midright").children[2].appendChild(img);
 		break;
 	}
 }

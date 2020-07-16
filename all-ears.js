@@ -329,6 +329,14 @@ function AllEars(readyCallback) {
 			case "yaml":
 			case "yml":
 				return "text";
+
+			// For non-text formats, only formats supported by browsers are sensible
+			case "gif":
+			case "jpg":
+			case "jpeg":
+			case "png":
+			case "webp":
+				return "image";
 		}
 	}
 
