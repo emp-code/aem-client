@@ -717,11 +717,14 @@ document.getElementById("btn_reg").onclick = function() {
 document.getElementById("chk_downme").onclick = function() {document.getElementById("btn_downme").disabled = !this.checked;};
 document.getElementById("chk_killme").onclick = function() {document.getElementById("btn_killme").disabled = !this.checked;};
 
-document.getElementById("btn_notepad_savesep").onclick = function() {
+document.getElementById("btn_notepad_saveupl").onclick = function() {
 	const np = document.getElementById("txt_notepad");
 	np.disabled = true;
 
-	ae.Message_Upload("title", np.value, false, function(success) {
+	let fname = prompt("Save as...", "Untitled");
+	if (!fname.endsWith(".txt")) fname += ".txt";
+
+	ae.Message_Upload(fname, np.value, false, function(success) {
 		if (success) {
 			np.value = "";
 			addUploads();
