@@ -338,7 +338,7 @@ function AllEars(readyCallback) {
 			case "webp":
 				return "image";
 		}
-	}
+	};
 
 	const _GetCiphersuite = function(cs) {
 		if (typeof(cs) !== "number") return "(Error reading ciphersuite value)";
