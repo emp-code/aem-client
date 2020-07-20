@@ -88,11 +88,12 @@ function displayFile(num) {
 
 	switch (ae.GetUplMsgType(num)) {
 		case "text": {
+			document.getElementById("midright").children[2].hidden = false;
 			document.getElementById("midright").children[2].textContent = sodium.to_string(ae.GetUplMsgBody(num));
 		break;}
 
 		case "image": {
-			document.getElementById("midright").children[2].textContent = "";
+			document.getElementById("midright").children[2].hidden = true;
 			const img = document.createElement("img");
 			img.src = URL.createObjectURL(new Blob([ae.GetUplMsgBody(num).buffer]));
 			document.getElementById("midright").appendChild(img);
@@ -133,6 +134,7 @@ function displayMsg(isInt, num) {
 	};
 
 	document.getElementById("midright").children[0].hidden = false;
+	document.getElementById("midright").children[2].hidden = false;
 	document.getElementById("midright").children[1].textContent = isInt ? ae.GetIntMsgTitle(num) : ae.GetExtMsgTitle(num);
 	document.getElementById("midright").children[2].textContent = isInt ? ae.GetIntMsgBody(num) : ae.GetExtMsgBody(num);
 
