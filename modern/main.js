@@ -97,6 +97,13 @@ function displayFile(num) {
 			const img = document.createElement("img");
 			img.src = URL.createObjectURL(new Blob([ae.GetUplMsgBody(num).buffer]));
 			document.getElementById("midright").appendChild(img);
+
+			img.onclick = function() {
+				if (!document.fullscreen)
+					img.requestFullscreen();
+				else
+					document.exitFullscreen();
+			}
 		break;}
 	}
 }
