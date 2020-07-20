@@ -337,6 +337,15 @@ function AllEars(readyCallback) {
 			case "png":
 			case "webp":
 				return "image";
+
+			case "aac":
+			case "flac":
+			case "m4a":
+			case "m4b":
+			case "mp3":
+			case "ogg":
+			case "wav":
+				return "audio";
 		}
 	};
 

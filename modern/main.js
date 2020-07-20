@@ -105,6 +105,14 @@ function displayFile(num) {
 					document.exitFullscreen();
 			}
 		break;}
+
+		case "audio": {
+			document.getElementById("midright").children[2].hidden = true;
+			const el = document.createElement("audio");
+			el.controls = "controls";
+			el.src = URL.createObjectURL(new Blob([ae.GetUplMsgBody(num).buffer]));
+			document.getElementById("midright").appendChild(el);
+		break;}
 	}
 }
 
