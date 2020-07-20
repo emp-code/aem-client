@@ -354,6 +354,7 @@ function AllEars(readyCallback) {
 			case "mp4":
 			case "mkv":
 			case "ogv":
+			case "ogx":
 			case "webm":
 				return "video";
 		}
