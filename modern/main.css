@@ -165,6 +165,11 @@ noscript {
 	flex-direction: column;
 }
 
+#midright img {
+	flex-grow: 1;
+	object-fit: contain;
+}
+
 #midright > table {
 	width: 100%;
 	table-layout: fixed;
