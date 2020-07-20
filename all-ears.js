@@ -28,7 +28,7 @@ function AllEars(readyCallback) {
 	const _AEM_ADDR_FLAG_ACCEXT = 1;
 
 	const _AEM_ADDR32_CHARS = "0123456789abcdefghjkmnpqrstuwxyz";
-	const _AEM_BYTES_POST = 8192;
+	const _AEM_BYTES_POST = 65536;
 	const _AEM_ADDRESSES_PER_USER = 31;
 	const _AEM_BYTES_PRIVATE = 4096 - sodium.crypto_box_PUBLICKEYBYTES - 1 - (_AEM_ADDRESSES_PER_USER * 9);
 	const _AEM_USER_MAXLEVEL = 3;
