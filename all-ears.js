@@ -343,6 +343,7 @@ function AllEars(readyCallback) {
 			case "m4a":
 			case "m4b":
 			case "mp3":
+			case "oga":
 			case "ogg":
 			case "opus":
 			case "wav":
