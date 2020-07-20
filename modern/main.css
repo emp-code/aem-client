@@ -165,7 +165,7 @@ noscript {
 	flex-direction: column;
 }
 
-#midright > img {
+#midright > img, #midright > video {
 	flex-grow: 1;
 	object-fit: contain;
 }
