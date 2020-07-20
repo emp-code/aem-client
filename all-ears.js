@@ -346,6 +346,14 @@ function AllEars(readyCallback) {
 			case "ogg":
 			case "wav":
 				return "audio";
+
+			case "avi":
+			case "m4v":
+			case "mp4":
+			case "mkv":
+			case "ogv":
+			case "webm":
+				return "video";
 		}
 	};
 
