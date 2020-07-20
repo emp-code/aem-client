@@ -118,7 +118,7 @@ function AllEars(readyCallback) {
 
 	function _NewUplMsg(id, ts, title, body) {
 		this.id = id;
-		this.timestamp = ts;
+		this.ts = ts;
 		this.title = title;
 		this.body = body;
 	}
@@ -576,7 +576,7 @@ function AllEars(readyCallback) {
 
 	this.GetUplMsgCount = function() {return _uplMsg.length;};
 	this.GetUplMsgIdHex = function(num) {return sodium.to_hex(_uplMsg[num].id);};
-	this.GetUplMsgTime  = function(num) {return _uplMsg[num].timestamp;};
+	this.GetUplMsgTime  = function(num) {return _uplMsg[num].ts;};
 	this.GetUplMsgTitle = function(num) {return _uplMsg[num].title;};
 	this.GetUplMsgBody  = function(num) {return _uplMsg[num].body;};
 	this.GetUplMsgType  = function(num) {return _GetFileType(_uplMsg[num].title);};
