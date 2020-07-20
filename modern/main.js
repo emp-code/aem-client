@@ -92,6 +92,7 @@ function displayFile(num) {
 		break;}
 
 		case "image": {
+			document.getElementById("midright").children[2].textContent = "";
 			const img = document.createElement("img");
 			img.src = URL.createObjectURL(new Blob([ae.GetUplMsgBody(num).buffer]));
 			document.getElementById("midright").appendChild(img);
