@@ -777,12 +777,12 @@ document.getElementById("btn_notepad_saveupl").onclick = function() {
 };
 
 document.getElementById("btn_upload").onclick = function() {
+	const btn = this;
 	const fileSelector = document.createElement("input");
 	fileSelector.type = "file";
 	fileSelector.click();
 
 	fileSelector.onchange = function() {
-		const btn = this;
 		btn.disabled = true;
 
 		const reader = new FileReader();
