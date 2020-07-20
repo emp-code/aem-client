@@ -69,9 +69,11 @@ function getMsgId(num) {
 }
 
 function clearDisplay() {
-	const el = document.getElementById("midright").children[2];
-	if (el.children.length > 0) URL.revokeObjectURL(el.children[0].src);
-	el.innerHTML = "";
+	const el = document.getElementById("midright").getElementsByTagName("img");
+	if (el.length !== 1) return;
+
+	URL.revokeObjectURL(el[0].src);
+	el[0].remove();
 }
 
 function displayFile(num) {
@@ -92,7 +94,7 @@ function displayFile(num) {
 		case "image": {
 			const img = document.createElement("img");
 			img.src = URL.createObjectURL(new Blob([ae.GetUplMsgBody(num).buffer]));
-			document.getElementById("midright").children[2].appendChild(img);
+			document.getElementById("midright").appendChild(img);
 		break;}
 	}
 }
