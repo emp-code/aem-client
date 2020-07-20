@@ -69,7 +69,9 @@ function getMsgId(num) {
 }
 
 function clearDisplay() {
-	const el = document.getElementById("midright").getElementsByTagName("img");
+	let el = document.getElementById("midright").getElementsByTagName("img");
+	if (el.length !== 1) el = document.getElementById("midright").getElementsByTagName("audio");
+	if (el.length !== 1) el = document.getElementById("midright").getElementsByTagName("video");
 	if (el.length !== 1) return;
 
 	URL.revokeObjectURL(el[0].src);
