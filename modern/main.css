@@ -161,6 +161,8 @@ noscript {
 
 #midright {
 	overflow-y: auto;
+	display: flex;
+	flex-direction: column;
 }
 
 #midright > table {
