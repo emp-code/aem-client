@@ -798,8 +798,6 @@ document.getElementById("btn_upload").onclick = function() {
 			});
 		};
 
-		const f = fileSelector.files[0];
-
 		reader.readAsArrayBuffer(fileSelector.files[0]);
 	};
 };
