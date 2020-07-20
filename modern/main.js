@@ -298,6 +298,7 @@ function addMessages() {
 
 				if (successBrowse) {
 					addMessages();
+					addUploads();
 					if (tabs[tab].cur < tabs[tab].max) document.getElementById("btn_rght").disabled = false;
 				}
 			});
