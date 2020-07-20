@@ -172,6 +172,7 @@ noscript {
 
 #midright > audio {
 	margin: 0 auto;
+	min-width: 90%;
 }
 
 #midright > table {
