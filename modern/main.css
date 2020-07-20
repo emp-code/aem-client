@@ -165,9 +165,13 @@ noscript {
 	flex-direction: column;
 }
 
-#midright img {
+#midright > img {
 	flex-grow: 1;
 	object-fit: contain;
+}
+
+#midright > audio {
+	margin: 0 auto;
 }
 
 #midright > table {
