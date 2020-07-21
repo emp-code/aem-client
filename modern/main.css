@@ -272,6 +272,10 @@ table, td {
 	opacity: 0.5;
 }
 
+#tbd_uploads td:nth-child(1) {
+	font-family: monospace, monospace;
+}
+
 .mono {
 	font-family: monospace, monospace;
 }
