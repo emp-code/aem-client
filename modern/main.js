@@ -26,6 +26,8 @@ const tabs = [
 	new TabState(0, 3, false, true) // Tools
 ];
 
+let showHeaders = false;
+
 let tab = 0;
 const TAB_INBOX = 0;
 const TAB_OUTBX = 1;
@@ -160,8 +162,27 @@ function displayMsg(isInt, num) {
 
 	document.getElementById("midright").children[0].hidden = false;
 	document.getElementById("midright").children[2].hidden = false;
-	document.getElementById("midright").children[1].textContent = isInt ? ae.GetIntMsgTitle(num) : ae.GetExtMsgTitle(num);
-	document.getElementById("midright").children[2].textContent = isInt ? ae.GetIntMsgBody(num) : ae.GetExtMsgBody(num);
+
+	if (isInt) {
+		document.getElementById("midright").children[1].textContent = ae.GetIntMsgTitle(num);
+		document.getElementById("midright").children[2].textContent = ae.GetIntMsgBody(num);
+	} else {
+		document.getElementById("midright").children[2].innerHTML = "";
+
+		const headers = document.createElement("p");
+		headers.textContent = ae.GetExtMsgHeaders(num);
+		headers.className = "mono";
+		headers.hidden = !showHeaders;
+		document.getElementById("midright").children[2].appendChild(headers);
+
+		const body = document.createElement("p");
+		body.textContent = ae.GetExtMsgBody(num);
+		document.getElementById("midright").children[2].appendChild(body);
+
+		document.getElementById("midright").children[1].textContent = ae.GetExtMsgTitle(num);
+		document.getElementById("midright").children[1].onclick = function() {showHeaders = !showHeaders; headers.hidden = !showHeaders;};
+		document.getElementById("midright").children[1].style.cursor = "pointer";
+	}
 
 	document.getElementById("readmsg_to").textContent = isInt ? ae.GetIntMsgTo(num) : ae.GetExtMsgTo(num);
 	document.getElementById("readmsg_date").children[0].textContent = new Date(ts * 1000).toISOString().slice(0, 19).replace("T", " ");
