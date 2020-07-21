@@ -276,6 +276,10 @@ table, td {
 	font-family: monospace, monospace;
 }
 
+#tbd_uploads td:nth-child(2) {
+	cursor: pointer;
+}
+
 .mono {
 	font-family: monospace, monospace;
 }
