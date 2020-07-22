@@ -107,7 +107,7 @@ function displayFile(num) {
 					img.requestFullscreen();
 				else
 					document.exitFullscreen();
-			}
+			};
 		break;}
 
 		case "audio": {
