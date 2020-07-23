@@ -335,8 +335,8 @@ function AllEars(readyCallback) {
 			case "bmp":
 			case "gif":
 			case "ico":
-			case "jpg":
 			case "jpeg":
+			case "jpg":
 			case "png":
 			case "webp":
 				return "image";
@@ -354,8 +354,8 @@ function AllEars(readyCallback) {
 
 			case "avi":
 			case "m4v":
-			case "mp4":
 			case "mkv":
+			case "mp4":
 			case "ogv":
 			case "ogx":
 			case "webm":
