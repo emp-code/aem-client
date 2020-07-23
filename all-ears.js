@@ -997,12 +997,12 @@ function AllEars(readyCallback) {
 						const msgTo = _addr32_decode(msgData.slice(11 + sodium.crypto_box_PUBLICKEYBYTES, 21 + sodium.crypto_box_PUBLICKEYBYTES));
 
 						const nonce = msgData.slice(21 + sodium.crypto_box_PUBLICKEYBYTES, 21 + sodium.crypto_box_PUBLICKEYBYTES + sodium.crypto_box_NONCEBYTES);
-						const msgEnc = msgData.slice(21 + sodium.crypto_box_PUBLICKEYBYTES + sodium.crypto_box_NONCEBYTES);
+						const msgBox = msgData.slice(21 + sodium.crypto_box_PUBLICKEYBYTES + sodium.crypto_box_NONCEBYTES);
 						let msgBin;
 						let msgTitle;
 						let msgBody;
 
-						try {msgBin = sodium.crypto_box_open_easy(msgEnc, nonce, msgFromPk, _userKeySecret, null);}
+						try {msgBin = sodium.crypto_box_open_easy(msgBox, nonce, msgFromPk, _userKeySecret, null);}
 						catch(e) {
 							msgTitle = "(error)";
 							msgBody = e;
