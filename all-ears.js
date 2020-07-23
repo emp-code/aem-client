@@ -28,9 +28,10 @@ function AllEars(readyCallback) {
 	const _AEM_ADDR_FLAG_ACCEXT = 1;
 
 	const _AEM_ADDR32_CHARS = "0123456789abcdefghjkmnpqrstuwxyz";
-	const _AEM_BYTES_POST = 65536;
 	const _AEM_ADDRESSES_PER_USER = 31;
+	const _AEM_BYTES_POST = 65536;
 	const _AEM_BYTES_PRIVATE = 4096 - sodium.crypto_box_PUBLICKEYBYTES - 1 - (_AEM_ADDRESSES_PER_USER * 9);
+	const _AEM_MSG_MINBLOCKS = 10;
 	const _AEM_USER_MAXLEVEL = 3;
 
 	const _AEM_ARGON2_MEMLIMIT = 67108864;
@@ -60,8 +61,8 @@ function AllEars(readyCallback) {
 	const _nullMsgId = new Uint8Array(16);
 
 	let _totalMsgCount = 0;
-	let _totalMsgKilos = 0;
-	let _readyMsgKilos = 0;
+	let _totalMsgBytes = 0;
+	let _readyMsgBytes = 0;
 
 	const _gkCountry = [];
 	const _gkDomain  = [];
@@ -548,8 +549,8 @@ function AllEars(readyCallback) {
 	this.GetAddressLimitShield = function(lvl) {return _maxAddressShield[lvl];};
 
 	this.GetTotalMsgCount = function() {return _totalMsgCount;};
-	this.GetTotalMsgKilos = function() {return _totalMsgKilos;};
-	this.GetReadyMsgKilos = function() {return _readyMsgKilos;};
+	this.GetTotalMsgBytes = function() {return _totalMsgBytes;};
+	this.GetReadyMsgBytes = function() {return _readyMsgBytes;};
 
 	this.GetExtMsgCount = function() {return _extMsg.length;};
 	this.GetExtMsgIdHex   = function(num) {return sodium.to_hex(_extMsg[num].id);};
@@ -894,27 +895,24 @@ function AllEars(readyCallback) {
 			if (!fetchOk) {callback(false); return;}
 
 			_totalMsgCount = new Uint16Array(browseData.slice(0, 2).buffer)[0];
-			_totalMsgKilos = new Uint32Array(new Uint8Array([browseData[2], browseData[3], browseData[4], 0]).buffer)[0];
+			_totalMsgBytes = new Uint32Array(browseData.slice(2, 6).buffer)[0] * 16;
 
-			let offset = 5;
+			let offset = 6;
+			if (browseData.length === offset) {callback(true); return;} // No messages or error getting messages
 
-			for (let msgNum = 0; msgNum < 128; msgNum++) {
-				const kib = browseData[offset];
-				if (kib === 0) break;
-				offset++;
+			while (offset < browseData.length) {
+				const msgBytes = (new Uint16Array(browseData.slice(offset, offset + 2).buffer)[0] + _AEM_MSG_MINBLOCKS) * 16;
+				offset += 2;
 
-				const msgEnc = browseData.slice(offset, offset + (kib * 1024));
+				const msgEnc = browseData.slice(offset, offset + msgBytes);
 
-				// Message ID: Every 64th byte of first kilo of encrypted data
-				const msgId = new Uint8Array(16);
-				for (let i = 0; i < 16; i++) msgId[i] = msgEnc[i * 64];
-
+				const msgId = msgEnc.slice(0, 16);
 				if (_MsgExists(msgId)) {
-					offset += (kib * 1024);
+					offset += msgBytes;
 					continue;
 				}
 
-				_readyMsgKilos += kib;
+				_readyMsgBytes += msgBytes;
 
 				if (!newest) {
 					for (let i = 0; i < 16; i++) _lastMsgId[i] = msgId[i];
@@ -924,22 +922,21 @@ function AllEars(readyCallback) {
 				try {msgData = sodium.crypto_box_seal_open(msgEnc, _userKeyPublic, _userKeySecret);}
 				catch(e) {
 					_intMsg.push(new _NewIntMsg(true, true, msgId, Date.now() / 1000, 3, null, "system", "system", "(error)", e));
-					offset += (kib * 1024);
+					offset += msgBytes;
 					continue;
 				}
 
-				const msgInfo = new Uint16Array(msgData.slice(0, 2).buffer)[0];
-				const padAmount = msgInfo >> 6;
-				// msgInfo & 15 unused
+				const msgInfo = msgData[0];
+				const padAmount = msgInfo & 15;
 
 				const padA = msgData.slice(msgData.length - sodium.crypto_sign_BYTES - padAmount, msgData.length - sodium.crypto_sign_BYTES);
 				const padB = sodium.randombytes_buf_deterministic(padAmount, msgData.slice(0, sodium.randombytes_SEEDBYTES), null);
 				const validPad = (padA && padB && padA.length === padB.length && _arraysEqual(padA, padB));
 				const validSig = sodium.crypto_sign_verify_detached(msgData.slice(msgData.length - sodium.crypto_sign_BYTES), msgData.slice(0, msgData.length - sodium.crypto_sign_BYTES), _AEM_SIG_PUBKEY);
 
-				const msgTs = new Uint32Array(msgData.slice(2, 6).buffer)[0];
+				const msgTs = new Uint32Array(msgData.slice(1, 5).buffer)[0];
 
-				msgData = msgData.slice(6, msgData.length - padAmount - sodium.crypto_sign_BYTES);
+				msgData = msgData.slice(5, msgData.length - padAmount - sodium.crypto_sign_BYTES);
 
 				switch (msgInfo & 48) {
 					case 0: { // ExtMsg
@@ -1022,8 +1019,6 @@ function AllEars(readyCallback) {
 						const nonce = msgData.slice(0, sodium.crypto_secretbox_NONCEBYTES);
 						const dec = sodium.crypto_secretbox_open_easy(msgData.slice(sodium.crypto_secretbox_NONCEBYTES), nonce, _userKeySymmetric);
 
-						// (dec[0] & 64) --> format
-
 						const lenTitle = (dec[0] & 63) + 1;
 						const msgTitle = sodium.to_string(dec.slice(1, 1 + lenTitle));
 						const msgBody = dec.slice(1 + lenTitle);
@@ -1035,7 +1030,7 @@ function AllEars(readyCallback) {
 					break;}
 				}
 
-				offset += (kib * 1024);
+				offset += msgBytes;
 			}
 
 			_extMsg.sort((a, b) => (a.ts < b.ts) ? 1 : -1);

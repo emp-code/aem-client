@@ -313,11 +313,11 @@ function addMessages() {
 		}
 	}
 
-	if (ae.GetReadyMsgKilos() < ae.GetTotalMsgKilos()) {
+	if (ae.GetReadyMsgBytes() < ae.GetTotalMsgBytes()) {
 		const inbox = document.getElementById("tbl_inbox");
 		const row = inbox.insertRow(-1);
 		const cell = row.insertCell(-1);
-		cell.textContent = "Load more (" + (ae.GetTotalMsgKilos() - ae.GetReadyMsgKilos()) + " KiB left)";
+		cell.textContent = "Load more (" + (ae.GetTotalMsgBytes() - ae.GetReadyMsgBytes()) / 1024 + " KiB left)";
 
 		row.onclick = function() {
 			this.onclick = "";
@@ -424,7 +424,7 @@ function reloadAccount() {
 	const row = tblAccs.insertRow(-1);
 	let cell;
 	cell = row.insertCell(-1); cell.textContent = ae.GetUserPkHex();
-	cell = row.insertCell(-1); cell.textContent = Math.round(ae.GetTotalMsgKilos() / 1024);
+	cell = row.insertCell(-1); cell.textContent = Math.round(ae.GetTotalMsgBytes() / 1024);
 	cell = row.insertCell(-1); cell.textContent = ae.GetAddressCountNormal();
 	cell = row.insertCell(-1); cell.textContent = ae.GetAddressCountShield();
 	cell = row.insertCell(-1); cell.textContent = ae.GetUserLevel();
