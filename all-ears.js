@@ -333,6 +333,7 @@ function AllEars(readyCallback) {
 
 			// For non-text formats, only formats supported by browsers are sensible
 			case "gif":
+			case "ico":
 			case "jpg":
 			case "jpeg":
 			case "png":
