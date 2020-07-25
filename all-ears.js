@@ -893,7 +893,7 @@ function AllEars(readyCallback) {
 
 		if (_arraysEqual(_lastMsgId, _nullMsgId)) newest = false;
 
-		_FetchEncrypted("message/browse", newest ? new Uint8Array([0]) : _lastMsgId, function(fetchOk, browseData) {
+		_FetchEncrypted("message/browse", newest ? _lastMsgId : new Uint8Array([0]), function(fetchOk, browseData) {
 			if (!fetchOk) {callback(false); return;}
 
 			_totalMsgCount = new Uint16Array(browseData.slice(0, 2).buffer)[0];
