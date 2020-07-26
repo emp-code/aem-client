@@ -57,8 +57,9 @@ function AllEars(readyCallback) {
 	const _extMsg = [];
 	const _intMsg = [];
 	const _uplMsg = [];
-	const _lastMsgId = new Uint8Array(16);
-	const _nullMsgId = new Uint8Array(16);
+
+	let _latestMsgId;
+	let _latestMsgTs = -1;
 
 	let _totalMsgCount = 0;
 	let _totalMsgBytes = 0;
@@ -891,9 +892,12 @@ function AllEars(readyCallback) {
 	this.Message_Browse = function(newest, callback) {
 		if (typeof(newest) !== "boolean") {callback(false); return;}
 
-		if (_arraysEqual(_lastMsgId, _nullMsgId)) newest = false;
+		if (!_latestMsgId) {
+			newest = false;
+			_latestMsgId = new Uint8Array(16);
+		}
 
-		_FetchEncrypted("message/browse", newest ? _lastMsgId : new Uint8Array([0]), function(fetchOk, browseData) {
+		_FetchEncrypted("message/browse", newest ? _latestMsgId : new Uint8Array([0]), function(fetchOk, browseData) {
 			if (!fetchOk) {callback(false); return;}
 
 			_totalMsgCount = new Uint16Array(browseData.slice(0, 2).buffer)[0];
@@ -916,10 +920,6 @@ function AllEars(readyCallback) {
 
 				_readyMsgBytes += msgBytes;
 
-				if (!newest) {
-					for (let i = 0; i < 16; i++) _lastMsgId[i] = msgId[i];
-				}
-
 				let msgData;
 				try {msgData = sodium.crypto_box_seal_open(msgEnc, _userKeyPublic, _userKeySecret);}
 				catch(e) {
@@ -937,6 +937,11 @@ function AllEars(readyCallback) {
 				const validSig = sodium.crypto_sign_verify_detached(msgData.slice(msgData.length - sodium.crypto_sign_BYTES), msgData.slice(0, msgData.length - sodium.crypto_sign_BYTES), _AEM_SIG_PUBKEY);
 
 				const msgTs = new Uint32Array(msgData.slice(1, 5).buffer)[0];
+
+				if (msgTs > _latestMsgTs) {
+					for (let i = 0; i < 16; i++) _latestMsgId[i] = msgId[i];
+					_latestMsgTs = msgTs;
+				}
 
 				msgData = msgData.slice(5, msgData.length - padAmount - sodium.crypto_sign_BYTES);
 
