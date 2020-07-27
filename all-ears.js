@@ -160,6 +160,7 @@ function AllEars(readyCallback) {
 			method: "POST",
 			credentials: "omit",
 			headers: noAccept,
+			mode: (_AEM_DOMAIN_API === document.domain) ? "same-origin" : "cors",
 			redirect: "error",
 			referrer: "no-referrer",
 			body: postData
