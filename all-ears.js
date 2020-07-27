@@ -29,9 +29,9 @@ function AllEars(readyCallback) {
 
 	const _AEM_ADDR32_CHARS = "0123456789abcdefghjkmnpqrstuwxyz";
 	const _AEM_ADDRESSES_PER_USER = 31;
-	const _AEM_BYTES_POST = 65536;
 	const _AEM_BYTES_PRIVATE = 4096 - sodium.crypto_box_PUBLICKEYBYTES - 1 - (_AEM_ADDRESSES_PER_USER * 9);
 	const _AEM_MSG_MINBLOCKS = 12;
+	const _AEM_API_BOX_SIZE_MAX = (Math.pow(2, 16) + _AEM_MSG_MINBLOCKS) * 16;
 	const _AEM_USER_MAXLEVEL = 3;
 
 	const _AEM_ARGON2_MEMLIMIT = 67108864;
@@ -156,23 +156,19 @@ function AllEars(readyCallback) {
 		});
 	};
 
-	const _FetchEncrypted = function(url, cleartext, callback) {
-		if (cleartext.length > _AEM_BYTES_POST) return callback(false);
+	const _FetchEncrypted = function(url, clearU8, callback) {
+		if (clearU8.length > _AEM_API_BOX_SIZE_MAX) return callback(false);
 
-		// postBox: the encrypted data to be sent
-		const clearU8 = new Uint8Array(_AEM_BYTES_POST);
-		clearU8.set(cleartext);
-
+		// postBox: clearU8 encrypted
 		const nonce = new Uint8Array(sodium.crypto_box_NONCEBYTES);
 		window.crypto.getRandomValues(nonce);
 		const postBox = sodium.crypto_box_easy(clearU8, nonce, _AEM_API_PUBKEY, _userKeySecret);
 
-		// sealBox: URL + Length + UPK + Nonce for postBox
-		const sealClear = new Uint8Array(16 + sodium.crypto_box_PUBLICKEYBYTES + sodium.crypto_box_NONCEBYTES);
-		sealClear.set(new Uint8Array(new Uint16Array([cleartext.length]).buffer));
-		sealClear.set(sodium.from_string(url), 2);
-		sealClear.set(nonce, 16);
-		sealClear.set(_userKeyPublic, 16 + sodium.crypto_box_NONCEBYTES);
+		// sealBox: URL + UPK + Nonce for postBox
+		const sealClear = new Uint8Array(14 + sodium.crypto_box_PUBLICKEYBYTES + sodium.crypto_box_NONCEBYTES);
+		sealClear.set(sodium.from_string(url));
+		sealClear.set(nonce, 14);
+		sealClear.set(_userKeyPublic, 14 + sodium.crypto_box_NONCEBYTES);
 		const sealBox = sodium.crypto_box_seal(sealClear, _AEM_API_PUBKEY);
 
 		// postMsg: sealBox + postBox
