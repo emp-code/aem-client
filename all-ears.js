@@ -16,7 +16,7 @@ function AllEars(readyCallback) {
 	const docSigPub = document.documentElement.getAttribute("data-aesigpub");
 	const docSaltNm = document.documentElement.getAttribute("data-aesaltnm");
 
-	if (!docApiPub || !docSaltNm || docApiPub.length !== sodium.crypto_box_SECRETKEYBYTES * 2 || docSigPub.length !== sodium.crypto_sign_PUBLICKEYBYTES * 2 || docSaltNm.length !== sodium.crypto_pwhash_SALTBYTES * 2) {
+	if (!docApiPub || !docSigPub || !docSaltNm || docApiPub.length !== sodium.crypto_box_SECRETKEYBYTES * 2 || docSigPub.length !== sodium.crypto_sign_PUBLICKEYBYTES * 2 || docSaltNm.length !== sodium.crypto_pwhash_SALTBYTES * 2) {
 		readyCallback(false);
 		return;
 	}
