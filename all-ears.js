@@ -22,6 +22,23 @@ function AllEars(readyCallback) {
 	}
 
 // Private constants - must match server
+	const _AEM_API_ACCOUNT_BROWSE = 0;
+	const _AEM_API_ACCOUNT_CREATE = 1;
+	const _AEM_API_ACCOUNT_DELETE = 2;
+	const _AEM_API_ACCOUNT_UPDATE = 3;
+	const _AEM_API_ADDRESS_CREATE = 4;
+	const _AEM_API_ADDRESS_DELETE = 5;
+	const _AEM_API_ADDRESS_LOOKUP = 6;
+	const _AEM_API_ADDRESS_UPDATE = 7;
+	const _AEM_API_MESSAGE_BROWSE = 8;
+	const _AEM_API_MESSAGE_CREATE = 9;
+	const _AEM_API_MESSAGE_DELETE = 10;
+	const _AEM_API_MESSAGE_UPLOAD = 11;
+	const _AEM_API_PRIVATE_UPDATE = 12;
+	const _AEM_API_SETTING_LIMITS = 13;
+	const _AEM_API_INTERNAL_EXIST = 14;
+	const _AEM_API_INTERNAL_LEVEL = 15;
+
 	const _AEM_ADDR_FLAG_SHIELD = 128;
 	const _AEM_ADDR_FLAG_USE_GK = 4;
 	const _AEM_ADDR_FLAG_ACCINT = 2;
@@ -156,7 +173,7 @@ function AllEars(readyCallback) {
 		});
 	};
 
-	const _FetchEncrypted = function(url, clearU8, callback) {
+	const _FetchEncrypted = function(apiCmd, clearU8, callback) {
 		if (clearU8.length > _AEM_API_BOX_SIZE_MAX) return callback(false);
 
 		// postBox: clearU8 encrypted
@@ -165,10 +182,10 @@ function AllEars(readyCallback) {
 		const postBox = sodium.crypto_box_easy(clearU8, nonce, _AEM_API_PUBKEY, _userKeySecret);
 
 		// sealBox: URL + UPK + Nonce for postBox
-		const sealClear = new Uint8Array(14 + sodium.crypto_box_PUBLICKEYBYTES + sodium.crypto_box_NONCEBYTES);
-		sealClear.set(sodium.from_string(url));
-		sealClear.set(nonce, 14);
-		sealClear.set(_userKeyPublic, 14 + sodium.crypto_box_NONCEBYTES);
+		const sealClear = new Uint8Array(1 + sodium.crypto_box_PUBLICKEYBYTES + sodium.crypto_box_NONCEBYTES);
+		sealClear[0] = apiCmd;
+		sealClear.set(nonce, 1);
+		sealClear.set(_userKeyPublic, 1 + sodium.crypto_box_NONCEBYTES);
 		const sealBox = sodium.crypto_box_seal(sealClear, _AEM_API_PUBKEY);
 
 		// postMsg: sealBox + postBox
@@ -642,7 +659,7 @@ function AllEars(readyCallback) {
 	this.Account_Browse = function(page, callback) {
 		if (typeof(page) !== "number" || page < 0 || page > 255) {callback(false); return;}
 
-		_FetchEncrypted("account/browse", new Uint8Array([page]), function(fetchOk, browseData) {
+		_FetchEncrypted(_AEM_API_ACCOUNT_BROWSE, new Uint8Array([page]), function(fetchOk, browseData) {
 			if (!fetchOk) {callback(false); return;}
 
 			for (let i = 0; i < 4; i++) {
@@ -756,7 +773,7 @@ function AllEars(readyCallback) {
 	};
 
 	this.Account_Create = function(pk_hex, callback) {
-		_FetchEncrypted("account/create", sodium.from_hex(pk_hex), function(fetchOk) {
+		_FetchEncrypted(_AEM_API_ACCOUNT_CREATE, sodium.from_hex(pk_hex), function(fetchOk) {
 			if (!fetchOk) {callback(false); return;}
 
 			_admin_userPkHex.push(pk_hex);
@@ -770,7 +787,7 @@ function AllEars(readyCallback) {
 	};
 
 	this.Account_Delete = function(pk_hex, callback) {
-		_FetchEncrypted("account/delete", sodium.from_hex(pk_hex), function(fetchOk) {
+		_FetchEncrypted(_AEM_API_ACCOUNT_DELETE, sodium.from_hex(pk_hex), function(fetchOk) {
 			if (!fetchOk) {callback(false); return;}
 
 			let num = -1;
@@ -800,7 +817,7 @@ function AllEars(readyCallback) {
 		upData[0] = level;
 		upData.set(sodium.from_hex(pk_hex), 1);
 
-		_FetchEncrypted("account/update", upData, function(fetchOk) {
+		_FetchEncrypted(_AEM_API_ACCOUNT_UPDATE, upData, function(fetchOk) {
 			if (!fetchOk) {callback(false); return;}
 
 			let num = -1;
@@ -820,7 +837,7 @@ function AllEars(readyCallback) {
 
 	this.Address_Create = function(addr, callback) {
 		if (addr == "SHIELD") {
-			_FetchEncrypted("address/create", sodium.from_string("SHIELD"), function(fetchOk, byteArray) {
+			_FetchEncrypted(_AEM_API_ADDRESS_CREATE, sodium.from_string("SHIELD"), function(fetchOk, byteArray) {
 				if (!fetchOk) {callback(false); return;}
 
 				_userAddress.push(new _NewAddress(byteArray.slice(0, 8), byteArray.slice(8, 18), true, true, false, false));
@@ -841,7 +858,7 @@ function AllEars(readyCallback) {
 			hash[6] = full[6] ^ full[14];
 			hash[7] = full[7] ^ full[15];
 
-			_FetchEncrypted("address/create", hash, function(fetchOk) {
+			_FetchEncrypted(_AEM_API_ADDRESS_CREATE, hash, function(fetchOk) {
 				if (!fetchOk) {callback(false); return;}
 
 				_userAddress.push(new _NewAddress(hash, addr32, false, true, false, false));
@@ -851,7 +868,7 @@ function AllEars(readyCallback) {
 	};
 
 	this.Address_Delete = function(num, callback) {
-		_FetchEncrypted("address/delete", _userAddress[num].hash, function(fetchOk) {
+		_FetchEncrypted(_AEM_API_ADDRESS_DELETE, _userAddress[num].hash, function(fetchOk) {
 			if (!fetchOk) {
 				callback(false);
 				return;
@@ -863,7 +880,7 @@ function AllEars(readyCallback) {
 	};
 
 	this.Address_Lookup = function(addr, callback) {
-		_FetchEncrypted("address/lookup", sodium.from_string(addr), function(fetchOk, addr_pk) {
+		_FetchEncrypted(_AEM_API_ADDRESS_LOOKUP, sodium.from_string(addr), function(fetchOk, addr_pk) {
 			callback(fetchOk? addr_pk : null);
 		});
 	};
@@ -882,7 +899,7 @@ function AllEars(readyCallback) {
 			data[(i * 9) + 8] = flags;
 		}
 
-		_FetchEncrypted("address/update", data, function(fetchOk) {callback(fetchOk);});
+		_FetchEncrypted(_AEM_API_ADDRESS_UPDATE, data, function(fetchOk) {callback(fetchOk);});
 	};
 
 	this.Message_Browse = function(newest, callback) {
@@ -893,7 +910,7 @@ function AllEars(readyCallback) {
 			_latestMsgId = new Uint8Array(16);
 		}
 
-		_FetchEncrypted("message/browse", newest ? _latestMsgId : new Uint8Array([0]), function(fetchOk, browseData) {
+		_FetchEncrypted(_AEM_API_MESSAGE_BROWSE, newest ? _latestMsgId : new Uint8Array([0]), function(fetchOk, browseData) {
 			if (!fetchOk) {callback(false); return;}
 
 			_totalMsgCount = new Uint16Array(browseData.slice(0, 2).buffer)[0];
@@ -1051,7 +1068,7 @@ function AllEars(readyCallback) {
 			if (typeof(replyId) !== "string") {callback(false); return;}
 
 			// 'x' is 01111000 in ASCII. Addr32 understands this as a length of 16, which is higher than the maximum 15.
-			_FetchEncrypted("message/create", sodium.from_string("x" + addr_from + "\n" + addr_to + "\n" + replyId + "\n" + title + "\n" + body), function(fetchOk) {callback(fetchOk);});
+			_FetchEncrypted(_AEM_API_MESSAGE_CREATE, sodium.from_string("x" + addr_from + "\n" + addr_to + "\n" + replyId + "\n" + title + "\n" + body), function(fetchOk) {callback(fetchOk);});
 			return;
 		}
 
@@ -1077,7 +1094,7 @@ function AllEars(readyCallback) {
 		final.set(nonce, 20 + sodium.crypto_box_PUBLICKEYBYTES);
 		final.set(msgBox, 20 + sodium.crypto_box_PUBLICKEYBYTES + sodium.crypto_box_NONCEBYTES);
 
-		_FetchEncrypted("message/create", final, function(fetchOk) {callback(fetchOk);});
+		_FetchEncrypted(_AEM_API_MESSAGE_CREATE, final, function(fetchOk) {callback(fetchOk);});
 	};
 
 	this.Message_Delete = function(hexIds, callback) {
@@ -1099,7 +1116,7 @@ function AllEars(readyCallback) {
 			data.set(id, i * 16);
 		}
 
-		_FetchEncrypted("message/delete", data, function(fetchOk) {
+		_FetchEncrypted(_AEM_API_MESSAGE_DELETE, data, function(fetchOk) {
 			if (!fetchOk) {callback(false); return;}
 
 			for (let i = 0; i < hexIds.length; i++) {
@@ -1166,7 +1183,7 @@ function AllEars(readyCallback) {
 		final.set(nonce);
 		final.set(sbox, sodium.crypto_secretbox_NONCEBYTES);
 
-		_FetchEncrypted("message/upload", final, function(fetchOk) {
+		_FetchEncrypted(_AEM_API_MESSAGE_UPLOAD, final, function(fetchOk) {
 			if (!fetchOk) {callback(false); return;}
 
 			_uplMsg.push(new _NewUplMsg(null, Date.now() / 1000, title, body)); //TODO: msgId
@@ -1213,7 +1230,7 @@ function AllEars(readyCallback) {
 		final.set(nonce);
 		final.set(sbox, sodium.crypto_secretbox_NONCEBYTES);
 
-		_FetchEncrypted("private/update", final, function(fetchOk) {callback(fetchOk);});
+		_FetchEncrypted(_AEM_API_PRIVATE_UPDATE, final, function(fetchOk) {callback(fetchOk);});
 	};
 
 	readyCallback(true);
