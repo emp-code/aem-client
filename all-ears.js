@@ -152,14 +152,13 @@ function AllEars(readyCallback) {
 	}
 
 	const _FetchBinary = function(url, postData, callback) {
-		const noAccept = new Headers();
-		noAccept.set("Accept-Language", "");
-		noAccept.set("Accept", "");
-
 		fetch(url, {
 			method: "POST",
 			credentials: "omit",
-			headers: noAccept,
+			headers: new Headers({
+				"Accept": "",
+				"Accept-Language": ""
+			}),
 			mode: (_AEM_DOMAIN_API === document.domain) ? "same-origin" : "cors",
 			redirect: "error",
 			referrer: "no-referrer",
