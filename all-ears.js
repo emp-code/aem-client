@@ -1165,7 +1165,7 @@ function AllEars(readyCallback) {
 		const u8body = (typeof(body) === "string") ? sodium.from_string(body) : body;
 
 		const lenData = 1 + u8title.length + u8body.length;
-		if (lenData + sodium.crypto_secretbox_NONCEBYTES + sodium.crypto_secretbox_MACBYTES > _AEM_BYTES_POST) {callback(false); return;}
+		if (lenData + sodium.crypto_secretbox_NONCEBYTES + sodium.crypto_secretbox_MACBYTES > _AEM_API_BOX_SIZE_MAX) {callback(false); return;}
 
 		const u8data = new Uint8Array(lenData);
 		u8data[0] = u8title.length - 1;
