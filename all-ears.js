@@ -151,8 +151,8 @@ function AllEars(readyCallback) {
 		this.use_gk = use_gk;
 	}
 
-	const _FetchBinary = function(url, postData, callback) {
-		fetch(url, {
+	const _FetchBinary = function(postData, callback) {
+		fetch((_AEM_DOMAIN_API.endsWith(".onion") ? "http://" : "https://") + _AEM_DOMAIN_API + ":302/api", {
 			method: "POST",
 			credentials: "omit",
 			headers: new Headers({
@@ -193,7 +193,7 @@ function AllEars(readyCallback) {
 		postMsg.set(sealBox);
 		postMsg.set(postBox, sealBox.length);
 
-		_FetchBinary((_AEM_DOMAIN_API.endsWith(".onion") ? "http://" : "https://") + _AEM_DOMAIN_API + ":302/api", postMsg, function(success, encData) {
+		_FetchBinary(postMsg, function(success, encData) {
 			if (!success) {callback(false, null); return;}
 
 			let decData;
