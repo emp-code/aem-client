@@ -152,14 +152,14 @@ function AllEars(readyCallback) {
 	}
 
 	const _FetchBinary = function(url, postData, callback) {
-		const nolang = new Headers();
-		nolang.append("Accept-Language", "");
-		nolang.append("Accept", "");
+		const noAccept = new Headers();
+		noAccept.append("Accept-Language", "");
+		noAccept.append("Accept", "");
 
 		fetch(url, {
 			method: "POST",
 			credentials: "omit",
-			headers: nolang,
+			headers: noAccept,
 			redirect: "error",
 			referrer: "no-referrer",
 			body: postData
