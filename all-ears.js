@@ -181,7 +181,7 @@ function AllEars(readyCallback) {
 		window.crypto.getRandomValues(nonce);
 		const postBox = sodium.crypto_box_easy(clearU8, nonce, _AEM_API_PUBKEY, _userKeySecret);
 
-		// sealBox: URL + UPK + Nonce for postBox
+		// sealBox: apiCmd + UPK + Nonce for postBox
 		const sealClear = new Uint8Array(1 + sodium.crypto_box_PUBLICKEYBYTES + sodium.crypto_box_NONCEBYTES);
 		sealClear[0] = apiCmd;
 		sealClear.set(nonce, 1);
