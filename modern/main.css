@@ -168,6 +168,7 @@ noscript {
 #midright > img, #midright > video {
 	flex-grow: 1;
 	object-fit: contain;
+	height: 1px;
 }
 
 #midright > audio {
