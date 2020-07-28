@@ -311,7 +311,7 @@ function AllEars(readyCallback) {
 		const ext = filename.lastIndexOf(".");
 		if (ext < 0) return null;
 
-		switch (filename.substr(ext + 1)) {
+		switch (filename.substr(ext + 1).toLowerCase()) {
 			case "bat":
 			case "c":
 			case "c++":
