@@ -371,6 +371,7 @@ function AllEars(readyCallback) {
 			case "avi":
 			case "m4v":
 			case "mkv":
+			case "mov":
 			case "mp4":
 			case "ogv":
 			case "ogx":
