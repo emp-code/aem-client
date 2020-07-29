@@ -74,6 +74,7 @@ function clearDisplay() {
 	let el = document.getElementById("midright").getElementsByTagName("img");
 	if (el.length !== 1) el = document.getElementById("midright").getElementsByTagName("audio");
 	if (el.length !== 1) el = document.getElementById("midright").getElementsByTagName("video");
+	if (el.length !== 1) el = document.getElementById("midright").getElementsByTagName("embed");
 	if (el.length !== 1) return;
 
 	URL.revokeObjectURL(el[0].src);
@@ -122,6 +123,14 @@ function displayFile(num) {
 			document.getElementById("midright").children[2].hidden = true;
 			const el = document.createElement("video");
 			el.controls = "controls";
+			el.src = URL.createObjectURL(new Blob([ae.GetUplMsgBody(num).buffer]));
+			document.getElementById("midright").appendChild(el);
+		break;}
+
+		case "pdf": {
+			document.getElementById("midright").children[2].hidden = true;
+			const el = document.createElement("embed");
+			el.type = "application/pdf";
 			el.src = URL.createObjectURL(new Blob([ae.GetUplMsgBody(num).buffer]));
 			document.getElementById("midright").appendChild(el);
 		break;}

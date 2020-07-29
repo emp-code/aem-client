@@ -379,6 +379,9 @@ function AllEars(readyCallback) {
 			case "ogx":
 			case "webm":
 				return "video";
+
+			case "pdf":
+				return "pdf";
 		}
 	};
 
