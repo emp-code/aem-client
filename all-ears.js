@@ -75,8 +75,10 @@ function AllEars(readyCallback) {
 	const _intMsg = [];
 	const _uplMsg = [];
 
-	let _latestMsgId;
-	let _latestMsgTs = -1;
+	let _newestMsgId = new Uint8Array(16);
+	let _oldestMsgId = new Uint8Array(16);
+	let _newestMsgTs = -1;
+	let _oldestMsgTs = Math.pow(2, 32);
 
 	let _totalMsgCount = 0;
 	let _totalMsgBytes = 0;
@@ -908,12 +910,14 @@ function AllEars(readyCallback) {
 	this.Message_Browse = function(newest, callback) {
 		if (typeof(newest) !== "boolean") {callback(false); return;}
 
-		if (!_latestMsgId) {
-			newest = false;
-			_latestMsgId = new Uint8Array(16);
-		}
+		let fetchId;
+		if (_newestMsgTs !== -1) {
+			fetchId = new Uint8Array(17);
+			fetchId[0] = newest;
+			fetchId.set(newest? _newestMsgId : _oldestMsgId, 1);
+		} else fetchId = new Uint8Array([0]);
 
-		_FetchEncrypted(_AEM_API_MESSAGE_BROWSE, newest ? _latestMsgId : new Uint8Array([0]), function(fetchOk, browseData) {
+		_FetchEncrypted(_AEM_API_MESSAGE_BROWSE, fetchId, function(fetchOk, browseData) {
 			if (!fetchOk) {callback(false); return;}
 
 			_totalMsgCount = new Uint16Array(browseData.slice(0, 2).buffer)[0];
@@ -954,9 +958,14 @@ function AllEars(readyCallback) {
 
 				const msgTs = new Uint32Array(msgData.slice(1, 5).buffer)[0];
 
-				if (msgTs > _latestMsgTs) {
-					for (let i = 0; i < 16; i++) _latestMsgId[i] = msgId[i];
-					_latestMsgTs = msgTs;
+				if (msgTs > _newestMsgTs) {
+					for (let i = 0; i < 16; i++) _newestMsgId[i] = msgId[i];
+					_newestMsgTs = msgTs;
+				}
+
+				if (msgTs < _oldestMsgTs) {
+					for (let i = 0; i < 16; i++) _oldestMsgId[i] = msgId[i];
+					_oldestMsgTs = msgTs;
 				}
 
 				msgData = msgData.slice(5, msgData.length - padAmount - sodium.crypto_sign_BYTES);
