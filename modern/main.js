@@ -142,7 +142,7 @@ function displayFile(num) {
 			el.allow = "";
 			el.sandbox = "";
 			el.csp = "base-uri 'none'; child-src 'none'; connect-src 'none'; default-src 'none'; font-src 'none'; form-action 'none'; frame-ancestors 'none'; frame-src 'none'; img-src 'none'; manifest-src 'none'; media-src 'none'; object-src 'none'; script-src 'none'; style-src 'none'; worker-src 'none';";
-			el.src = URL.createObjectURL(new Blob([ae.GetUplMsgBody(num).buffer], {type: "text/html"}));
+			el.srcdoc = sodium.to_string(ae.GetUplMsgBody(num).buffer);
 			document.getElementById("midright").appendChild(el);
 		break;}
 	}
