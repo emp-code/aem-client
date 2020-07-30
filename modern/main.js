@@ -132,7 +132,7 @@ function displayFile(num) {
 			document.getElementById("midright").children[2].hidden = true;
 			const el = document.createElement("embed");
 			el.type = "application/pdf";
-			el.src = URL.createObjectURL(new Blob([ae.GetUplMsgBody(num).buffer]));
+			el.src = URL.createObjectURL(new Blob([ae.GetUplMsgBody(num).buffer], {type: "application/pdf"}));
 			document.getElementById("midright").appendChild(el);
 		break;}
 
