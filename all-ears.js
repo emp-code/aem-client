@@ -326,8 +326,6 @@ function AllEars(readyCallback) {
 			case "h++":
 			case "hh":
 			case "hpp":
-			case "htm":
-			case "html":
 			case "hxx":
 			case "ini":
 			case "java":
@@ -382,6 +380,10 @@ function AllEars(readyCallback) {
 
 			case "pdf":
 				return "pdf";
+
+			case "html":
+			case "htm":
+				return "html";
 		}
 	};
 

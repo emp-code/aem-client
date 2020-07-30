@@ -75,6 +75,7 @@ function clearDisplay() {
 	if (el.length !== 1) el = document.getElementById("midright").getElementsByTagName("audio");
 	if (el.length !== 1) el = document.getElementById("midright").getElementsByTagName("video");
 	if (el.length !== 1) el = document.getElementById("midright").getElementsByTagName("embed");
+	if (el.length !== 1) el = document.getElementById("midright").getElementsByTagName("iframe");
 	if (el.length !== 1) return;
 
 	URL.revokeObjectURL(el[0].src);
@@ -132,6 +133,16 @@ function displayFile(num) {
 			const el = document.createElement("embed");
 			el.type = "application/pdf";
 			el.src = URL.createObjectURL(new Blob([ae.GetUplMsgBody(num).buffer]));
+			document.getElementById("midright").appendChild(el);
+		break;}
+
+		case "html": {
+			document.getElementById("midright").children[2].hidden = true;
+			const el = document.createElement("iframe");
+			el.allow = "";
+			el.sandbox = "";
+			el.csp = "base-uri 'none'; child-src 'none'; connect-src 'none'; default-src 'none'; font-src 'none'; form-action 'none'; frame-ancestors 'none'; frame-src 'none'; img-src 'none'; manifest-src 'none'; media-src 'none'; object-src 'none'; script-src 'none'; style-src 'none'; worker-src 'none';";
+			el.src = URL.createObjectURL(new Blob([ae.GetUplMsgBody(num).buffer], {type: "text/html"}));
 			document.getElementById("midright").appendChild(el);
 		break;}
 	}

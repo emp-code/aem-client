@@ -165,7 +165,12 @@ noscript {
 	flex-direction: column;
 }
 
-#midright > img, #midright > video, #midright > embed {
+#midright > iframe {
+	background: #808080;
+	border: 0;
+}
+
+#midright > img, #midright > video, #midright > embed, #midright > iframe {
 	flex-grow: 1;
 	object-fit: contain;
 	height: 1px;
