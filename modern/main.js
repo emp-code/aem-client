@@ -4,6 +4,12 @@ sodium.ready.then(function() {
 
 const ae = new AllEars(function(ok) {
 	if (ok) {
+		const greeting = localStorage.greeting;
+		if (greeting) {
+			document.getElementById("greeting").textContent = greeting;
+			document.getElementById("txt_pg").value = greeting;
+		}
+
 		document.getElementById("txt_skey").style.background = "#466";
 		document.getElementById("txt_skey").maxLength = "64";
 	} else {
@@ -872,6 +878,10 @@ document.getElementById("btn_upload").onclick = function() {
 
 		reader.readAsArrayBuffer(fileSelector.files[0]);
 	};
+};
+
+document.getElementById("btn_pg").onclick = function() {
+	localStorage.greeting = document.getElementById("txt_pg").value;
 };
 
 document.getElementById("txt_skey").onkeyup = function(event) {
