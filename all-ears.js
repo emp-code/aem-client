@@ -161,7 +161,7 @@ function AllEars(readyCallback) {
 				"Accept": "",
 				"Accept-Language": ""
 			}),
-			mode: (_AEM_DOMAIN_API === document.domain) ? "same-origin" : "cors",
+			mode: "cors",
 			redirect: "error",
 			referrer: "no-referrer",
 			body: postData
