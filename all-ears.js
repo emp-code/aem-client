@@ -924,12 +924,12 @@ function AllEars(readyCallback) {
 
 		_FetchEncrypted(_AEM_API_MESSAGE_BROWSE, fetchId, function(fetchOk, browseData) {
 			if (!fetchOk) {callback(false); return;}
+			if (browseData.length <= 6) {callback(true); return;} // No messages or error getting messages
 
 			_totalMsgCount = new Uint16Array(browseData.slice(0, 2).buffer)[0];
 			_totalMsgBytes = new Uint32Array(browseData.slice(2, 6).buffer)[0] * 16;
 
 			let offset = 6;
-			if (browseData.length === offset) {callback(true); return;} // No messages or error getting messages
 
 			while (offset < browseData.length) {
 				const msgBytes = (new Uint16Array(browseData.slice(offset, offset + 2).buffer)[0] + _AEM_MSG_MINBLOCKS) * 16;
