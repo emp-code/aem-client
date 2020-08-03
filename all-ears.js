@@ -1307,7 +1307,7 @@ function AllEars(readyCallback) {
 		_FetchEncrypted(_AEM_API_MESSAGE_UPLOAD, final, function(fetchOk) {
 			if (!fetchOk) {callback(false); return;}
 
-			_uplMsg.push(new _NewUplMsg(null, Date.now() / 1000, title, body)); //TODO: msgId
+			_uplMsg.unshift(new _NewUplMsg(null, Date.now() / 1000, title, body));
 			callback(true);
 		});
 	};
