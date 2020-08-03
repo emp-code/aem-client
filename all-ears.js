@@ -616,7 +616,7 @@ function AllEars(readyCallback) {
 		}
 
 		return offset;
-	}
+	};
 
 // Public
 	this.Reset = function() {
