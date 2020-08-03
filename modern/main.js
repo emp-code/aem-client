@@ -373,8 +373,7 @@ function addUploads() {
 		cell = row.insertCell(-1); cell.textContent = ae.GetUplMsgTitle(i);
 		cell.onclick = function() {displayFile(this.parentElement.rowIndex - 1);};
 
-		cell = row.insertCell(-1); cell.textContent = ""; // Format
-		cell = row.insertCell(-1); cell.textContent = ""; // Size
+		cell = row.insertCell(-1); cell.textContent = (ae.GetUplMsgBytes(i) / 1024).toFixed(1);
 
 		cell = row.insertCell(-1);
 		if (ae.GetUplMsgIdHex(i)) {

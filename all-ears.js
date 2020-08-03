@@ -140,11 +140,12 @@ function AllEars(readyCallback) {
 		this.body = body;
 	}
 
-	function _NewUplMsg(id, ts, title, body) {
+	function _NewUplMsg(id, ts, title, body, blocks) {
 		this.id = id;
 		this.ts = ts;
 		this.title = title;
 		this.body = body;
+		this.blocks = blocks;
 	}
 
 	function _NewAddress(hash, addr32, is_shd, accExt, accInt, use_gk) {
@@ -713,6 +714,7 @@ function AllEars(readyCallback) {
 	this.GetUplMsgTime  = function(num) {return _uplMsg[num].ts;};
 	this.GetUplMsgTitle = function(num) {return _uplMsg[num].title;};
 	this.GetUplMsgBody  = function(num) {return _uplMsg[num].body;};
+	this.GetUplMsgBytes = function(num) {return _uplMsg[num].blocks * 16;};
 	this.GetUplMsgType  = function(num) {return _GetFileType(_uplMsg[num].title);};
 
 	this.GetGatekeeperCountry = function() {return _gkCountry;};
@@ -1165,7 +1167,7 @@ function AllEars(readyCallback) {
 						const msgTitle = sodium.to_string(dec.slice(1, 1 + lenTitle));
 						const msgBody = dec.slice(1 + lenTitle);
 
-						_uplMsg.push(new _NewUplMsg(msgId, msgTs, msgTitle, msgBody));
+						_uplMsg.push(new _NewUplMsg(msgId, msgTs, msgTitle, msgBody, msgBytes / 16));
 					break;}
 
 					case 48: { // Unused
@@ -1308,7 +1310,7 @@ function AllEars(readyCallback) {
 		_FetchEncrypted(_AEM_API_MESSAGE_UPLOAD, final, function(fetchOk) {
 			if (!fetchOk) {callback(false); return;}
 
-			_uplMsg.unshift(new _NewUplMsg(null, Date.now() / 1000, title, body));
+			_uplMsg.unshift(new _NewUplMsg(null, Date.now() / 1000, title, body, (final.length + sodium.crypto_box_SEALBYTES) / 16));
 			callback(true);
 		});
 	};
