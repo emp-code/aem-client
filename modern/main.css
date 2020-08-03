@@ -259,7 +259,7 @@ table, td {
 	opacity: 0.5;
 }
 
-#tbl_inbox tr:hover {
+#tbl_inbox tr:hover, #tbd_uploads tr:hover {
 	background: #1a1a1a;
 	cursor: pointer;
 }
