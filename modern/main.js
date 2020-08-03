@@ -348,7 +348,7 @@ function addMessages() {
 		row.onclick = function() {
 			this.onclick = "";
 
-			ae.Message_Browse(false, function(successBrowse) {
+			ae.Message_Browse(false, false, function(successBrowse) {
 				document.getElementById("tbl_inbox").style.opacity = 1;
 
 				if (successBrowse) {
@@ -496,6 +496,8 @@ function reloadAccount() {
 	}
 
 	updateAddressCounts();
+	addMessages();
+	addUploads();
 }
 
 function deleteAddress(addr) {
@@ -612,7 +614,7 @@ document.getElementById("btn_updt").onclick = function() {
 	if (tab === TAB_INBOX) {
 		document.getElementById("tbl_inbox").style.opacity = 0.5;
 
-		ae.Message_Browse(true, function(successBrowse) {
+		ae.Message_Browse(true, false, function(successBrowse) {
 			document.getElementById("tbl_inbox").style.opacity = 1;
 
 			if (successBrowse) {
@@ -901,15 +903,12 @@ document.getElementById("btn_enter").onclick = function() {
 
 	ae.SetKeys(txtSkey.value, function(successSetKeys) {
 		if (successSetKeys) {
-			ae.Account_Browse(0, function(successBrowse) {
+			ae.Message_Browse(false, true, function(successBrowse) {
 				if (successBrowse) {
 					txtSkey.value = "";
-
-					reloadAccount();
 					document.getElementById("div_begin").hidden = true;
 					document.getElementById("div_main").style.display = "grid";
-
-					document.getElementById("btn_updt").click();
+					reloadAccount();
 				} else {
 					console.log("Failed to enter");
 					btn.disabled = false;

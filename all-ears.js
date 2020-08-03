@@ -44,6 +44,9 @@ function AllEars(readyCallback) {
 	const _AEM_ADDR_FLAG_ACCINT = 2;
 	const _AEM_ADDR_FLAG_ACCEXT = 1;
 
+	const _AEM_FLAG_UINFO = 2;
+	const _AEM_FLAG_NEWER = 1;
+
 	const _AEM_ADDR32_CHARS = "0123456789abcdefghjkmnpqrstuwxyz";
 	const _AEM_ADDRESSES_PER_USER = 31;
 	const _AEM_BYTES_PRIVATE = 4096 - sodium.crypto_box_PUBLICKEYBYTES - 1 - (_AEM_ADDRESSES_PER_USER * 9);
@@ -523,6 +526,98 @@ function AllEars(readyCallback) {
 		}
 	};
 
+	const _ParseUinfo = function(browseData) {
+		_userLevel = browseData[0] & 3;
+
+		for (let i = 0; i < 4; i++) {
+			if (i === _userLevel) {
+				_maxStorage.push(browseData[1]);
+				_maxAddressNormal.push(browseData[2]);
+				_maxAddressShield.push(browseData[3]);
+			} else {
+				// Unknown
+				_maxStorage.push(0);
+				_maxAddressNormal.push(0);
+				_maxAddressShield.push(0);
+			}
+		}
+
+		// Addresses
+		let offset = 4;
+		for (let i = 0; i < (browseData[0] >> 3); i++) {
+			const hash = browseData.slice(offset, offset + 8);
+			const accExt = (browseData[offset + 8] & _AEM_ADDR_FLAG_ACCEXT) > 0;
+			const accInt = (browseData[offset + 8] & _AEM_ADDR_FLAG_ACCINT) > 0;
+			const use_gk = (browseData[offset + 8] & _AEM_ADDR_FLAG_USE_GK) > 0;
+			const is_shd = (browseData[offset + 8] & _AEM_ADDR_FLAG_SHIELD) > 0;
+
+			_userAddress.push(new _NewAddress(hash, null, is_shd, accExt, accInt, use_gk));
+			offset += 9;
+		}
+
+		// Private field
+		const privNonce = browseData.slice(offset, offset + sodium.crypto_secretbox_NONCEBYTES);
+		let privData;
+
+		try {privData = sodium.crypto_secretbox_open_easy(browseData.slice(offset + sodium.crypto_secretbox_NONCEBYTES, offset + _AEM_BYTES_PRIVATE), privNonce, _userKeySymmetric);}
+		catch(e) {
+			console.log("Private data field decryption failed:" + e);
+			return offset;
+		}
+
+		offset += _AEM_BYTES_PRIVATE;
+
+		// Private - Address data
+		for (let i = 0; i < privData[0]; i++) {
+			const start = 1 + (i * 18);
+			const hash = privData.slice(start, start + 8);
+			const addr32 = privData.slice(start + 8, start + 18);
+
+			for (let j = 0; j < _userAddress.length; j++) {
+				let wasFound = true;
+
+				for (let k = 0; k < 8; k ++) {
+					if (hash[k] !== _userAddress[j].hash[k]) {
+						wasFound = false;
+						break;
+					}
+				}
+
+				if (wasFound) {
+					_userAddress[j].addr32 = addr32;
+					break;
+				}
+			}
+		}
+
+		// Private - Contacts
+		let privOffset = 1 + (privData[0] * 18);
+		const contactCount = privData[privOffset];
+		privOffset++;
+
+		for (let i = 0; i < contactCount; i++) {
+			let con = privData.slice(privOffset);
+			let end = con.indexOf(10); // 10=LF
+			if (end === -1) break;
+			_contactMail[i] = sodium.to_string(con.slice(0, end));
+			privOffset += end + 1;
+
+			con = privData.slice(privOffset);
+			end = con.indexOf(10);
+			if (end === -1) break;
+			_contactName[i] = sodium.to_string(con.slice(0, end));
+			privOffset += end + 1;
+
+			con = privData.slice(privOffset);
+			end = con.indexOf(10);
+			if (end === -1) break;
+			_contactNote[i] = sodium.to_string(con.slice(0, end));
+			privOffset += end + 1;
+		}
+
+		return offset;
+	}
+
 // Public
 	this.Reset = function() {
 		_maxStorage.splice(0);
@@ -912,18 +1007,27 @@ function AllEars(readyCallback) {
 		_FetchEncrypted(_AEM_API_ADDRESS_UPDATE, data, function(fetchOk) {callback(fetchOk);});
 	};
 
-	this.Message_Browse = function(newest, callback) {
-		if (typeof(newest) !== "boolean") {callback(false); return;}
+	this.Message_Browse = function(newest, u_info, callback) {
+		if (typeof(newest) !== "boolean" || typeof(u_info) !== "boolean") {callback(false); return;}
 
 		let fetchId;
 		if (_newestMsgTs !== -1) {
 			fetchId = new Uint8Array(17);
-			fetchId[0] = newest;
+			fetchId[0] = 0;
+			if (newest) fetchId[0] |= _AEM_FLAG_NEWER;
+			if (u_info) fetchId[0] |= _AEM_FLAG_UINFO;
 			fetchId.set(newest? _newestMsgId : _oldestMsgId, 1);
-		} else fetchId = new Uint8Array([0]);
+		} else fetchId = new Uint8Array([u_info ? _AEM_FLAG_UINFO : 0]);
 
 		_FetchEncrypted(_AEM_API_MESSAGE_BROWSE, fetchId, function(fetchOk, browseData) {
 			if (!fetchOk) {callback(false); return;}
+
+			if (u_info) {
+				if (browseData.length < 1000) {callback(false); return;}
+				const uinfo_bytes = _ParseUinfo(browseData);
+				browseData = browseData.slice(uinfo_bytes);
+			}
+
 			if (browseData.length <= 6) {callback(true); return;} // No messages or error getting messages
 
 			_totalMsgCount = new Uint16Array(browseData.slice(0, 2).buffer)[0];
