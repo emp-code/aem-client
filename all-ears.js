@@ -708,7 +708,7 @@ function AllEars(readyCallback) {
 	this.GetIntMsgFlagVSig = function(num) {return _intMsg[num].validSig;};
 
 	this.GetUplMsgCount = function() {return _uplMsg.length;};
-	this.GetUplMsgIdHex = function(num) {return sodium.to_hex(_uplMsg[num].id);};
+	this.GetUplMsgIdHex = function(num) {return _uplMsg[num].id? sodium.to_hex(_uplMsg[num].id) : null;};
 	this.GetUplMsgTime  = function(num) {return _uplMsg[num].ts;};
 	this.GetUplMsgTitle = function(num) {return _uplMsg[num].title;};
 	this.GetUplMsgBody  = function(num) {return _uplMsg[num].body;};

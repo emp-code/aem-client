@@ -376,7 +376,7 @@ function addUploads() {
 		cell = row.insertCell(-1); cell.textContent = ""; // Format
 		cell = row.insertCell(-1); cell.textContent = ""; // Size
 
-		cell = row.insertCell(-1); cell.innerHTML = "<button data-msgid=\"" + ae.GetUplMsgIdHex(i) + "\" type=\"button\">X</button>";
+		cell = row.insertCell(-1); if (ae.GetUplMsgIdHex(i)) cell.innerHTML = "<button data-msgid=\"" + ae.GetUplMsgIdHex(i) + "\" type=\"button\">X</button>";
 		cell.children[0].onclick = function() {
 			const tr = this.parentElement.parentElement;
 			ae.Message_Delete(this.getAttribute("data-msgid"), function(success) {
