@@ -297,7 +297,8 @@ function AllEars(readyCallback) {
 	};
 
 	const _arraysEqual = function(a, b) {
-		return a.every((el, ix) => el === b[ix]);
+		try {return a.every((el, ix) => el === b[ix]);}
+		catch(e) {return false;}
 	};
 
 	const _MsgExists = function(id) {
