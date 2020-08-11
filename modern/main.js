@@ -211,7 +211,10 @@ function displayMsg(isInt, num) {
 	}
 
 	document.getElementById("readmsg_to").textContent = isInt ? ae.GetIntMsgTo(num) : ae.GetExtMsgTo(num);
-	document.getElementById("readmsg_date").children[0].textContent = new Date(ts * 1000).toISOString().slice(0, 19).replace("T", " ");
+
+	const tzOs = new Date().getTimezoneOffset();
+	const tz = ((tzOs < 0) ? "+" : "-") + Math.floor(tzOs / -60).toString().padStart(2, "0") + (tzOs % 60 * -1).toString().padStart(2, "0");
+	document.getElementById("readmsg_date").children[0].textContent = new Date((ts * 1000) + (tzOs * -60000)).toISOString().slice(0, 19).replace("T", " ") + " " + tz;
 
 	if (!isInt) {
 		document.getElementById("readmsg_ip").hidden = false;
@@ -271,7 +274,7 @@ function addMsg(isInt, i) {
 
 	const ts = isInt? ae.GetIntMsgTime(i) : ae.GetExtMsgTime(i);
 	cellTime.setAttribute("data-ts", ts);
-	cellTime.textContent = new Date(ts * 1000).toISOString().slice(0, 10);
+	cellTime.textContent = new Date((ts * 1000) + (new Date().getTimezoneOffset() * -60000)).toISOString().slice(0, 10);
 
 	cellSubj.textContent = isInt? ae.GetIntMsgTitle(i) : ae.GetExtMsgTitle(i);
 
