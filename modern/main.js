@@ -467,7 +467,7 @@ function reloadAccount() {
 	const row = tblAccs.insertRow(-1);
 	let cell;
 	cell = row.insertCell(-1); cell.textContent = ae.GetUserPkHex();
-	cell = row.insertCell(-1); cell.textContent = Math.round(ae.GetTotalMsgBytes() / 1024);
+	cell = row.insertCell(-1); cell.textContent = Math.round(ae.GetTotalMsgBytes() / 1024 / 1024);
 	cell = row.insertCell(-1); cell.textContent = ae.GetAddressCountNormal();
 	cell = row.insertCell(-1); cell.textContent = ae.GetAddressCountShield();
 	cell = row.insertCell(-1); cell.textContent = ae.GetUserLevel();
