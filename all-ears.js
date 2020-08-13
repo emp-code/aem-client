@@ -140,11 +140,12 @@ function AllEars(readyCallback) {
 		this.body = body;
 	}
 
-	function _NewUplMsg(id, ts, title, body, blocks) {
+	function _NewUplMsg(id, ts, title, body, parent, blocks) {
 		this.id = id;
 		this.ts = ts;
 		this.title = title;
 		this.body = body;
+		this.parent = parent;
 		this.blocks = blocks;
 	}
 
@@ -716,6 +717,15 @@ function AllEars(readyCallback) {
 	this.GetUplMsgBody  = function(num) {return _uplMsg[num].body;};
 	this.GetUplMsgBytes = function(num) {return _uplMsg[num].blocks * 16;};
 	this.GetUplMsgType  = function(num) {return _GetFileType(_uplMsg[num].title);};
+	this.GetUplMsgParent = function(num) {
+		for (i = 0; i < _extMsg.length; i++) {
+			if (_arraysEqual(_uplMsg[num].parent), _extMsg[num].id) {
+				return i;
+			}
+		}
+
+		return null;
+	}
 
 	this.GetGatekeeperCountry = function() {return _gkCountry;};
 	this.GetGatekeeperDomain  = function() {return _gkDomain;};
@@ -1160,14 +1170,23 @@ function AllEars(readyCallback) {
 					break;}
 
 					case 32: { // Upload
-						const nonce = msgData.slice(0, sodium.crypto_secretbox_NONCEBYTES);
-						const dec = sodium.crypto_secretbox_open_easy(msgData.slice(sodium.crypto_secretbox_NONCEBYTES), nonce, _userKeySymmetric);
+						let msgTitle;
+						let msgBody;
+						let msgParent = null;
 
-						const lenTitle = (dec[0] & 63) + 1;
-						const msgTitle = sodium.to_string(dec.slice(1, 1 + lenTitle));
-						const msgBody = dec.slice(1 + lenTitle);
+						try {
+							// Uploaded file, additional symmetric encryption
+							const dec = sodium.crypto_secretbox_open_easy(msgData.slice(sodium.crypto_secretbox_NONCEBYTES), msgData.slice(0, sodium.crypto_secretbox_NONCEBYTES), _userKeySymmetric);
+							msgTitle = sodium.to_string(dec.slice(1, 2 + dec[0]));
+							msgBody = dec.slice(2 + dec[0]);
+						} catch(e) {
+							// Email attachment, no additional encryption
+							msgParent = msgData.slice(1, 17);
+							msgTitle = sodium.to_string(msgData.slice(17, 18 + msgData[0])); // +1
+							msgBody = msgData.slice(18 + msgData[0]);
+						}
 
-						_uplMsg.push(new _NewUplMsg(msgId, msgTs, msgTitle, msgBody, msgBytes / 16));
+						_uplMsg.push(new _NewUplMsg(msgId, msgTs, msgTitle, msgBody, msgParent, msgBytes / 16));
 					break;}
 
 					case 48: { // Unused
@@ -1309,7 +1328,7 @@ function AllEars(readyCallback) {
 		_FetchEncrypted(_AEM_API_MESSAGE_UPLOAD, final, function(fetchOk) {
 			if (!fetchOk) {callback(false); return;}
 
-			_uplMsg.unshift(new _NewUplMsg(null, Date.now() / 1000, title, body, (final.length + sodium.crypto_box_SEALBYTES) / 16));
+			_uplMsg.unshift(new _NewUplMsg(null, Date.now() / 1000, title, body, null, (final.length + sodium.crypto_box_SEALBYTES) / 16));
 			_totalMsgBytes += final.length + sodium.crypto_box_SEALBYTES;
 			callback(true);
 		});
