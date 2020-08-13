@@ -1304,7 +1304,7 @@ function AllEars(readyCallback) {
 		if (typeof(title) !== "string" || title.length < 1 || body.length < 1) {callback(false); return;}
 
 		const u8title = sodium.from_string(title);
-		if (u8title.length > 128) {callback(false); return;}
+		if (u8title.length > 256) {callback(false); return;}
 		const u8body = (typeof(body) === "string") ? sodium.from_string(body) : body;
 
 		const lenData = 1 + u8title.length + u8body.length;
