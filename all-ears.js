@@ -1285,7 +1285,7 @@ function AllEars(readyCallback) {
 		if (typeof(title) !== "string" || title.length < 1 || body.length < 1) {callback(false); return;}
 
 		const u8title = sodium.from_string(title);
-		if (u8title.length > 64) {callback(false); return;}
+		if (u8title.length > 128) {callback(false); return;}
 		const u8body = (typeof(body) === "string") ? sodium.from_string(body) : body;
 
 		const lenData = 1 + u8title.length + u8body.length;
@@ -1293,7 +1293,6 @@ function AllEars(readyCallback) {
 
 		const u8data = new Uint8Array(lenData);
 		u8data[0] = u8title.length - 1;
-//		if () u8data[0] |= 64; // unused
 
 		u8data.set(u8title, 1);
 		u8data.set(u8body, 1 + u8title.length);
