@@ -1310,6 +1310,7 @@ function AllEars(readyCallback) {
 			if (!fetchOk) {callback(false); return;}
 
 			_uplMsg.unshift(new _NewUplMsg(null, Date.now() / 1000, title, body, (final.length + sodium.crypto_box_SEALBYTES) / 16));
+			_totalMsgBytes += final.length + sodium.crypto_box_SEALBYTES;
 			callback(true);
 		});
 	};

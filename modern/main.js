@@ -866,6 +866,7 @@ document.getElementById("btn_notepad_saveupl").onclick = function() {
 		if (success) {
 			np.value = "";
 			addUploads();
+			document.getElementById("tbd_accs").children[0].children[1].textContent = Math.round(ae.GetTotalMsgBytes() / 1024 / 1024);
 		}
 
 		console.log("Failed to add text");
@@ -887,6 +888,7 @@ document.getElementById("btn_upload").onclick = function() {
 			ae.Message_Upload(fileSelector.files[0].name, new Uint8Array(reader.result), function(success) {
 				if (success) {
 					addUploads();
+					document.getElementById("tbd_accs").children[0].children[1].textContent = Math.round(ae.GetTotalMsgBytes() / 1024 / 1024);
 				} else {
 					console.log("Failed upload");
 				}
