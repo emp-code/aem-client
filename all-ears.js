@@ -725,7 +725,7 @@ function AllEars(readyCallback) {
 		}
 
 		return null;
-	}
+	};
 
 	this.GetGatekeeperCountry = function() {return _gkCountry;};
 	this.GetGatekeeperDomain  = function() {return _gkDomain;};
