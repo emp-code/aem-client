@@ -565,7 +565,7 @@ function AllEars(readyCallback) {
 		try {privData = sodium.crypto_secretbox_open_easy(browseData.slice(offset + sodium.crypto_secretbox_NONCEBYTES, offset + _AEM_BYTES_PRIVATE), privNonce, _userKeySymmetric);}
 		catch(e) {
 			console.log("Private data field decryption failed:" + e);
-			return offset;
+			return offset + _AEM_BYTES_PRIVATE;
 		}
 
 		offset += _AEM_BYTES_PRIVATE;
