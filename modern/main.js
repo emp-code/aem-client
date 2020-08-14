@@ -393,8 +393,8 @@ function addUploads() {
 }
 
 function updateAddressCounts() {
-	document.getElementById("limit_normal").textContent = (ae.GetAddressCountNormal() + "/" + ae.GetAddressLimitNormal(ae.GetUserLevel())).padStart(ae.GetAddressLimitNormal(ae.GetUserLevel()) > 9 ? 5 : 1);
-	document.getElementById("limit_shield").textContent = (ae.GetAddressCountShield() + "/" + ae.GetAddressLimitShield(ae.GetUserLevel())).padStart(ae.GetAddressLimitShield(ae.GetUserLevel()) > 9 ? 5 : 1);
+	document.getElementById("limit_normal").textContent = (ae.GetAddressCountNormal() + "/" + ae.GetLimitNormalA(ae.GetUserLevel())).padStart(ae.GetLimitNormalA(ae.GetUserLevel()) > 9 ? 5 : 1);
+	document.getElementById("limit_shield").textContent = (ae.GetAddressCountShield() + "/" + ae.GetLimitShieldA(ae.GetUserLevel())).padStart(ae.GetLimitShieldA(ae.GetUserLevel()) > 9 ? 5 : 1);
 	document.getElementById("limit_total").textContent = ((ae.GetAddressCountNormal() + ae.GetAddressCountShield()) + "/" + ae.GetAddrPerUser()).padStart(5);
 }
 
@@ -449,15 +449,15 @@ function reloadAccount() {
 			tblLimits.rows[i].cells[2].children[0].disabled = false;
 			tblLimits.rows[i].cells[3].children[0].disabled = false;
 
-			tblLimits.rows[i].cells[1].children[0].value = ae.GetStorageLimit(i) + 1;
-			tblLimits.rows[i].cells[2].children[0].value = ae.GetAddressLimitNormal(i);
-			tblLimits.rows[i].cells[3].children[0].value = ae.GetAddressLimitShield(i);
+			tblLimits.rows[i].cells[1].children[0].value = ae.GetLimitStorage(i) + 1;
+			tblLimits.rows[i].cells[2].children[0].value = ae.GetLimitNormalA(i);
+			tblLimits.rows[i].cells[3].children[0].value = ae.GetLimitShieldA(i);
 		}
 	} else {
 		const lvl = ae.GetUserLevel();
-		tblLimits.rows[lvl].cells[1].children[0].value = ae.GetStorageLimit(lvl) + 1;
-		tblLimits.rows[lvl].cells[2].children[0].value = ae.GetAddressLimitNormal(lvl);
-		tblLimits.rows[lvl].cells[3].children[0].value = ae.GetAddressLimitShield(lvl);
+		tblLimits.rows[lvl].cells[1].children[0].value = ae.GetLimitStorage(lvl) + 1;
+		tblLimits.rows[lvl].cells[2].children[0].value = ae.GetLimitNormalA(lvl);
+		tblLimits.rows[lvl].cells[3].children[0].value = ae.GetLimitShieldA(lvl);
 	}
 
 	// Accounts
@@ -487,13 +487,6 @@ function reloadAccount() {
 			if (success) row.remove();
 		});
 	};
-
-	// Admin: Other accounts
-	if (ae.IsUserAdmin()) {
-		for (let i = 0; i < ae.Admin_GetUserCount(); i++) {
-			addAccountToTable(i);
-		}
-	}
 
 	document.getElementById("txt_reg").disabled = !ae.IsUserAdmin();
 	document.getElementById("btn_reg").disabled = !ae.IsUserAdmin();
@@ -538,8 +531,8 @@ function deleteAddress(addr) {
 			document.getElementById("write_from").remove(addressToDelete);
 			updateAddressCounts();
 
-			if (ae.GetAddressCountNormal() < ae.GetAddressLimitNormal(ae.GetUserLevel())) document.getElementById("btn_address_create_normal").disabled = false;
-			if (ae.GetAddressCountShield() < ae.GetAddressLimitShield(ae.GetUserLevel())) document.getElementById("btn_address_create_shield").disabled = false;
+			if (ae.GetAddressCountNormal() < ae.GetLimitNormalA(ae.GetUserLevel())) document.getElementById("btn_address_create_normal").disabled = false;
+			if (ae.GetAddressCountShield() < ae.GetLimitShieldA(ae.GetUserLevel())) document.getElementById("btn_address_create_shield").disabled = false;
 
 			ae.Private_Update(function(success2) {
 				if (!success2) console.log("Failed to update the Private field");
@@ -809,20 +802,20 @@ function addressCreate(addr) {
 
 				if (!success2) console.log("Failed to update the Private field");
 
-				if (ae.GetAddressCountNormal() < ae.GetAddressLimitNormal(ae.GetUserLevel())) btnN.disabled = false;
-				if (ae.GetAddressCountShield() < ae.GetAddressLimitShield(ae.GetUserLevel())) btnS.disabled = false;
+				if (ae.GetAddressCountNormal() < ae.GetLimitNormalA(ae.GetUserLevel())) btnN.disabled = false;
+				if (ae.GetAddressCountShield() < ae.GetLimitShieldA(ae.GetUserLevel())) btnS.disabled = false;
 			});
 		} else {
 			console.log("Failed to add address");
 
-			if (ae.GetAddressCountNormal() < ae.GetAddressLimitNormal(ae.GetUserLevel())) btnN.disabled = false;
-			if (ae.GetAddressCountShield() < ae.GetAddressLimitShield(ae.GetUserLevel())) btnS.disabled = false;
+			if (ae.GetAddressCountNormal() < ae.GetLimitNormalA(ae.GetUserLevel())) btnN.disabled = false;
+			if (ae.GetAddressCountShield() < ae.GetLimitShieldA(ae.GetUserLevel())) btnS.disabled = false;
 		}
 	});
 }
 
 document.getElementById("btn_address_create_normal").onclick = function() {
-	if (ae.GetAddressCountNormal() >= ae.GetAddressLimitNormal(ae.GetUserLevel())) return;
+	if (ae.GetAddressCountNormal() >= ae.GetLimitNormalA(ae.GetUserLevel())) return;
 
 	const txtNewAddr = document.getElementById("txt_address_create_normal");
 	if (!txtNewAddr.reportValidity()) return;
@@ -831,7 +824,7 @@ document.getElementById("btn_address_create_normal").onclick = function() {
 };
 
 document.getElementById("btn_address_create_shield").onclick = function() {
-	if (ae.GetAddressCountShield() >= ae.GetAddressLimitShield(ae.GetUserLevel())) return;
+	if (ae.GetAddressCountShield() >= ae.GetLimitShieldA(ae.GetUserLevel())) return;
 
 	addressCreate("SHIELD");
 };
@@ -928,6 +921,13 @@ document.getElementById("btn_enter").onclick = function() {
 					document.getElementById("div_begin").hidden = true;
 					document.getElementById("div_main").style.display = "grid";
 					reloadAccount();
+
+					if (ae.IsUserAdmin()) {
+						ae.Account_Browse(function(successAcc) {
+							if (successAcc) {for (let i = 0; i < ae.Admin_GetUserCount(); i++) {addAccountToTable(i);}}
+							else console.log("Failed to Account_Browse");
+						});
+					}
 				} else {
 					console.log("Failed to enter");
 					btn.disabled = false;

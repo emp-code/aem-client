@@ -65,8 +65,8 @@ function AllEars(readyCallback) {
 
 // Private variables
 	const _maxStorage = [];
-	const _maxAddressNormal = [];
-	const _maxAddressShield = [];
+	const _maxNormalA = [];
+	const _maxShieldA = [];
 
 	let _userKeyPublic;
 	let _userKeySecret;
@@ -535,13 +535,13 @@ function AllEars(readyCallback) {
 		for (let i = 0; i < 4; i++) {
 			if (i === _userLevel) {
 				_maxStorage.push(browseData[1]);
-				_maxAddressNormal.push(browseData[2]);
-				_maxAddressShield.push(browseData[3]);
+				_maxNormalA.push(browseData[2]);
+				_maxShieldA.push(browseData[3]);
 			} else {
 				// Unknown
 				_maxStorage.push(0);
-				_maxAddressNormal.push(0);
-				_maxAddressShield.push(0);
+				_maxNormalA.push(0);
+				_maxShieldA.push(0);
 			}
 		}
 
@@ -624,8 +624,8 @@ function AllEars(readyCallback) {
 // Public
 	this.Reset = function() {
 		_maxStorage.splice(0);
-		_maxAddressNormal.splice(0);
-		_maxAddressShield.splice(0);
+		_maxNormalA.splice(0);
+		_maxShieldA.splice(0);
 		_userLevel = 0;
 		_userAddress.splice(0);
 		_extMsg.splice(0);
@@ -668,9 +668,9 @@ function AllEars(readyCallback) {
 	this.IsUserAdmin = function() {return (_userLevel === _AEM_USER_MAXLEVEL);};
 	this.GetUserPkHex = function() {return sodium.to_hex(_userKeyPublic);};
 	this.GetUserLevel = function() {return _userLevel;};
-	this.GetStorageLimit = function(lvl) {return _maxStorage[lvl];};
-	this.GetAddressLimitNormal = function(lvl) {return _maxAddressNormal[lvl];};
-	this.GetAddressLimitShield = function(lvl) {return _maxAddressShield[lvl];};
+	this.GetLimitStorage = function(lvl) {return _maxStorage[lvl];};
+	this.GetLimitNormalA = function(lvl) {return _maxNormalA[lvl];};
+	this.GetLimitShieldA = function(lvl) {return _maxShieldA[lvl];};
 
 	this.GetTotalMsgCount = function() {return _totalMsgCount;};
 	this.GetTotalMsgBytes = function() {return _totalMsgBytes;};
@@ -774,116 +774,44 @@ function AllEars(readyCallback) {
 		callback(true);
 	};
 
-	this.Account_Browse = function(page, callback) {
-		if (typeof(page) !== "number" || page < 0 || page > 255) {callback(false); return;}
+	this.Account_Browse = function(callback) {
+		if (_userLevel !== _AEM_USER_MAXLEVEL) {callback(false); return;}
 
-		_FetchEncrypted(_AEM_API_ACCOUNT_BROWSE, new Uint8Array([page]), function(fetchOk, browseData) {
+		_FetchEncrypted(_AEM_API_ACCOUNT_BROWSE, new Uint8Array([0]), function(fetchOk, browseData) {
 			if (!fetchOk) {callback(false); return;}
+
+			_maxStorage.splice(0);
+			_maxNormalA.splice(0);
+			_maxShieldA.splice(0);
 
 			for (let i = 0; i < 4; i++) {
 				_maxStorage.push(browseData[(i * 3) + 0]);
-				_maxAddressNormal.push(browseData[(i * 3) + 1]);
-				_maxAddressShield.push(browseData[(i * 3) + 2]);
+				_maxNormalA.push(browseData[(i * 3) + 1]);
+				_maxShieldA.push(browseData[(i * 3) + 2]);
 			}
 
-			_userLevel = browseData[12];
+			let offset = 12;
+			const userCount = new Uint32Array(browseData.slice(offset, offset + 4).buffer)[0];
+			offset += 4;
 
-			// Addresses
-			let offset = 14;
-			for (let i = 0; i < browseData[13]; i++) {
-				const hash = browseData.slice(offset, offset + 8);
-				const accExt = (browseData[offset + 8] & _AEM_ADDR_FLAG_ACCEXT) > 0;
-				const accInt = (browseData[offset + 8] & _AEM_ADDR_FLAG_ACCINT) > 0;
-				const use_gk = (browseData[offset + 8] & _AEM_ADDR_FLAG_USE_GK) > 0;
-				const is_shd = (browseData[offset + 8] & _AEM_ADDR_FLAG_SHIELD) > 0;
+			for (let i = 0; i < userCount; i++) {
+				const s = browseData.slice(offset, offset + 35);
 
-				_userAddress.push(new _NewAddress(hash, null, is_shd, accExt, accInt, use_gk));
-				offset += 9;
-			}
+				const u16 = new Uint16Array(s.slice(0, 2).buffer)[0];
 
-			// Private field
-			const privNonce = browseData.slice(offset, offset + sodium.crypto_secretbox_NONCEBYTES);
-			let privData;
+				const newSpace = s[2] | ((u16 >> 4) & 3840);
+				const newLevel = u16 & 3;
+				const newAddrS = (u16 >> 2) & 31;
+				const newAddrN = (u16 >> 7) & 31;
+				const newPkHex = sodium.to_hex(s.slice(3));
 
-			try {privData = sodium.crypto_secretbox_open_easy(browseData.slice(offset + sodium.crypto_secretbox_NONCEBYTES, offset + _AEM_BYTES_PRIVATE), privNonce, _userKeySymmetric);}
-			catch(e) {
-				console.log("Private data field decryption failed:" + e);
-				callback(true);
-				return;
-			}
+				_admin_userPkHex.push(newPkHex);
+				_admin_userLevel.push(newLevel);
+				_admin_userSpace.push(newSpace);
+				_admin_userNaddr.push(newAddrN);
+				_admin_userSaddr.push(newAddrS);
 
-			offset += _AEM_BYTES_PRIVATE;
-
-			// Private - Address data
-			for (let i = 0; i < privData[0]; i++) {
-				const start = 1 + (i * 18);
-				const hash = privData.slice(start, start + 8);
-				const addr32 = privData.slice(start + 8, start + 18);
-
-				for (let j = 0; j < _userAddress.length; j++) {
-					let wasFound = true;
-
-					for (let k = 0; k < 8; k ++) {
-						if (hash[k] !== _userAddress[j].hash[k]) {
-							wasFound = false;
-							break;
-						}
-					}
-
-					if (wasFound) {
-						_userAddress[j].addr32 = addr32;
-						break;
-					}
-				}
-			}
-
-			// Private - Contacts
-			let privOffset = 1 + (privData[0] * 18);
-			const contactCount = privData[privOffset];
-			privOffset++;
-
-			for (let i = 0; i < contactCount; i++) {
-				let con = privData.slice(privOffset);
-				let end = con.indexOf(10); // 10=LF
-				if (end === -1) break;
-				_contactMail[i] = sodium.to_string(con.slice(0, end));
-				privOffset += end + 1;
-
-				con = privData.slice(privOffset);
-				end = con.indexOf(10);
-				if (end === -1) break;
-				_contactName[i] = sodium.to_string(con.slice(0, end));
-				privOffset += end + 1;
-
-				con = privData.slice(privOffset);
-				end = con.indexOf(10);
-				if (end === -1) break;
-				_contactNote[i] = sodium.to_string(con.slice(0, end));
-				privOffset += end + 1;
-			}
-
-			// Admin Data
-			if (_userLevel === _AEM_USER_MAXLEVEL) {
-				const userCount = new Uint32Array(browseData.slice(offset, offset + 4).buffer)[0];
-				offset += 4;
-
-				for (let i = 0; i < ((userCount > 1024) ? 1024 : userCount); i++) {
-					const s = browseData.slice(offset, offset + 35);
-
-					const newPkHex = sodium.to_hex(s.slice(3));
-					const newLevel = s[0] & 3;
-					const newSpace = s[0] >>> 2;
-					const newNaddr = s[1];
-					const newSaddr = s[2];
-
-					_admin_userPkHex.push(newPkHex);
-					_admin_userLevel.push(newLevel);
-					_admin_userSpace.push(newSpace);
-					_admin_userNaddr.push(newNaddr);
-					_admin_userSaddr.push(newSaddr);
-
-					offset += 35;
-				}
+				offset += 35;
 			}
 
 			callback(true);
