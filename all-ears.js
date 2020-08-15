@@ -743,7 +743,7 @@ function AllEars(readyCallback) {
 	this.GetUplMsgBytes = function(num) {return _uplMsg[num].blocks * 16;};
 	this.GetUplMsgType  = function(num) {return _GetFileType(_uplMsg[num].title);};
 	this.GetUplMsgParent = function(num) {
-		for (i = 0; i < _extMsg.length; i++) {
+		for (let i = 0; i < _extMsg.length; i++) {
 			if (_arraysEqual(_uplMsg[num].parent), _extMsg[num].id) {
 				return i;
 			}
