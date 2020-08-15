@@ -77,6 +77,7 @@ function AllEars(readyCallback) {
 	const _extMsg = [];
 	const _intMsg = [];
 	const _uplMsg = [];
+	const _outMsg = [];
 
 	let _newestMsgId = new Uint8Array(16);
 	let _oldestMsgId = new Uint8Array(16);
@@ -137,6 +138,28 @@ function AllEars(readyCallback) {
 		this.from = from;
 		this.to = to;
 		this.title = title;
+		this.body = body;
+	}
+
+	function _NewOutMsg_Ext(id, ts, ip, to, from, subj, body, greet) {
+		this.isInt = false;
+		this.id = id;
+		this.ip = ip;
+		this.ts = ts;
+		this.to = to;
+		this.from = from;
+		this.subj = subj;
+		this.body = body;
+		this.greet = greet;
+	}
+
+	function _NewOutMsg_Int(id, ts, to, from, subj, body) {
+		this.isInt = true;
+		this.id = id;
+		this.ts = ts;
+		this.to = to;
+		this.from = from;
+		this.subj = subj;
 		this.body = body;
 	}
 
@@ -309,6 +332,7 @@ function AllEars(readyCallback) {
 		_extMsg.forEach(function(msg) {if (_arraysEqual(msg.id, id)) found = true;}); if (found) return true;
 		_intMsg.forEach(function(msg) {if (_arraysEqual(msg.id, id)) found = true;}); if (found) return true;
 		_uplMsg.forEach(function(msg) {if (_arraysEqual(msg.id, id)) found = true;}); if (found) return true;
+		_outMsg.forEach(function(msg) {if (_arraysEqual(msg.id, id)) found = true;}); if (found) return true;
 
 		return false;
 	};
@@ -631,6 +655,7 @@ function AllEars(readyCallback) {
 		_extMsg.splice(0);
 		_intMsg.splice(0);
 		_uplMsg.splice(0);
+		_outMsg.splice(0);
 
 		_gkCountry.splice(0);
 		_gkDomain .splice(0);
@@ -726,6 +751,16 @@ function AllEars(readyCallback) {
 
 		return null;
 	};
+
+	this.GetOutMsgCount = function() {return _outMsg.length;};
+	this.GetOutMsgIdHex = function(num) {return sodium.to_hex(_outMsg[num].id);};
+	this.GetOutMsgGreet = function(num) {return _outMsg[num].greet;};
+	this.GetOutMsgTime = function(num) {return _outMsg[num].ts;};
+	this.GetOutMsgSubj = function(num) {return _outMsg[num].subj;};
+	this.GetOutMsgBody = function(num) {return _outMsg[num].body;};
+	this.GetOutMsgFrom = function(num) {return _outMsg[num].from;};
+	this.GetOutMsgTo   = function(num) {return _outMsg[num].to;};
+	this.GetOutMsgIp   = function(num) {return String(_outMsg[num].ip[0] + "." + _outMsg[num].ip[1] + "." + _outMsg[num].ip[2] + "." + _outMsg[num].ip[3]);};
 
 	this.GetGatekeeperCountry = function() {return _gkCountry;};
 	this.GetGatekeeperDomain  = function() {return _gkDomain;};
@@ -1097,7 +1132,7 @@ function AllEars(readyCallback) {
 						}
 					break;}
 
-					case 32: { // Upload
+					case 32: { // UplMsg (Email attachment, or uploaded file)
 						let msgTitle;
 						let msgBody;
 						let msgParent = null;
@@ -1117,7 +1152,36 @@ function AllEars(readyCallback) {
 						_uplMsg.push(new _NewUplMsg(msgId, msgTs, msgTitle, msgBody, msgParent, msgBytes / 16));
 					break;}
 
-					case 48: { // Unused
+					case 48: { // OutMsg (Delivery report for sent message)
+						const lenSb = (msgData[0] & 127);
+
+						if (msgData[0] & 128) {
+							// Internal message, TODO
+
+							//_outMsg.push(new _NewOutMsg_Int(msgId, msgTs, msgTo, msgFr, msgSb, msgBd));
+						} else {
+							// Email
+							const msgIp = msgData.slice(1, 5);
+							const msgCs = new Uint16Array(msgData.slice(5, 7).buffer)[0];
+							const msgTlsVer = msgData[7] >> 5;
+							const msgAttach = msgData[7] & 31;
+							// msgData[8]: TLS_InfoByte
+
+							const lenTo = msgData[9];
+							const lenFr = msgData[10];
+							const lenMx = msgData[11];
+							const lenGr = msgData[12];
+
+							let os = 13;
+							const msgTo = sodium.to_string(msgData.slice(os, os + lenTo)); os += lenTo;
+							const msgFr = sodium.to_string(msgData.slice(os, os + lenFr)); os += lenFr;
+							const msgMx = sodium.to_string(msgData.slice(os, os + lenMx)); os += lenMx;
+							const msgGr = sodium.to_string(msgData.slice(os, os + lenGr)); os += lenGr;
+							const msgSb = sodium.to_string(msgData.slice(os, os + lenSb)); os += lenSb;
+							const msgBd = sodium.to_string(msgData.slice(os));
+
+							_outMsg.push(new _NewOutMsg_Ext(msgId, msgTs, msgIp, msgTo, msgFr, msgSb, msgBd, msgGr));
+						}
 					break;}
 				}
 
@@ -1127,6 +1191,7 @@ function AllEars(readyCallback) {
 			_extMsg.sort((a, b) => (a.ts < b.ts) ? 1 : -1);
 			_intMsg.sort((a, b) => (a.ts < b.ts) ? 1 : -1);
 			_uplMsg.sort((a, b) => (a.ts < b.ts) ? 1 : -1);
+			_outMsg.sort((a, b) => (a.ts < b.ts) ? 1 : -1);
 
 			callback(true);
 		});

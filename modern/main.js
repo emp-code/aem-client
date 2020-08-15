@@ -36,7 +36,7 @@ let showHeaders = false;
 
 let tab = 0;
 const TAB_INBOX = 0;
-const TAB_OUTBX = 1;
+const TAB_DRBOX = 1;
 const TAB_WRITE = 2;
 const TAB_NOTES = 3;
 const TAB_TOOLS = 4;
@@ -357,6 +357,7 @@ function addMessages() {
 				if (successBrowse) {
 					addMessages();
 					addUploads();
+					addSent();
 					if (tabs[tab].cur < tabs[tab].max) document.getElementById("btn_rght").disabled = false;
 				}
 			});
@@ -389,6 +390,68 @@ function addUploads() {
 				});
 			};
 		}
+	}
+}
+
+function displayOutMsg(num) {
+	clearDisplay();
+	document.getElementById("midright").scroll(0, 0);
+
+	document.getElementById("btn_reply").disabled = true;
+	document.getElementById("btn_mdele").disabled = false;
+	document.getElementById("btn_mdele").onclick = function() {
+		this.blur();
+		ae.Message_Delete(ae.GetOutMsgIdHex(num), function(success) {
+			if (!success) console.log("Failed delete");
+		});
+	};
+
+	document.getElementById("midright").children[0].hidden = false;
+	document.getElementById("midright").children[2].hidden = false;
+
+//	if (isInt) {
+		document.getElementById("midright").children[1].textContent = ae.GetOutMsgSubj(num);
+		document.getElementById("midright").children[2].textContent = ae.GetOutMsgBody(num);
+//	} else {
+//	}
+
+	document.getElementById("readmsg_to").textContent = ae.GetOutMsgTo(num);
+	document.getElementById("readmsg_envfrom").hidden = false;
+	document.getElementById("readmsg_envfrom").textContent = ae.GetOutMsgFrom(num);
+
+	const ts = ae.GetOutMsgTime(num);
+	const tzOs = new Date().getTimezoneOffset();
+	const tz = ((tzOs < 0) ? "+" : "-") + Math.floor(tzOs / -60).toString().padStart(2, "0") + (tzOs % 60 * -1).toString().padStart(2, "0");
+	document.getElementById("readmsg_date").children[0].textContent = new Date((ts * 1000) + (tzOs * -60000)).toISOString().slice(0, 19).replace("T", " ") + " " + tz;
+
+//	if (!isInt) {
+		document.getElementById("readmsg_ip").hidden = false;
+		document.getElementById("readmsg_country").hidden = false;
+		document.getElementById("readmsg_tls").hidden = false;
+		document.getElementById("readmsg_greet").hidden = false;
+
+//		const cc = ae.GetExtMsgCountry(num);
+
+		document.getElementById("readmsg_ip").children[0].textContent = ae.GetOutMsgIp(num);
+//		document.getElementById("readmsg_country").textContent = getCountryFlag(cc) + " " + getCountryName(cc);
+//		document.getElementById("readmsg_tls").children[0].textContent = ae.GetOutMsgTLS(num);
+		document.getElementById("readmsg_greet").children[0].textContent = ae.GetOutMsgGreet(num);
+//		document.getElementById("readmsg_envfrom").textContent = ae.GetExtMsgFrom(num);
+//	} else {
+//	}
+}
+
+function addSent() {
+	const tbl = document.getElementById("tbl_drbox");
+	tbl.innerHTML = "";
+
+	for (let i = 0; i < ae.GetOutMsgCount(); i++) {
+		const row = tbl.insertRow(-1);
+		let cell;
+
+		cell = row.insertCell(-1); cell.textContent = new Date(ae.GetOutMsgTime(i) * 1000).toISOString().slice(0, 10);
+		cell = row.insertCell(-1); cell.textContent = ae.GetOutMsgSubj(i);
+		row.onclick = function() {displayOutMsg(i);};
 	}
 }
 
@@ -508,6 +571,7 @@ function reloadAccount() {
 	updateAddressCounts();
 	addMessages();
 	addUploads();
+	addSent();
 }
 
 function deleteAddress(addr) {
@@ -688,6 +752,10 @@ function updateTab() {
 	switch (tab) {
 		case TAB_INBOX:
 			addMessages();
+		break;
+
+		case TAB_DRBOX:
+			addSent();
 		break;
 
 		case TAB_WRITE:

@@ -236,30 +236,29 @@ table, td {
 	overflow: hidden;
 }
 
-#tbl_inbox {
+#tbl_inbox, #tbl_drbox {
 	table-layout:fixed;
 	width: 100%;
 	transition: opacity 0.2s;
 }
 
-#tbl_inbox tr {
+#tbl_inbox tr, #tbl_drbox tr {
 	display: grid;
 	grid-template-columns: auto 3fr 1fr 2fr;
+	opacity: 0.5;
 }
 
-#tbl_inbox tr > td:nth-child(1) {
+#tbl_inbox tr > td:nth-child(1), #tbl_drbox tr > td:nth-child(1) {
 	font-family: monospace, monospace;
-	opacity: 0.5;
 }
 
 #tbl_inbox tr > td:nth-child(2n) {
 	white-space: nowrap;
 	text-overflow: ellipsis;
 	overflow: hidden;
-	opacity: 0.5;
 }
 
-#tbl_inbox tr:hover, #tbd_uploads tr:hover {
+#tbl_inbox tr:hover, #tbl_drbox tr:hover, #tbd_uploads tr:hover {
 	background: #1a1a1a;
 	cursor: pointer;
 }
@@ -267,15 +266,6 @@ table, td {
 #tbl_inbox tr > td:nth-child(3n) {
 	text-align: right;
 	direction: rtl;
-	opacity: 0.5;
-}
-
-#tbl_inbox tr > td:nth-child(4n) {
-	opacity: 0.5;
-}
-
-#tbl_inbox tr > td:nth-child(5n) {
-	opacity: 0.5;
 }
 
 #tbd_uploads td:nth-child(1) {
