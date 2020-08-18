@@ -141,16 +141,20 @@ function AllEars(readyCallback) {
 		this.body = body;
 	}
 
-	function _NewOutMsg_Ext(id, ts, ip, to, from, subj, body, greet) {
+	function _NewOutMsg_Ext(id, ts, ip, to, from, subj, body, mxDom, greet, tlsCs, tlsVer, attach) {
 		this.isInt = false;
 		this.id = id;
-		this.ip = ip;
 		this.ts = ts;
+		this.ip = ip;
 		this.to = to;
 		this.from = from;
 		this.subj = subj;
 		this.body = body;
+		this.mxDom = mxDom;
 		this.greet = greet;
+		this.tlsCs = tlsCs;
+		this.tlsVer = tlsVer;
+		this.attach = attach;
 	}
 
 	function _NewOutMsg_Int(id, ts, to, from, subj, body) {
@@ -754,13 +758,16 @@ function AllEars(readyCallback) {
 
 	this.GetOutMsgCount = function() {return _outMsg.length;};
 	this.GetOutMsgIdHex = function(num) {return sodium.to_hex(_outMsg[num].id);};
-	this.GetOutMsgGreet = function(num) {return _outMsg[num].greet;};
 	this.GetOutMsgTime = function(num) {return _outMsg[num].ts;};
+	this.GetOutMsgIp   = function(num) {return String(_outMsg[num].ip[0] + "." + _outMsg[num].ip[1] + "." + _outMsg[num].ip[2] + "." + _outMsg[num].ip[3]);};
+	this.GetOutMsgTo   = function(num) {return _outMsg[num].to;};
+	this.GetOutMsgFrom = function(num) {return _outMsg[num].from;};
 	this.GetOutMsgSubj = function(num) {return _outMsg[num].subj;};
 	this.GetOutMsgBody = function(num) {return _outMsg[num].body;};
-	this.GetOutMsgFrom = function(num) {return _outMsg[num].from;};
-	this.GetOutMsgTo   = function(num) {return _outMsg[num].to;};
-	this.GetOutMsgIp   = function(num) {return String(_outMsg[num].ip[0] + "." + _outMsg[num].ip[1] + "." + _outMsg[num].ip[2] + "." + _outMsg[num].ip[3]);};
+	this.GetOutMsgMxDom = function(num) {return _outMsg[num].mxDom;};
+	this.GetOutMsgGreet = function(num) {return _outMsg[num].greet;};
+	this.GetOutMsgTLS   = function(num) {return _GetTlsVersion(_outMsg[num].tlsVer) + " " + _GetCiphersuite(_outMsg[num].tlsCs);};
+	this.GetOutMsgAttach = function(num) {return _outMsg[num].attach;};
 
 	this.GetGatekeeperCountry = function() {return _gkCountry;};
 	this.GetGatekeeperDomain  = function() {return _gkDomain;};
@@ -1180,7 +1187,7 @@ function AllEars(readyCallback) {
 							const msgSb = sodium.to_string(msgData.slice(os, os + lenSb)); os += lenSb;
 							const msgBd = sodium.to_string(msgData.slice(os));
 
-							_outMsg.push(new _NewOutMsg_Ext(msgId, msgTs, msgIp, msgTo, msgFr, msgSb, msgBd, msgGr));
+							_outMsg.push(new _NewOutMsg_Ext(msgId, msgTs, msgIp, msgTo, msgFr, msgSb, msgBd, msgMx, msgGr, msgCs, msgTlsVer, msgAttach));
 						}
 					break;}
 				}
