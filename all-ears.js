@@ -577,10 +577,10 @@ function AllEars(readyCallback) {
 		let offset = 4;
 		for (let i = 0; i < (browseData[0] >> 3); i++) {
 			const hash = browseData.slice(offset, offset + 8);
-			const accExt = (browseData[offset + 8] & _AEM_ADDR_FLAG_ACCEXT) > 0;
-			const accInt = (browseData[offset + 8] & _AEM_ADDR_FLAG_ACCINT) > 0;
-			const use_gk = (browseData[offset + 8] & _AEM_ADDR_FLAG_USE_GK) > 0;
-			const is_shd = (browseData[offset + 8] & _AEM_ADDR_FLAG_SHIELD) > 0;
+			const accExt = (browseData[offset + 8] & _AEM_ADDR_FLAG_ACCEXT) != 0;
+			const accInt = (browseData[offset + 8] & _AEM_ADDR_FLAG_ACCINT) != 0;
+			const use_gk = (browseData[offset + 8] & _AEM_ADDR_FLAG_USE_GK) != 0;
+			const is_shd = (browseData[offset + 8] & _AEM_ADDR_FLAG_SHIELD) != 0;
 
 			_userAddress.push(new _NewAddress(hash, null, is_shd, accExt, accInt, use_gk));
 			offset += 9;
@@ -1069,18 +1069,18 @@ function AllEars(readyCallback) {
 						const msgTlsVer = msgData[6] >> 5;
 						const msgAttach = msgData[6] & 31;
 
-						const msgEsmtp = (msgData[7] & 128) > 0;
-						const msgQuitR = (msgData[7] & 64) > 0;
-						const msgProtV = (msgData[7] & 32) > 0;
-						const msgInval = (msgData[8] & 128) > 0;
-						const msgRares = (msgData[8] & 64) > 0;
+						const msgEsmtp = (msgData[7] & 128) != 0;
+						const msgQuitR = (msgData[7] &  64) != 0;
+						const msgProtV = (msgData[7] &  32) != 0;
+						const msgInval = (msgData[8] & 128) != 0;
+						const msgRares = (msgData[8] &  64) != 0;
 						// [8] & 32 unused
 
 						const msgCc = ((msgData[7] & 31) > 26 || (msgData[8] & 31) > 26) ? "??" : String.fromCharCode("A".charCodeAt(0) + (msgData[7] & 31)) + String.fromCharCode("A".charCodeAt(0) + (msgData[8] & 31));
 
 						// Infobyte [9]
 
-						const msgShield = (msgData[10] & 128) > 0;
+						const msgShield = (msgData[10] & 128) != 0;
 						// & 128 unused: [11], [12], [13]
 
 						const lenGreet = msgData[10] & 127;
