@@ -36,8 +36,6 @@ function AllEars(readyCallback) {
 	const _AEM_API_MESSAGE_UPLOAD = 11;
 	const _AEM_API_PRIVATE_UPDATE = 12;
 	const _AEM_API_SETTING_LIMITS = 13;
-	const _AEM_API_INTERNAL_EXIST = 14;
-	const _AEM_API_INTERNAL_LEVEL = 15;
 
 	const _AEM_ADDR_FLAG_SHIELD = 128;
 	const _AEM_ADDR_FLAG_USE_GK = 4;
