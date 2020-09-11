@@ -968,8 +968,8 @@ function AllEars(readyCallback) {
 	};
 
 	this.Address_Lookup = function(addr, callback) {
-		_FetchEncrypted(_AEM_API_ADDRESS_LOOKUP, sodium.from_string(addr), function(fetchOk, addr_pk) {
-			callback(fetchOk? addr_pk : null);
+		_FetchEncrypted(_AEM_API_ADDRESS_LOOKUP, sodium.from_string(addr), function(fetchOk, result) {
+			callback(fetchOk? result : null);
 		});
 	};
 
@@ -1113,26 +1113,39 @@ function AllEars(readyCallback) {
 					break;}
 
 					case 16: { // IntMsg
-						const msgFromLv = msgData[0] & 3;
-						const msgFromPk = msgData.slice(1, 1 + sodium.crypto_box_PUBLICKEYBYTES);
-						const msgFrom = _addr32_decode(msgData.slice(1 + sodium.crypto_box_PUBLICKEYBYTES, 11 + sodium.crypto_box_PUBLICKEYBYTES));
-						const msgTo = _addr32_decode(msgData.slice(11 + sodium.crypto_box_PUBLICKEYBYTES, 21 + sodium.crypto_box_PUBLICKEYBYTES));
+						// 128 unused
+						const msgTitleLen = msgData[0] & 127;
 
-						const nonce = msgData.slice(21 + sodium.crypto_box_PUBLICKEYBYTES, 21 + sodium.crypto_box_PUBLICKEYBYTES + sodium.crypto_box_NONCEBYTES);
-						const msgBox = msgData.slice(21 + sodium.crypto_box_PUBLICKEYBYTES + sodium.crypto_box_NONCEBYTES);
+						// 128/64/32 unused
+						const msgEncrypted  = msgData[1] & 16;
+						const msgFromShield = msgData[1] &  8;
+						const msgToShield   = msgData[1] &  4;
+						const msgFromLv     = msgData[1] &  3;
+
+						const msgFrom = _addr32_decode(msgData.slice( 2, 12));
+						const msgTo   = _addr32_decode(msgData.slice(12, 22));
+
+						const msgFromPk = msgData.slice(22, 22 + sodium.crypto_box_PUBLICKEYBYTES);
+						const msgNonce = msgData.slice(22 + sodium.crypto_box_PUBLICKEYBYTES, 22 + sodium.crypto_box_PUBLICKEYBYTES + sodium.crypto_box_NONCEBYTES);
+						const msgBox = msgData.slice(22 + sodium.crypto_box_PUBLICKEYBYTES + sodium.crypto_box_NONCEBYTES);
+
 						let msgBin;
 						let msgTitle;
 						let msgBody;
 
-						try {msgBin = sodium.crypto_box_open_easy(msgBox, nonce, msgFromPk, _userKeySecret, null);}
-						catch(e) {
+						try {
+							if (msgEncrypted) {
+								msgBin = sodium.crypto_box_open_easy(msgBox, nonce, msgFromPk, _userKeySecret, null);
+							} else {
+								msgBin = msgBox;
+							}
+						} catch(e) {
 							msgTitle = "(error)";
 							msgBody = e;
 						} finally {
 							if (msgBin) {
-								const msgText = sodium.to_string(msgBin);
-								msgTitle = msgText.slice(0, msgText.indexOf("\n"));
-								msgBody = msgText.slice(msgText.indexOf("\n"));
+								msgTitle = sodium.to_string(msgBin.slice(0, msgTitleLen));
+								msgBody = sodium.to_string(msgBin.slice(msgTitleLen));
 							}
 
 							_intMsg.push(new _NewIntMsg(validPad, validSig, msgId, msgTs, msgFromLv, msgFromPk, msgFrom, msgTo, msgTitle, msgBody));
@@ -1207,22 +1220,28 @@ function AllEars(readyCallback) {
 	this.Message_Create = function(title, body, addr_from, addr_to, replyId, to_pubkey, callback) {
 		if (typeof(title) !== "string" || typeof(body) !== "string" || typeof(addr_from) !== "string" || typeof(addr_to) !== "string") {callback(false); return;}
 
-		if (!to_pubkey) { // Email
+		if (addr_to.indexOf("@") >= 0) { // Email
 			if (typeof(replyId) !== "string") {callback(false); return;}
 
-			// 'x' is 01111000 in ASCII. Addr32 understands this as a length of 16, which is higher than the maximum 15.
-			_FetchEncrypted(_AEM_API_MESSAGE_CREATE, sodium.from_string("x" + addr_from + "\n" + addr_to + "\n" + replyId + "\n" + title + "\n" + body), function(fetchOk) {callback(fetchOk);});
+			// First byte is title length for internal messages, values over 127 are treated as email
+			const bin = sodium.from_string("x" + addr_from + "\n" + addr_to + "\n" + replyId + "\n" + title + "\n" + body);
+			bin[0] = 0xFF;
+
+			_FetchEncrypted(_AEM_API_MESSAGE_CREATE, bin, function(fetchOk) {callback(fetchOk);});
 			return;
 		}
 
 		// Internal mail
-		if (to_pubkey.constructor !== Uint8Array || to_pubkey.length !== sodium.crypto_box_PUBLICKEYBYTES) {callback(false); return;}
-
 		const nonce = new Uint8Array(sodium.crypto_box_NONCEBYTES);
-		window.crypto.getRandomValues(nonce);
+		const isEncrypted = (to_pubkey.constructor === Uint8Array && to_pubkey.length === sodium.crypto_box_PUBLICKEYBYTES);
 
-		const msg = sodium.from_string(title + "\n" + body);
-		const msgBox = sodium.crypto_box_easy(msg, nonce, to_pubkey, _userKeySecret, null);
+		if (isEncrypted) {
+			window.crypto.getRandomValues(nonce);
+		} else {
+			nonce.fill(0xAA);
+		}
+
+		const msgBox = isEncrypted ? sodium.crypto_box_easy(sodium.from_string(title + body), nonce, to_pubkey, _userKeySecret, null) : sodium.from_string(title + body);
 
 		const addr32_from = _addr32_encode(addr_from);
 		if (!addr32_from) {callback(false); return;}
@@ -1230,12 +1249,20 @@ function AllEars(readyCallback) {
 		const addr32_to = _addr32_encode(addr_to);
 		if (!addr32_to) {callback(false); return;}
 
-		const final = new Uint8Array(20 + sodium.crypto_box_PUBLICKEYBYTES + sodium.crypto_box_NONCEBYTES + msgBox.length);
-		final.set(addr32_from);
-		final.set(addr32_to, 10);
-		final.set(to_pubkey, 20);
-		final.set(nonce, 20 + sodium.crypto_box_PUBLICKEYBYTES);
-		final.set(msgBox, 20 + sodium.crypto_box_PUBLICKEYBYTES + sodium.crypto_box_NONCEBYTES);
+		const final = new Uint8Array(22 + sodium.crypto_box_PUBLICKEYBYTES + sodium.crypto_box_NONCEBYTES + msgBox.length);
+
+		final[0] = title.length & 127;
+
+		// 128/64/32 unused
+		final[1] = isEncrypted? 16 : 0;
+		if (addr_from.length === 16) final[1] |=  8;
+		if (addr_to.length   === 16) final[1] |=  4;
+		// Server sets sender level (0-3)
+
+		final.set(addr32_from, 2);
+		final.set(addr32_to, 12);
+		final.set(nonce, 22);
+		final.set(msgBox, 22 + sodium.crypto_box_NONCEBYTES);
 
 		_FetchEncrypted(_AEM_API_MESSAGE_CREATE, final, function(fetchOk) {callback(fetchOk);});
 	};

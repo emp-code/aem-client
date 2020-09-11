@@ -748,6 +748,23 @@ document.getElementById("btn_savecontacts").onclick = function() {
 	});
 };
 
+function writeVerify() {
+	document.getElementById("div_write_1").hidden = true;
+	document.getElementById("div_write_2").hidden = false;
+
+	document.getElementById("write2_recv").textContent = document.getElementById("write_recv").value;
+	document.getElementById("write2_subj").textContent = document.getElementById("write_subj").value;
+	document.getElementById("write2_rply").textContent = document.getElementById("write_rply").textContent;
+	document.getElementById("write2_body").textContent = document.getElementById("write_body").value;
+
+	if (document.getElementById("write_recv").value.indexOf("@") >= 0)
+		document.getElementById("write2_from").textContent = document.getElementById("write_from").value + "@" + ae.GetDomainEml();
+	else
+		document.getElementById("write2_from").textContent = document.getElementById("write_from").value;
+
+//	document.getElementById("write2_pkey").textContent = sodium.to_hex(pk);
+}
+
 function updateTab() {
 	switch (tab) {
 		case TAB_INBOX:
@@ -767,22 +784,16 @@ function updateTab() {
 				break;
 
 				case 1: // Verify
-					ae.Address_Lookup(document.getElementById("write_recv").value, function(pk) {
-						if (pk) {
-							document.getElementById("div_write_1").hidden = true;
-							document.getElementById("div_write_2").hidden = false;
+					if (document.getElementById("write_recv").value.indexOf("@") >= 0) {
+						ae.Address_Lookup(document.getElementById("write_recv").value, function(pk) {
+							if (!pk) {
+								console.log("Failed lookup");
+								return;
+							}
 
-							document.getElementById("write2_from").textContent = document.getElementById("write_from").value + "@" + ae.GetDomainEml();
-							document.getElementById("write2_recv").textContent = document.getElementById("write_recv").value;
-							document.getElementById("write2_pkey").textContent = sodium.to_hex(pk);
-
-							document.getElementById("write2_subj").textContent = document.getElementById("write_subj").value;
-							document.getElementById("write2_rply").textContent = document.getElementById("write_rply").textContent;
-							document.getElementById("write2_body").textContent = document.getElementById("write_body").value;
-						} else {
-							console.log("Failed lookup");
-						}
-					});
+							writeVerify();
+						});
+					} else writeVerify();
 				break;
 
 				case 2: // Send
