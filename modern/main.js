@@ -908,6 +908,24 @@ document.getElementById("btn_address_create_shield").onclick = function() {
 	addressCreate("SHIELD");
 };
 
+document.getElementById("btn_address_update").onclick = function() {
+	const btn = this;
+	btn.disabled = true;
+
+	const rows = document.getElementById("tbl_addrs").rows;
+
+	for (let i = 0; i < rows.length; i++) {
+		ae.SetAddressAccExt(i, rows[i].getElementsByTagName("input")[0].checked);
+		ae.SetAddressAccInt(i, rows[i].getElementsByTagName("input")[1].checked);
+		ae.SetAddressUse_Gk(i, rows[i].getElementsByTagName("input")[2].checked);
+	};
+
+	ae.Address_Update(function(success) {
+		if (!success) console.log("Address/Update failed");
+		btn.disabled = false;
+	});
+};
+
 document.getElementById("btn_reg").onclick = function() {
 	const btn = document.getElementById("btn_reg");
 	const txt = document.getElementById("txt_reg");

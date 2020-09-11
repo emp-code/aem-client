@@ -444,6 +444,10 @@ hr {
 	width: 3em;
 }
 
+#table_addrs > tfoot button {
+	width: 100%;
+}
+
 #div_notes tbody tr td:not(:last-of-type) {
 	opacity: 0.55;
 }
