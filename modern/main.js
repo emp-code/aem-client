@@ -918,7 +918,7 @@ document.getElementById("btn_address_update").onclick = function() {
 		ae.SetAddressAccExt(i, rows[i].getElementsByTagName("input")[0].checked);
 		ae.SetAddressAccInt(i, rows[i].getElementsByTagName("input")[1].checked);
 		ae.SetAddressUse_Gk(i, rows[i].getElementsByTagName("input")[2].checked);
-	};
+	}
 
 	ae.Address_Update(function(success) {
 		if (!success) console.log("Address/Update failed");
