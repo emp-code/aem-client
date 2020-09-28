@@ -1350,10 +1350,10 @@ function AllEars(readyCallback) {
 		final.set(nonce);
 		final.set(sbox, sodium.crypto_secretbox_NONCEBYTES);
 
-		_FetchEncrypted(_AEM_API_MESSAGE_UPLOAD, final, function(fetchOk) {
+		_FetchEncrypted(_AEM_API_MESSAGE_UPLOAD, final, function(fetchOk, newMsgId) {
 			if (!fetchOk) {callback(false); return;}
 
-			_uplMsg.unshift(new _NewUplMsg(null, Date.now() / 1000, title, body, null, (final.length + sodium.crypto_box_SEALBYTES) / 16));
+			_uplMsg.unshift(new _NewUplMsg(newMsgId, Date.now() / 1000, title, body, null, (final.length + sodium.crypto_box_SEALBYTES) / 16));
 			_totalMsgBytes += final.length + sodium.crypto_box_SEALBYTES;
 			callback(true);
 		});
