@@ -158,6 +158,7 @@ function displayMsg(isInt, num) {
 	clearDisplay();
 
 	document.getElementById("midright").scroll(0, 0);
+	document.getElementById("midright").setAttribute("data-msgid", isInt? ae.GetIntMsgIdHex(num) : ae.GetExtMsgIdHex(num));
 
 	const ts = isInt? ae.GetIntMsgTime(num) : ae.GetExtMsgTime(num);
 
@@ -182,7 +183,16 @@ function displayMsg(isInt, num) {
 		this.blur();
 
 		ae.Message_Delete(isInt? ae.GetIntMsgIdHex(num) : ae.GetExtMsgIdHex(num), function(success) {
-			if (!success) console.log("Failed delete");
+			if (success) {
+				const tbl = document.getElementById("tbl_inbox")
+				for (let i = 0; i < tbl.rows.length; i++) {
+					if (tbl.rows[i].getAttribute("data-msgid") === document.getElementById("midright").getAttribute("data-msgid")) tbl.deleteRow(i);
+				}
+
+				addMessages();
+				addUploads();
+				addSent();
+			} else console.log("Failed delete");
 		});
 	};
 
@@ -267,6 +277,8 @@ function displayMsg(isInt, num) {
 // Interface
 function addMsg(isInt, i) {
 	const row = document.getElementById("tbl_inbox").insertRow(-1);
+	row.setAttribute("data-msgid", isInt? ae.GetIntMsgIdHex(i) : ae.GetExtMsgIdHex(i));
+
 	const cellTime = row.insertCell(-1);
 	const cellSubj = row.insertCell(-1);
 	const cellSnd1 = row.insertCell(-1);
