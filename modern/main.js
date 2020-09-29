@@ -181,6 +181,7 @@ function displayMsg(isInt, num) {
 	document.getElementById("btn_mdele").disabled = false;
 	document.getElementById("btn_mdele").onclick = function() {
 		this.blur();
+		this.disabled = true;
 
 		ae.Message_Delete(isInt? ae.GetIntMsgIdHex(num) : ae.GetExtMsgIdHex(num), function(success) {
 			if (success) {
@@ -192,7 +193,7 @@ function displayMsg(isInt, num) {
 				addMessages();
 				addUploads();
 				addSent();
-			} else console.log("Failed delete");
+			} else this.disabled = false;
 		});
 	};
 
