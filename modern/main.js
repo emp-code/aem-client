@@ -185,10 +185,9 @@ function displayMsg(isInt, num) {
 
 		ae.Message_Delete(isInt? ae.GetIntMsgIdHex(num) : ae.GetExtMsgIdHex(num), function(success) {
 			if (success) {
-				const tbl = document.getElementById("tbl_inbox")
-				for (let i = 0; i < tbl.rows.length; i++) {
-					if (tbl.rows[i].getAttribute("data-msgid") === document.getElementById("midright").getAttribute("data-msgid")) tbl.deleteRow(i);
-				}
+				["tbl_inbox", "tbl_drbox", "tbd_uploads"].foreach(function(tbl) {
+					for (let i = 0; i < tbl.rows.length; i++) {if (tbl.rows[i].getAttribute("data-msgid") === document.getElementById("midright").getAttribute("data-msgid")) tbl.deleteRow(i);}
+				});
 
 				addMessages();
 				addUploads();
