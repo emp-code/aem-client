@@ -1115,10 +1115,10 @@ function AllEars(readyCallback) {
 						const msgTitleLen = msgData[0] & 127;
 
 						// 128/64/32 unused
-						const msgEncrypted = (msgData[1] & 16) != 0;
-						const msgFromShield = msgData[1] &  8;
-						const msgToShield   = msgData[1] &  4;
-						const msgFromLv     = msgData[1] &  3;
+						const msgEncrypted  = (msgData[1] & 16) != 0;
+						const msgFromShield = (msgData[1] &  8) != 0;
+						const msgToShield   = (msgData[1] &  4) != 0;
+						const msgFromLv = msgData[1] & 3;
 
 						const msgFrom = _addr32_decode(msgData.slice( 2, 12), msgFromShield);
 						const msgTo   = _addr32_decode(msgData.slice(12, 22), msgToShield);
