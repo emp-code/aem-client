@@ -1290,35 +1290,17 @@ function AllEars(readyCallback) {
 			for (let i = 0; i < hexIds.length; i++) {
 				const id = sodium.from_hex(hexIds[i]);
 
-				for (let j = 0; j < _extMsg.length; j++) {
-					let matches = true;
+				[_extMsg, _intMsg, _uplMsg].forEach(function(msgSet) {
+					for (let j = 0; j < msgSet.length; j++) {
+						let matches = true;
 
-					for (let k = 0; k < 16; k++) {
-						if (id[k] !== _extMsg[j].id[k]) {matches = false; break;}
+						for (let k = 0; k < 16; k++) {
+							if (id[k] !== msgSet[j].id[k]) {matches = false; break;}
+						}
+
+						if (matches) {msgSet.splice(j, 1); j--;}
 					}
-
-					if (matches) {_extMsg.splice(j, 1); j--;}
-				}
-
-				for (let j = 0; j < _intMsg.length; j++) {
-					let matches = true;
-
-					for (let k = 0; k < 16; k++) {
-						if (id[k] !== _intMsg[j].id[k]) {matches = false; break;}
-					}
-
-					if (matches) {_intMsg.splice(j, 1); j--;}
-				}
-
-				for (let j = 0; j < _uplMsg.length; j++) {
-					let matches = true;
-
-					for (let k = 0; k < 16; k++) {
-						if (id[k] !== _uplMsg[j].id[k]) {matches = false; break;}
-					}
-
-					if (matches) {_uplMsg.splice(j, 1); j--;}
-				}
+				});
 			}
 
 			callback(true);
