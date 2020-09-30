@@ -384,6 +384,8 @@ function addUploads() {
 
 	for (let i = 0; i < ae.GetUplMsgCount(); i++) {
 		const row = tbl.insertRow(-1);
+		row.setAttribute("data-msgid", ae.GetUplMsgIdHex(i));
+
 		let cell;
 		cell = row.insertCell(-1); cell.textContent = new Date(ae.GetUplMsgTime(i) * 1000).toISOString().slice(0, 10);
 
@@ -460,8 +462,9 @@ function addSent() {
 
 	for (let i = 0; i < ae.GetOutMsgCount(); i++) {
 		const row = tbl.insertRow(-1);
-		let cell;
+		row.setAttribute("data-msgid", ae.GetOutMsgIdHex(i));
 
+		let cell;
 		cell = row.insertCell(-1); cell.textContent = new Date(ae.GetOutMsgTime(i) * 1000).toISOString().slice(0, 10);
 		cell = row.insertCell(-1); cell.textContent = ae.GetOutMsgSubj(i);
 		row.onclick = function() {displayOutMsg(i);};
