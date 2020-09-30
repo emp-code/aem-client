@@ -1120,8 +1120,8 @@ function AllEars(readyCallback) {
 						const msgToShield   = msgData[1] &  4;
 						const msgFromLv     = msgData[1] &  3;
 
-						const msgFrom = _addr32_decode(msgData.slice( 2, 12));
-						const msgTo   = _addr32_decode(msgData.slice(12, 22));
+						const msgFrom = _addr32_decode(msgData.slice( 2, 12), msgFromShield);
+						const msgTo   = _addr32_decode(msgData.slice(12, 22), msgToShield);
 
 						const msgFromPk = msgData.slice(22, 22 + sodium.crypto_box_PUBLICKEYBYTES);
 						const msgNonce = msgData.slice(22 + sodium.crypto_box_PUBLICKEYBYTES, 22 + sodium.crypto_box_PUBLICKEYBYTES + sodium.crypto_box_NONCEBYTES);
