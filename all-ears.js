@@ -1133,7 +1133,7 @@ function AllEars(readyCallback) {
 
 						try {
 							if (msgEncrypted) {
-								msgBin = sodium.crypto_box_open_easy(msgBox, nonce, msgFromPk, _userKeySecret, null);
+								msgBin = sodium.crypto_box_open_easy(msgBox, msgNonce, msgFromPk, _userKeySecret, null);
 							} else {
 								msgBin = msgBox;
 							}
