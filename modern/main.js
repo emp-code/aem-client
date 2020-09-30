@@ -92,9 +92,9 @@ function displayFile(num) {
 	clearDisplay();
 
 	document.getElementById("midright").scroll(0, 0);
+	document.getElementById("midright").setAttribute("data-msgid", ae.GetUplMsgIdHex(num));
 	document.getElementById("btn_reply").disabled = true;
-	document.getElementById("btn_mdele").disabled = true;
-
+	document.getElementById("btn_mdele").disabled = false;
 	document.getElementById("midright").children[0].hidden = true;
 	document.getElementById("midright").children[1].textContent = ae.GetUplMsgTitle(num);
 
@@ -157,6 +157,7 @@ function displayFile(num) {
 function displayMsg(isInt, num) {
 	clearDisplay();
 
+	document.getElementById("btn_mdele").disabled = false;
 	document.getElementById("midright").scroll(0, 0);
 	document.getElementById("midright").setAttribute("data-msgid", isInt? ae.GetIntMsgIdHex(num) : ae.GetExtMsgIdHex(num));
 
@@ -176,24 +177,6 @@ function displayMsg(isInt, num) {
 				opt.selected = true;
 			}
 		}
-	};
-
-	document.getElementById("btn_mdele").disabled = false;
-	document.getElementById("btn_mdele").onclick = function() {
-		this.blur();
-		this.disabled = true;
-
-		ae.Message_Delete(isInt? ae.GetIntMsgIdHex(num) : ae.GetExtMsgIdHex(num), function(success) {
-			if (success) {
-				["tbl_inbox", "tbl_drbox", "tbd_uploads"].foreach(function(tbl) {
-					for (let i = 0; i < tbl.rows.length; i++) {if (tbl.rows[i].getAttribute("data-msgid") === document.getElementById("midright").getAttribute("data-msgid")) tbl.deleteRow(i);}
-				});
-
-				addMessages();
-				addUploads();
-				addSent();
-			} else this.disabled = false;
-		});
 	};
 
 	document.getElementById("midright").children[0].hidden = false;
@@ -410,16 +393,9 @@ function addUploads() {
 function displayOutMsg(num) {
 	clearDisplay();
 	document.getElementById("midright").scroll(0, 0);
-
+	document.getElementById("midright").setAttribute("data-msgid", ae.GetOutMsgIdHex(num));
 	document.getElementById("btn_reply").disabled = true;
 	document.getElementById("btn_mdele").disabled = false;
-	document.getElementById("btn_mdele").onclick = function() {
-		this.blur();
-		ae.Message_Delete(ae.GetOutMsgIdHex(num), function(success) {
-			if (!success) console.log("Failed delete");
-		});
-	};
-
 	document.getElementById("midright").children[0].hidden = false;
 	document.getElementById("midright").children[2].hidden = false;
 
@@ -716,6 +692,28 @@ document.getElementById("btn_updt").onclick = function() {
 			}
 		});
 	}
+};
+
+document.getElementById("btn_mdele").onclick = function() {
+	const btn = this;
+	btn.blur();
+	btn.disabled = true;
+
+	const delId = document.getElementById("midright").getAttribute("data-msgid");
+	if (!delId) return;
+
+	ae.Message_Delete(delId, function(success) {
+		if (success) {
+			["tbl_inbox", "tbl_drbox", "tbd_uploads"].forEach(function(tbl_name) {
+				const tbl = document.getElementById(tbl_name);
+				for (let i = 0; i < tbl.rows.length; i++) {if (tbl.rows[i].getAttribute("data-msgid") === delId) tbl.deleteRow(i);}
+			});
+
+			addMessages();
+			addUploads();
+			addSent();
+		} else btn.disabled = false;
+	});
 };
 
 function addContact(mail, name, note) {
