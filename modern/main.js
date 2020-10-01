@@ -407,10 +407,10 @@ function displayOutMsg(num) {
 	document.getElementById("readmsg_date").children[0].textContent = new Date((ts * 1000) + (tzOs * -60000)).toISOString().slice(0, 19).replace("T", " ") + " " + tz;
 
 	const isInt = ae.GetOutMsgIsInt(num);
-	document.getElementById("readmsg_ip").hidden      = !isInt;
-	document.getElementById("readmsg_country").hidden = !isInt;
-	document.getElementById("readmsg_tls").hidden     = !isInt;
-	document.getElementById("readmsg_greet").hidden   = !isInt;
+	document.getElementById("readmsg_ip").hidden      = isInt;
+	document.getElementById("readmsg_country").hidden = isInt;
+	document.getElementById("readmsg_tls").hidden     = isInt;
+	document.getElementById("readmsg_greet").hidden   = isInt;
 
 	if (!isInt) {
 //		const cc = ae.GetExtMsgCountry(num);
