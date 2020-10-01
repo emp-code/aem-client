@@ -1124,8 +1124,8 @@ function AllEars(readyCallback) {
 						const msgTo   = _addr32_decode(msgData.slice(12, 22), msgToShield);
 
 						const msgFromPk = msgData.slice(22, 22 + sodium.crypto_box_PUBLICKEYBYTES);
-						const msgNonce = msgData.slice(22 + sodium.crypto_box_PUBLICKEYBYTES, 22 + sodium.crypto_box_PUBLICKEYBYTES + sodium.crypto_box_NONCEBYTES);
-						const msgBox = msgData.slice(22 + sodium.crypto_box_PUBLICKEYBYTES + sodium.crypto_box_NONCEBYTES);
+						const msgNonce = msgData.slice(22 + sodium.crypto_box_PUBLICKEYBYTES, 22 + sodium.crypto_box_PUBLICKEYBYTES + sodium.crypto_secretbox_NONCEBYTES);
+						const msgBox = msgData.slice(22 + sodium.crypto_box_PUBLICKEYBYTES + sodium.crypto_secretbox_NONCEBYTES);
 
 						let msgBin;
 						let msgTitle;
@@ -1133,7 +1133,7 @@ function AllEars(readyCallback) {
 
 						try {
 							if (msgEncrypted) {
-								msgBin = sodium.crypto_box_open_easy(msgBox, msgNonce, msgFromPk, _userKeySecret, null);
+								//msgBin = sodium.crypto_secretbox_open_easy(msgBox, msgNonce, intbox_secretkey); // TODO
 							} else {
 								msgBin = msgBox;
 							}
@@ -1171,14 +1171,28 @@ function AllEars(readyCallback) {
 					break;}
 
 					case 48: { // OutMsg (Delivery report for sent message)
-						const lenSb = (msgData[0] & 127);
+						const lenSb = msgData[0] & 127;
 
-						if (msgData[0] & 128) {
-							// Internal message, TODO
+						if ((msgData[0] & 128) != 0) { // Internal message
+							const isEncrypted  = (msgData[1] & 16) != 0;
+							const isFromShield = (msgData[1] &  8) != 0;
+							const isToShield   = (msgData[1] &  4) != 0;
 
-							//_outMsg.push(new _NewOutMsg_Int(msgId, msgTs, msgTo, msgFr, msgSb, msgBd));
-						} else {
-							// Email
+							const msgFr = _addr32_decode(msgData.slice(2, 12), isFromShield);
+							const msgTo = _addr32_decode(msgData.slice(12, 22), isToShield);
+
+							let msgBin = msgData.slice(22);
+							if (isEncrypted) {
+								// TODO
+							} else {
+								msgBin = sodium.to_string(msgBin);
+							}
+
+							const msgSb = msgBin.slice(0, lenSb);
+							const msgBd = msgBin.slice(lenSb);
+
+							_outMsg.push(new _NewOutMsg_Int(msgId, msgTs, msgTo, msgFr, msgSb, msgBd));
+						} else { // Email
 							const msgIp = msgData.slice(1, 5);
 							const msgCs = new Uint16Array(msgData.slice(5, 7).buffer)[0];
 							const msgTlsVer = msgData[7] >> 5;
@@ -1230,7 +1244,7 @@ function AllEars(readyCallback) {
 		}
 
 		// Internal mail
-		const nonce = new Uint8Array(sodium.crypto_box_NONCEBYTES);
+		const nonce = new Uint8Array(sodium.crypto_secretbox_NONCEBYTES);
 		const isEncrypted = (to_pubkey.constructor === Uint8Array && to_pubkey.length === sodium.crypto_box_PUBLICKEYBYTES);
 
 		if (isEncrypted) {
@@ -1247,7 +1261,7 @@ function AllEars(readyCallback) {
 		const addr32_to = _addr32_encode(addr_to);
 		if (!addr32_to) {callback(false); return;}
 
-		const final = new Uint8Array(22 + sodium.crypto_box_PUBLICKEYBYTES + sodium.crypto_box_NONCEBYTES + msgBox.length);
+		const final = new Uint8Array(22 + sodium.crypto_box_PUBLICKEYBYTES + sodium.crypto_secretbox_NONCEBYTES + msgBox.length);
 
 		final[0] = title.length & 127;
 
@@ -1260,7 +1274,7 @@ function AllEars(readyCallback) {
 		final.set(addr32_from, 2);
 		final.set(addr32_to, 12);
 		final.set(nonce, 22);
-		final.set(msgBox, 22 + sodium.crypto_box_NONCEBYTES);
+		final.set(msgBox, 22 + sodium.crypto_secretbox_NONCEBYTES);
 
 		_FetchEncrypted(_AEM_API_MESSAGE_CREATE, final, function(fetchOk) {callback(fetchOk);});
 	};
