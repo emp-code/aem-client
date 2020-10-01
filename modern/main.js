@@ -406,7 +406,7 @@ function displayOutMsg(num) {
 	const tz = ((tzOs < 0) ? "+" : "-") + Math.floor(tzOs / -60).toString().padStart(2, "0") + (tzOs % 60 * -1).toString().padStart(2, "0");
 	document.getElementById("readmsg_date").children[0].textContent = new Date((ts * 1000) + (tzOs * -60000)).toISOString().slice(0, 19).replace("T", " ") + " " + tz;
 
-	const isInt = GetOutMsgIsInt(num);
+	const isInt = ae.GetOutMsgIsInt(num);
 	document.getElementById("readmsg_ip").hidden      = !isInt;
 	document.getElementById("readmsg_country").hidden = !isInt;
 	document.getElementById("readmsg_tls").hidden     = !isInt;
