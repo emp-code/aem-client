@@ -203,7 +203,7 @@ function displayMsg(isInt, num) {
 		document.getElementById("midright").children[1].style.cursor = "pointer";
 	}
 
-	document.getElementById("readmsg_to").textContent = isInt ? ae.GetIntMsgTo(num) : ae.GetExtMsgTo(num);
+	document.getElementById("readmsg_envto").textContent = isInt ? ae.GetIntMsgTo(num) : ae.GetExtMsgTo(num);
 
 	const tzOs = new Date().getTimezoneOffset();
 	const tz = ((tzOs < 0) ? "+" : "-") + Math.floor(tzOs / -60).toString().padStart(2, "0") + (tzOs % 60 * -1).toString().padStart(2, "0");
@@ -214,8 +214,6 @@ function displayMsg(isInt, num) {
 		document.getElementById("readmsg_country").hidden = false;
 		document.getElementById("readmsg_tls").hidden = false;
 		document.getElementById("readmsg_greet").hidden = false;
-		document.getElementById("readmsg_timing").hidden = false;
-		document.getElementById("readmsg_envfrom").hidden = false;
 
 		const cc = ae.GetExtMsgCountry(num);
 
@@ -239,8 +237,6 @@ function displayMsg(isInt, num) {
 		document.getElementById("readmsg_country").hidden = true;
 		document.getElementById("readmsg_tls").hidden = true;
 		document.getElementById("readmsg_greet").hidden = true;
-		document.getElementById("readmsg_timing").hidden = true;
-		document.getElementById("readmsg_envfrom").hidden = true;
 
 		let symbol = "<span title=\"Invalid level\">&#x26a0;</span>";
 		if (ae.GetIntMsgFrom(num) === "system") {if (ae.GetIntMsgLevel(num) === 3) symbol = "<span title=\"System\">&#x1f162;</span>";} // S (System)
@@ -248,7 +244,7 @@ function displayMsg(isInt, num) {
 		else if (ae.GetIntMsgLevel(num) === 1) symbol = "<span title=\"Level 1 User\">&#x278a;</span>"; // 1
 		else if (ae.GetIntMsgLevel(num) === 2) symbol = "<span title=\"Level 2 User\">&#x278b;</span>"; // 2
 		else if (ae.GetIntMsgLevel(num) === 3) symbol = "<span title=\"Administrator\">&#x1f150;</span>"; // A (Admin)
-		document.getElementById("readmsg_from").innerHTML = symbol + " " + ae.GetIntMsgFrom(num);
+		document.getElementById("readmsg_envfrom").innerHTML = symbol + " " + ae.GetIntMsgFrom(num);
 
 		let flagText = "";
 		if (!ae.GetIntMsgFlagVPad(num)) flagText += "<abbr title=\"Invalid padding\">PAD</abbr> ";
@@ -399,14 +395,10 @@ function displayOutMsg(num) {
 	document.getElementById("midright").children[0].hidden = false;
 	document.getElementById("midright").children[2].hidden = false;
 
-//	if (isInt) {
-		document.getElementById("midright").children[1].textContent = ae.GetOutMsgSubj(num);
-		document.getElementById("midright").children[2].textContent = ae.GetOutMsgBody(num);
-//	} else {
-//	}
+	document.getElementById("midright").children[1].textContent = ae.GetOutMsgSubj(num);
+	document.getElementById("midright").children[2].textContent = ae.GetOutMsgBody(num);
 
-	document.getElementById("readmsg_to").textContent = ae.GetOutMsgTo(num);
-	document.getElementById("readmsg_envfrom").hidden = false;
+	document.getElementById("readmsg_envto").textContent = ae.GetOutMsgTo(num);
 	document.getElementById("readmsg_envfrom").textContent = ae.GetOutMsgFrom(num);
 
 	const ts = ae.GetOutMsgTime(num);
@@ -414,21 +406,20 @@ function displayOutMsg(num) {
 	const tz = ((tzOs < 0) ? "+" : "-") + Math.floor(tzOs / -60).toString().padStart(2, "0") + (tzOs % 60 * -1).toString().padStart(2, "0");
 	document.getElementById("readmsg_date").children[0].textContent = new Date((ts * 1000) + (tzOs * -60000)).toISOString().slice(0, 19).replace("T", " ") + " " + tz;
 
-//	if (!isInt) {
-		document.getElementById("readmsg_ip").hidden = false;
-		document.getElementById("readmsg_country").hidden = false;
-		document.getElementById("readmsg_tls").hidden = false;
-		document.getElementById("readmsg_greet").hidden = false;
+	const isInt = GetOutMsgIsInt(num);
+	document.getElementById("readmsg_ip").hidden      = !isInt;
+	document.getElementById("readmsg_country").hidden = !isInt;
+	document.getElementById("readmsg_tls").hidden     = !isInt;
+	document.getElementById("readmsg_greet").hidden   = !isInt;
 
+	if (!isInt) {
 //		const cc = ae.GetExtMsgCountry(num);
 
 		document.getElementById("readmsg_ip").children[0].textContent = ae.GetOutMsgIp(num);
 //		document.getElementById("readmsg_country").textContent = getCountryFlag(cc) + " " + getCountryName(cc);
 //		document.getElementById("readmsg_tls").children[0].textContent = ae.GetOutMsgTLS(num);
 		document.getElementById("readmsg_greet").children[0].textContent = ae.GetOutMsgGreet(num);
-//		document.getElementById("readmsg_envfrom").textContent = ae.GetExtMsgFrom(num);
-//	} else {
-//	}
+	}
 }
 
 function addSent() {

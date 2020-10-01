@@ -756,6 +756,7 @@ function AllEars(readyCallback) {
 
 	this.GetOutMsgCount = function() {return _outMsg.length;};
 	this.GetOutMsgIdHex = function(num) {return sodium.to_hex(_outMsg[num].id);};
+	this.GetOutMsgIsInt = function(num) {return _outMsg[num].isInt;};
 	this.GetOutMsgTime = function(num) {return _outMsg[num].ts;};
 	this.GetOutMsgIp   = function(num) {return String(_outMsg[num].ip[0] + "." + _outMsg[num].ip[1] + "." + _outMsg[num].ip[2] + "." + _outMsg[num].ip[3]);};
 	this.GetOutMsgTo   = function(num) {return _outMsg[num].to;};
