@@ -68,6 +68,7 @@ function AllEars(readyCallback) {
 
 	let _userKeyPublic;
 	let _userKeySecret;
+	let _userKeyKxHash;
 	let _userKeySymmetric;
 
 	let _userLevel = 0;
@@ -809,7 +810,7 @@ function AllEars(readyCallback) {
 
 		_userKeyPublic = boxKeys.publicKey;
 		_userKeySecret = boxKeys.privateKey;
-
+		_userKeyKxHash = sodium.crypto_kdf_derive_from_key(sodium.crypto_generichash_KEYBYTES, 4, "AEM-Usr0", sodium.from_hex(skey_hex));
 		_userKeySymmetric = sodium.crypto_kdf_derive_from_key(sodium.crypto_secretbox_KEYBYTES, 5, "AEM-Usr0", sodium.from_hex(skey_hex));
 
 		callback(true);
@@ -1112,21 +1113,19 @@ function AllEars(readyCallback) {
 					break;}
 
 					case 16: { // IntMsg
-						// 128 unused
-						const msgTitleLen = msgData[0] & 127;
-
 						// 128/64/32 unused
-						const msgEncrypted  = (msgData[1] & 16) != 0;
-						const msgFromShield = (msgData[1] &  8) != 0;
-						const msgToShield   = (msgData[1] &  4) != 0;
-						const msgFromLv = msgData[1] & 3;
+						const msgEncrypted  = (msgData[0] & 16) != 0;
+						const msgFromShield = (msgData[0] &  8) != 0;
+						const msgToShield   = (msgData[0] &  4) != 0;
+						const msgFromLv = msgData[0] & 3;
 
-						const msgFrom = _addr32_decode(msgData.slice( 2, 12), msgFromShield);
-						const msgTo   = _addr32_decode(msgData.slice(12, 22), msgToShield);
+						const msgFrom = _addr32_decode(msgData.slice( 1, 11), msgFromShield);
+						const msgTo   = _addr32_decode(msgData.slice(11, 21), msgToShield);
 
-						const msgFromPk = msgData.slice(22, 22 + sodium.crypto_box_PUBLICKEYBYTES);
-						const msgNonce = msgData.slice(22 + sodium.crypto_box_PUBLICKEYBYTES, 22 + sodium.crypto_box_PUBLICKEYBYTES + sodium.crypto_secretbox_NONCEBYTES);
-						const msgBox = msgData.slice(22 + sodium.crypto_box_PUBLICKEYBYTES + sodium.crypto_secretbox_NONCEBYTES);
+						const msgFromPk = msgData.slice(21, 21 + sodium.crypto_kx_PUBLICKEYBYTES);
+
+						const msgTitleLen = msgData[21 + sodium.crypto_kx_PUBLICKEYBYTES] & 127; // 128 unused
+						const msgBox = msgData.slice(22 + sodium.crypto_kx_PUBLICKEYBYTES);
 
 						let msgBin;
 						let msgTitle;
@@ -1134,7 +1133,10 @@ function AllEars(readyCallback) {
 
 						try {
 							if (msgEncrypted) {
-								//msgBin = sodium.crypto_secretbox_open_easy(msgBox, msgNonce, intbox_secretkey); // TODO
+								// TODO
+								//const kxKeys = sodium.crypto_kx_seed_keypair(sodium.crypto_generichash(sodium.crypto_kx_SEEDBYTES, addr32_to, _userKeyKxHash));
+								//const sessionKeys = sodium.crypto_kx_server_session_keys(kxKeys.publicKey, kxKeys.privateKey, msgFromPk);
+								//sodium.crypto_secretbox_open_easy(msgBox, msgNonce, sessionKeys.sharedRx);
 							} else {
 								msgBin = msgBox;
 							}
@@ -1182,11 +1184,16 @@ function AllEars(readyCallback) {
 							const msgFr = _addr32_decode(msgData.slice(2, 12), isFromShield);
 							const msgTo = _addr32_decode(msgData.slice(12, 22), isToShield);
 
-							let msgBin = msgData.slice(22);
+							let msgBin;
 							if (isEncrypted) {
+								const sender_pubkey = msgData.slice(22, 22 + sodium.crypto_kx_PUBLICKEYBYTES);
+								msgBin = msgData.slice(22 + sodium.crypto_kx_PUBLICKEYBYTES);
 								// TODO
+								//const kxKeys = sodium.crypto_kx_seed_keypair(sodium.crypto_generichash(sodium.crypto_kx_SEEDBYTES, addr32_from, _userKeyKxHash));
+								//const sessionKeys = sodium.crypto_kx_client_session_keys(kxKeys.publicKey, kxKeys.privateKey, sender_pubkey);
+								//msgBin = sodium.crypto_secretbox_open_easy(msgBin, nonce, sessionKeys.sharedTx);
 							} else {
-								msgBin = sodium.to_string(msgBin);
+								msgBin = sodium.to_string(msgData.slice(22));
 							}
 
 							const msgSb = msgBin.slice(0, lenSb);
@@ -1245,16 +1252,10 @@ function AllEars(readyCallback) {
 		}
 
 		// Internal mail
-		const nonce = new Uint8Array(sodium.crypto_secretbox_NONCEBYTES);
-		const isEncrypted = (to_pubkey.constructor === Uint8Array && to_pubkey.length === sodium.crypto_box_PUBLICKEYBYTES);
+		const isEncrypted = (to_pubkey.constructor === Uint8Array && to_pubkey.length === sodium.crypto_kx_PUBLICKEYBYTES);
+		if (title.length + body.length < (isEncrypted? 6 : 38)) {callback(false); return;} // Minimum message size based on AEM_MSG_MINBLOCKS
 
-		if (isEncrypted) {
-			window.crypto.getRandomValues(nonce);
-		} else {
-			nonce.fill(0xAA);
-		}
-
-		const msgBox = isEncrypted ? sodium.crypto_box_easy(sodium.from_string(title + body), nonce, to_pubkey, _userKeySecret, null) : sodium.from_string(title + body);
+		const msgTs = new Uint8Array(isEncrypted? (new Uint32Array([Math.round(Date.now() / 1000) + 2]).buffer) : [0,0,0,0]); // +2 to account for connection delay
 
 		const addr32_from = _addr32_encode(addr_from);
 		if (!addr32_from) {callback(false); return;}
@@ -1262,20 +1263,42 @@ function AllEars(readyCallback) {
 		const addr32_to = _addr32_encode(addr_to);
 		if (!addr32_to) {callback(false); return;}
 
-		const final = new Uint8Array(22 + sodium.crypto_box_PUBLICKEYBYTES + sodium.crypto_secretbox_NONCEBYTES + msgBox.length);
+		let msgBox;
+		let msgPub;
+		if (isEncrypted) {
+			const kxKeys = sodium.crypto_kx_seed_keypair(sodium.crypto_generichash(sodium.crypto_kx_SEEDBYTES, addr32_from, _userKeyKxHash));
+			const sessionKeys = sodium.crypto_kx_client_session_keys(kxKeys.publicKey, kxKeys.privateKey, sender_pubkey);
+			msgPub = kxKeys.publicKey;
 
-		final[0] = title.length & 127;
+			const nonce = new Uint8Array(crypto.secretbox_NONCEBYTES);
+			nonce.fill(0);
+			nonce.set(msgTs);
+
+			msgBox = sodium.crypto_secretbox_easy(sodium.from_string(title + body), nonce, sessionKeys.sharedTx);
+		} else {
+			msgPub = new Uint8Array(sodium.crypto_kx_PUBLICKEYBYTES);
+			msgPub.fill(0);
+
+			msgBox = sodium.from_string(title + body);
+		}
+
+		const final = new Uint8Array((sodium.crypto_kx_PUBLICKEYBYTES * 2) + 26 + msgBox.length);
+
+		if (isEncrypted) final.set(sender_pubkey); else final.fill(0);
+		final.set(msgTs, sodium.crypto_kx_PUBLICKEYBYTES);
 
 		// 128/64/32 unused
-		final[1] = isEncrypted? 16 : 0;
-		if (addr_from.length === 16) final[1] |=  8;
-		if (addr_to.length   === 16) final[1] |=  4;
+		final[sodium.crypto_kx_PUBLICKEYBYTES + 4] = isEncrypted? 16 : 0;
+		if (addr_from.length === 16) final[sodium.crypto_kx_PUBLICKEYBYTES + 4] |= 8;
+		if (addr_to.length   === 16) final[sodium.crypto_kx_PUBLICKEYBYTES + 4] |= 4;
 		// Server sets sender level (0-3)
 
-		final.set(addr32_from, 2);
-		final.set(addr32_to, 12);
-		final.set(nonce, 22);
-		final.set(msgBox, 22 + sodium.crypto_secretbox_NONCEBYTES);
+		final.set(addr32_from, sodium.crypto_kx_PUBLICKEYBYTES + 5);
+		final.set(addr32_to, sodium.crypto_kx_PUBLICKEYBYTES + 15);
+		final.set(msgPub, sodium.crypto_kx_PUBLICKEYBYTES + 25);
+
+		final[(sodium.crypto_kx_PUBLICKEYBYTES * 2) + 25] = title.length;
+		final.set(msgBox, (sodium.crypto_kx_PUBLICKEYBYTES * 2) + 26);
 
 		_FetchEncrypted(_AEM_API_MESSAGE_CREATE, final, function(fetchOk) {callback(fetchOk);});
 	};
