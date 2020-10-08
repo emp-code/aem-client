@@ -411,7 +411,7 @@ hr {
 	opacity: 0.25;
 }
 
-#div_write_2 p {
+#write2_recv, #write2_from, #write2_subj, #write2_body {
 	opacity: 0.55;
 	white-space: pre-wrap;
 }
@@ -423,11 +423,12 @@ hr {
 }
 
 #write2_pkey {
+	text-align: center;
+}
+
+#write2_pkey input {
 	font-family: monospace, monospace;
-	margin: 1em auto;
-	font-size: large;
-	max-width: 16ch;
-	word-break: break-all;
+	text-align: center;
 }
 
 #write2_subj {
@@ -442,6 +443,10 @@ hr {
 #div_notes table tr td:last-of-type, #table_addrs td:not(:first-of-type) {
 	text-align: center;
 	width: 3em;
+}
+
+#mymsgpubkey {
+	font-family: monospace, monospace;
 }
 
 #table_addrs > tfoot button {

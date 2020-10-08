@@ -235,8 +235,10 @@ function displayMsg(isInt, num) {
 	} else {
 		document.getElementById("readmsg_ip").hidden = true;
 		document.getElementById("readmsg_country").hidden = true;
-		document.getElementById("readmsg_tls").hidden = true;
 		document.getElementById("readmsg_greet").hidden = true;
+
+		document.getElementById("readmsg_tls").hidden = false;
+		document.getElementById("readmsg_tls").textContent = ae.GetIntMsgFromPk(num);
 
 		let symbol = "<span title=\"Invalid level\">&#x26a0;</span>";
 		if (ae.GetIntMsgFrom(num) === "system") {if (ae.GetIntMsgLevel(num) === 3) symbol = "<span title=\"System\">&#x1f162;</span>";} // S (System)
@@ -761,12 +763,13 @@ function writeVerify() {
 	document.getElementById("write2_rply").textContent = document.getElementById("write_rply").textContent;
 	document.getElementById("write2_body").textContent = document.getElementById("write_body").value;
 
-	if (document.getElementById("write_recv").value.indexOf("@") >= 0)
+	if (document.getElementById("write_recv").value.indexOf("@") >= 0) {
 		document.getElementById("write2_from").textContent = document.getElementById("write_from").value + "@" + ae.GetDomainEml();
-	else
+		document.getElementById("write2_pkey").hidden = true;
+	} else {
 		document.getElementById("write2_from").textContent = document.getElementById("write_from").value;
-
-//	document.getElementById("write2_pkey").textContent = sodium.to_hex(pk);
+		document.getElementById("write2_pkey").hidden = false;
+	}
 }
 
 function updateTab() {
@@ -807,7 +810,7 @@ function updateTab() {
 						document.getElementById("write_from").value,
 						document.getElementById("write_recv").value,
 						document.getElementById("write_rply").textContent,
-						(document.getElementById("write2_recv").textContent.indexOf("@") > 0) ? null : sodium.from_hex(document.getElementById("write2_pkey").textContent),
+						(document.getElementById("write2_recv").textContent.indexOf("@") > 0) ? null : sodium.from_base64(document.querySelector("#write2_pkey > input").value, sodium.base64_variants.ORIGINAL_NO_PADDING),
 						function(success) {
 							if (success) {
 								console.log("Sent ok");
