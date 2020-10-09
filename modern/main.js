@@ -556,6 +556,8 @@ function reloadAccount() {
 	addMessages();
 	addUploads();
 	addSent();
+
+	document.getElementById("btn_rght").disabled = (tabs[tab].cur === tabs[tab].max);
 }
 
 function deleteAddress(addr) {
