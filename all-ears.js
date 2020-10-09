@@ -1192,19 +1192,23 @@ function AllEars(readyCallback) {
 
 							let msgBin;
 							if (isEncrypted) {
-								// TODO
-								/*
-								const sender_pubkey = msgData.slice(22, 22 + sodium.crypto_kx_PUBLICKEYBYTES);
-								msgBin = msgData.slice(22 + sodium.crypto_kx_PUBLICKEYBYTES);
+								const nonce = new Uint8Array(sodium.crypto_secretbox_NONCEBYTES);
+								nonce.fill(0);
+								nonce.set(msgTs_bin);
+
+								const addr32_from = msgData.slice(2, 12);
+								const recv_pubkey = msgData.slice(22, 22 + sodium.crypto_kx_PUBLICKEYBYTES);
+
 								const kxKeys = sodium.crypto_kx_seed_keypair(sodium.crypto_generichash(sodium.crypto_kx_SEEDBYTES, addr32_from, _userKeyKxHash));
-								const sessionKeys = sodium.crypto_kx_client_session_keys(kxKeys.publicKey, kxKeys.privateKey, sender_pubkey);
+								const sessionKeys = sodium.crypto_kx_client_session_keys(kxKeys.publicKey, kxKeys.privateKey, recv_pubkey);
+
+								msgBin = msgData.slice(22 + sodium.crypto_kx_PUBLICKEYBYTES);
 								msgBin = sodium.crypto_secretbox_open_easy(msgBin, nonce, sessionKeys.sharedTx);
-								*/
-								msgBin = "TODO-Enc";
 							} else {
-								msgBin = sodium.to_string(msgData.slice(22));
+								msgBin = msgData.slice(22);
 							}
 
+							msgBin = sodium.to_string(msgBin);
 							const msgSb = msgBin.slice(0, lenSb);
 							const msgBd = msgBin.slice(lenSb);
 
