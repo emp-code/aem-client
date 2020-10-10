@@ -233,7 +233,7 @@ tr {
 
 table, td {
 	white-space: nowrap;
-	overflow: hidden;
+	overflow: inherit;
 }
 
 #tbl_inbox, #tbl_drbox {
