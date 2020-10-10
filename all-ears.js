@@ -843,8 +843,8 @@ function AllEars(readyCallback) {
 
 				const newSpace = s[2] | ((u16 >> 4) & 3840);
 				const newLevel = u16 & 3;
-				const newAddrS = (u16 >> 2) & 31;
-				const newAddrN = (u16 >> 7) & 31;
+				const newAddrN = (u16 >> 2) & 31;
+				const newAddrS = (u16 >> 7) & 31;
 				const newPkHex = sodium.to_hex(s.slice(3));
 
 				_admin_userPkHex.push(newPkHex);
