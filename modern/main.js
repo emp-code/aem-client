@@ -315,7 +315,7 @@ function addMessages() {
 	const maxExt = ae.GetExtMsgCount();
 	const maxInt = ae.GetIntMsgCount();
 
-	tabs[TAB_INBOX].max = Math.floor((maxExt + maxInt) / rowsPerPage);
+	tabs[TAB_INBOX].max = Math.floor((maxExt + maxInt - 1) / rowsPerPage);
 
 	let numExt = 0;
 	let numInt = 0;
