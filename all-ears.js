@@ -1091,26 +1091,29 @@ function AllEars(readyCallback) {
 
 						const msgTo = _addr32_decode(msgData.slice(14, 24), msgShield);
 
-						const msgBodyBr = new Int8Array(msgData.slice(24));
-						const msgBodyU8 = new Uint8Array(window.BrotliDecode(msgBodyBr));
-						const msgBodyTx = new TextDecoder("utf-8").decode(msgBodyU8);
+						try {
+							const msgBodyBr = new Int8Array(msgData.slice(24));
+							const msgBodyU8 = new Uint8Array(window.BrotliDecode(msgBodyBr));
+							const msgBodyTx = new TextDecoder("utf-8").decode(msgBodyU8);
 
-						const msgGreet   = msgBodyTx.slice(0,                               lenGreet);
-						const msgRdns    = msgBodyTx.slice(lenGreet,                        lenGreet + lenRdns);
-						const msgCharset = msgBodyTx.slice(lenGreet + lenRdns,              lenGreet + lenRdns + lenCharset);
-						const msgEnvFrom = msgBodyTx.slice(lenGreet + lenRdns + lenCharset, lenGreet + lenRdns + lenCharset + lenEnvFrom);
+							const msgGreet   = msgBodyTx.slice(0,                               lenGreet);
+							const msgRdns    = msgBodyTx.slice(lenGreet,                        lenGreet + lenRdns);
+							const msgCharset = msgBodyTx.slice(lenGreet + lenRdns,              lenGreet + lenRdns + lenCharset);
+							const msgEnvFrom = msgBodyTx.slice(lenGreet + lenRdns + lenCharset, lenGreet + lenRdns + lenCharset + lenEnvFrom);
 
-						const body = msgBodyTx.slice(lenGreet + lenRdns + lenCharset + lenEnvFrom);
+							const body = msgBodyTx.slice(lenGreet + lenRdns + lenCharset + lenEnvFrom);
 
-						const titleStart = body.indexOf("\nSubject:");
-						const titleEnd = (titleStart < 0) ? -1 : body.slice(titleStart + 9).indexOf("\n");
-						const msgTitle = (titleStart < 0) ? "(Missing title)" : body.substr(titleStart + 9, titleEnd).trim();
+							const titleStart = body.indexOf("\nSubject:");
+							const titleEnd = (titleStart < 0) ? -1 : body.slice(titleStart + 9).indexOf("\n");
+							const msgTitle = (titleStart < 0) ? "(Missing title)" : body.substr(titleStart + 9, titleEnd).trim();
 
-						const headersEnd = body.indexOf("\n\n");
-						const msgHeaders = body.slice(0, headersEnd);
-						const msgBody = body.slice(headersEnd + 2);
-
-						_extMsg.push(new _NewExtMsg(validPad, validSig, msgId, msgTs, msgIp, msgCc, msgCs, msgTlsVer, msgEsmtp, msgQuitR, msgProtV, msgInval, msgRares, msgAttach, msgGreet, msgRdns, msgCharset, msgEnvFrom, msgTo, msgHeaders, msgTitle, msgBody));
+							const headersEnd = body.indexOf("\n\n");
+							const msgHeaders = body.slice(0, headersEnd);
+							const msgBody = body.slice(headersEnd + 2);
+							_extMsg.push(new _NewExtMsg(validPad, validSig, msgId, msgTs, msgIp, msgCc, msgCs, msgTlsVer, msgEsmtp, msgQuitR, msgProtV, msgInval, msgRares, msgAttach, msgGreet, msgRdns, msgCharset, msgEnvFrom, msgTo, msgHeaders, msgTitle, msgBody));
+						} catch(e) {
+							_extMsg.push(new _NewExtMsg(validPad, validSig, msgId, msgTs, msgIp, msgCc, msgCs, msgTlsVer, msgEsmtp, msgQuitR, msgProtV, msgInval, msgRares, msgAttach, "", "", "", "", msgTo, "", "Failed decompression", "Size: " + msgData.length));
+						}
 					break;}
 
 					case 16: { // IntMsg
