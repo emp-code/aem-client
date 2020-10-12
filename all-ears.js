@@ -38,7 +38,7 @@ function AllEars(readyCallback) {
 	const _AEM_API_SETTING_LIMITS = 13;
 
 	const _AEM_ADDR_FLAG_SHIELD = 128;
-	const _AEM_ADDR_FLAG_USE_GK = 4;
+	// 64/32/16/8/4 unused
 	const _AEM_ADDR_FLAG_ACCINT = 2;
 	const _AEM_ADDR_FLAG_ACCEXT = 1;
 
@@ -175,13 +175,12 @@ function AllEars(readyCallback) {
 		this.blocks = blocks;
 	}
 
-	function _NewAddress(hash, addr32, is_shd, accExt, accInt, use_gk) {
+	function _NewAddress(hash, addr32, is_shd, accExt, accInt) {
 		this.hash = hash;
 		this.addr32 = addr32;
 		this.is_shd = is_shd;
 		this.accExt = accExt;
 		this.accInt = accInt;
-		this.use_gk = use_gk;
 	}
 
 	const _FetchBinary = function(postData, callback) {
@@ -578,10 +577,9 @@ function AllEars(readyCallback) {
 			const hash = browseData.slice(offset, offset + 8);
 			const accExt = (browseData[offset + 8] & _AEM_ADDR_FLAG_ACCEXT) != 0;
 			const accInt = (browseData[offset + 8] & _AEM_ADDR_FLAG_ACCINT) != 0;
-			const use_gk = (browseData[offset + 8] & _AEM_ADDR_FLAG_USE_GK) != 0;
 			const is_shd = (browseData[offset + 8] & _AEM_ADDR_FLAG_SHIELD) != 0;
 
-			_userAddress.push(new _NewAddress(hash, null, is_shd, accExt, accInt, use_gk));
+			_userAddress.push(new _NewAddress(hash, null, is_shd, accExt, accInt));
 			offset += 9;
 		}
 
@@ -683,11 +681,9 @@ function AllEars(readyCallback) {
 	this.GetAddress = function(num) {return _addr32_decode(_userAddress[num].addr32, _userAddress[num].is_shd);};
 	this.GetAddressAccExt = function(num) {return _userAddress[num].accExt;};
 	this.GetAddressAccInt = function(num) {return _userAddress[num].accInt;};
-	this.GetAddressUse_Gk = function(num) {return _userAddress[num].use_gk;};
 
 	this.SetAddressAccExt = function(num, val) {_userAddress[num].accExt = val;};
 	this.SetAddressAccInt = function(num, val) {_userAddress[num].accInt = val;};
-	this.SetAddressUse_Gk = function(num, val) {_userAddress[num].use_gk = val;};
 
 	this.GetAddressCount = function() {return _userAddress.length;};
 	this.GetAddressCountNormal = function() {return _GetAddressCount(false);};
@@ -982,7 +978,6 @@ function AllEars(readyCallback) {
 			let flags = 0;
 			if (_userAddress[i].accExt) flags |= _AEM_ADDR_FLAG_ACCEXT;
 			if (_userAddress[i].accInt) flags |= _AEM_ADDR_FLAG_ACCINT;
-			if (_userAddress[i].use_gk) flags |= _AEM_ADDR_FLAG_USE_GK;
 
 			data[(i * 9) + 8] = flags;
 		}
