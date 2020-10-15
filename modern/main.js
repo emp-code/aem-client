@@ -870,7 +870,6 @@ function addAddress(num) {
 	const cellAddr = row.insertCell(-1);
 	const cellChk1 = row.insertCell(-1);
 	const cellChk2 = row.insertCell(-1);
-	const cellChk3 = row.insertCell(-1);
 	const cellBtnD = row.insertCell(-1);
 
 	cellAddr.textContent = ae.GetAddress(num);
