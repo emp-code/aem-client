@@ -945,7 +945,7 @@ function AllEars(readyCallback) {
 			_FetchEncrypted(_AEM_API_ADDRESS_CREATE, hash, function(fetchOk) {
 				if (!fetchOk) {callback(false); return;}
 
-				_userAddress.push(new _NewAddress(hash, addr32, false, true, false, false));
+				_userAddress.push(new _NewAddress(hash, addr32, false, true, false));
 				callback(true);
 			});
 		}
