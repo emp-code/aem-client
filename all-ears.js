@@ -721,6 +721,27 @@ function AllEars(readyCallback) {
 	this.GetExtMsgFlagFail = function(num) {return _extMsg[num].inval;};
 	this.GetExtMsgFlagPErr = function(num) {return _extMsg[num].protV;};
 
+	this.GetExtMsgReplyAddress = function(num) {
+		let resultStart = _extMsg[num].headers.toUpperCase().lastIndexOf("REPLY-TO:");
+		if (resultStart == -1) {
+			resultStart = _extMsg[num].headers.toUpperCase().lastIndexOf("FROM:");
+			if (resultStart == -1) return _extMsg[num].envFrom; // No address in headers; use envelope address
+			resultStart += 5;
+		} else resultStart += 9;
+
+		let result = _extMsg[num].headers.slice(resultStart);
+		result = result.slice(0, result.indexOf("\n"));
+
+		// Get address from headers
+		const start2 = result.indexOf("<");
+		if (start2 == -1) return result;
+
+		const end2 = result.indexOf(">");
+		if (end2 == -1) return null;
+
+		return result.slice(start2 + 1, end2);
+	}
+
 	this.GetIntMsgCount = function() {return _intMsg.length;};
 	this.GetIntMsgIdHex  = function(num) {return sodium.to_hex(_intMsg[num].id);};
 	this.GetIntMsgTime   = function(num) {return _intMsg[num].ts;};
