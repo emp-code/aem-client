@@ -902,6 +902,7 @@ document.getElementById("btn_dele").onclick = function() {
 		document.getElementById("write_recv").value = "";
 		document.getElementById("write_subj").value = "";
 		document.getElementById("write_body").value = "";
+		document.getElementById("write_rply").textContent = "";
 
 		document.getElementById("write_recv").focus();
 	}
