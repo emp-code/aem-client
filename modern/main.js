@@ -410,7 +410,8 @@ function displayMsg(isInt, num) {
 	document.getElementById("btn_reply").onclick = function() {
 		document.getElementById("write_recv").value = isInt? ae.GetIntMsgFrom(num) : ae.GetExtMsgReplyAddress(num);
 		document.getElementById("write_subj").value = "Re: " + (isInt ? ae.GetIntMsgTitle(num) : ae.GetExtMsgTitle(num));
-		document.getElementById("write_rply").textContent = (isInt? "" : getMsgId(num));
+		document.getElementById("write_subj").setAttribute("data-replyid", isInt? "" : getMsgId(num));
+
 		document.getElementById("btn_write").click();
 		document.getElementById("div_write_1").hidden = false;
 		document.getElementById("div_write_2").hidden = true;
@@ -902,7 +903,7 @@ document.getElementById("btn_dele").onclick = function() {
 		document.getElementById("write_recv").value = "";
 		document.getElementById("write_subj").value = "";
 		document.getElementById("write_body").value = "";
-		document.getElementById("write_rply").textContent = "";
+		document.getElementById("write_subj").setAttribute("data-replyid", "");
 
 		document.getElementById("write_recv").focus();
 	}
@@ -1004,7 +1005,7 @@ function writeVerify() {
 
 	document.getElementById("write2_recv").textContent = document.getElementById("write_recv").value;
 	document.getElementById("write2_subj").textContent = document.getElementById("write_subj").value;
-	document.getElementById("write2_rply").textContent = document.getElementById("write_rply").textContent;
+	document.getElementById("write2_rply").textContent = document.getElementById("write_subj").getAttribute("data-replyid");
 	document.getElementById("write2_body").textContent = document.getElementById("write_body").value;
 
 	if (document.getElementById("write_recv").value.indexOf("@") >= 0) {
@@ -1053,7 +1054,7 @@ function updateTab() {
 						document.getElementById("write_body").value,
 						document.getElementById("write_from").value,
 						document.getElementById("write_recv").value,
-						document.getElementById("write_rply").textContent,
+						document.getElementById("write_subj").getAttribute("data-replyid"),
 						(document.getElementById("write2_recv").textContent.indexOf("@") > 0) ? null : sodium.from_base64(document.querySelector("#write2_pkey > input").value, sodium.base64_variants.ORIGINAL_NO_PADDING),
 						function(success) {
 							if (success) {
