@@ -410,6 +410,9 @@ function displayMsg(isInt, num) {
 	document.getElementById("btn_reply").onclick = function() {
 		document.getElementById("write_recv").value = isInt? ae.GetIntMsgFrom(num) : ae.GetExtMsgReplyAddress(num);
 		document.getElementById("write_subj").value = "Re: " + (isInt ? ae.GetIntMsgTitle(num) : ae.GetExtMsgTitle(num));
+
+		document.getElementById("write_recv").readOnly = !isInt;
+		document.getElementById("write_subj").readOnly = !isInt;
 		document.getElementById("write_subj").setAttribute("data-replyid", isInt? "" : getMsgId(num));
 
 		document.getElementById("btn_write").click();
@@ -903,6 +906,9 @@ document.getElementById("btn_dele").onclick = function() {
 		document.getElementById("write_recv").value = "";
 		document.getElementById("write_subj").value = "";
 		document.getElementById("write_body").value = "";
+
+		document.getElementById("write_recv").readOnly = false;
+		document.getElementById("write_subj").readOnly = false;
 		document.getElementById("write_subj").setAttribute("data-replyid", "");
 
 		document.getElementById("write_recv").focus();
