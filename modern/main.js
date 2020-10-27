@@ -1042,16 +1042,7 @@ function updateTab() {
 				break;
 
 				case 1: // Verify
-					if (document.getElementById("write_recv").value.indexOf("@") >= 0) {
-						ae.Address_Lookup(document.getElementById("write_recv").value, function(pk) {
-							if (!pk) {
-								console.log("Failed lookup");
-								return;
-							}
-
-							writeVerify();
-						});
-					} else writeVerify();
+					writeVerify();
 				break;
 
 				case 2: // Send
