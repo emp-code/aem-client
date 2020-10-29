@@ -127,11 +127,12 @@ function AllEars(readyCallback) {
 		this.body = body;
 	}
 
-	function _NewIntMsg(validPad, validSig, id, ts, fromLv, fromPk, from, to, title, body) {
+	function _NewIntMsg(validPad, validSig, id, ts, isE2ee, fromLv, fromPk, from, to, title, body) {
 		this.validPad = validPad;
 		this.validSig = validSig;
 		this.id = id;
 		this.ts = ts;
+		this.isE2ee = isE2ee;
 		this.fromLv = fromLv;
 		this.fromPk = fromPk;
 		this.from = from;
@@ -754,6 +755,7 @@ function AllEars(readyCallback) {
 
 	this.GetIntMsgFlagVPad = function(num) {return _intMsg[num].validPad;};
 	this.GetIntMsgFlagVSig = function(num) {return _intMsg[num].validSig;};
+	this.GetIntMsgFlagE2ee = function(num) {return _intMsg[num].isE2ee;};
 
 	this.GetUplMsgCount = function() {return _uplMsg.length;};
 	this.GetUplMsgIdHex = function(num) {return _uplMsg[num].id? sodium.to_hex(_uplMsg[num].id) : null;};
@@ -1051,7 +1053,7 @@ function AllEars(readyCallback) {
 				let msgData;
 				try {msgData = sodium.crypto_box_seal_open(msgEnc, _userKeyPublic, _userKeySecret);}
 				catch(e) {
-					_intMsg.push(new _NewIntMsg(true, true, msgId, Date.now() / 1000, 3, null, "system", "system", "(error)", e));
+					_intMsg.push(new _NewIntMsg(true, true, msgId, Date.now() / 1000, true, 3, null, "system", "system", "(error)", e));
 					offset += msgBytes;
 					continue;
 				}
@@ -1174,7 +1176,7 @@ function AllEars(readyCallback) {
 								msgBody = sodium.to_string(msgBin.slice(msgTitleLen));
 							}
 
-							_intMsg.push(new _NewIntMsg(validPad, validSig, msgId, msgTs, msgFromLv, msgFromPk, msgFrom, msgTo, msgTitle, msgBody));
+							_intMsg.push(new _NewIntMsg(validPad, validSig, msgId, msgTs, msgEncrypted, msgFromLv, msgFromPk, msgFrom, msgTo, msgTitle, msgBody));
 						}
 					break;}
 

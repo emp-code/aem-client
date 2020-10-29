@@ -500,6 +500,7 @@ function displayMsg(isInt, num) {
 		let flagText = "";
 		if (!ae.GetIntMsgFlagVPad(num)) flagText += "<abbr title=\"Invalid padding\">PAD</abbr> ";
 		if (!ae.GetIntMsgFlagVSig(num)) flagText += "<abbr title=\"Invalid signature\">SIG</abbr> ";
+		if (ae.GetIntMsgFlagE2ee(num)) flagText += "<abbr title=\"End-to-end encrypted\">E2EE</abbr> ";
 		document.getElementById("readmsg_flags").children[0].innerHTML = flagText.trim();
 	}
 }
