@@ -141,8 +141,10 @@ function AllEars(readyCallback) {
 		this.body = body;
 	}
 
-	function _NewOutMsg_Ext(id, ts, ip, to, from, subj, body, mxDom, greet, tlsCs, tlsVer, attach) {
+	function _NewOutMsg_Ext(validPad, validSig, id, ts, ip, to, from, subj, body, mxDom, greet, tlsCs, tlsVer, attach) {
 		this.isInt = false;
+		this.validPad = validPad;
+		this.validSig = validSig;
 		this.id = id;
 		this.ts = ts;
 		this.ip = ip;
@@ -157,8 +159,10 @@ function AllEars(readyCallback) {
 		this.attach = attach;
 	}
 
-	function _NewOutMsg_Int(id, ts, isE2ee, to, from, subj, body) {
+	function _NewOutMsg_Int(validPad, validSig, id, ts, isE2ee, to, from, subj, body) {
 		this.isInt = true;
+		this.validPad = validPad;
+		this.validSig = validSig;
 		this.id = id;
 		this.ts = ts;
 		this.isE2ee = isE2ee;
@@ -788,7 +792,10 @@ function AllEars(readyCallback) {
 	this.GetOutMsgGreet = function(num) {return _outMsg[num].greet;};
 	this.GetOutMsgTLS   = function(num) {return _GetTlsVersion(_outMsg[num].tlsVer) + " " + _GetCiphersuite(_outMsg[num].tlsCs);};
 	this.GetOutMsgAttach = function(num) {return _outMsg[num].attach;};
+
 	this.GetOutMsgFlagE2ee = function(num) {return _outMsg[num].isE2ee;};
+	this.GetOutMsgFlagVPad = function(num) {return _outMsg[num].validPad;};
+	this.GetOutMsgFlagVSig = function(num) {return _outMsg[num].validSig;};
 
 	this.GetGatekeeperCountry = function() {return _gkCountry;};
 	this.GetGatekeeperDomain  = function() {return _gkDomain;};
@@ -1235,7 +1242,7 @@ function AllEars(readyCallback) {
 							const msgSb = msgBin.slice(0, lenSb);
 							const msgBd = msgBin.slice(lenSb);
 
-							_outMsg.push(new _NewOutMsg_Int(msgId, msgTs, isEncrypted, msgTo, msgFr, msgSb, msgBd));
+							_outMsg.push(new _NewOutMsg_Int(validPad, validSig, msgId, msgTs, isEncrypted, msgTo, msgFr, msgSb, msgBd));
 						} else { // Email
 							const msgIp = msgData.slice(1, 5);
 							const msgCs = new Uint16Array(msgData.slice(5, 7).buffer)[0];
@@ -1256,7 +1263,7 @@ function AllEars(readyCallback) {
 							const msgSb = sodium.to_string(msgData.slice(os, os + lenSb)); os += lenSb;
 							const msgBd = sodium.to_string(msgData.slice(os));
 
-							_outMsg.push(new _NewOutMsg_Ext(msgId, msgTs, msgIp, msgTo, msgFr, msgSb, msgBd, msgMx, msgGr, msgCs, msgTlsVer, msgAttach));
+							_outMsg.push(new _NewOutMsg_Ext(validPad, validSig, msgId, msgTs, msgIp, msgTo, msgFr, msgSb, msgBd, msgMx, msgGr, msgCs, msgTlsVer, msgAttach));
 						}
 					break;}
 				}
