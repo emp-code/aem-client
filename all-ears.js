@@ -157,10 +157,11 @@ function AllEars(readyCallback) {
 		this.attach = attach;
 	}
 
-	function _NewOutMsg_Int(id, ts, to, from, subj, body) {
+	function _NewOutMsg_Int(id, ts, isE2ee, to, from, subj, body) {
 		this.isInt = true;
 		this.id = id;
 		this.ts = ts;
+		this.isE2ee = isE2ee;
 		this.to = to;
 		this.from = from;
 		this.subj = subj;
@@ -787,6 +788,7 @@ function AllEars(readyCallback) {
 	this.GetOutMsgGreet = function(num) {return _outMsg[num].greet;};
 	this.GetOutMsgTLS   = function(num) {return _GetTlsVersion(_outMsg[num].tlsVer) + " " + _GetCiphersuite(_outMsg[num].tlsCs);};
 	this.GetOutMsgAttach = function(num) {return _outMsg[num].attach;};
+	this.GetOutMsgFlagE2ee = function(num) {return _outMsg[num].isE2ee;};
 
 	this.GetGatekeeperCountry = function() {return _gkCountry;};
 	this.GetGatekeeperDomain  = function() {return _gkDomain;};
@@ -1233,7 +1235,7 @@ function AllEars(readyCallback) {
 							const msgSb = msgBin.slice(0, lenSb);
 							const msgBd = msgBin.slice(lenSb);
 
-							_outMsg.push(new _NewOutMsg_Int(msgId, msgTs, msgTo, msgFr, msgSb, msgBd));
+							_outMsg.push(new _NewOutMsg_Int(msgId, msgTs, isEncrypted, msgTo, msgFr, msgSb, msgBd));
 						} else { // Email
 							const msgIp = msgData.slice(1, 5);
 							const msgCs = new Uint16Array(msgData.slice(5, 7).buffer)[0];

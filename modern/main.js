@@ -672,6 +672,10 @@ function displayOutMsg(num) {
 //		document.getElementById("readmsg_tls").children[0].textContent = ae.GetOutMsgTLS(num);
 		document.getElementById("readmsg_greet").children[0].textContent = ae.GetOutMsgGreet(num);
 	}
+
+	let flagText = "";
+	if (ae.GetOutMsgFlagE2ee(num)) flagText += "<abbr title=\"End-to-end encrypted\">E2EE</abbr> ";
+	document.getElementById("readmsg_flags").children[0].innerHTML = flagText.trim();
 }
 
 function addSent() {
