@@ -417,10 +417,11 @@ function displayMsg(isInt, num) {
 		document.getElementById("write_subj").readOnly = !isInt;
 		document.getElementById("write_subj").setAttribute("data-replyid", isInt? "" : getMsgId(num));
 
+		tabs[TAB_WRITE].cur = 0;
+		document.getElementById("btn_write").disabled = false;
 		document.getElementById("btn_write").click();
-		document.getElementById("div_write_1").hidden = false;
-		document.getElementById("div_write_2").hidden = true;
 		document.getElementById("write_body").focus();
+
 		for (const opt of document.getElementById("write_from").options) {
 			if (opt.value === (isInt ? ae.GetIntMsgTo(num) : ae.GetExtMsgTo(num))) {
 				opt.selected = true;
@@ -1121,6 +1122,8 @@ for (let i = 0; i < buttons.length; i++) {
 		document.getElementById("btn_rght").disabled = (tabs[tab].cur === tabs[tab].max);
 		document.getElementById("btn_dele").disabled = !tabs[tab].btnDele;
 		document.getElementById("btn_updt").disabled = !tabs[tab].btnUpdt;
+
+		updateTab();
 	};
 }
 
