@@ -411,6 +411,7 @@ function displayMsg(isInt, num) {
 		document.getElementById("write_recv").value = isInt? ae.GetIntMsgFrom(num) : ae.GetExtMsgReplyAddress(num);
 		document.getElementById("write_subj").value = (isInt ? ae.GetIntMsgTitle(num) : ae.GetExtMsgTitle(num));
 		if (!document.getElementById("write_subj").value.startsWith("Re:")) document.getElementById("write_subj").value = "Re: " + document.getElementById("write_subj").value;
+		document.querySelector("#write2_pkey > input").value = isInt ? ae.GetIntMsgFromPk(num) : "";
 
 		document.getElementById("write_recv").readOnly = !isInt;
 		document.getElementById("write_subj").readOnly = !isInt;
