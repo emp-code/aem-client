@@ -1296,9 +1296,8 @@ function AllEars(readyCallback) {
 
 		// Internal mail
 		const isEncrypted = (to_pubkey.constructor === Uint8Array && to_pubkey.length === sodium.crypto_kx_PUBLICKEYBYTES);
-		if (title.length + body.length < (isEncrypted? 6 : 38)) {callback(false); return;} // Minimum message size based on AEM_MSG_MINBLOCKS
-
 		const msgTs = new Uint8Array(isEncrypted? (new Uint32Array([Math.round(Date.now() / 1000) + 2]).buffer) : [0,0,0,0]); // +2 to account for connection delay
+		if (!isEncrypted && (title.length + body.length) < 38) body = body.padEnd(38, "\0"); // Minimum message size based on AEM_MSG_MINBLOCKS
 
 		const addr32_from = _addr32_encode(addr_from);
 		if (!addr32_from) {callback(false); return;}
