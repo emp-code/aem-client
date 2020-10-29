@@ -1213,7 +1213,7 @@ function AllEars(readyCallback) {
 						const lenSb = msgData[0] & 127;
 
 						if ((msgData[0] & 128) != 0) { // Internal message
-							const isEncrypted  = (msgData[1] & 16) != 0;
+							const isE2ee       = (msgData[1] & 16) != 0;
 							const isFromShield = (msgData[1] &  8) != 0;
 							const isToShield   = (msgData[1] &  4) != 0;
 
@@ -1221,7 +1221,7 @@ function AllEars(readyCallback) {
 							const msgTo = _addr32_decode(msgData.slice(12, 22), isToShield);
 
 							let msgBin;
-							if (isEncrypted) {
+							if (isE2ee) {
 								const nonce = new Uint8Array(sodium.crypto_secretbox_NONCEBYTES);
 								nonce.fill(0);
 								nonce.set(msgTs_bin);
@@ -1242,7 +1242,7 @@ function AllEars(readyCallback) {
 							const msgSb = msgBin.slice(0, lenSb);
 							const msgBd = msgBin.slice(lenSb);
 
-							_outMsg.push(new _NewOutMsg_Int(validPad, validSig, msgId, msgTs, isEncrypted, msgTo, msgFr, msgSb, msgBd));
+							_outMsg.push(new _NewOutMsg_Int(validPad, validSig, msgId, msgTs, isE2ee, msgTo, msgFr, msgSb, msgBd));
 						} else { // Email
 							const msgIp = msgData.slice(1, 5);
 							const msgCs = new Uint16Array(msgData.slice(5, 7).buffer)[0];
@@ -1295,9 +1295,9 @@ function AllEars(readyCallback) {
 		}
 
 		// Internal mail
-		const isEncrypted = (to_pubkey.constructor === Uint8Array && to_pubkey.length === sodium.crypto_kx_PUBLICKEYBYTES);
-		const msgTs = new Uint8Array(isEncrypted? (new Uint32Array([Math.round(Date.now() / 1000) + 2]).buffer) : [0,0,0,0]); // +2 to account for connection delay
-		if (!isEncrypted && (title.length + body.length) < 38) body = body.padEnd(38, "\0"); // Minimum message size based on AEM_MSG_MINBLOCKS
+		const isE2ee = (to_pubkey.constructor === Uint8Array && to_pubkey.length === sodium.crypto_kx_PUBLICKEYBYTES);
+		const msgTs = new Uint8Array(isE2ee? (new Uint32Array([Math.round(Date.now() / 1000) + 2]).buffer) : [0,0,0,0]); // +2 to account for connection delay
+		if (!isE2ee && (title.length + body.length) < 38) body = body.padEnd(38, "\0"); // Minimum message size based on AEM_MSG_MINBLOCKS
 
 		const addr32_from = _addr32_encode(addr_from);
 		if (!addr32_from) {callback(false); return;}
@@ -1308,7 +1308,7 @@ function AllEars(readyCallback) {
 		const kxKeys = sodium.crypto_kx_seed_keypair(sodium.crypto_generichash(sodium.crypto_kx_SEEDBYTES, addr32_from, _userKeyKxHash));
 		let msgBox;
 
-		if (isEncrypted) {
+		if (isE2ee) {
 			const nonce = new Uint8Array(sodium.crypto_secretbox_NONCEBYTES);
 			nonce.fill(0);
 			nonce.set(msgTs);
@@ -1323,12 +1323,12 @@ function AllEars(readyCallback) {
 		final.fill(0);
 
 		// 128/64/32 unused
-		final[0] = isEncrypted? 16 : 0;
+		final[0] = isE2ee? 16 : 0;
 		if (addr_from.length === 16) final[0] |= 8;
 		if (addr_to.length   === 16) final[0] |= 4;
 		// Server sets sender level (0-3)
 
-		if (isEncrypted) final.set(to_pubkey, 1);
+		if (isE2ee) final.set(to_pubkey, 1);
 		final.set(msgTs, 1 + sodium.crypto_kx_PUBLICKEYBYTES);
 
 		final.set(addr32_from, sodium.crypto_kx_PUBLICKEYBYTES + 5);
