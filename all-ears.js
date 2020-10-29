@@ -1310,15 +1310,16 @@ function AllEars(readyCallback) {
 		}
 
 		const final = new Uint8Array((sodium.crypto_kx_PUBLICKEYBYTES * 2) + 26 + msgBox.length);
-
-		if (isEncrypted) final.set(to_pubkey); else final.fill(0);
-		final.set(msgTs, sodium.crypto_kx_PUBLICKEYBYTES);
+		final.fill(0);
 
 		// 128/64/32 unused
-		final[sodium.crypto_kx_PUBLICKEYBYTES + 4] = isEncrypted? 16 : 0;
-		if (addr_from.length === 16) final[sodium.crypto_kx_PUBLICKEYBYTES + 4] |= 8;
-		if (addr_to.length   === 16) final[sodium.crypto_kx_PUBLICKEYBYTES + 4] |= 4;
+		final[0] = isEncrypted? 16 : 0;
+		if (addr_from.length === 16) final[0] |= 8;
+		if (addr_to.length   === 16) final[0] |= 4;
 		// Server sets sender level (0-3)
+
+		if (isEncrypted) final.set(to_pubkey, 1);
+		final.set(msgTs, 1 + sodium.crypto_kx_PUBLICKEYBYTES);
 
 		final.set(addr32_from, sodium.crypto_kx_PUBLICKEYBYTES + 5);
 		final.set(addr32_to, sodium.crypto_kx_PUBLICKEYBYTES + 15);
