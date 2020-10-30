@@ -304,6 +304,24 @@ function getCountryFlag(countryCode) {
 	]));
 }
 
+function getClockIcon(d) {
+	const h24 = d.getUTCHours();
+	let h12 = (h24 === 0 ? 12 : ((h24 > 12) ? h24 - 12 : h24));
+
+	const m60 = (d.getUTCMinutes() * 60) + d.getUTCSeconds();
+	let m30 = 0;
+	if (m60 <= 900) { // <= 15: round down to this hour
+		m30 = 0;
+	} else if (m60 > 900 && m60 < 2700) { // 15..45: round to half-past this hour
+		m30 = 12;
+	} else { // >= 45: round up to next hour
+		h12++;
+		m30 = 0;
+	}
+
+	return "&#" + ((128335 + h12) + m30) + ";";
+}
+
 function getMsgId(num) {
 	let i;
 	if (ae.GetExtMsgHeaders(num).toLowerCase().slice(0, 11) === "message-id:") {
@@ -458,21 +476,8 @@ function displayMsg(isInt, num) {
 	const tzOs = new Date().getTimezoneOffset();
 	const tz = ((tzOs < 0) ? "+" : "-") + Math.floor(tzOs / -60).toString().padStart(2, "0") + (tzOs % 60 * -1).toString().padStart(2, "0");
 	const msgDate = new Date((ts * 1000) + (tzOs * -60000));
-	const h24 = msgDate.getUTCHours();
-	let h12 = (h24 === 0 ? 12 : ((h24 > 12) ? h24 - 12 : h24));
 
-	const m60 = (msgDate.getUTCMinutes() * 60) + msgDate.getUTCSeconds();
-	let m30 = 0;
-	if (m60 <= 900) { // <= 15: round down to this hour
-		m30 = 0;
-	} else if (m60 > 900 && m60 < 2700) { // 15..45: round to half-past this hour
-		m30 = 12;
-	} else { // >= 45: round up to next hour
-		h12++;
-		m30 = 0;
-	}
-
-	document.getElementById("readmsg_date").children[0].innerHTML = "&#" + ((128335 + h12) + m30) + ";";
+	document.getElementById("readmsg_date").children[0].innerHTML = getClockIcon(msgDate);
 	document.getElementById("readmsg_date").children[1].textContent = msgDate.toISOString().slice(0, 19).replace("T", " ") + " " + tz;
 
 	if (!isInt) {
