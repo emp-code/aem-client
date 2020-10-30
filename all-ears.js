@@ -87,10 +87,6 @@ function AllEars(readyCallback) {
 	let _totalMsgBytes = 0;
 	let _readyMsgBytes = 0;
 
-	const _gkCountry = [];
-	const _gkDomain  = [];
-	const _gkAddress = [];
-
 	const _contactMail = [];
 	const _contactName = [];
 	const _contactNote = [];
@@ -663,10 +659,6 @@ function AllEars(readyCallback) {
 		_uplMsg.splice(0);
 		_outMsg.splice(0);
 
-		_gkCountry.splice(0);
-		_gkDomain .splice(0);
-		_gkAddress.splice(0);
-
 		_contactMail.splice(0);
 		_contactName.splice(0);
 		_contactNote.splice(0);
@@ -795,10 +787,6 @@ function AllEars(readyCallback) {
 	this.GetOutMsgFlagE2ee = function(num) {return _outMsg[num].isE2ee;};
 	this.GetOutMsgFlagVPad = function(num) {return _outMsg[num].validPad;};
 	this.GetOutMsgFlagVSig = function(num) {return _outMsg[num].validSig;};
-
-	this.GetGatekeeperCountry = function() {return _gkCountry;};
-	this.GetGatekeeperDomain  = function() {return _gkDomain;};
-	this.GetGatekeeperAddress = function() {return _gkAddress;};
 
 	this.Admin_GetUserCount = function() {return _admin_userPkHex.length;};
 	this.Admin_GetUserPkHex = function(num) {return _admin_userPkHex[num];};
