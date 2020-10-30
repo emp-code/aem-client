@@ -322,8 +322,7 @@ function AllEars(readyCallback) {
 		let count = 0;
 
 		for (let i = 0; i < _userAddress.length; i++) {
-			if (isShield && _userAddress[i].is_shd) count++;
-			else if (!isShield && ! _userAddress[i].is_shd) count++;
+			if (_userAddress[i].is_shd === isShield) count++;
 		}
 
 		return count;
