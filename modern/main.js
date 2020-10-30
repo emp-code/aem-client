@@ -488,7 +488,7 @@ function displayMsg(isInt, num) {
 		document.getElementById("readmsg_greet").hidden = true;
 
 		document.getElementById("readmsg_tls").hidden = false;
-		document.getElementById("readmsg_tls").textContent = ae.GetIntMsgFromPk(num);
+		document.getElementById("readmsg_tls").children[0].textContent = ae.GetIntMsgFromPk(num);
 
 		let symbol = "<span title=\"Invalid level\">&#x26a0;</span>";
 		if (ae.GetIntMsgFrom(num) === "system") {if (ae.GetIntMsgLevel(num) === 3) symbol = "<span title=\"System\">&#x1f162;</span>";} // S (System)
