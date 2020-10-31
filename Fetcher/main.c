@@ -1,5 +1,3 @@
-#include <stddef.h>
-
 #include "../all-ears.h"
 
 int main(void) {
