@@ -234,11 +234,11 @@ function AllEars(readyCallback) {
 			try {decData = sodium.crypto_box_open_easy(encData.slice(sodium.crypto_box_NONCEBYTES), encData.slice(0, sodium.crypto_box_NONCEBYTES), _AEM_API_PUBKEY, _userKeySecret);}
 			catch(e) {callback(false); return;}
 
-			if (decData.length !== 33) {callback(true, decData); return;} // long response
+			if (decData.length !== 33) {callback(true, decData); return;} // Long response
 
-			// short response
-			if (decData[0] === 255) callback(false); // error
-			else if (decData[0] === 0) callback(true, null); // no-content ok
+			// Short response
+			if (decData[0] === 255) callback(false); // Error
+			else if (decData[0] === 0) callback(true, null); // No-content ok
 			else callback(true, decData.slice(1, 1 + decData[0]));
 		});
 	};
@@ -1014,7 +1014,7 @@ function AllEars(readyCallback) {
 			if (newest) fetchId[0] |= _AEM_FLAG_NEWER;
 			if (u_info) fetchId[0] |= _AEM_FLAG_UINFO;
 			fetchId.set(newest? _newestMsgId : _oldestMsgId, 1);
-		} else fetchId = new Uint8Array([u_info ? _AEM_FLAG_UINFO : 0]);
+		} else fetchId = new Uint8Array([u_info? _AEM_FLAG_UINFO : 0]);
 
 		_FetchEncrypted(_AEM_API_MESSAGE_BROWSE, fetchId, function(fetchOk, browseData) {
 			if (!fetchOk) {callback(false); return;}
