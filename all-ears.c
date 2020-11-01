@@ -25,7 +25,7 @@
 #define AEM_PORT_API 302
 #define AEM_LEVEL_MAX 3
 #define AEM_LEN_PRIVATE (4096 - crypto_box_PUBLICKEYBYTES - 1 - (AEM_ADDRESSES_PER_USER * 9))
-#define AEM_RESPONSE_HEAD_SIZE_SHORT 317
+#define AEM_RESPONSE_HEAD_SIZE_SHORT 166
 #define AEM_RESPONSE_DATA_SIZE_SHORT 33
 #define AEM_SEALCLEAR_LEN (1 + crypto_box_NONCEBYTES + crypto_box_PUBLICKEYBYTES)
 
@@ -119,9 +119,9 @@ static int apiFetch(const int apiCmd, const void * const clear, const size_t len
 	if (ret1 == 0 && ret2 == 0) {
 		if (send(sock, req, lenReq, 0) == (int)lenReq) {
 			if (wantShortResponse) {
-				unsigned char response[AEM_RESPONSE_HEAD_SIZE_SHORT + AEM_RESPONSE_DATA_SIZE_SHORT + 1];
-				lenResult = recv(sock, response, AEM_RESPONSE_HEAD_SIZE_SHORT + AEM_RESPONSE_DATA_SIZE_SHORT + 1, 0);
-				if (lenResult != AEM_RESPONSE_HEAD_SIZE_SHORT + AEM_RESPONSE_DATA_SIZE_SHORT) {
+				unsigned char response[AEM_RESPONSE_HEAD_SIZE_SHORT + AEM_RESPONSE_DATA_SIZE_SHORT + crypto_box_NONCEBYTES + crypto_box_MACBYTES + 1];
+				lenResult = recv(sock, response, AEM_RESPONSE_HEAD_SIZE_SHORT + AEM_RESPONSE_DATA_SIZE_SHORT + crypto_box_NONCEBYTES + crypto_box_MACBYTES + 1, 0);
+				if (lenResult != AEM_RESPONSE_HEAD_SIZE_SHORT + AEM_RESPONSE_DATA_SIZE_SHORT + crypto_box_NONCEBYTES + crypto_box_MACBYTES) {
 					lenResult = -1;
 				} else if (result != NULL) {
 					const int lenCpy = response[AEM_RESPONSE_DATA_SIZE_SHORT];
