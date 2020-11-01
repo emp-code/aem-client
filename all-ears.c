@@ -115,6 +115,7 @@ static int apiFetch(const int apiCmd, const void * const clear, const size_t len
 
 	const bool wantShortResponse = (apiCmd != AEM_API_ACCOUNT_BROWSE && apiCmd != AEM_API_MESSAGE_BROWSE);
 
+
 	int lenResult = -1;
 	if (ret1 == 0 && ret2 == 0) {
 		if (send(sock, req, lenReq, 0) == (int)lenReq) {
@@ -140,12 +141,18 @@ static int apiFetch(const int apiCmd, const void * const clear, const size_t len
 					if (lenResult > 0) {
 						const unsigned char * const headEnd = memmem(*result, lenResult, "\r\n\r\n", 4);
 						if (headEnd != NULL) {
-							const int lenFinal = (*result + lenResult) - (headEnd + 4);
-							memcpy(*result, headEnd + 4, lenFinal);
-							lenResult = lenFinal;
-						} else {free(*result); lenResult = -1;} // Invalid response from server
-					} else {free(*result); lenResult = -1;} // Server refused to answer
-				} else lenResult = -1; // Failed alloc
+							const int lenBox = (*result + lenResult) - (headEnd + 4);
+							unsigned char * const decrypted = malloc(lenBox - crypto_box_MACBYTES);
+							if (decrypted != NULL) {
+								if (crypto_box_open_easy(decrypted, headEnd + 4 + crypto_box_NONCEBYTES, lenBox - crypto_box_NONCEBYTES, headEnd + 4, spk, usk) == 0) {
+									lenResult = lenBox;
+									free(*result);
+									*result = decrypted;
+								} else  {free(*result); free(decrypted); lenResult = -1;} // Failed decrypting box
+							} else {free(*result); lenResult = -2;} // Failed alloc
+						} else {free(*result); lenResult = -3;} // Invalid response from server
+					} else {free(*result); lenResult = -4;} // Server refused to answer
+				} else lenResult = -5; // Failed alloc
 			}
 		}
 	}
