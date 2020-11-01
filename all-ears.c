@@ -129,6 +129,7 @@ static int apiFetch(const int apiCmd, const void * const clear, const size_t len
 						lenResult = -1;
 					} else {
 						memcpy(*result, response + AEM_RESPONSE_HEAD_SIZE_SHORT + 1, lenCpy);
+						lenResult = lenCpy;
 					}
 				}
 			} else if (result != NULL) {
