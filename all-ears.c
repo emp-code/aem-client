@@ -121,17 +121,18 @@ static int apiFetch(const int apiCmd, const void * const clear, const size_t len
 			if (wantShortResponse) {
 				unsigned char response[AEM_RESPONSE_HEAD_SIZE_SHORT + AEM_RESPONSE_DATA_SIZE_SHORT + crypto_box_NONCEBYTES + crypto_box_MACBYTES + 1];
 				lenResult = recv(sock, response, AEM_RESPONSE_HEAD_SIZE_SHORT + AEM_RESPONSE_DATA_SIZE_SHORT + crypto_box_NONCEBYTES + crypto_box_MACBYTES + 1, 0);
-				if (lenResult != AEM_RESPONSE_HEAD_SIZE_SHORT + AEM_RESPONSE_DATA_SIZE_SHORT + crypto_box_NONCEBYTES + crypto_box_MACBYTES) {
-					lenResult = -1;
-				} else if (result != NULL) {
-					const int lenCpy = response[AEM_RESPONSE_DATA_SIZE_SHORT];
-					if (lenCpy >= AEM_RESPONSE_DATA_SIZE_SHORT) {
-						lenResult = -1;
-					} else {
-						memcpy(*result, response + AEM_RESPONSE_HEAD_SIZE_SHORT + 1, lenCpy);
-						lenResult = lenCpy;
-					}
-				} else lenResult = 0; // Result data not wanted, 0 indicates success
+				if (lenResult == AEM_RESPONSE_HEAD_SIZE_SHORT + AEM_RESPONSE_DATA_SIZE_SHORT + crypto_box_NONCEBYTES + crypto_box_MACBYTES) {
+					unsigned char decrypted[AEM_RESPONSE_DATA_SIZE_SHORT];
+					if (crypto_box_open_easy(decrypted, response + AEM_RESPONSE_HEAD_SIZE_SHORT + crypto_box_NONCEBYTES, AEM_RESPONSE_DATA_SIZE_SHORT + crypto_box_MACBYTES, response + AEM_RESPONSE_HEAD_SIZE_SHORT, spk, usk) == 0) {
+						if (result != NULL) {
+							const int lenCpy = decrypted[0];
+							if (lenCpy < AEM_RESPONSE_DATA_SIZE_SHORT) {
+								memcpy(*result, decrypted + 1, lenCpy);
+								lenResult = lenCpy;
+							} else lenResult = -1; // Invalid length --> Server reported error
+						} else lenResult = 0; // Result data not wanted, 0=success
+					} else lenResult = -1; // Failed to decrypt
+				} else lenResult = -1; // Incorrect length received
 			} else if (result != NULL) {
 				*result = malloc(1000 + AEM_MAXLEN_MSGDATA);
 				if (*result != NULL) {
