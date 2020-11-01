@@ -84,10 +84,10 @@ static int torConnect(void) {
 }
 
 static int apiFetch(const int apiCmd, const void * const clear, const size_t lenClear, unsigned char **result) {
-	if (apiCmd < 0 || clear == NULL || lenClear < 1 || lenClear > AEM_API_BOX_SIZE_MAX) return -1;
+	if (apiCmd < 0 || clear == NULL || lenClear < 1 || lenClear > AEM_API_BOX_SIZE_MAX) return -100;
 
 	const int sock = torConnect();
-	if (sock < 0) return -1;
+	if (sock < 0) return -101;
 
 	size_t lenReq = AEM_SEALCLEAR_LEN + crypto_box_SEALBYTES + lenClear + crypto_box_MACBYTES;
 	unsigned char req[122 + lenReq];
@@ -132,8 +132,8 @@ static int apiFetch(const int apiCmd, const void * const clear, const size_t len
 								lenResult = lenCpy;
 							} else lenResult = -1; // Invalid length --> Server reported error
 						} else lenResult = 0; // Result data not wanted, 0=success
-					} else lenResult = -1; // Failed to decrypt
-				} else lenResult = -1; // Incorrect length received
+					} else lenResult = -2; // Failed to decrypt
+				} else lenResult = -3; // Incorrect length received
 			} else if (result != NULL) {
 				*result = malloc(1000 + AEM_MAXLEN_MSGDATA);
 				if (*result != NULL) {
