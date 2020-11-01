@@ -24,8 +24,8 @@ enum aem_api_commands {
 int allears_init(const char * const newOnionId, const unsigned char newSpk[crypto_box_PUBLICKEYBYTES], const unsigned char userKey[crypto_kdf_KEYBYTES]);
 void allears_free(void);
 
-int allears_account_create(const unsigned char * const newPk);
-int allears_account_delete(const unsigned char * const newPk);
+int allears_account_create(const unsigned char * const targetPk);
+int allears_account_delete(const unsigned char * const targetPk);
 int allears_message_browse();
 
 #endif
