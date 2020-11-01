@@ -237,7 +237,7 @@ function AllEars(readyCallback) {
 			if (decData.length !== 33) {callback(true, decData); return;} // Long response
 
 			// Short response
-			if (decData[0] === 255) callback(false); // Error
+			if (decData[0] > 32) callback(false); // Error
 			else if (decData[0] === 0) callback(true, null); // No-content ok
 			else callback(true, decData.slice(1, 1 + decData[0]));
 		});
