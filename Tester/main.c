@@ -7,9 +7,11 @@
 
 int main(int argc, char *argv[]) {
 	if (argc != 4 || strlen(argv[1]) != 56 || strlen(argv[2]) != (crypto_box_PUBLICKEYBYTES * 2) || strlen(argv[3]) != (crypto_kdf_KEYBYTES * 2)) {
-		puts("Usage: allears-tester OnionID SPK USK");
-		return 1;
+		printf("Usage: %s OnionID SPK USK\n", argv[0]);
+		return EXIT_FAILURE;
 	}
+
+	if (sodium_init() != 0) {puts("Failed sodium_init()"); return EXIT_FAILURE;}
 
 	unsigned char spk[crypto_box_PUBLICKEYBYTES];
 	sodium_hex2bin(spk, crypto_box_PUBLICKEYBYTES, argv[2], crypto_box_PUBLICKEYBYTES * 2, NULL, NULL, NULL);
@@ -19,13 +21,30 @@ int main(int argc, char *argv[]) {
 
 	if (allears_init(argv[1], spk, usk) != 0) {
 		puts("Init failed");
-		return 1;
+		return EXIT_FAILURE;
 	}
 
-	if (allears_message_browse() == 0) {
-		puts("Ok");
-	} else puts("Fail");
+	unsigned char *tmpKey = (unsigned char*)"abcdefghijklmnopqrstuvwxyz012345";
 
+	if (allears_account_create(tmpKey) != 0) {
+		puts("Failed Account/Create");
+		allears_free();
+		return EXIT_FAILURE;
+	}
+
+	if (allears_account_update(tmpKey, 1) != 0) {
+		puts("Failed Account/Update");
+		allears_free();
+		return EXIT_FAILURE;
+	}
+
+	if (allears_account_delete(tmpKey) != 0) {
+		puts("Failed Account/Delete");
+		allears_free();
+		return EXIT_FAILURE;
+	}
+
+	puts("Ok");
 	allears_free();
-	return 0;
+	return EXIT_SUCCESS;
 }
