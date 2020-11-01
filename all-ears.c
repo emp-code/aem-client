@@ -131,7 +131,7 @@ static int apiFetch(const int apiCmd, const void * const clear, const size_t len
 						memcpy(*result, response + AEM_RESPONSE_HEAD_SIZE_SHORT + 1, lenCpy);
 						lenResult = lenCpy;
 					}
-				}
+				} else lenResult = 0; // Result data not wanted, 0 indicates success
 			} else if (result != NULL) {
 				*result = malloc(1000 + AEM_MAXLEN_MSGDATA);
 				if (*result != NULL) {
