@@ -37,6 +37,13 @@ int main(int argc, char *argv[]) {
 		printf("Failed Account/Update: %d\n", ret);
 	}
 
+	struct aem_user *userList;
+	if ((ret = allears_account_browse(&userList)) < 0) {
+		printf("Failed Account/Browse: %d\n", ret);
+	}
+
+	// TODO Look for the user in userList
+
 	if ((ret = allears_account_delete(tmpKey) != 0)) {
 		printf("Failed Account/Delete: %d\n", ret);
 	}
