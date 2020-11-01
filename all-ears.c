@@ -155,11 +155,13 @@ static int apiFetch(const int apiCmd, const void * const clear, const size_t len
 }
 
 int allears_account_create(const unsigned char * const targetPk) {
-	return apiFetch(AEM_API_ACCOUNT_CREATE, newPk, crypto_box_PUBLICKEYBYTES, NULL);
+	if (targetPk == NULL) return -1;
+	return apiFetch(AEM_API_ACCOUNT_CREATE, targetPk, crypto_box_PUBLICKEYBYTES, NULL);
 }
 
 int allears_account_delete(const unsigned char * const targetPk) {
-	return apiFetch(AEM_API_ACCOUNT_DELETE, newPk, crypto_box_PUBLICKEYBYTES, NULL);
+	if (targetPk == NULL) return -1;
+	return apiFetch(AEM_API_ACCOUNT_DELETE, targetPk, crypto_box_PUBLICKEYBYTES, NULL);
 }
 
 int allears_message_browse() {
