@@ -26,20 +26,21 @@ int main(int argc, char *argv[]) {
 
 	unsigned char *tmpKey = (unsigned char*)"abcdefghijklmnopqrstuvwxyz012345";
 
-	if (allears_account_create(tmpKey) != 0) {
-		puts("Failed Account/Create");
+	int ret;
+	if ((ret = allears_account_create(tmpKey)) != 0) {
+		printf("Failed Account/Create: %d\n", ret);
 		allears_free();
 		return EXIT_FAILURE;
 	}
 
-	if (allears_account_update(tmpKey, 1) != 0) {
-		puts("Failed Account/Update");
+	if ((ret = allears_account_update(tmpKey, 1)) != 0) {
+		printf("Failed Account/Update: %d\n", ret);
 		allears_free();
 		return EXIT_FAILURE;
 	}
 
-	if (allears_account_delete(tmpKey) != 0) {
-		puts("Failed Account/Delete");
+	if ((ret = allears_account_delete(tmpKey) != 0)) {
+		printf("Failed Account/Delete: %d\n", ret);
 		allears_free();
 		return EXIT_FAILURE;
 	}
