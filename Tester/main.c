@@ -35,17 +35,12 @@ int main(int argc, char *argv[]) {
 
 	if ((ret = allears_account_update(tmpKey, 1)) != 0) {
 		printf("Failed Account/Update: %d\n", ret);
-		allears_free();
-		return EXIT_FAILURE;
 	}
 
 	if ((ret = allears_account_delete(tmpKey) != 0)) {
 		printf("Failed Account/Delete: %d\n", ret);
-		allears_free();
-		return EXIT_FAILURE;
 	}
 
-	puts("Ok");
 	allears_free();
 	return EXIT_SUCCESS;
 }
