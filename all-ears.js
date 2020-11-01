@@ -234,7 +234,8 @@ function AllEars(readyCallback) {
 			try {decData = sodium.crypto_box_open_easy(encData.slice(sodium.crypto_box_NONCEBYTES), encData.slice(0, sodium.crypto_box_NONCEBYTES), _AEM_API_PUBKEY, _userKeySecret);}
 			catch(e) {callback(false); return;}
 
-			if (decData.length !== 33) {callback(true, decData); return;} // Long response
+			if (decData.length > 33) {callback(true, decData); return;} // Long response
+			if (decData.length !== 33) {callback(false, decData); return;}
 
 			// Short response
 			if (decData[0] > 32) callback(false); // Error
