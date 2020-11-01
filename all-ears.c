@@ -164,6 +164,16 @@ int allears_account_delete(const unsigned char * const targetPk) {
 	return apiFetch(AEM_API_ACCOUNT_DELETE, targetPk, crypto_box_PUBLICKEYBYTES, NULL);
 }
 
+int allears_account_update(const unsigned char * const targetPk, const uint8_t level) {
+	if (level > AEM_LEVEL_MAX) return -1;
+
+	unsigned char data[1 + crypto_box_PUBLICKEYBYTES];
+	data[0] = level;
+	memcpy(data + 1, targetPk, crypto_box_PUBLICKEYBYTES);
+
+	return apiFetch(AEM_API_ACCOUNT_UPDATE, data, 1 + crypto_box_PUBLICKEYBYTES, NULL);
+}
+
 int allears_message_browse() {
 	unsigned char *msgData;
 	if (apiFetch(AEM_API_MESSAGE_BROWSE, (const unsigned char[]){0}, 1, &msgData) == -1) return -1;

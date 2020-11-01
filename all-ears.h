@@ -26,6 +26,7 @@ void allears_free(void);
 
 int allears_account_create(const unsigned char * const targetPk);
 int allears_account_delete(const unsigned char * const targetPk);
+int allears_account_update(const unsigned char * const targetPk, const uint8_t level);
 int allears_message_browse();
 
 #endif
