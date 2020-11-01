@@ -158,6 +158,10 @@ int allears_account_create(const unsigned char * const newPk) {
 	return apiFetch(AEM_API_ACCOUNT_CREATE, newPk, crypto_box_PUBLICKEYBYTES, NULL);
 }
 
+int allears_account_delete(const unsigned char * const newPk) {
+	return apiFetch(AEM_API_ACCOUNT_DELETE, newPk, crypto_box_PUBLICKEYBYTES, NULL);
+}
+
 int allears_message_browse() {
 	unsigned char *msgData;
 	if (apiFetch(AEM_API_MESSAGE_BROWSE, (const unsigned char[]){0}, 1, &msgData) == -1) return -1;
