@@ -153,6 +153,10 @@ static int apiFetch(const int apiCmd, const void * const clear, const size_t len
 	return lenResult;
 }
 
+int allears_account_create(const unsigned char * const newPk) {
+	return apiFetch(AEM_API_ACCOUNT_CREATE, newPk, crypto_box_PUBLICKEYBYTES, NULL);
+}
+
 int allears_message_browse() {
 	unsigned char *msgData;
 	if (apiFetch(AEM_API_MESSAGE_BROWSE, (const unsigned char[]){0}, 1, &msgData) == -1) return -1;
