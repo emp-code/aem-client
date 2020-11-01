@@ -161,6 +161,19 @@ static int apiFetch(const int apiCmd, const void * const clear, const size_t len
 	return lenResult;
 }
 
+int allears_account_browse(struct aem_user **userList) {
+	if (userList == NULL) return -1;
+
+	unsigned char *res;
+	const int ret = apiFetch(AEM_API_ACCOUNT_BROWSE, (unsigned char[]){0}, 1, &res);
+	if (ret < 0) return ret;
+
+	// TODO: User data into userList
+
+	free(res);
+	return 0;
+}
+
 int allears_account_create(const unsigned char * const targetPk) {
 	if (targetPk == NULL) return -1;
 	return apiFetch(AEM_API_ACCOUNT_CREATE, targetPk, crypto_box_PUBLICKEYBYTES, NULL);

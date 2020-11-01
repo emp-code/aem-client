@@ -21,9 +21,18 @@ enum aem_api_commands {
 	AEM_API_SETTING_LIMITS
 };
 
+struct aem_user {
+	uint16_t space;
+	uint8_t level;
+	uint8_t addrNrm;
+	uint8_t addrShd;
+	unsigned char pk[crypto_box_PUBLICKEYBYTES];
+};
+
 int allears_init(const char * const newOnionId, const unsigned char newSpk[crypto_box_PUBLICKEYBYTES], const unsigned char userKey[crypto_kdf_KEYBYTES]);
 void allears_free(void);
 
+int allears_account_browse(struct aem_user **userList);
 int allears_account_create(const unsigned char * const targetPk);
 int allears_account_delete(const unsigned char * const targetPk);
 int allears_account_update(const unsigned char * const targetPk, const uint8_t level);
