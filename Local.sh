@@ -2,7 +2,7 @@
 
 echo 'Local.sh: Generate a standalone All-Ears Mail HTML client'
 
-if [ ! hash 2>/dev/null curl ] && [ ! hash 2>/dev/null wget ]; then echo "Need curl or wget"; exit; fi
+if ! hash 2>/dev/null curl && ! hash 2>/dev/null wget; then echo "Need curl or wget"; exit; fi
 if ! hash openssl; then exit; fi
 
 echo 'Enter API domain'
