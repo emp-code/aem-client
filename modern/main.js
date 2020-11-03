@@ -860,8 +860,8 @@ function deleteAddress(addr) {
 			updateAddressCounts();
 
 			const limitReached = (ae.GetAddressCountNormal() + ae.GetAddressCountShield() >= 31);
-			if (!limitReached && ae.GetAddressCountNormal() < ae.GetLimitNormalA(ae.GetUserLevel())) document.getElementById("btn_address_create_normal").disabled = false;
-			if (!limitReached && ae.GetAddressCountShield() < ae.GetLimitShieldA(ae.GetUserLevel())) document.getElementById("btn_address_create_shield").disabled = false;
+			document.getElementById("btn_address_create_normal").disabled = (limitReached || ae.GetAddressCountNormal() > ae.GetLimitNormalA(ae.GetUserLevel()));
+			document.getElementById("btn_address_create_shield").disabled = (limitReached || ae.GetAddressCountShield() > ae.GetLimitShieldA(ae.GetUserLevel()));
 
 			ae.Private_Update(function(success2) {
 				if (!success2) console.log("Failed to update the Private field");
@@ -1165,15 +1165,15 @@ function addressCreate(addr) {
 				if (!success2) console.log("Failed to update the Private field");
 
 				const limitReached = (ae.GetAddressCountNormal() + ae.GetAddressCountShield() >= 31);
-				if (!limitReached && ae.GetAddressCountNormal() < ae.GetLimitNormalA(ae.GetUserLevel())) btnN.disabled = false;
-				if (!limitReached && ae.GetAddressCountShield() < ae.GetLimitShieldA(ae.GetUserLevel())) btnS.disabled = false;
+				btnN.disabled = (limitReached || ae.GetAddressCountNormal() >= ae.GetLimitNormalA(ae.GetUserLevel()));
+				btnS.disabled = (limitReached || ae.GetAddressCountShield() >= ae.GetLimitShieldA(ae.GetUserLevel()));
 			});
 		} else {
 			console.log("Failed to add address");
 
 			const limitReached = (ae.GetAddressCountNormal() + ae.GetAddressCountShield() >= 31);
-			if (!limitReached && ae.GetAddressCountNormal() < ae.GetLimitNormalA(ae.GetUserLevel())) btnN.disabled = false;
-			if (!limitReached && ae.GetAddressCountShield() < ae.GetLimitShieldA(ae.GetUserLevel())) btnS.disabled = false;
+			btnN.disabled = (limitReached || ae.GetAddressCountNormal() >= ae.GetLimitNormalA(ae.GetUserLevel()));
+			btnS.disabled = (limitReached || ae.GetAddressCountShield() >= ae.GetLimitShieldA(ae.GetUserLevel()));
 		}
 	});
 }
