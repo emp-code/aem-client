@@ -38,14 +38,14 @@ read outname
 if [ ! "$outname" ]; then exit; fi
 if [ -f "$outname" ]; then echo "File exists"; exit; fi
 
-url_brotli="https://cdn.jsdelivr.net/gh/google/brotli@1.0.7/js/decode.min.js"
-url_sodium="https://cdn.jsdelivr.net/gh/jedisct1/libsodium.js@0.7.8/dist/browsers/sodium.js"
+readonly url_brotli="https://cdn.jsdelivr.net/gh/google/brotli@1.0.7/js/decode.min.js"
+readonly url_sodium="https://cdn.jsdelivr.net/gh/jedisct1/libsodium.js@0.7.8/dist/browsers/sodium.js"
 
-js_brotli=$(if hash 2>/dev/null curl; then curl --fail --silent --user-agent '' "$url_brotli"; else wget -4 -q -U '' -O - "$url_brotli"; fi)
-js_sodium=$(if hash 2>/dev/null curl; then curl --fail --silent --user-agent '' "$url_sodium"; else wget -4 -q -U '' -O - "$url_sodium"; fi)
-js_aem_js=$(cat all-ears.js)
-js_modern=$(cat modern/main.js)
-css_modern=$(cat modern/main.css)
+readonly js_brotli=$(if hash 2>/dev/null curl; then curl --fail --silent --user-agent '' "$url_brotli"; else wget -4 -q -U '' -O - "$url_brotli"; fi)
+readonly js_sodium=$(if hash 2>/dev/null curl; then curl --fail --silent --user-agent '' "$url_sodium"; else wget -4 -q -U '' -O - "$url_sodium"; fi)
+readonly js_aem_js=$(cat all-ears.js)
+readonly js_modern=$(cat modern/main.js)
+readonly css_modern=$(cat modern/main.css)
 
 if [ ! "$js_brotli" ] || [ ! "$js_sodium" ]; then
 	echo "Failed fetching Brotli and/or Sodium libraries"
@@ -54,20 +54,20 @@ fi
 
 if [ ! "$js_aem_js" ] || [ ! "$js_modern" ] || [ ! "$css_modern" ]; then exit; fi
 
-hash_js_brotli="D02d+8Zt5n4/7mnD+GctnXcW7NBcKHdgDsl3msmWdkOG3094pdP0ceN/4c/zChml"
-hash_js_sodium="UQ7f7udPxA0m0PWF3VEnZYGh4Tga11PPkrMLwO/A544LXaznLhy0l3yo+bU1kJjF"
-hash_js_aem_js=$(echo -n "$js_aem_js" | openssl dgst -sha384 -binary | openssl base64 -A)
-hash_js_modern=$(echo -n "$js_modern" | openssl dgst -sha384 -binary | openssl base64 -A)
-hash_css_modern=$(echo -n "$css_modern" | openssl dgst -sha384 -binary | openssl base64 -A)
+readonly hash_js_brotli="D02d+8Zt5n4/7mnD+GctnXcW7NBcKHdgDsl3msmWdkOG3094pdP0ceN/4c/zChml"
+readonly hash_js_sodium="UQ7f7udPxA0m0PWF3VEnZYGh4Tga11PPkrMLwO/A544LXaznLhy0l3yo+bU1kJjF"
+readonly hash_js_aem_js=$(echo -n "$js_aem_js" | openssl dgst -sha384 -binary | openssl base64 -A)
+readonly hash_js_modern=$(echo -n "$js_modern" | openssl dgst -sha384 -binary | openssl base64 -A)
+readonly hash_css_modern=$(echo -n "$css_modern" | openssl dgst -sha384 -binary | openssl base64 -A)
 
 if [ $(echo -n "$js_brotli" | openssl dgst -sha384 -binary | openssl base64 -A) != "$hash_js_brotli" ]; then echo "Brotli hash mismatch"; exit; fi
 if [ $(echo    "$js_sodium" | openssl dgst -sha384 -binary | openssl base64 -A) != "$hash_js_sodium" ]; then echo "Sodium hash mismatch"; exit; fi
 
-LineCss=$(cat modern/index.html | grep -F 'main.css' -n -m 1 | sed 's/:.*//')
-LineJsFirst=$(cat modern/index.html | grep -F '<script' -n -m 1 | sed 's/:.*//')
-LineJsLast=$(cat modern/index.html | grep -F '<script' -n | tail -n 1 | sed 's/:.*//')
+readonly LineCss=$(cat modern/index.html | grep -F 'main.css' -n -m 1 | sed 's/:.*//')
+readonly LineJsFirst=$(cat modern/index.html | grep -F '<script' -n -m 1 | sed 's/:.*//')
+readonly LineJsLast=$(cat modern/index.html | grep -F '<script' -n | tail -n 1 | sed 's/:.*//')
 
-html=\
+readonly html=\
 $(cat modern/index.html | head -n $(expr $LineCss - 1))\
 $(echo -en '\n\t\t<meta charset="utf-8">')\
 $(echo -en '\n\t\t<meta name="referrer" content="no-referrer">')\
