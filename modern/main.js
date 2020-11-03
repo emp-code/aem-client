@@ -859,8 +859,9 @@ function deleteAddress(addr) {
 			document.getElementById("write_from").remove(addressToDelete);
 			updateAddressCounts();
 
-			if (ae.GetAddressCountNormal() < ae.GetLimitNormalA(ae.GetUserLevel())) document.getElementById("btn_address_create_normal").disabled = false;
-			if (ae.GetAddressCountShield() < ae.GetLimitShieldA(ae.GetUserLevel())) document.getElementById("btn_address_create_shield").disabled = false;
+			const limitReached = (ae.GetAddressCountNormal() + ae.GetAddressCountShield() >= 31);
+			if (!limitReached && ae.GetAddressCountNormal() < ae.GetLimitNormalA(ae.GetUserLevel())) document.getElementById("btn_address_create_normal").disabled = false;
+			if (!limitReached && ae.GetAddressCountShield() < ae.GetLimitShieldA(ae.GetUserLevel())) document.getElementById("btn_address_create_shield").disabled = false;
 
 			ae.Private_Update(function(success2) {
 				if (!success2) console.log("Failed to update the Private field");
@@ -1163,20 +1164,22 @@ function addressCreate(addr) {
 
 				if (!success2) console.log("Failed to update the Private field");
 
-				if (ae.GetAddressCountNormal() < ae.GetLimitNormalA(ae.GetUserLevel())) btnN.disabled = false;
-				if (ae.GetAddressCountShield() < ae.GetLimitShieldA(ae.GetUserLevel())) btnS.disabled = false;
+				const limitReached = (ae.GetAddressCountNormal() + ae.GetAddressCountShield() >= 31);
+				if (!limitReached && ae.GetAddressCountNormal() < ae.GetLimitNormalA(ae.GetUserLevel())) btnN.disabled = false;
+				if (!limitReached && ae.GetAddressCountShield() < ae.GetLimitShieldA(ae.GetUserLevel())) btnS.disabled = false;
 			});
 		} else {
 			console.log("Failed to add address");
 
-			if (ae.GetAddressCountNormal() < ae.GetLimitNormalA(ae.GetUserLevel())) btnN.disabled = false;
-			if (ae.GetAddressCountShield() < ae.GetLimitShieldA(ae.GetUserLevel())) btnS.disabled = false;
+			const limitReached = (ae.GetAddressCountNormal() + ae.GetAddressCountShield() >= 31);
+			if (!limitReached && ae.GetAddressCountNormal() < ae.GetLimitNormalA(ae.GetUserLevel())) btnN.disabled = false;
+			if (!limitReached && ae.GetAddressCountShield() < ae.GetLimitShieldA(ae.GetUserLevel())) btnS.disabled = false;
 		}
 	});
 }
 
 document.getElementById("btn_address_create_normal").onclick = function() {
-	if (ae.GetAddressCountNormal() >= ae.GetLimitNormalA(ae.GetUserLevel())) return;
+	if (ae.GetAddressCountNormal() >= ae.GetLimitNormalA(ae.GetUserLevel()) || ae.GetAddressCountNormal() + ae.GetAddressCountShield() >= 31) return;
 
 	const txtNewAddr = document.getElementById("txt_address_create_normal");
 	if (!txtNewAddr.reportValidity()) return;
@@ -1185,7 +1188,7 @@ document.getElementById("btn_address_create_normal").onclick = function() {
 };
 
 document.getElementById("btn_address_create_shield").onclick = function() {
-	if (ae.GetAddressCountShield() >= ae.GetLimitShieldA(ae.GetUserLevel())) return;
+	if (ae.GetAddressCountShield() >= ae.GetLimitShieldA(ae.GetUserLevel()) || ae.GetAddressCountNormal() + ae.GetAddressCountShield() >= 31) return;
 
 	addressCreate("SHIELD");
 };
