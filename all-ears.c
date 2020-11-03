@@ -115,7 +115,6 @@ static int apiFetch(const int apiCmd, const void * const clear, const size_t len
 
 	const bool wantShortResponse = (apiCmd != AEM_API_ACCOUNT_BROWSE && apiCmd != AEM_API_MESSAGE_BROWSE);
 
-
 	int lenResult = -1;
 	if (ret1 == 0 && ret2 == 0) {
 		if (send(sock, req, lenReq, 0) == (int)lenReq) {
@@ -153,9 +152,9 @@ static int apiFetch(const int apiCmd, const void * const clear, const size_t len
 						} else {free(*result); lenResult = -3;} // Invalid response from server
 					} else {free(*result); lenResult = -4;} // Server refused to answer
 				} else lenResult = -5; // Failed alloc
-			}
-		}
-	}
+			} else lenResult = -6; // Can't store long response: result parameter is null
+		} else lenResult = -7; // Failed sending request
+	} else lenResult = -8; // Failed creating encrypted boxes
 
 	close(sock);
 	return lenResult;
