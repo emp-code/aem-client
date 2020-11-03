@@ -63,9 +63,9 @@ readonly hash_css_modern=$(echo -n "$css_modern" | openssl dgst -sha384 -binary 
 if [ $(echo -n "$js_brotli" | openssl dgst -sha384 -binary | openssl base64 -A) != "$hash_js_brotli" ]; then echo "Brotli hash mismatch"; exit; fi
 if [ $(echo    "$js_sodium" | openssl dgst -sha384 -binary | openssl base64 -A) != "$hash_js_sodium" ]; then echo "Sodium hash mismatch"; exit; fi
 
-readonly LineCss=$(cat modern/index.html | grep -F 'main.css' -n -m 1 | sed 's/:.*//')
-readonly LineJsFirst=$(cat modern/index.html | grep -F '<script' -n -m 1 | sed 's/:.*//')
-readonly LineJsLast=$(cat modern/index.html | grep -F '<script' -n | tail -n 1 | sed 's/:.*//')
+readonly LineCss=$(grep -F 'main.css' -n -m 1 modern/index.html | sed 's/:.*//')
+readonly LineJsFirst=$(grep -F '<script' -n -m 1 modern/index.html | sed 's/:.*//')
+readonly LineJsLast=$(grep -F '<script' -n modern/index.html | tail -n 1 | sed 's/:.*//')
 
 readonly html=\
 $(cat modern/index.html | head -n $(expr $LineCss - 1))\
