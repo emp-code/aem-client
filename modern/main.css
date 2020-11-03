@@ -190,6 +190,12 @@ noscript {
 	border-bottom: 1px solid #555;
 }
 
+#div_tools {
+	overflow-x: hidden;
+	overflow-y: auto;
+	max-height: 100%;
+}
+
 .top button, .bot button {
 	background: #000011;
 	color: #fff;
