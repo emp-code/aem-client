@@ -4,27 +4,35 @@ echo 'Local.sh: Generate a standalone All-Ears Mail HTML client'
 
 echo 'Enter API domain'
 read apidom
+if [ ! "$apidom" ]; then exit; fi
 
 echo 'Enter email domain'
 read emldom
+if [ ! "$emldom" ]; then exit; fi
 
 echo 'Enter the API public key (64 hex characters)'
 read apiPubkey
+if [ $(echo -n "$apiPubkey" | wc -c) -ne $(echo -n "$apiPubkey" | tr -d -c '[:xdigit:]' | wc -c) ] || [ $(echo -n "$apiPubkey" | wc -c) -ne 64 ]; then exit; fi
 
 echo 'Enter the signature public key (64 hex characters)'
 read sigPubkey
+if [ $(echo -n "$sigPubkey" | wc -c) -ne $(echo -n "$sigPubkey" | tr -d -c '[:xdigit:]' | wc -c) ] || [ $(echo -n "$sigPubkey" | wc -c) -ne 64 ]; then exit; fi
 
 echo 'Enter the normal address salt (32 hex characters)'
 read saltNormal
+if [ $(echo -n "$saltNormal" | wc -c) -ne $(echo -n "$saltNormal" | tr -d -c '[:xdigit:]' | wc -c) ] || [ $(echo -n "$saltNormal" | wc -c) -ne 32 ]; then exit; fi
 
 echo "Enter page title"
 read title
+if [ ! "$title" ]; then exit; fi
 
 echo 'Enter page subtitle (greeting)'
 read subtitle
+if [ ! "$subtitle" ]; then exit; fi
 
 echo 'Enter filename'
 read outname
+if [ ! "$outname" ]; then exit; fi
 
 js_brotli=$(curl --fail --silent --user-agent '' 'https://cdn.jsdelivr.net/gh/google/brotli@1.0.7/js/decode.min.js')
 js_sodium=$(curl --fail --silent --user-agent '' 'https://cdn.jsdelivr.net/gh/jedisct1/libsodium.js@0.7.8/dist/browsers/sodium.js')
