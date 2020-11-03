@@ -53,6 +53,9 @@ hash_js_aem_js=$(echo -n "$js_aem_js" | openssl dgst -sha384 -binary | openssl b
 hash_js_modern=$(echo -n "$js_modern" | openssl dgst -sha384 -binary | openssl base64 -A)
 hash_css_modern=$(echo -n "$css_modern" | openssl dgst -sha384 -binary | openssl base64 -A)
 
+if [ $(echo -n "$js_brotli" | openssl dgst -sha384 -binary | openssl base64 -A) != "$hash_js_brotli" ]; then echo "Brotli hash mismatch"; exit; fi
+if [ $(echo    "$js_sodium" | openssl dgst -sha384 -binary | openssl base64 -A) != "$hash_js_sodium" ]; then echo "Sodium hash mismatch"; exit; fi
+
 LineCss=$(cat modern/index.html | grep -F 'main.css' -n -m 1 | sed 's/:.*//')
 LineJsFirst=$(cat modern/index.html | grep -F '<script' -n -m 1 | sed 's/:.*//')
 LineJsLast=$(cat modern/index.html | grep -F '<script' -n | tail -n 1 | sed 's/:.*//')
