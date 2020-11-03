@@ -36,6 +36,7 @@ if [ ! "$subtitle" ]; then exit; fi
 echo 'Enter filename'
 read outname
 if [ ! "$outname" ]; then exit; fi
+if [ -f "$outname" ]; then echo "File exists"; exit; fi
 
 js_brotli=$(curl --fail --silent --user-agent '' 'https://cdn.jsdelivr.net/gh/google/brotli@1.0.7/js/decode.min.js')
 js_sodium=$(curl --fail --silent --user-agent '' 'https://cdn.jsdelivr.net/gh/jedisct1/libsodium.js@0.7.8/dist/browsers/sodium.js')
