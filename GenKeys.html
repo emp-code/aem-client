@@ -1,56 +1,56 @@
 <!doctype html>
 <html>
-<head>
-	<title>Generate keys for All-Ears Mail</title>
+	<head>
+		<title>Generate keys for All-Ears Mail</title>
 
-	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta charset="utf-8">
 
-	<style>
-		body, input {
-			text-align: center;
-		}
-
-		input {
-			font-family: monospace, monospace;
-		}
-
-		@media (prefers-color-scheme: dark) {
-			body, input, button {
-				background: #000;
-				color: #aaa;
+		<style>
+			body, input {
+				text-align: center;
 			}
-		}
-	</style>
-</head>
-<body>
-	<p>
-		<button type="button" autofocus>Generate keys</button>
-	</p>
 
-	<p>
-		Public (for account creation):<br>
-		<input type="text" readonly="readonly" size="64" id="pkey">
-	</p>
-
-	<p>
-		Secret (for using All-Ears):<br>
-		<input type="text" readonly="readonly" size="64" id="skey">
-	</p>
-
-	<script src="https://cdn.jsdelivr.net/gh/jedisct1/libsodium.js@0.7.8/dist/browsers/sodium.js" integrity="sha384-UQ7f7udPxA0m0PWF3VEnZYGh4Tga11PPkrMLwO/A544LXaznLhy0l3yo+bU1kJjF" crossorigin="anonymous"></script>
-
-	<script>
-		sodium.ready.then(function() {
-			document.getElementsByTagName("button")[0].onclick = function() {
-				const newKey = sodium.crypto_kdf_keygen();
-				const boxSeed = sodium.crypto_kdf_derive_from_key(sodium.crypto_box_SEEDBYTES, 1, "AEM-Usr0", newKey);
-				const boxKeys = sodium.crypto_box_seed_keypair(boxSeed);
-
-				document.getElementById("pkey").value = sodium.to_hex(boxKeys.publicKey);
-				document.getElementById("skey").value = sodium.to_hex(newKey);
+			input {
+				font-family: monospace, monospace;
 			}
-		});
-	</script>
-</body>
+
+			@media (prefers-color-scheme: dark) {
+				body, input, button {
+					background: #000;
+					color: #aaa;
+				}
+			}
+		</style>
+	</head>
+	<body>
+		<p>
+			<button type="button" autofocus>Generate keys</button>
+		</p>
+
+		<p>
+			Public (for account creation):<br>
+			<input type="text" readonly="readonly" size="64" id="pkey">
+		</p>
+
+		<p>
+			Secret (for using All-Ears):<br>
+			<input type="text" readonly="readonly" size="64" id="skey">
+		</p>
+
+		<script src="https://cdn.jsdelivr.net/gh/jedisct1/libsodium.js@0.7.8/dist/browsers/sodium.js" integrity="sha384-UQ7f7udPxA0m0PWF3VEnZYGh4Tga11PPkrMLwO/A544LXaznLhy0l3yo+bU1kJjF" crossorigin="anonymous"></script>
+
+		<script>
+			sodium.ready.then(function() {
+				document.getElementsByTagName("button")[0].onclick = function() {
+					const newKey = sodium.crypto_kdf_keygen();
+					const boxSeed = sodium.crypto_kdf_derive_from_key(sodium.crypto_box_SEEDBYTES, 1, "AEM-Usr0", newKey);
+					const boxKeys = sodium.crypto_box_seed_keypair(boxSeed);
+
+					document.getElementById("pkey").value = sodium.to_hex(boxKeys.publicKey);
+					document.getElementById("skey").value = sodium.to_hex(newKey);
+				}
+			});
+		</script>
+	</body>
 </html>
