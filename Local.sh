@@ -1,3 +1,5 @@
+#!/bin/bash
+
 echo 'Local.sh: Generate a standalone All-Ears Mail HTML client'
 
 echo 'Enter API domain'
