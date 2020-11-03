@@ -1160,14 +1160,18 @@ function addressCreate(addr) {
 	ae.Address_Create(addr, function(success1) {
 		if (success1) {
 			ae.Private_Update(function(success2) {
-				addAddress(ae.GetAddressCount() - 1);
-				if (addr !== "SHIELD") document.getElementById("txt_address_create_normal").value = "";
 				updateAddressCounts();
-				if (!success2) console.log("Failed to update the Private field");
+
+				if (success2) {
+					addAddress(ae.GetAddressCount() - 1);
+					if (addr !== "SHIELD") document.getElementById("txt_address_create_normal").value = "";
+				} else {
+					console.log("Failed to update the Private field");
+				}
 			});
 		} else {
 			console.log("Failed to add address");
-			updateAddressCount();
+			updateAddressCounts();
 		}
 	});
 }
