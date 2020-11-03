@@ -2,7 +2,7 @@
 
 echo 'Local.sh: Generate a standalone All-Ears Mail HTML client'
 
-if ! hash curl; then exit; fi
+if [ ! hash 2>/dev/null curl ] && [ ! hash 2>/dev/null wget ]; then echo "Need curl or wget"; exit; fi
 if ! hash openssl; then exit; fi
 
 echo 'Enter API domain'
@@ -38,8 +38,11 @@ read outname
 if [ ! "$outname" ]; then exit; fi
 if [ -f "$outname" ]; then echo "File exists"; exit; fi
 
-js_brotli=$(curl --fail --silent --user-agent '' 'https://cdn.jsdelivr.net/gh/google/brotli@1.0.7/js/decode.min.js')
-js_sodium=$(curl --fail --silent --user-agent '' 'https://cdn.jsdelivr.net/gh/jedisct1/libsodium.js@0.7.8/dist/browsers/sodium.js')
+url_brotli="https://cdn.jsdelivr.net/gh/google/brotli@1.0.7/js/decode.min.js"
+url_sodium="https://cdn.jsdelivr.net/gh/jedisct1/libsodium.js@0.7.8/dist/browsers/sodium.js"
+
+js_brotli=$(if hash 2>/dev/null curl; then curl --fail --silent --user-agent '' "$url_brotli"; else wget -4 -q -U '' -O - "$url_brotli"; fi)
+js_sodium=$(if hash 2>/dev/null curl; then curl --fail --silent --user-agent '' "$url_sodium"; else wget -4 -q -U '' -O - "$url_sodium"; fi)
 js_aem_js=$(cat all-ears.js)
 js_modern=$(cat modern/main.js)
 css_modern=$(cat modern/main.css)
