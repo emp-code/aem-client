@@ -2,6 +2,9 @@
 
 echo 'Local.sh: Generate a standalone All-Ears Mail HTML client'
 
+if ! hash curl; then exit; fi
+if ! hash openssl; then exit; fi
+
 echo 'Enter API domain'
 read apidom
 if [ ! "$apidom" ]; then exit; fi
