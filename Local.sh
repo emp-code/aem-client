@@ -88,6 +88,6 @@ echo "$html" | sed \
 -e "s~AEM Normal Addr Salt placeholder~$saltNormal~" \
 -e "s~aeapidom=\"\"~aeapidom=\"$apidom\"~" \
 -e "s~AEM placeholder for email domain~$emldom~" \
-> $outname
+> "$outname"
 
 echo "Saved to $outname"
