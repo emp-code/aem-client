@@ -90,4 +90,5 @@ echo "$html" | sed \
 -e "s~AEM placeholder for email domain~$emldom~" \
 > "$outname"
 
+chmod 1400 "$outname"
 echo "Saved to $outname"
