@@ -738,7 +738,7 @@ function AllEars(readyCallback) {
 		if (end2 == -1) return null;
 
 		return result.slice(start2 + 1, end2);
-	}
+	};
 
 	this.GetIntMsgCount = function() {return _intMsg.length;};
 	this.GetIntMsgIdHex  = function(num) {return sodium.to_hex(_intMsg[num].id);};
