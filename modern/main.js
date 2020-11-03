@@ -721,6 +721,10 @@ function updateAddressCounts() {
 	document.getElementById("limit_normal").textContent = (ae.GetAddressCountNormal() + "/" + ae.GetLimitNormalA(ae.GetUserLevel())).padStart(ae.GetLimitNormalA(ae.GetUserLevel()) > 9 ? 5 : 1);
 	document.getElementById("limit_shield").textContent = (ae.GetAddressCountShield() + "/" + ae.GetLimitShieldA(ae.GetUserLevel())).padStart(ae.GetLimitShieldA(ae.GetUserLevel()) > 9 ? 5 : 1);
 	document.getElementById("limit_total").textContent = ((ae.GetAddressCountNormal() + ae.GetAddressCountShield()) + "/" + ae.GetAddrPerUser()).padStart(5);
+
+	const limitReached = (ae.GetAddressCountNormal() + ae.GetAddressCountShield() >= 31);
+	document.getElementById("btn_address_create_normal").disabled = (limitReached || ae.GetAddressCountNormal() >= ae.GetLimitNormalA(ae.GetUserLevel()));
+	document.getElementById("btn_address_create_shield").disabled = (limitReached || ae.GetAddressCountShield() >= ae.GetLimitShieldA(ae.GetUserLevel()));
 }
 
 function adjustLevel(pubkey, level, c) {
@@ -1150,10 +1154,8 @@ for (let i = 0; i < buttons.length; i++) {
 }
 
 function addressCreate(addr) {
-	const btnN = document.getElementById("btn_address_create_normal");
-	const btnS = document.getElementById("btn_address_create_shield");
-	btnN.disabled = true;
-	btnS.disabled = true;
+	document.getElementById("btn_address_create_normal").disabled = true;
+	document.getElementById("btn_address_create_shield").disabled = true;
 
 	ae.Address_Create(addr, function(success1) {
 		if (success1) {
@@ -1161,19 +1163,11 @@ function addressCreate(addr) {
 				addAddress(ae.GetAddressCount() - 1);
 				if (addr !== "SHIELD") document.getElementById("txt_address_create_normal").value = "";
 				updateAddressCounts();
-
 				if (!success2) console.log("Failed to update the Private field");
-
-				const limitReached = (ae.GetAddressCountNormal() + ae.GetAddressCountShield() >= 31);
-				btnN.disabled = (limitReached || ae.GetAddressCountNormal() >= ae.GetLimitNormalA(ae.GetUserLevel()));
-				btnS.disabled = (limitReached || ae.GetAddressCountShield() >= ae.GetLimitShieldA(ae.GetUserLevel()));
 			});
 		} else {
 			console.log("Failed to add address");
-
-			const limitReached = (ae.GetAddressCountNormal() + ae.GetAddressCountShield() >= 31);
-			btnN.disabled = (limitReached || ae.GetAddressCountNormal() >= ae.GetLimitNormalA(ae.GetUserLevel()));
-			btnS.disabled = (limitReached || ae.GetAddressCountShield() >= ae.GetLimitShieldA(ae.GetUserLevel()));
+			updateAddressCount();
 		}
 	});
 }
