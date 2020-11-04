@@ -90,13 +90,14 @@ static int apiFetch(const int apiCmd, const void * const clear, const size_t len
 	if (sock < 0) return -101;
 
 	size_t lenReq = AEM_SEALCLEAR_LEN + crypto_box_SEALBYTES + lenClear + crypto_box_MACBYTES;
-	unsigned char req[122 + lenReq];
+	unsigned char req[141 + lenReq];
 
 	// HTTP headers
 	sprintf((char*)req,
 		"POST /api HTTP/1.1\r\n"
 		"Host: %.56s.onion:302\r\n"
 		"Content-Length: %zu\r\n"
+		"Connection: close\r\n"
 		"\r\n",
 	onionId, lenReq);
 	const size_t lenHeaders = strlen((char*)req);
