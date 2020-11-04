@@ -160,17 +160,42 @@ static int apiFetch(const int apiCmd, const void * const clear, const size_t len
 	return lenResult;
 }
 
-int allears_account_browse(struct aem_user **userList) {
+int allears_account_browse(struct aem_user ** const userList) {
 	if (userList == NULL) return -1;
 
 	unsigned char *res;
 	const int ret = apiFetch(AEM_API_ACCOUNT_BROWSE, (unsigned char[]){0}, 1, &res);
 	if (ret < 0) return ret;
+	if (ret < 47) return -2;
 
-	// TODO: User data into userList
+/*	for (int i = 0; i < 4; i++) {
+		maxStorage[i] = res[(i * 3) + 0];
+		maxNormalA[i] = res[(i * 3) + 1];
+		maxShieldA[i] = res[(i * 3) + 2];
+	}
+*/
+
+	uint32_t userCount;
+	memcpy(&userCount, res + 12, 4);
+
+	*userList = malloc(sizeof(struct aem_user) * userCount);
+
+	size_t offset = 16;
+	for (unsigned int i = 0; i < userCount; i++) {
+		uint16_t u16;
+		memcpy(&u16, res + offset, 2);
+
+		(*userList)[i].space = res[offset + 2] | ((u16 >> 4) & 3840);
+		(*userList)[i].level = u16 & 3;
+		(*userList)[i].addrNrm = (u16 >> 2) & 31;
+		(*userList)[i].addrShd = (u16 >> 7) & 31;
+		memcpy(((*userList)[i]).pk, res + offset + 3, crypto_box_PUBLICKEYBYTES);
+
+		offset += 35;
+	}
 
 	free(res);
-	return 0;
+	return userCount;
 }
 
 int allears_account_create(const unsigned char * const targetPk) {

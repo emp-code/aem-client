@@ -40,9 +40,18 @@ int main(int argc, char *argv[]) {
 	struct aem_user *userList;
 	if ((ret = allears_account_browse(&userList)) < 0) {
 		printf("Failed Account/Browse: %d\n", ret);
-	}
+	} else {
+		int found = -1;
+		for (int i = 0; i < ret; i++) {
+			if (memcmp(userList[i].pk, tmpKey, crypto_box_PUBLICKEYBYTES) == 0) {
+				found = i;
+				break;
+			}
+		}
 
-	// TODO Look for the user in userList
+		if (found == -1) puts("Created account not found");
+		free(userList);
+	}
 
 	if ((ret = allears_account_delete(tmpKey) != 0)) {
 		printf("Failed Account/Delete: %d\n", ret);
