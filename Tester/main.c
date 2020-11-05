@@ -39,17 +39,17 @@ static int performTests(int * const retNum, const char onionId[56], const unsign
 	// Admin
 	if (allears_init(onionId, spk, key_admin) != 0) return -1;
 	(*retNum)++; if ((ret = allears_account_create(upk_user2)) < 0) {return ret;}
-	(*retNum)++; if ((ret = allears_account_update(upk_user2, 2)) >= 0) return ret;
+	(*retNum)++; if ((ret = allears_account_update(upk_user2, 2)) != 0) return -1;
 	// TODO: Send User1 a message
 
 	// User1
 	if (allears_init(onionId, spk, key_user1) != 0) return -1;
 	// TODO: Delete non-existent address
-	(*retNum)++; if ((ret = allears_account_delete(upk_user2) >= 0)) return ret;
-	(*retNum)++; if ((ret = allears_account_update(upk_user2, 3)) >= 0) return ret;
-	(*retNum)++; if ((ret = allears_account_update(upk_user2, 1)) >= 0) return ret;
-	(*retNum)++; if ((ret = allears_account_update(upk_user1, 3)) >= 0) return ret;
-	(*retNum)++; if ((ret = allears_account_update(upk_user1, 2)) >= 0) return ret;
+	(*retNum)++; if ((ret = allears_account_delete(upk_user2) >= 0)) return -1;
+	(*retNum)++; if ((ret = allears_account_update(upk_user2, 3)) >= 0) return -1;
+	(*retNum)++; if ((ret = allears_account_update(upk_user2, 1)) >= 0) return -1;
+	(*retNum)++; if ((ret = allears_account_update(upk_user1, 3)) >= 0) return -1;
+	(*retNum)++; if ((ret = allears_account_update(upk_user1, 2)) >= 0) return -1;
 	(*retNum)++; if ((ret = allears_account_update(upk_user1, 1)) != 0) return ret;
 	// TODO: Update address setting
 
