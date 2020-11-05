@@ -55,6 +55,7 @@ static int performTests(int * const retNum, const char onionId[56], const unsign
 
 	// Admin
 	if (allears_init(onionId, spk, key_admin) != 0) return -1;
+	(*retNum)++; if ((ret = allears_account_delete(upk_user2) != 0)) return ret;
 	// TODO: Send User1 a message
 
 	// User1
