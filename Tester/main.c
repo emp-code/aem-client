@@ -54,10 +54,11 @@ static int performTests(int * const retNum, const char onionId[56], const unsign
 	// TODO: Update address setting
 
 	// Admin
-	if (allears_init(onionId, spk, key_user1) != 0) return -1;
+	if (allears_init(onionId, spk, key_admin) != 0) return -1;
 	// TODO: Send User1 a message
 
 	// User1
+	if (allears_init(onionId, spk, key_user1) != 0) return -1;
 	// TODO: Upload a file
 	// TODO: Browse messages
 	// TODO: Delete a message
