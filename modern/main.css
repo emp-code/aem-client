@@ -342,6 +342,7 @@ table, td {
 #div_notes table {
 	border-bottom: 1px solid #333;
 	padding-bottom: 0.25em;
+	width: 100%;
 }
 
 #div_write, #div_write_1, #div_notepad {
@@ -440,10 +441,6 @@ hr {
 #write2_subj {
 	font-size: large;
 	font-weight: bold;
-}
-
-#div_notes table {
-	width: 100%;
 }
 
 #div_notes table tr td:last-of-type, #table_addrs td:not(:first-of-type) {
