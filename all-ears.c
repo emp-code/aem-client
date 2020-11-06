@@ -200,13 +200,11 @@ int allears_account_browse(struct aem_user ** const userList) {
 }
 
 int allears_account_create(const unsigned char * const targetPk) {
-	if (targetPk == NULL) return -1;
-	return apiFetch(AEM_API_ACCOUNT_CREATE, targetPk, crypto_box_PUBLICKEYBYTES, NULL);
+	return (targetPk == NULL) ? -1 : apiFetch(AEM_API_ACCOUNT_CREATE, targetPk, crypto_box_PUBLICKEYBYTES, NULL);
 }
 
 int allears_account_delete(const unsigned char * const targetPk) {
-	if (targetPk == NULL) return -1;
-	return apiFetch(AEM_API_ACCOUNT_DELETE, targetPk, crypto_box_PUBLICKEYBYTES, NULL);
+	return (targetPk == NULL) ? -1 : apiFetch(AEM_API_ACCOUNT_DELETE, targetPk, crypto_box_PUBLICKEYBYTES, NULL);
 }
 
 int allears_account_update(const unsigned char * const targetPk, const uint8_t level) {
