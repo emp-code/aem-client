@@ -952,15 +952,16 @@ function AllEars(readyCallback) {
 			if (addr32 === null) {callback(false); return;}
 
 			const full = sodium.crypto_pwhash(16, addr32, _AEM_SALT_NORMAL, _AEM_ARGON2_OPSLIMIT, _AEM_ARGON2_MEMLIMIT, sodium.crypto_pwhash_ALG_ARGON2ID13);
-			const hash = new Uint8Array(8);
-			hash[0] = full[0] ^ full[8];
-			hash[1] = full[1] ^ full[9];
-			hash[2] = full[2] ^ full[10];
-			hash[3] = full[3] ^ full[11];
-			hash[4] = full[4] ^ full[12];
-			hash[5] = full[5] ^ full[13];
-			hash[6] = full[6] ^ full[14];
-			hash[7] = full[7] ^ full[15];
+			const hash = new Uint8Array([
+				full[0] ^ full[8],
+				full[1] ^ full[9],
+				full[2] ^ full[10],
+				full[3] ^ full[11],
+				full[4] ^ full[12],
+				full[5] ^ full[13],
+				full[6] ^ full[14],
+				full[7] ^ full[15]
+			]);
 
 			_FetchEncrypted(_AEM_API_ADDRESS_CREATE, hash, function(fetchOk) {
 				if (!fetchOk) {callback(false); return;}
