@@ -256,6 +256,10 @@ int allears_message_browse() {
 	return 0;
 }
 
+int allears_private_update(const unsigned char newPrivate[AEM_LEN_PRIVATE]) {
+	return apiFetch(AEM_API_PRIVATE_UPDATE, newPrivate, AEM_LEN_PRIVATE, NULL);
+}
+
 int allears_init(const char * const newOnionId, const unsigned char newSpk[crypto_box_PUBLICKEYBYTES], const unsigned char newSaltNm[crypto_pwhash_SALTBYTES], const unsigned char userKey[crypto_kdf_KEYBYTES]) {
 	memcpy(onionId, newOnionId, 56);
 	memcpy(saltNm, newSaltNm, crypto_pwhash_SALTBYTES);
