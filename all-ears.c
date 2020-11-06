@@ -216,8 +216,15 @@ int allears_account_delete(const unsigned char * const targetPk) {
 	return (targetPk == NULL) ? -1 : apiFetch(AEM_API_ACCOUNT_DELETE, targetPk, crypto_box_PUBLICKEYBYTES, NULL);
 }
 
-int allears_address_create(const char * const addr, const size_t lenAddr) {
-	if (lenAddr == 6 && memcmp(addr, "SHIELD", 6) == 0) return apiFetch(AEM_API_ADDRESS_CREATE, (const unsigned char * const)addr, 6, NULL);
+int allears_address_create(const char * const addr, const size_t lenAddr, uint64_t * const shield_hash, unsigned char * const shield_addr32) {
+	if (shield_hash != NULL) {
+		unsigned char data[AEM_RESPONSE_DATA_SIZE_SHORT - 1];
+		if (apiFetch(AEM_API_ADDRESS_CREATE, (const unsigned char[]){'S', 'H', 'I', 'E', 'L', 'D'}, 6, (unsigned char**)&data) != 0) return -1;
+
+		memcpy(shield_hash, data, 8);
+		memcpy(shield_addr32, data + 8, 10);
+		return 0;
+	}
 
 	unsigned char addr32[10];
 	addr32_store(addr32, addr, lenAddr);

@@ -33,7 +33,7 @@ static int performTests(int * const retNum, const char onionId[56], const unsign
 	// User1
 	if (allears_init(onionId, spk, saltNm, key_user1) != 0) return -1;
 	// TODO: Update private
-	(*retNum)++; if ((ret = allears_address_create("aemtest1", 8)) < 0) return -1;
+	(*retNum)++; if ((ret = allears_address_create("aemtest1", 8, NULL, NULL)) < 0) return -1;
 	(*retNum)++; if ((ret = allears_account_create(upk_user2)) >= 0) return -1;
 
 	// Admin

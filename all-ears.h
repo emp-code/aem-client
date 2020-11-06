@@ -36,7 +36,7 @@ int allears_account_browse(struct aem_user ** const userList);
 int allears_account_create(const unsigned char * const targetPk);
 int allears_account_delete(const unsigned char * const targetPk);
 int allears_account_update(const unsigned char * const targetPk, const uint8_t level);
-int allears_address_create(const char * const addr, const size_t lenAddr);
+int allears_address_create(const char * const addr, const size_t lenAddr, uint64_t * const shield_hash, unsigned char * const shield_addr32);
 int allears_address_delete(const uint64_t hash);
 int allears_message_browse();
 
