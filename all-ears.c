@@ -223,11 +223,13 @@ int allears_address_create(const char * const addr, const size_t lenAddr, uint64
 		return 0;
 	}
 
+	if (addr == NULL) return -1;
+
 	unsigned char addr32[10];
 	addr32_store(addr32, addr, lenAddr);
 	const uint64_t hash = normalHash((const char * const)addr32);
 
-	return (addr == NULL) ? -1 : apiFetch(AEM_API_ADDRESS_CREATE, &hash, 8, NULL);
+	return apiFetch(AEM_API_ADDRESS_CREATE, &hash, 8, NULL);
 }
 
 int allears_address_delete(const uint64_t hash) {
