@@ -6,35 +6,35 @@ if ! hash 2>/dev/null curl && ! hash 2>/dev/null wget; then echo "Need curl or w
 if ! hash openssl; then exit; fi
 
 echo 'Enter API domain'
-read apidom
+read -r apidom
 if [ ! "$apidom" ]; then exit; fi
 
 echo 'Enter email domain'
-read emldom
+read -r emldom
 if [ ! "$emldom" ]; then exit; fi
 
 echo 'Enter the API public key (64 hex characters)'
-read apiPubkey
+read -r apiPubkey
 if [ $(echo -n "$apiPubkey" | wc -c) -ne $(echo -n "$apiPubkey" | tr -d -c '[:xdigit:]' | wc -c) ] || [ $(echo -n "$apiPubkey" | wc -c) -ne 64 ]; then exit; fi
 
 echo 'Enter the signature public key (64 hex characters)'
-read sigPubkey
+read -r sigPubkey
 if [ $(echo -n "$sigPubkey" | wc -c) -ne $(echo -n "$sigPubkey" | tr -d -c '[:xdigit:]' | wc -c) ] || [ $(echo -n "$sigPubkey" | wc -c) -ne 64 ]; then exit; fi
 
 echo 'Enter the normal address salt (32 hex characters)'
-read saltNormal
+read -r saltNormal
 if [ $(echo -n "$saltNormal" | wc -c) -ne $(echo -n "$saltNormal" | tr -d -c '[:xdigit:]' | wc -c) ] || [ $(echo -n "$saltNormal" | wc -c) -ne 32 ]; then exit; fi
 
 echo "Enter page title"
-read title
+read -r title
 if [ ! "$title" ]; then exit; fi
 
 echo 'Enter page subtitle (greeting)'
-read subtitle
+read -r subtitle
 if [ ! "$subtitle" ]; then exit; fi
 
 echo 'Enter filename'
-read outname
+read -r outname
 if [ ! "$outname" ]; then exit; fi
 if [ -f "$outname" ]; then echo "File exists"; exit; fi
 
