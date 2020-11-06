@@ -29,13 +29,15 @@ struct aem_user {
 	unsigned char pk[crypto_box_PUBLICKEYBYTES];
 };
 
-int allears_init(const char * const newOnionId, const unsigned char newSpk[crypto_box_PUBLICKEYBYTES], const unsigned char userKey[crypto_kdf_KEYBYTES]);
+int allears_init(const char * const newOnionId, const unsigned char newSaltNm[crypto_pwhash_SALTBYTES], const unsigned char newSpk[crypto_box_PUBLICKEYBYTES], const unsigned char userKey[crypto_kdf_KEYBYTES]);
 void allears_free(void);
 
 int allears_account_browse(struct aem_user ** const userList);
 int allears_account_create(const unsigned char * const targetPk);
 int allears_account_delete(const unsigned char * const targetPk);
 int allears_account_update(const unsigned char * const targetPk, const uint8_t level);
+int allears_address_create(const char * const addr, const size_t lenAddr);
+int allears_address_delete(const uint64_t hash);
 int allears_message_browse();
 
 #endif

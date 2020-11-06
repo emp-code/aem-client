@@ -5,10 +5,10 @@
 
 #include "../all-ears.h"
 
-static int performTests(int * const retNum, const char onionId[56], const unsigned char * const spk, const unsigned char * const key_admin, const unsigned char * const key_user1, const unsigned char * const upk_user1, const unsigned char * const upk_user2) {
+static int performTests(int * const retNum, const char onionId[56], const unsigned char * const spk, const unsigned char * const saltNm, const unsigned char * const key_admin, const unsigned char * const key_user1, const unsigned char * const upk_user1, const unsigned char * const upk_user2) {
 	// Admin
 	*retNum = 0;
-	if (allears_init(onionId, spk, key_admin) != 0) return -1;
+	if (allears_init(onionId, spk, saltNm, key_admin) != 0) return -1;
 
 	int ret;
 	struct aem_user *userList;
@@ -31,20 +31,20 @@ static int performTests(int * const retNum, const char onionId[56], const unsign
 	free(userList);
 
 	// User1
-	if (allears_init(onionId, spk, key_user1) != 0) return -1;
+	if (allears_init(onionId, spk, saltNm, key_user1) != 0) return -1;
 	// TODO: Update private
-	// TODO: Create address
+	(*retNum)++; if ((ret = allears_address_create("aemtest1", 8)) < 0) return -1;
 	(*retNum)++; if ((ret = allears_account_create(upk_user2)) >= 0) return -1;
 
 	// Admin
-	if (allears_init(onionId, spk, key_admin) != 0) return -1;
+	if (allears_init(onionId, spk, saltNm, key_admin) != 0) return -1;
 	(*retNum)++; if ((ret = allears_account_create(upk_user2)) < 0) {return ret;}
 	(*retNum)++; if ((ret = allears_account_update(upk_user2, 2)) != 0) return -1;
 	// TODO: Send User1 a message
 
 	// User1
-	if (allears_init(onionId, spk, key_user1) != 0) return -1;
-	// TODO: Delete non-existent address
+	if (allears_init(onionId, spk, saltNm, key_user1) != 0) return -1;
+	(*retNum)++; if ((ret = allears_address_delete(UINT64_MAX)) < 0) return -1;
 	(*retNum)++; if ((ret = allears_account_delete(upk_user2) >= 0)) return -1;
 	(*retNum)++; if ((ret = allears_account_update(upk_user2, 3)) >= 0) return -1;
 	(*retNum)++; if ((ret = allears_account_update(upk_user2, 1)) >= 0) return -1;
@@ -54,12 +54,12 @@ static int performTests(int * const retNum, const char onionId[56], const unsign
 	// TODO: Update address setting
 
 	// Admin
-	if (allears_init(onionId, spk, key_admin) != 0) return -1;
+	if (allears_init(onionId, spk, saltNm, key_admin) != 0) return -1;
 	(*retNum)++; if ((ret = allears_account_delete(upk_user2) != 0)) return ret;
 	// TODO: Send User1 a message
 
 	// User1
-	if (allears_init(onionId, spk, key_user1) != 0) return -1;
+	if (allears_init(onionId, spk, saltNm, key_user1) != 0) return -1;
 	// TODO: Upload a file
 	// TODO: Browse messages
 	// TODO: Delete a message
@@ -72,8 +72,9 @@ static int performTests(int * const retNum, const char onionId[56], const unsign
 }
 
 int main(int argc, char *argv[]) {
-	if (argc != 4 || strlen(argv[1]) != 56 || strlen(argv[2]) != (crypto_box_PUBLICKEYBYTES * 2) || strlen(argv[3]) != (crypto_kdf_KEYBYTES * 2)) {
-		printf("Usage: %s OnionID SPK USK\n", argv[0]);
+	// TODO: Add SigPub
+	if (argc != 5 || strlen(argv[1]) != 56 || strlen(argv[2]) != (crypto_box_PUBLICKEYBYTES * 2) || strlen(argv[3]) != (crypto_pwhash_SALTBYTES * 2) || strlen(argv[4]) != (crypto_kdf_KEYBYTES * 2)) {
+		printf("Usage: %s OnionID ApiPub SaltNm USK\n", argv[0]);
 		return EXIT_FAILURE;
 	}
 
@@ -82,9 +83,12 @@ int main(int argc, char *argv[]) {
 	unsigned char spk[crypto_box_PUBLICKEYBYTES];
 	sodium_hex2bin(spk, crypto_box_PUBLICKEYBYTES, argv[2], crypto_box_PUBLICKEYBYTES * 2, NULL, NULL, NULL);
 
+	unsigned char saltNm[crypto_pwhash_SALTBYTES];
+	sodium_hex2bin(saltNm, crypto_pwhash_SALTBYTES, argv[3], crypto_pwhash_SALTBYTES * 2, NULL, NULL, NULL);
+
 	// Admin
 	unsigned char key_admin[crypto_kdf_KEYBYTES];
-	sodium_hex2bin(key_admin, crypto_kdf_KEYBYTES, argv[3], crypto_kdf_KEYBYTES * 2, NULL, NULL, NULL);
+	sodium_hex2bin(key_admin, crypto_kdf_KEYBYTES, argv[4], crypto_kdf_KEYBYTES * 2, NULL, NULL, NULL);
 
 	unsigned char tmp_bs[crypto_box_SEEDBYTES];
 	unsigned char tmp_sk[crypto_box_SECRETKEYBYTES];
@@ -102,7 +106,7 @@ int main(int argc, char *argv[]) {
 
 	// Perform the tests
 	int retNum = 0;
-	const int ret = performTests(&retNum, argv[1], spk, key_admin, key_user1, upk_user1, upk_user2);
+	const int ret = performTests(&retNum, argv[1], spk, saltNm, key_admin, key_user1, upk_user1, upk_user2);
 	if (ret != 0) printf("Failed test %d\n", retNum);
 
 	allears_free();

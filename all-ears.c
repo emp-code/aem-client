@@ -28,6 +28,8 @@
 #define AEM_RESPONSE_HEAD_SIZE_SHORT 166
 #define AEM_RESPONSE_DATA_SIZE_SHORT 33
 #define AEM_SEALCLEAR_LEN (1 + crypto_box_NONCEBYTES + crypto_box_PUBLICKEYBYTES)
+#define AEM_ADDRESS_ARGON2_OPSLIMIT 3
+#define AEM_ADDRESS_ARGON2_MEMLIMIT 67108864
 
 // Local settings
 #define AEM_MAXLEN_HOST 32
@@ -35,10 +37,12 @@
 #define AEM_SOCKET_TIMEOUT 30
 
 static unsigned char spk[crypto_box_PUBLICKEYBYTES];
+static unsigned char saltNm[crypto_pwhash_SALTBYTES];
+static char onionId[56];
+
 static unsigned char upk[crypto_box_PUBLICKEYBYTES];
 static unsigned char usk[crypto_box_SECRETKEYBYTES];
 
-static char onionId[56];
 
 static int makeTorSocket(void) {
 	struct sockaddr_in torAddr;
@@ -81,6 +85,11 @@ static int torConnect(void) {
 
 	close(sock);
 	return -1;
+}
+
+static uint64_t normalHash(const char addr32[10]) {
+	uint64_t halves[2];
+	return (crypto_pwhash((unsigned char*)halves, 16, addr32, 10, saltNm, AEM_ADDRESS_ARGON2_OPSLIMIT, AEM_ADDRESS_ARGON2_MEMLIMIT, crypto_pwhash_ALG_ARGON2ID13) == 0) ? (halves[0] ^ halves[1]) : 0;
 }
 
 static int apiFetch(const int apiCmd, const void * const clear, const size_t lenClear, unsigned char **result) {
@@ -207,6 +216,20 @@ int allears_account_delete(const unsigned char * const targetPk) {
 	return (targetPk == NULL) ? -1 : apiFetch(AEM_API_ACCOUNT_DELETE, targetPk, crypto_box_PUBLICKEYBYTES, NULL);
 }
 
+int allears_address_create(const char * const addr, const size_t lenAddr) {
+	if (lenAddr == 6 && memcmp(addr, "SHIELD", 6) == 0) return apiFetch(AEM_API_ADDRESS_CREATE, (const unsigned char * const)addr, 6, NULL);
+
+	unsigned char addr32[10];
+	addr32_store(addr32, addr, lenAddr);
+	const uint64_t hash = normalHash((const char * const)addr32);
+
+	return (addr == NULL) ? -1 : apiFetch(AEM_API_ADDRESS_CREATE, &hash, 8, NULL);
+}
+
+int allears_address_delete(const uint64_t hash) {
+	return apiFetch(AEM_API_ADDRESS_CREATE, &hash, 8, NULL);
+}
+
 int allears_account_update(const unsigned char * const targetPk, const uint8_t level) {
 	if (level > AEM_LEVEL_MAX) return -1;
 
@@ -226,8 +249,9 @@ int allears_message_browse() {
 	return 0;
 }
 
-int allears_init(const char * const newOnionId, const unsigned char newSpk[crypto_box_PUBLICKEYBYTES], const unsigned char userKey[crypto_kdf_KEYBYTES]) {
+int allears_init(const char * const newOnionId, const unsigned char newSpk[crypto_box_PUBLICKEYBYTES], const unsigned char newSaltNm[crypto_pwhash_SALTBYTES], const unsigned char userKey[crypto_kdf_KEYBYTES]) {
 	memcpy(onionId, newOnionId, 56);
+	memcpy(saltNm, newSaltNm, crypto_pwhash_SALTBYTES);
 	memcpy(spk, newSpk, crypto_box_PUBLICKEYBYTES);
 
 	unsigned char boxSeed[crypto_box_SEEDBYTES];
