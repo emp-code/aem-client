@@ -206,11 +206,11 @@ int allears_account_browse(struct aem_user ** const userList) {
 }
 
 int allears_account_create(const unsigned char * const targetPk) {
-	return (targetPk == NULL) ? -1 : apiFetch(AEM_API_ACCOUNT_CREATE, targetPk, crypto_box_PUBLICKEYBYTES, NULL);
+	return apiFetch(AEM_API_ACCOUNT_CREATE, targetPk, crypto_box_PUBLICKEYBYTES, NULL);
 }
 
 int allears_account_delete(const unsigned char * const targetPk) {
-	return (targetPk == NULL) ? -1 : apiFetch(AEM_API_ACCOUNT_DELETE, targetPk, crypto_box_PUBLICKEYBYTES, NULL);
+	return apiFetch(AEM_API_ACCOUNT_DELETE, targetPk, crypto_box_PUBLICKEYBYTES, NULL);
 }
 
 int allears_address_create(const char * const addr, const size_t lenAddr, uint64_t * const shield_hash, unsigned char * const shield_addr32) {
