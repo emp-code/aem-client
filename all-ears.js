@@ -47,9 +47,9 @@ function AllEars(readyCallback) {
 
 	const _AEM_ADDR32_CHARS = "0123456789abcdefghjkmnpqrstuwxyz";
 	const _AEM_ADDRESSES_PER_USER = 31;
-	const _AEM_BYTES_PRIVATE = 4096 - sodium.crypto_box_PUBLICKEYBYTES - 1 - (_AEM_ADDRESSES_PER_USER * 9);
-	const _AEM_MSG_MINBLOCKS = 12;
 	const _AEM_API_BOX_SIZE_MAX = (Math.pow(2, 16) + _AEM_MSG_MINBLOCKS) * 16;
+	const _AEM_LEN_PRIVATE = 4096 - sodium.crypto_box_PUBLICKEYBYTES - 1 - (_AEM_ADDRESSES_PER_USER * 9);
+	const _AEM_MSG_MINBLOCKS = 12;
 	const _AEM_USER_MAXLEVEL = 3;
 
 	const _AEM_ARGON2_MEMLIMIT = 67108864;
@@ -589,13 +589,13 @@ function AllEars(readyCallback) {
 		const privNonce = browseData.slice(offset, offset + sodium.crypto_secretbox_NONCEBYTES);
 		let privData;
 
-		try {privData = sodium.crypto_secretbox_open_easy(browseData.slice(offset + sodium.crypto_secretbox_NONCEBYTES, offset + _AEM_BYTES_PRIVATE), privNonce, _userKeySymmetric);}
+		try {privData = sodium.crypto_secretbox_open_easy(browseData.slice(offset + sodium.crypto_secretbox_NONCEBYTES, offset + _AEM_LEN_PRIVATE), privNonce, _userKeySymmetric);}
 		catch(e) {
 			console.log("Private data field decryption failed:" + e);
-			return offset + _AEM_BYTES_PRIVATE;
+			return offset + _AEM_LEN_PRIVATE;
 		}
 
-		offset += _AEM_BYTES_PRIVATE;
+		offset += _AEM_LEN_PRIVATE;
 
 		// Private - Address data
 		for (let i = 0; i < privData[0]; i++) {
@@ -1407,7 +1407,7 @@ function AllEars(readyCallback) {
 	};
 
 	this.Private_Update = function(callback) {
-		const privData = new Uint8Array(_AEM_BYTES_PRIVATE - sodium.crypto_secretbox_NONCEBYTES - sodium.crypto_secretbox_MACBYTES);
+		const privData = new Uint8Array(_AEM_LEN_PRIVATE - sodium.crypto_secretbox_NONCEBYTES - sodium.crypto_secretbox_MACBYTES);
 		privData[0] = _userAddress.length;
 
 		let offset = 1;
