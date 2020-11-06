@@ -21,10 +21,8 @@
 #define AEM_MSG_MINBLOCKS 12
 #define AEM_API_BOX_SIZE_MAX ((UINT16_MAX + AEM_MSG_MINBLOCKS) * 16)
 #define AEM_MAXLEN_MSGDATA 4194304 // 4 MiB
-#define AEM_ADDRESSES_PER_USER 31
 #define AEM_PORT_API 302
 #define AEM_LEVEL_MAX 3
-#define AEM_LEN_PRIVATE (4096 - crypto_box_PUBLICKEYBYTES - 1 - (AEM_ADDRESSES_PER_USER * 9))
 #define AEM_RESPONSE_HEAD_SIZE_SHORT 166
 #define AEM_RESPONSE_DATA_SIZE_SHORT 33
 #define AEM_SEALCLEAR_LEN (1 + crypto_box_NONCEBYTES + crypto_box_PUBLICKEYBYTES)
@@ -42,7 +40,6 @@ static char onionId[56];
 
 static unsigned char upk[crypto_box_PUBLICKEYBYTES];
 static unsigned char usk[crypto_box_SECRETKEYBYTES];
-
 
 static int makeTorSocket(void) {
 	struct sockaddr_in torAddr;
