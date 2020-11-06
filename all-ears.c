@@ -223,7 +223,7 @@ int allears_address_create(const char * const addr, const size_t lenAddr, uint64
 		return 0;
 	}
 
-	if (addr == NULL || lenAddr > 15) return -1;
+	if (addr == NULL || lenAddr < 1 || lenAddr > 15) return -1;
 
 	unsigned char addr32[10];
 	addr32_store(addr32, addr, lenAddr);
