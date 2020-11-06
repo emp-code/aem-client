@@ -68,7 +68,7 @@ readonly LineJsFirst=$(grep -F '<script' -n -m 1 modern/index.html | sed 's/:.*/
 readonly LineJsLast=$(grep -F '<script' -n modern/index.html | tail -n 1 | sed 's/:.*//')
 
 readonly html=\
-$(cat modern/index.html | head -n $(expr $LineCss - 1))\
+$(head -n $(expr $LineCss - 1) modern/index.html)\
 $(echo -en '\n\t\t<meta charset="utf-8">')\
 $(echo -en '\n\t\t<meta name="referrer" content="no-referrer">')\
 $(echo -en '\n\t\t<meta http-equiv="Content-Security-Policy" content="')\
@@ -81,7 +81,7 @@ $(echo -en '\n\t\t<script>')$(echo -n "$js_brotli")$(echo -en '</script>')\
 $(echo -en '\n\t\t<script>')$(echo -n "$js_sodium")$(echo -en '\n</script>')\
 $(echo -en '\n\t\t<script>')$(cat all-ears.js)$(echo -en '</script>')\
 $(echo -en '\n\t\t<script>')$(cat modern/main.js)$(echo -en '</script>\n ')\
-$(cat modern/index.html | tail -n +$(expr $LineJsLast + 1))\
+$(tail -n +$(expr $LineJsLast + 1) modern/index.html)\
 
 echo "$html" | sed \
 -e "s~<title>All-Ears Mail</title>~<title>$title</title>~" \
