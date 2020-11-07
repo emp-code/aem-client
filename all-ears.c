@@ -235,6 +235,18 @@ int allears_address_delete(const uint64_t hash) {
 	return apiFetch(AEM_API_ADDRESS_CREATE, &hash, 8, NULL);
 }
 
+int allears_address_update(struct aem_address * const addr, const int count) {
+	if (addr == NULL || count < 1) return -1;
+
+	unsigned char data[9 * count];
+	for (int i = 0; i < count; i++) {
+		memcpy(data + (i * 9), &addr[i].hash, 8);
+		data[(i * 9) + 8] = addr[i].flags;
+	}
+
+	return apiFetch(AEM_API_ADDRESS_UPDATE, data, count * 9, NULL);
+}
+
 int allears_account_update(const unsigned char * const targetPk, const uint8_t level) {
 	if (level > AEM_LEVEL_MAX) return -1;
 

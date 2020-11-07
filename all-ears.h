@@ -4,6 +4,8 @@
 #include <stddef.h>
 #include <sodium.h>
 
+#define AEM_ADDR_FLAG_ACCINT 2
+#define AEM_ADDR_FLAG_ACCEXT 1
 #define AEM_ADDRESSES_PER_USER 31
 #define AEM_LEN_PRIVATE (4096 - crypto_box_PUBLICKEYBYTES - 1 - (AEM_ADDRESSES_PER_USER * 9))
 
@@ -47,6 +49,7 @@ int allears_account_delete(const unsigned char * const targetPk);
 int allears_account_update(const unsigned char * const targetPk, const uint8_t level);
 int allears_address_create(struct aem_address * const addr, const char * const norm, const size_t lenNorm);
 int allears_address_delete(const uint64_t hash);
+int allears_address_update(struct aem_address * const addr, const int count);
 int allears_message_browse();
 int allears_private_update(const unsigned char newPrivate[AEM_LEN_PRIVATE]);
 

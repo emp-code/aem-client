@@ -34,6 +34,7 @@ static int performTests(int * const retNum, const char onionId[56], const unsign
 	memset(privateData, 0xFC, AEM_LEN_PRIVATE);
 
 	struct aem_address addr;
+	addr.flags = AEM_ADDR_FLAG_ACCINT | AEM_ADDR_FLAG_ACCEXT;
 
 	// User1
 	if (allears_init(onionId, spk, saltNm, key_user1) != 0) return -1;
@@ -56,7 +57,7 @@ static int performTests(int * const retNum, const char onionId[56], const unsign
 	(*retNum)++; if ((ret = allears_account_update(upk_user1, 3)) >= 0) return -1;
 	(*retNum)++; if ((ret = allears_account_update(upk_user1, 2)) >= 0) return -1;
 	(*retNum)++; if ((ret = allears_account_update(upk_user1, 1)) != 0) return ret;
-	// TODO: Update address setting
+	(*retNum)++; if ((ret = allears_address_update(&addr, 1)) != 0) return ret;
 
 	// Admin
 	if (allears_init(onionId, spk, saltNm, key_admin) != 0) return -1;
