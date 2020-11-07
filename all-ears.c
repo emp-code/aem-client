@@ -227,6 +227,7 @@ int allears_address_create(struct aem_address * const addr, const char * const n
 
 	addr32_store(addr->addr32, norm, lenNorm);
 	addr->hash = normalHash((const char * const)addr->addr32);
+	addr->flags = AEM_ADDR_FLAGS_DEFAULT;
 
 	return apiFetch(AEM_API_ADDRESS_CREATE, &addr->hash, 8, NULL);
 }

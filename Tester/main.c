@@ -34,13 +34,13 @@ static int performTests(int * const retNum, const char onionId[56], const unsign
 	memset(privateData, 0xFC, AEM_LEN_PRIVATE);
 
 	struct aem_address addr;
-	addr.flags = AEM_ADDR_FLAG_ACCINT | AEM_ADDR_FLAG_ACCEXT;
 
 	// User1
 	if (allears_init(onionId, spk, saltNm, key_user1) != 0) return -1;
+	(*retNum)++; if ((ret = allears_account_create(upk_user2)) >= 0) return -1;
 	(*retNum)++; if ((ret = allears_private_update(privateData)) != 0) return -1;
 	(*retNum)++; if ((ret = allears_address_create(&addr, "aemtest1", 8)) != 0) return -1;
-	(*retNum)++; if ((ret = allears_account_create(upk_user2)) >= 0) return -1;
+	addr.flags = AEM_ADDR_FLAG_ACCINT | AEM_ADDR_FLAG_ACCEXT;
 
 	// Admin
 	if (allears_init(onionId, spk, saltNm, key_admin) != 0) return -1;
