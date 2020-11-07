@@ -44,7 +44,7 @@ static int performTests(int * const retNum, const char onionId[56], const unsign
 
 	// Admin
 	if (allears_init(onionId, spk, saltNm, key_admin) != 0) return -1;
-	(*retNum)++; if ((ret = allears_account_create(upk_user2)) != 0) {return ret;}
+	(*retNum)++; if ((ret = allears_account_create(upk_user2)) != 0) return ret;
 	(*retNum)++; if ((ret = allears_account_update(upk_user2, 2)) != 0) return -1;
 	// TODO: Send User1 a message
 
@@ -71,7 +71,6 @@ static int performTests(int * const retNum, const char onionId[56], const unsign
 	// TODO: Delete a message
 	// TODO: Delete a non-existing message
 	// TODO: Browse messages, verify corrrect message deleted
-	// TODO: Delete address
 	(*retNum)++; if ((ret = allears_address_delete(addr.hash)) != 0) return ret;
 	(*retNum)++; if ((ret = allears_account_delete(upk_user1)) != 0) return ret;
 
