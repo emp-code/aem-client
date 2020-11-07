@@ -32,6 +32,12 @@ struct aem_user {
 	unsigned char pk[crypto_box_PUBLICKEYBYTES];
 };
 
+struct aem_address {
+	uint64_t hash;
+	unsigned char addr32[10];
+	uint8_t flags;
+};
+
 int allears_init(const char * const newOnionId, const unsigned char newSaltNm[crypto_pwhash_SALTBYTES], const unsigned char newSpk[crypto_box_PUBLICKEYBYTES], const unsigned char userKey[crypto_kdf_KEYBYTES]);
 void allears_free(void);
 
@@ -39,7 +45,7 @@ int allears_account_browse(struct aem_user ** const userList);
 int allears_account_create(const unsigned char * const targetPk);
 int allears_account_delete(const unsigned char * const targetPk);
 int allears_account_update(const unsigned char * const targetPk, const uint8_t level);
-int allears_address_create(const char * const addr, const size_t lenAddr, uint64_t * const shield_hash, unsigned char * const shield_addr32);
+int allears_address_create(struct aem_address * const addr, const char * const norm, const size_t lenNorm);
 int allears_address_delete(const uint64_t hash);
 int allears_message_browse();
 int allears_private_update(const unsigned char newPrivate[AEM_LEN_PRIVATE]);

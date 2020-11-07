@@ -213,23 +213,22 @@ int allears_account_delete(const unsigned char * const targetPk) {
 	return apiFetch(AEM_API_ACCOUNT_DELETE, targetPk, crypto_box_PUBLICKEYBYTES, NULL);
 }
 
-int allears_address_create(const char * const addr, const size_t lenAddr, uint64_t * const shield_hash, unsigned char * const shield_addr32) {
-	if (shield_hash != NULL) {
+int allears_address_create(struct aem_address * const addr, const char * const norm, const size_t lenNorm) {
+	if (norm == NULL) {
 		unsigned char data[AEM_RESPONSE_DATA_SIZE_SHORT - 1];
 		if (apiFetch(AEM_API_ADDRESS_CREATE, (const unsigned char[]){'S', 'H', 'I', 'E', 'L', 'D'}, 6, (unsigned char**)&data) != 0) return -1;
 
-		memcpy(shield_hash, data, 8);
-		memcpy(shield_addr32, data + 8, 10);
+		memcpy(&(addr->hash), data, 8);
+		memcpy(addr->addr32, data + 8, 10);
 		return 0;
 	}
 
-	if (addr == NULL || lenAddr < 1 || lenAddr > 15) return -1;
+	if (lenNorm < 1 || lenNorm > 15) return -1;
 
-	unsigned char addr32[10];
-	addr32_store(addr32, addr, lenAddr);
-	const uint64_t hash = normalHash((const char * const)addr32);
+	addr32_store(addr->addr32, norm, lenNorm);
+	addr->hash = normalHash((const char * const)addr->addr32);
 
-	return apiFetch(AEM_API_ADDRESS_CREATE, &hash, 8, NULL);
+	return apiFetch(AEM_API_ADDRESS_CREATE, &addr->hash, 8, NULL);
 }
 
 int allears_address_delete(const uint64_t hash) {
