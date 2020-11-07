@@ -72,6 +72,7 @@ static int performTests(int * const retNum, const char onionId[56], const unsign
 	// TODO: Delete a non-existing message
 	// TODO: Browse messages, verify corrrect message deleted
 	// TODO: Delete address
+	(*retNum)++; if ((ret = allears_address_delete(addr.hash)) != 0) return ret;
 	(*retNum)++; if ((ret = allears_account_delete(upk_user1)) != 0) return ret;
 
 	return 0;
