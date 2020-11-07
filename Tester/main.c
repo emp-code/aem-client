@@ -50,7 +50,7 @@ static int performTests(int * const retNum, const char onionId[56], const unsign
 
 	// User1
 	if (allears_init(onionId, spk, saltNm, key_user1) != 0) return -1;
-	(*retNum)++; if ((ret = allears_address_delete(UINT64_MAX)) != 0) return -1;
+	(*retNum)++; if ((ret = allears_address_delete(UINT64_MAX)) >= 0) return -1;
 	(*retNum)++; if ((ret = allears_account_delete(upk_user2)) >= 0) return -1;
 	(*retNum)++; if ((ret = allears_account_update(upk_user2, 3)) >= 0) return -1;
 	(*retNum)++; if ((ret = allears_account_update(upk_user2, 1)) >= 0) return -1;

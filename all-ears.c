@@ -233,7 +233,7 @@ int allears_address_create(struct aem_address * const addr, const char * const n
 }
 
 int allears_address_delete(const uint64_t hash) {
-	return apiFetch(AEM_API_ADDRESS_CREATE, &hash, 8, NULL);
+	return apiFetch(AEM_API_ADDRESS_DELETE, &hash, 8, NULL);
 }
 
 int allears_address_update(struct aem_address * const addr, const int count) {
