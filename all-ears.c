@@ -267,6 +267,52 @@ int allears_message_browse() {
 	return 0;
 }
 
+int allears_message_create(const char * const title, const size_t lenTitle, const char * const body, const size_t lenBody, const char * const addrFrom, const size_t lenAddrFrom, const char * const addrTo, const size_t lenAddrTo, const char * const replyId, const size_t lenReplyId, const unsigned char toPubkey[crypto_kx_PUBLICKEYBYTES]) {
+	if (title == NULL || body == NULL || addrFrom == NULL || addrTo == NULL || lenTitle < 1 || lenBody < 1 || lenAddrFrom < 1 || lenAddrTo < 1) return -1;
+
+	if (memchr(addrTo, '@', lenAddrTo) != NULL) {
+		// TODO: Email
+		return -1;
+	}
+
+	const bool isE2ee = (toPubkey != NULL);
+	if (isE2ee) return -1; // TODO
+
+	const size_t lenFinal = (crypto_kx_PUBLICKEYBYTES * 2) + 26 + lenTitle + lenBody;
+	unsigned char final[lenFinal];
+	bzero(final, lenFinal);
+
+	// 128/64/32 unused
+	final[0] = isE2ee? 16 : 0;
+	if (lenAddrFrom == 16) final[0] |= 8;
+	if (lenAddrTo   == 16) final[0] |= 4;
+	// Server sets sender level (0-3)
+
+	if (!isE2ee && (lenTitle + lenBody) < 38) return -1; // TODO: Add padding
+
+	unsigned char addr32_from[10];
+	unsigned char addr32_to[10];
+	addr32_store(addr32_from, addrFrom, lenAddrFrom);
+	addr32_store(addr32_to, addrTo, lenAddrTo);
+
+	memcpy(final + crypto_kx_PUBLICKEYBYTES +  5, addr32_from, 10);
+	memcpy(final + crypto_kx_PUBLICKEYBYTES + 15, addr32_to, 10);
+//	memcpy(final + crypto_kx_PUBLICKEYBYTES + 25, kxKeys.publicKey, crypto_kx_PUBLICKEYBYTES); //TODO
+
+	final[(crypto_kx_PUBLICKEYBYTES * 2) + 25] = lenTitle;
+
+	if (isE2ee) {
+		memcpy(final + 1, toPubkey, crypto_kx_PUBLICKEYBYTES);
+//		memcpy(final + 1 + crypto_kx_PUBLICKEYBYTES, msgTs);
+		// TODO
+	} else {
+		memcpy(final + (crypto_kx_PUBLICKEYBYTES * 2) + 26, title, lenTitle);
+		memcpy(final + (crypto_kx_PUBLICKEYBYTES * 2) + 26 + lenTitle, body, lenBody);
+	}
+
+	return apiFetch(AEM_API_MESSAGE_CREATE, final, lenFinal, NULL);
+}
+
 int allears_private_update(const unsigned char newPrivate[AEM_LEN_PRIVATE]) {
 	return apiFetch(AEM_API_PRIVATE_UPDATE, newPrivate, AEM_LEN_PRIVATE, NULL);
 }

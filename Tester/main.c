@@ -46,7 +46,7 @@ static int performTests(int * const retNum, const char onionId[56], const unsign
 	if (allears_init(onionId, spk, saltNm, key_admin) != 0) return -1;
 	(*retNum)++; if ((ret = allears_account_create(upk_user2)) != 0) return ret;
 	(*retNum)++; if ((ret = allears_account_update(upk_user2, 2)) != 0) return -1;
-	// TODO: Send User1 a message
+	(*retNum)++; if ((ret = allears_message_create("Test Message", 12, "This here is a test message.", 28, "admin", 5, "aemtest1", 8, NULL, 0, NULL)) >= 0) return -1;
 
 	// User1
 	if (allears_init(onionId, spk, saltNm, key_user1) != 0) return -1;
@@ -62,7 +62,7 @@ static int performTests(int * const retNum, const char onionId[56], const unsign
 	// Admin
 	if (allears_init(onionId, spk, saltNm, key_admin) != 0) return -1;
 	(*retNum)++; if ((ret = allears_account_delete(upk_user2)) != 0) return ret;
-	// TODO: Send User1 a message
+	(*retNum)++; if ((ret = allears_message_create("Test Message", 12, "This here is a test message.", 28, "admin", 5, "aemtest1", 8, NULL, 0, NULL)) != 0) return ret;
 
 	// User1
 	if (allears_init(onionId, spk, saltNm, key_user1) != 0) return -1;
