@@ -38,8 +38,9 @@ static unsigned char spk[crypto_box_PUBLICKEYBYTES];
 static unsigned char saltNm[crypto_pwhash_SALTBYTES];
 static char onionId[56];
 
-static unsigned char upk[crypto_box_PUBLICKEYBYTES];
-static unsigned char usk[crypto_box_SECRETKEYBYTES];
+static unsigned char userKey_kxHash[crypto_generichash_KEYBYTES];
+static unsigned char userKey_public[crypto_box_PUBLICKEYBYTES];
+static unsigned char userKey_secret[crypto_box_SECRETKEYBYTES];
 
 static int makeTorSocket(void) {
 	struct sockaddr_in torAddr;
@@ -115,10 +116,10 @@ static int apiFetch(const int apiCmd, const void * const clear, const size_t len
 	unsigned char sealClear[AEM_SEALCLEAR_LEN];
 	sealClear[0] = apiCmd;
 	memcpy(sealClear + 1, pbNonce, crypto_box_NONCEBYTES);
-	memcpy(sealClear + 1 + crypto_box_NONCEBYTES, upk, crypto_box_PUBLICKEYBYTES);
+	memcpy(sealClear + 1 + crypto_box_NONCEBYTES, userKey_public, crypto_box_PUBLICKEYBYTES);
 
 	const int ret1 = crypto_box_seal(req + lenHeaders, sealClear, AEM_SEALCLEAR_LEN, spk);
-	const int ret2 = crypto_box_easy(req + lenHeaders + AEM_SEALCLEAR_LEN + crypto_box_SEALBYTES, clear, lenClear, pbNonce, spk, usk);
+	const int ret2 = crypto_box_easy(req + lenHeaders + AEM_SEALCLEAR_LEN + crypto_box_SEALBYTES, clear, lenClear, pbNonce, spk, userKey_secret);
 
 	const bool wantShortResponse = (apiCmd != AEM_API_ACCOUNT_BROWSE && apiCmd != AEM_API_MESSAGE_BROWSE);
 
@@ -130,7 +131,7 @@ static int apiFetch(const int apiCmd, const void * const clear, const size_t len
 				lenResult = recv(sock, response, AEM_RESPONSE_HEAD_SIZE_SHORT + AEM_RESPONSE_DATA_SIZE_SHORT + crypto_box_NONCEBYTES + crypto_box_MACBYTES + 1, 0);
 				if (lenResult == AEM_RESPONSE_HEAD_SIZE_SHORT + AEM_RESPONSE_DATA_SIZE_SHORT + crypto_box_NONCEBYTES + crypto_box_MACBYTES) {
 					unsigned char decrypted[AEM_RESPONSE_DATA_SIZE_SHORT];
-					if (crypto_box_open_easy(decrypted, response + AEM_RESPONSE_HEAD_SIZE_SHORT + crypto_box_NONCEBYTES, AEM_RESPONSE_DATA_SIZE_SHORT + crypto_box_MACBYTES, response + AEM_RESPONSE_HEAD_SIZE_SHORT, spk, usk) == 0) {
+					if (crypto_box_open_easy(decrypted, response + AEM_RESPONSE_HEAD_SIZE_SHORT + crypto_box_NONCEBYTES, AEM_RESPONSE_DATA_SIZE_SHORT + crypto_box_MACBYTES, response + AEM_RESPONSE_HEAD_SIZE_SHORT, spk, userKey_secret) == 0) {
 						if (result != NULL) {
 							const int lenCpy = decrypted[0];
 							if (lenCpy < AEM_RESPONSE_DATA_SIZE_SHORT) {
@@ -150,7 +151,7 @@ static int apiFetch(const int apiCmd, const void * const clear, const size_t len
 							const int lenBox = (*result + lenResult) - (headEnd + 4);
 							unsigned char * const decrypted = malloc(lenBox - crypto_box_MACBYTES);
 							if (decrypted != NULL) {
-								if (crypto_box_open_easy(decrypted, headEnd + 4 + crypto_box_NONCEBYTES, lenBox - crypto_box_NONCEBYTES, headEnd + 4, spk, usk) == 0) {
+								if (crypto_box_open_easy(decrypted, headEnd + 4 + crypto_box_NONCEBYTES, lenBox - crypto_box_NONCEBYTES, headEnd + 4, spk, userKey_secret) == 0) {
 									lenResult = lenBox;
 									free(*result);
 									*result = decrypted;
@@ -267,6 +268,21 @@ int allears_message_browse() {
 	return 0;
 }
 
+static void getKxPublic(const unsigned char addr32_from[10], unsigned char * const target) {
+	unsigned char hash[crypto_kx_SEEDBYTES];
+	crypto_generichash(hash, crypto_kx_SEEDBYTES, addr32_from, 10, userKey_kxHash, crypto_generichash_KEYBYTES);
+
+	unsigned char kxKeyPublic[crypto_kx_PUBLICKEYBYTES];
+	unsigned char kxKeySecret[crypto_kx_SECRETKEYBYTES];
+	crypto_kx_seed_keypair(kxKeyPublic, kxKeySecret, hash);
+
+	sodium_memzero(hash, crypto_kx_SEEDBYTES);
+	sodium_memzero(kxKeySecret, crypto_kx_SECRETKEYBYTES);
+
+	memcpy(target, kxKeyPublic, crypto_kx_PUBLICKEYBYTES);
+	sodium_memzero(kxKeyPublic, crypto_kx_PUBLICKEYBYTES);
+}
+
 int allears_message_create(const char * const title, const size_t lenTitle, const char * const body, const size_t lenBody, const char * const addrFrom, const size_t lenAddrFrom, const char * const addrTo, const size_t lenAddrTo, const char * const replyId, const size_t lenReplyId, const unsigned char toPubkey[crypto_kx_PUBLICKEYBYTES]) {
 	if (title == NULL || body == NULL || addrFrom == NULL || addrTo == NULL || lenTitle < 1 || lenBody < 1 || lenAddrFrom < 1 || lenAddrTo < 1) return -1;
 
@@ -297,7 +313,7 @@ int allears_message_create(const char * const title, const size_t lenTitle, cons
 
 	memcpy(final + crypto_kx_PUBLICKEYBYTES +  5, addr32_from, 10);
 	memcpy(final + crypto_kx_PUBLICKEYBYTES + 15, addr32_to, 10);
-//	memcpy(final + crypto_kx_PUBLICKEYBYTES + 25, kxKeys.publicKey, crypto_kx_PUBLICKEYBYTES); //TODO
+	getKxPublic(addr32_from, final + crypto_kx_PUBLICKEYBYTES + 25);
 
 	final[(crypto_kx_PUBLICKEYBYTES * 2) + 25] = lenTitle;
 
@@ -322,13 +338,16 @@ int allears_init(const char * const newOnionId, const unsigned char newSpk[crypt
 	memcpy(saltNm, newSaltNm, crypto_pwhash_SALTBYTES);
 	memcpy(spk, newSpk, crypto_box_PUBLICKEYBYTES);
 
+	crypto_kdf_derive_from_key(userKey_kxHash, crypto_generichash_KEYBYTES, 4, "AEM-Usr0", userKey);
+
 	unsigned char boxSeed[crypto_box_SEEDBYTES];
 	crypto_kdf_derive_from_key(boxSeed, crypto_box_SEEDBYTES, 1, "AEM-Usr0", userKey);
-	crypto_box_seed_keypair(upk, usk, boxSeed);
+	crypto_box_seed_keypair(userKey_public, userKey_secret, boxSeed);
 	sodium_memzero(boxSeed, crypto_box_SEEDBYTES);
 	return 0;
 }
 
 void allears_free(void) {
-	sodium_memzero(usk, crypto_box_SECRETKEYBYTES);
+	sodium_memzero(userKey_kxHash, crypto_box_SECRETKEYBYTES);
+	sodium_memzero(userKey_secret, crypto_box_SECRETKEYBYTES);
 }
