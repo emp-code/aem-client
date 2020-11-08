@@ -419,6 +419,8 @@ function AllEars(readyCallback) {
 			case "htm":
 				return "html";
 		}
+
+		return null;
 	};
 
 	const _GetCiphersuite = function(cs) {
