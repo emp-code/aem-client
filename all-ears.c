@@ -330,6 +330,26 @@ int allears_message_create(const char * const title, const size_t lenTitle, cons
 	return apiFetch(AEM_API_MESSAGE_CREATE, final, lenFinal, NULL);
 }
 
+int allears_message_upload(const char * const fileName, const size_t lenFileName, const unsigned char * const fileData, const size_t lenFileData) {
+	if (fileName == NULL || fileData == NULL || lenFileName < 1 || lenFileName > 256 || lenFileData < 1) return -1;
+
+	const size_t lenData = 1 + lenFileName + lenFileData;
+	const size_t lenFinal = lenData + crypto_secretbox_NONCEBYTES + crypto_secretbox_MACBYTES;
+	if (lenFinal > AEM_API_BOX_SIZE_MAX) return -1;
+
+	unsigned char data[lenData];
+	data[0] = lenFileName - 1;
+	memcpy(data + 1, fileName, lenFileName);
+	memcpy(data + 1 + lenFileName, fileData, lenFileData);
+
+	unsigned char final[lenFinal];
+
+	randombytes_buf(final, crypto_secretbox_NONCEBYTES);
+	crypto_secretbox_easy(final + crypto_secretbox_NONCEBYTES, data, lenData, final, userKey_symmetric);
+
+	return apiFetch(AEM_API_MESSAGE_UPLOAD, final, lenFinal, NULL);
+}
+
 int allears_private_update(const unsigned char newPrivate[AEM_LEN_PRIVATE]) {
 	return apiFetch(AEM_API_PRIVATE_UPDATE, newPrivate, AEM_LEN_PRIVATE, NULL);
 }

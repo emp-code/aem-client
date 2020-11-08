@@ -66,7 +66,7 @@ static int performTests(int * const retNum, const char onionId[56], const unsign
 
 	// User1
 	if (allears_init(onionId, spk, saltNm, key_user1) != 0) return -1;
-	// TODO: Upload a file
+	(*retNum)++; if ((ret = allears_message_upload("test.txt", 8, (unsigned char*)"This is an uploaded test file.", 30)) != 0) return ret;
 	// TODO: Browse messages
 	// TODO: Delete a message
 	// TODO: Delete a non-existing message
