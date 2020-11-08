@@ -547,33 +547,33 @@ function addMsg(isInt, i) {
 	row.setAttribute("data-msgid", isInt? ae.GetIntMsgIdHex(i) : ae.GetExtMsgIdHex(i));
 
 	const cellTime = row.insertCell(-1);
-	const cellSubj = row.insertCell(-1);
-	const cellSnd1 = row.insertCell(-1);
-	const cellSnd2 = row.insertCell(-1);
-
 	const ts = isInt? ae.GetIntMsgTime(i) : ae.GetExtMsgTime(i);
 	cellTime.setAttribute("data-ts", ts);
 	cellTime.textContent = new Date((ts * 1000) + (new Date().getTimezoneOffset() * -60000)).toISOString().slice(0, 10);
 
+	const cellSubj = row.insertCell(-1);
 	cellSubj.textContent = isInt? ae.GetIntMsgTitle(i) : ae.GetExtMsgTitle(i);
 
 	if (isInt) {
-		cellSnd1.textContent = ae.GetIntMsgFrom(i);
-		cellSnd1.className = (ae.GetIntMsgFrom(i).length === 16) ? "mono" : "";
+		const cellSnd = row.insertCell(-1);
+		cellSnd.textContent = ae.GetIntMsgFrom(i);
+		cellSnd.className = (ae.GetIntMsgFrom(i).length === 16) ? "mono" : "";
 	} else {
 		const from1 = ae.GetExtMsgFrom(i);
 		const from2 = from1.substring(from1.indexOf("@") + 1);
 		const cc = ae.GetExtMsgCountry(i);
-
+		const cellSnd1 = row.insertCell(-1);
 		cellSnd1.textContent = from1.substring(0, from1.indexOf("@"));
 
 		const flag = document.createElement("abbr");
 		flag.textContent = getCountryFlag(cc);
 		flag.title = getCountryName(cc);
-		cellSnd2.appendChild(flag);
 
 		const fromText = document.createElement("span");
 		fromText.textContent = " " + from2;
+
+		const cellSnd2 = row.insertCell(-1);
+		cellSnd2.appendChild(flag);
 		cellSnd2.appendChild(fromText);
 	}
 
