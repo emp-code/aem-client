@@ -350,6 +350,20 @@ function clearDisplay() {
 }
 
 function displayFile(num) {
+	const fileType = ae.GetUplMsgType(num);
+
+	if (!fileType) { // Download
+		const a = document.createElement("a");
+		a.href = URL.createObjectURL(new Blob([ae.GetUplMsgBody(num).buffer]));
+		a.download = ae.GetUplMsgTitle(num);
+		a.click();
+
+		a.href = "";
+		a.download = "";
+		URL.revokeObjectURL(objectUrl);
+		return;
+	}
+
 	clearDisplay();
 
 	document.getElementById("midright").scroll(0, 0);
@@ -359,7 +373,7 @@ function displayFile(num) {
 	document.getElementById("midright").children[0].hidden = true;
 	document.getElementById("midright").children[1].textContent = ae.GetUplMsgTitle(num);
 
-	switch (ae.GetUplMsgType(num)) {
+	switch (fileType) {
 		case "text": {
 			document.getElementById("midright").children[2].hidden = false;
 			document.getElementById("midright").children[2].textContent = sodium.to_string(ae.GetUplMsgBody(num));
