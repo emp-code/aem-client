@@ -350,7 +350,7 @@ int allears_init(const char * const newOnionId, const unsigned char newSpk[crypt
 }
 
 void allears_free(void) {
-	sodium_memzero(userKey_kxHash, crypto_box_SECRETKEYBYTES);
+	sodium_memzero(userKey_kxHash, crypto_generichash_KEYBYTES);
 	sodium_memzero(userKey_secret, crypto_box_SECRETKEYBYTES);
 	sodium_memzero(userKey_symmetric, crypto_secretbox_KEYBYTES);
 }
