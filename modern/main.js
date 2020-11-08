@@ -358,9 +358,9 @@ function displayFile(num) {
 		a.download = ae.GetUplMsgTitle(num);
 		a.click();
 
+		URL.revokeObjectURL(a.href);
 		a.href = "";
 		a.download = "";
-		URL.revokeObjectURL(objectUrl);
 		return;
 	}
 
