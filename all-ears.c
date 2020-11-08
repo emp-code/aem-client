@@ -39,6 +39,7 @@ static unsigned char saltNm[crypto_pwhash_SALTBYTES];
 static char onionId[56];
 
 static unsigned char userKey_kxHash[crypto_generichash_KEYBYTES];
+static unsigned char userKey_symmetric[crypto_secretbox_KEYBYTES];
 static unsigned char userKey_public[crypto_box_PUBLICKEYBYTES];
 static unsigned char userKey_secret[crypto_box_SECRETKEYBYTES];
 
@@ -339,6 +340,7 @@ int allears_init(const char * const newOnionId, const unsigned char newSpk[crypt
 	memcpy(spk, newSpk, crypto_box_PUBLICKEYBYTES);
 
 	crypto_kdf_derive_from_key(userKey_kxHash, crypto_generichash_KEYBYTES, 4, "AEM-Usr0", userKey);
+	crypto_kdf_derive_from_key(userKey_symmetric, crypto_secretbox_KEYBYTES, 5, "AEM-Usr0", userKey);
 
 	unsigned char boxSeed[crypto_box_SEEDBYTES];
 	crypto_kdf_derive_from_key(boxSeed, crypto_box_SEEDBYTES, 1, "AEM-Usr0", userKey);
@@ -350,4 +352,5 @@ int allears_init(const char * const newOnionId, const unsigned char newSpk[crypt
 void allears_free(void) {
 	sodium_memzero(userKey_kxHash, crypto_box_SECRETKEYBYTES);
 	sodium_memzero(userKey_secret, crypto_box_SECRETKEYBYTES);
+	sodium_memzero(userKey_symmetric, crypto_secretbox_KEYBYTES);
 }
