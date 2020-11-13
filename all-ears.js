@@ -1404,6 +1404,7 @@ function AllEars(readyCallback) {
 
 			_uplMsg.unshift(new _NewUplMsg(newMsgId, Date.now() / 1000, title, body, null, (final.length + sodium.crypto_box_SEALBYTES) / 16));
 			_totalMsgBytes += final.length + sodium.crypto_box_SEALBYTES;
+			_readyMsgBytes += final.length + sodium.crypto_box_SEALBYTES;
 			callback(true);
 		});
 	};
