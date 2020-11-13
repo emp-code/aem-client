@@ -1404,7 +1404,7 @@ function AllEars(readyCallback) {
 
 			_uplMsg.unshift(new _NewUplMsg(newMsgId, Date.now() / 1000, title, body, null, (final.length + sodium.crypto_box_SEALBYTES) / 16));
 
-			let x = final.length + sodium.crypto_box_SEALBYTES;
+			let x = final.length + 117; // 5 (info + ts) + 64 (sig) + 48 (sealed box)
 			if (x % 16 != 0) x+= (16 - (x % 16));
 			_totalMsgBytes += x;
 			_readyMsgBytes += x;
