@@ -625,7 +625,7 @@ function addMessages() {
 		const inbox = document.getElementById("tbl_inbox");
 		const row = inbox.insertRow(-1);
 		const cell = row.insertCell(-1);
-		cell.textContent = "Load more (" + (ae.GetTotalMsgBytes() - ae.GetReadyMsgBytes()) / 1024 + " KiB left)";
+		cell.textContent = "Load more (" + Math.round((ae.GetTotalMsgBytes() - ae.GetReadyMsgBytes()) / 1024) + " KiB left)";
 
 		row.onclick = function() {
 			this.onclick = "";
