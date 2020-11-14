@@ -5,10 +5,10 @@
 
 #include "../all-ears.h"
 
-static int performTests(int * const retNum, const char onionId[56], const unsigned char * const spk, const unsigned char * const saltNm, const unsigned char * const key_admin, const unsigned char * const key_user1, const unsigned char * const upk_user1, const unsigned char * const upk_user2) {
+static int performTests(int * const retNum, const char onionId[56], const unsigned char * const pkApi, const unsigned char * const pkSig, const unsigned char * const saltNm, const unsigned char * const key_admin, const unsigned char * const key_user1, const unsigned char * const upk_user1, const unsigned char * const upk_user2) {
 	// Admin
 	*retNum = 0;
-	if (allears_init(onionId, spk, saltNm, key_admin) != 0) return -1;
+	if (allears_init(onionId, pkApi, pkSig, saltNm, key_admin) != 0) return -1;
 
 	int ret;
 	struct aem_user *userList;
@@ -36,20 +36,20 @@ static int performTests(int * const retNum, const char onionId[56], const unsign
 	struct aem_address addr;
 
 	// User1
-	if (allears_init(onionId, spk, saltNm, key_user1) != 0) return -1;
+	if (allears_init(onionId, pkApi, pkSig, saltNm, key_user1) != 0) return -1;
 	(*retNum)++; if ((ret = allears_account_create(upk_user2)) >= 0) return -1;
 	(*retNum)++; if ((ret = allears_private_update(privateData)) != 0) return -1;
 	(*retNum)++; if ((ret = allears_address_create(&addr, "aemtest1", 8)) != 0) return -1;
 	addr.flags = AEM_ADDR_FLAG_ACCINT | AEM_ADDR_FLAG_ACCEXT;
 
 	// Admin
-	if (allears_init(onionId, spk, saltNm, key_admin) != 0) return -1;
+	if (allears_init(onionId, pkApi, pkSig, saltNm, key_admin) != 0) return -1;
 	(*retNum)++; if ((ret = allears_account_create(upk_user2)) != 0) return ret;
 	(*retNum)++; if ((ret = allears_account_update(upk_user2, 2)) != 0) return -1;
 	(*retNum)++; if ((ret = allears_message_create("Test Message", 12, "This here is a test message.", 28, "admin", 5, "aemtest1", 8, NULL, 0, NULL)) >= 0) return -1;
 
 	// User1
-	if (allears_init(onionId, spk, saltNm, key_user1) != 0) return -1;
+	if (allears_init(onionId, pkApi, pkSig, saltNm, key_user1) != 0) return -1;
 	(*retNum)++; if ((ret = allears_address_delete(UINT64_MAX)) >= 0) return -1;
 	(*retNum)++; if ((ret = allears_account_delete(upk_user2)) >= 0) return -1;
 	(*retNum)++; if ((ret = allears_account_update(upk_user2, 3)) >= 0) return -1;
@@ -60,17 +60,23 @@ static int performTests(int * const retNum, const char onionId[56], const unsign
 	(*retNum)++; if ((ret = allears_address_update(&addr, 1)) != 0) return ret;
 
 	// Admin
-	if (allears_init(onionId, spk, saltNm, key_admin) != 0) return -1;
+	if (allears_init(onionId, pkApi, pkSig, saltNm, key_admin) != 0) return -1;
 	(*retNum)++; if ((ret = allears_account_delete(upk_user2)) != 0) return ret;
 	(*retNum)++; if ((ret = allears_message_create("Test Message", 12, "This here is a test message.", 28, "admin", 5, "aemtest1", 8, NULL, 0, NULL)) != 0) return ret;
 
 	// User1
-	if (allears_init(onionId, spk, saltNm, key_user1) != 0) return -1;
+	if (allears_init(onionId, pkApi, pkSig, saltNm, key_user1) != 0) return -1;
 	(*retNum)++; if ((ret = allears_message_upload("test.txt", 8, (unsigned char*)"This is an uploaded test file.", 30)) != 0) return ret;
-	// TODO: Browse messages
+//	(*retNum)++; if ((ret = allears_message_browse()) != 0) return ret;
+
+	// TODO: Check messages
+
 	// TODO: Delete a message
 	// TODO: Delete a non-existing message
-	// TODO: Browse messages, verify corrrect message deleted
+
+//	(*retNum)++; if ((ret = allears_message_browse()) != 0) return ret;
+	// TODO: Check messages
+
 	(*retNum)++; if ((ret = allears_address_delete(addr.hash)) != 0) return ret;
 	(*retNum)++; if ((ret = allears_account_delete(upk_user1)) != 0) return ret;
 
@@ -79,22 +85,25 @@ static int performTests(int * const retNum, const char onionId[56], const unsign
 
 int main(int argc, char *argv[]) {
 	// TODO: Add SigPub
-	if (argc != 5 || strlen(argv[1]) != 56 || strlen(argv[2]) != (crypto_box_PUBLICKEYBYTES * 2) || strlen(argv[3]) != (crypto_pwhash_SALTBYTES * 2) || strlen(argv[4]) != (crypto_kdf_KEYBYTES * 2)) {
-		printf("Usage: %s OnionID ApiPub SaltNm USK\n", argv[0]);
+	if (argc != 6 || strlen(argv[1]) != 56 || strlen(argv[2]) != (crypto_box_PUBLICKEYBYTES * 2) || strlen(argv[3]) != (crypto_sign_PUBLICKEYBYTES * 2) || strlen(argv[4]) != (crypto_pwhash_SALTBYTES * 2) || strlen(argv[5]) != (crypto_kdf_KEYBYTES * 2)) {
+		printf("Usage: %s OnionID PkApi PkSig SaltNm USK\n", argv[0]);
 		return EXIT_FAILURE;
 	}
 
 	if (sodium_init() != 0) {puts("Failed sodium_init()"); return EXIT_FAILURE;}
 
-	unsigned char spk[crypto_box_PUBLICKEYBYTES];
-	sodium_hex2bin(spk, crypto_box_PUBLICKEYBYTES, argv[2], crypto_box_PUBLICKEYBYTES * 2, NULL, NULL, NULL);
+	unsigned char pkApi[crypto_box_PUBLICKEYBYTES];
+	sodium_hex2bin(pkApi, crypto_box_PUBLICKEYBYTES, argv[2], crypto_box_PUBLICKEYBYTES * 2, NULL, NULL, NULL);
+
+	unsigned char pkSig[crypto_sign_PUBLICKEYBYTES];
+	sodium_hex2bin(pkSig, crypto_sign_PUBLICKEYBYTES, argv[3], crypto_sign_PUBLICKEYBYTES * 2, NULL, NULL, NULL);
 
 	unsigned char saltNm[crypto_pwhash_SALTBYTES];
-	sodium_hex2bin(saltNm, crypto_pwhash_SALTBYTES, argv[3], crypto_pwhash_SALTBYTES * 2, NULL, NULL, NULL);
+	sodium_hex2bin(saltNm, crypto_pwhash_SALTBYTES, argv[4], crypto_pwhash_SALTBYTES * 2, NULL, NULL, NULL);
 
 	// Admin
 	unsigned char key_admin[crypto_kdf_KEYBYTES];
-	sodium_hex2bin(key_admin, crypto_kdf_KEYBYTES, argv[4], crypto_kdf_KEYBYTES * 2, NULL, NULL, NULL);
+	sodium_hex2bin(key_admin, crypto_kdf_KEYBYTES, argv[5], crypto_kdf_KEYBYTES * 2, NULL, NULL, NULL);
 
 	unsigned char tmp_bs[crypto_box_SEEDBYTES];
 	unsigned char tmp_sk[crypto_box_SECRETKEYBYTES];
@@ -112,7 +121,7 @@ int main(int argc, char *argv[]) {
 
 	// Perform the tests
 	int retNum = 0;
-	const int ret = performTests(&retNum, argv[1], spk, saltNm, key_admin, key_user1, upk_user1, upk_user2);
+	const int ret = performTests(&retNum, argv[1], pkApi, pkSig, saltNm, key_admin, key_user1, upk_user1, upk_user2);
 	if (ret != 0) printf("Failed test %d\n", retNum);
 
 	allears_free();

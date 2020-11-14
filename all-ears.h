@@ -42,7 +42,7 @@ struct aem_address {
 	uint8_t flags;
 };
 
-int allears_init(const char * const newOnionId, const unsigned char newSpk[crypto_box_PUBLICKEYBYTES], const unsigned char newSaltNm[crypto_pwhash_SALTBYTES], const unsigned char userKey[crypto_kdf_KEYBYTES]);
+int allears_init(const char * const newOnionId, const unsigned char pkApi[crypto_box_PUBLICKEYBYTES], const unsigned char pkSig[crypto_sign_PUBLICKEYBYTES], const unsigned char newSaltNm[crypto_pwhash_SALTBYTES], const unsigned char userKey[crypto_kdf_KEYBYTES]);
 void allears_free(void);
 
 int allears_account_browse(struct aem_user ** const userList);

@@ -34,7 +34,8 @@
 #define AEM_PORT_TOR 9050
 #define AEM_SOCKET_TIMEOUT 30
 
-static unsigned char spk[crypto_box_PUBLICKEYBYTES];
+static unsigned char api_pubkey[crypto_box_PUBLICKEYBYTES];
+static unsigned char sig_pubkey[crypto_sign_PUBLICKEYBYTES];
 static unsigned char saltNm[crypto_pwhash_SALTBYTES];
 static char onionId[56];
 
@@ -42,6 +43,11 @@ static unsigned char userKey_kxHash[crypto_generichash_KEYBYTES];
 static unsigned char userKey_symmetric[crypto_secretbox_KEYBYTES];
 static unsigned char userKey_public[crypto_box_PUBLICKEYBYTES];
 static unsigned char userKey_secret[crypto_box_SECRETKEYBYTES];
+
+static uint16_t totalMsgCount = 0;
+static uint32_t totalMsgBlock = 0;
+static unsigned int count_intMsg = 0;
+static struct aem_intMsg *intMsg;
 
 static int makeTorSocket(void) {
 	struct sockaddr_in torAddr;
@@ -119,8 +125,8 @@ static int apiFetch(const int apiCmd, const void * const clear, const size_t len
 	memcpy(sealClear + 1, pbNonce, crypto_box_NONCEBYTES);
 	memcpy(sealClear + 1 + crypto_box_NONCEBYTES, userKey_public, crypto_box_PUBLICKEYBYTES);
 
-	const int ret1 = crypto_box_seal(req + lenHeaders, sealClear, AEM_SEALCLEAR_LEN, spk);
-	const int ret2 = crypto_box_easy(req + lenHeaders + AEM_SEALCLEAR_LEN + crypto_box_SEALBYTES, clear, lenClear, pbNonce, spk, userKey_secret);
+	const int ret1 = crypto_box_seal(req + lenHeaders, sealClear, AEM_SEALCLEAR_LEN, api_pubkey);
+	const int ret2 = crypto_box_easy(req + lenHeaders + AEM_SEALCLEAR_LEN + crypto_box_SEALBYTES, clear, lenClear, pbNonce, api_pubkey, userKey_secret);
 
 	const bool wantShortResponse = (apiCmd != AEM_API_ACCOUNT_BROWSE && apiCmd != AEM_API_MESSAGE_BROWSE);
 
@@ -132,7 +138,7 @@ static int apiFetch(const int apiCmd, const void * const clear, const size_t len
 				lenResult = recv(sock, response, AEM_RESPONSE_HEAD_SIZE_SHORT + AEM_RESPONSE_DATA_SIZE_SHORT + crypto_box_NONCEBYTES + crypto_box_MACBYTES + 1, 0);
 				if (lenResult == AEM_RESPONSE_HEAD_SIZE_SHORT + AEM_RESPONSE_DATA_SIZE_SHORT + crypto_box_NONCEBYTES + crypto_box_MACBYTES) {
 					unsigned char decrypted[AEM_RESPONSE_DATA_SIZE_SHORT];
-					if (crypto_box_open_easy(decrypted, response + AEM_RESPONSE_HEAD_SIZE_SHORT + crypto_box_NONCEBYTES, AEM_RESPONSE_DATA_SIZE_SHORT + crypto_box_MACBYTES, response + AEM_RESPONSE_HEAD_SIZE_SHORT, spk, userKey_secret) == 0) {
+					if (crypto_box_open_easy(decrypted, response + AEM_RESPONSE_HEAD_SIZE_SHORT + crypto_box_NONCEBYTES, AEM_RESPONSE_DATA_SIZE_SHORT + crypto_box_MACBYTES, response + AEM_RESPONSE_HEAD_SIZE_SHORT, api_pubkey, userKey_secret) == 0) {
 						if (result != NULL) {
 							const int lenCpy = decrypted[0];
 							if (lenCpy < AEM_RESPONSE_DATA_SIZE_SHORT) {
@@ -149,14 +155,14 @@ static int apiFetch(const int apiCmd, const void * const clear, const size_t len
 					if (lenResult > 0) {
 						const unsigned char * const headEnd = memmem(*result, lenResult, "\r\n\r\n", 4);
 						if (headEnd != NULL) {
-							const int lenBox = (*result + lenResult) - (headEnd + 4);
+							const int lenBox = (*result + lenResult) - (headEnd + 4 + crypto_box_NONCEBYTES);
 							unsigned char * const decrypted = malloc(lenBox - crypto_box_MACBYTES);
 							if (decrypted != NULL) {
-								if (crypto_box_open_easy(decrypted, headEnd + 4 + crypto_box_NONCEBYTES, lenBox - crypto_box_NONCEBYTES, headEnd + 4, spk, userKey_secret) == 0) {
-									lenResult = lenBox;
+								if (crypto_box_open_easy(decrypted, headEnd + 4 + crypto_box_NONCEBYTES, lenBox, headEnd + 4, api_pubkey, userKey_secret) == 0) {
+									lenResult = lenBox - crypto_box_MACBYTES;
 									free(*result);
 									*result = decrypted;
-								} else  {free(*result); free(decrypted); lenResult = -1;} // Failed decrypting box
+								} else {printf("%.80s", *result); free(*result); free(decrypted); lenResult = -1;} // Failed decrypting box
 							} else {free(*result); lenResult = -2;} // Failed alloc
 						} else {free(*result); lenResult = -3;} // Invalid response from server
 					} else {free(*result); lenResult = -4;} // Server refused to answer
@@ -261,11 +267,28 @@ int allears_account_update(const unsigned char * const targetPk, const uint8_t l
 }
 
 int allears_message_browse() {
-	unsigned char *msgData;
-	if (apiFetch(AEM_API_MESSAGE_BROWSE, (const unsigned char[]){0}, 1, &msgData) == -1) return -1;
+	unsigned char *browseData;
+	const int lenBrowseData = apiFetch(AEM_API_MESSAGE_BROWSE, (const unsigned char[]){0}, 1, &browseData);
+	if (lenBrowseData < 6) {printf("nodata: %d\n", lenBrowseData); return 0;}
 
-	// TODO
-	free(msgData);
+	memcpy(&totalMsgCount, browseData, 2);
+	memcpy(&totalMsgBlock, browseData + 2, 4);
+
+	int offset = 6;
+	while (offset < lenBrowseData) {
+		uint16_t msgBlocks;
+		memcpy(&msgBlocks, browseData + offset, 2);
+		const size_t msgBytes = (msgBlocks + AEM_MSG_MINBLOCKS) * 16;
+		offset += 2;
+
+		unsigned char msgId[16];
+		memcpy(msgId, browseData + offset, 16);
+		// TODO: Check if msgId exists, to avoid duplicates
+
+		// TODO
+	}
+
+	free(browseData);
 	return 0;
 }
 
@@ -354,10 +377,11 @@ int allears_private_update(const unsigned char newPrivate[AEM_LEN_PRIVATE]) {
 	return apiFetch(AEM_API_PRIVATE_UPDATE, newPrivate, AEM_LEN_PRIVATE, NULL);
 }
 
-int allears_init(const char * const newOnionId, const unsigned char newSpk[crypto_box_PUBLICKEYBYTES], const unsigned char newSaltNm[crypto_pwhash_SALTBYTES], const unsigned char userKey[crypto_kdf_KEYBYTES]) {
+int allears_init(const char * const newOnionId, const unsigned char pkApi[crypto_box_PUBLICKEYBYTES], const unsigned char pkSig[crypto_sign_PUBLICKEYBYTES], const unsigned char newSaltNm[crypto_pwhash_SALTBYTES], const unsigned char userKey[crypto_kdf_KEYBYTES]) {
 	memcpy(onionId, newOnionId, 56);
 	memcpy(saltNm, newSaltNm, crypto_pwhash_SALTBYTES);
-	memcpy(spk, newSpk, crypto_box_PUBLICKEYBYTES);
+	memcpy(api_pubkey, pkApi, crypto_box_PUBLICKEYBYTES);
+	memcpy(sig_pubkey, pkSig, crypto_sign_PUBLICKEYBYTES);
 
 	crypto_kdf_derive_from_key(userKey_kxHash, crypto_generichash_KEYBYTES, 4, "AEM-Usr0", userKey);
 	crypto_kdf_derive_from_key(userKey_symmetric, crypto_secretbox_KEYBYTES, 5, "AEM-Usr0", userKey);
