@@ -33,9 +33,10 @@ function AllEars(readyCallback) {
 	const _AEM_API_MESSAGE_BROWSE = 8;
 	const _AEM_API_MESSAGE_CREATE = 9;
 	const _AEM_API_MESSAGE_DELETE = 10;
-	const _AEM_API_MESSAGE_UPLOAD = 11;
-	const _AEM_API_PRIVATE_UPDATE = 12;
-	const _AEM_API_SETTING_LIMITS = 13;
+	const _AEM_API_MESSAGE_PUBLIC = 11;
+	const _AEM_API_MESSAGE_UPLOAD = 12;
+	const _AEM_API_PRIVATE_UPDATE = 13;
+	const _AEM_API_SETTING_LIMITS = 14;
 
 	const _AEM_ADDR_FLAG_SHIELD = 128;
 	// 64/32/16/8/4 unused
@@ -1135,7 +1136,14 @@ function AllEars(readyCallback) {
 					break;}
 
 					case 16: { // IntMsg
-						// 128/64/32 unused
+						// 128/64 unused
+						if ((msgData[0] & 32) != 0) {
+							const bodyAndTitle = sodium.to_string(msgData.slice(1));
+							const separator = bodyAndTitle.indexOf('\n');
+							_intMsg.push(new _NewIntMsg(validPad, validSig, msgId, msgTs, true, 3, null, "system", "system", bodyAndTitle.slice(0, separator), bodyAndTitle.slice(separator + 1)));
+							break;
+						}
+
 						const msgEncrypted  = (msgData[0] & 16) != 0;
 						const msgFromShield = (msgData[0] &  8) != 0;
 						const msgToShield   = (msgData[0] &  4) != 0;
