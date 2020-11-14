@@ -162,7 +162,7 @@ static int apiFetch(const int apiCmd, const void * const clear, const size_t len
 									lenResult = lenBox - crypto_box_MACBYTES;
 									free(*result);
 									*result = decrypted;
-								} else {printf("%.80s", *result); free(*result); free(decrypted); lenResult = -1;} // Failed decrypting box
+								} else {free(*result); free(decrypted); lenResult = -1;} // Failed decrypting box
 							} else {free(*result); lenResult = -2;} // Failed alloc
 						} else {free(*result); lenResult = -3;} // Invalid response from server
 					} else {free(*result); lenResult = -4;} // Server refused to answer
