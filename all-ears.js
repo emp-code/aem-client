@@ -1054,7 +1054,7 @@ function AllEars(readyCallback) {
 				let msgData;
 				try {msgData = sodium.crypto_box_seal_open(msgEnc, _userKeyPublic, _userKeySecret);}
 				catch(e) {
-					_intMsg.push(new _NewIntMsg(true, true, msgId, Date.now() / 1000, true, 3, null, "system", "system", "(error)", e));
+					_intMsg.push(new _NewIntMsg(true, true, msgId, Date.now() / 1000, false, 3, null, "system", "system", "(error)", e));
 					offset += msgBytes;
 					continue;
 				}
@@ -1140,7 +1140,7 @@ function AllEars(readyCallback) {
 						if ((msgData[0] & 32) != 0) {
 							const bodyAndTitle = sodium.to_string(msgData.slice(1));
 							const separator = bodyAndTitle.indexOf('\n');
-							_intMsg.push(new _NewIntMsg(validPad, validSig, msgId, msgTs, true, 3, null, "system", "system", bodyAndTitle.slice(0, separator), bodyAndTitle.slice(separator + 1)));
+							_intMsg.push(new _NewIntMsg(validPad, validSig, msgId, msgTs, false, 3, null, "system", "system", bodyAndTitle.slice(0, separator), bodyAndTitle.slice(separator + 1)));
 							break;
 						}
 
