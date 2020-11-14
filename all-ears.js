@@ -747,7 +747,7 @@ function AllEars(readyCallback) {
 	this.GetIntMsgIdHex  = function(num) {return sodium.to_hex(_intMsg[num].id);};
 	this.GetIntMsgTime   = function(num) {return _intMsg[num].ts;};
 	this.GetIntMsgLevel  = function(num) {return _intMsg[num].fromLv;};
-	this.GetIntMsgFromPk = function(num) {return sodium.to_base64(_intMsg[num].fromPk, sodium.base64_variants.ORIGINAL_NO_PADDING);};
+	this.GetIntMsgFromPk = function(num) {return _intMsg[num].fromPk? sodium.to_base64(_intMsg[num].fromPk, sodium.base64_variants.ORIGINAL_NO_PADDING) : "";};
 	this.GetIntMsgFrom   = function(num) {return _intMsg[num].from;};
 	this.GetIntMsgTo     = function(num) {return _intMsg[num].to;};
 	this.GetIntMsgTitle  = function(num) {return _intMsg[num].title;};
