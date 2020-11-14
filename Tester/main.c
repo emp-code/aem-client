@@ -80,6 +80,9 @@ static int performTests(int * const retNum, const char onionId[56], const unsign
 	(*retNum)++; if ((ret = allears_address_delete(addr.hash)) != 0) return ret;
 	(*retNum)++; if ((ret = allears_account_delete(upk_user1)) != 0) return ret;
 
+	if (allears_init(onionId, pkApi, pkSig, saltNm, key_admin) != 0) return -1;
+	(*retNum)++; if ((ret = allears_message_public("Test announcement", 17, "This announcement is a part of a test run.", 42)) != 0) return ret;
+
 	return 0;
 }
 

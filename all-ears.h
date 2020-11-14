@@ -23,6 +23,7 @@ enum aem_api_commands {
 	AEM_API_MESSAGE_BROWSE,
 	AEM_API_MESSAGE_CREATE,
 	AEM_API_MESSAGE_DELETE,
+	AEM_API_MESSAGE_PUBLIC,
 	AEM_API_MESSAGE_UPLOAD,
 	AEM_API_PRIVATE_UPDATE,
 	AEM_API_SETTING_LIMITS
@@ -54,6 +55,7 @@ int allears_address_delete(const uint64_t hash);
 int allears_address_update(struct aem_address * const addr, const int count);
 int allears_message_browse();
 int allears_message_create(const char * const title, const size_t lenTitle, const char * const body, const size_t lenBody, const char * const addrFrom, const size_t lenAddrFrom, const char * const addrTo, const size_t lenAddrTo, const char * const replyId, const size_t lenReplyId, const unsigned char toPubkey[crypto_kx_PUBLICKEYBYTES]);
+int allears_message_public(const char * const title, const size_t lenTitle, const char * const body, const size_t lenBody);
 int allears_message_upload(const char * const fileName, const size_t lenFileName, const unsigned char * const fileData, const size_t lenFileData);
 int allears_private_update(const unsigned char newPrivate[AEM_LEN_PRIVATE]);
 

@@ -353,6 +353,19 @@ int allears_message_create(const char * const title, const size_t lenTitle, cons
 	return apiFetch(AEM_API_MESSAGE_CREATE, final, lenFinal, NULL);
 }
 
+int allears_message_public(const char * const title, const size_t lenTitle, const char * const body, const size_t lenBody) {
+	if (title == NULL || body == NULL || lenTitle < 1 || lenBody < 1) return -1;
+
+	const size_t lenFinal = lenTitle + 1 + lenBody;
+	unsigned char final[lenFinal];
+
+	memcpy(final, title, lenTitle);
+	final[lenTitle] = '\n';
+	memcpy(final + lenTitle + 1, body, lenBody);
+
+	return apiFetch(AEM_API_MESSAGE_PUBLIC, final, lenFinal, NULL);
+}
+
 int allears_message_upload(const char * const fileName, const size_t lenFileName, const unsigned char * const fileData, const size_t lenFileData) {
 	if (fileName == NULL || fileData == NULL || lenFileName < 1 || lenFileName > 256 || lenFileData < 1) return -1;
 
