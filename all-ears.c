@@ -285,7 +285,17 @@ int allears_message_browse() {
 		memcpy(msgId, browseData + offset, 16);
 		// TODO: Check if msgId exists, to avoid duplicates
 
+		const size_t lenMsgData = msgBytes - crypto_box_SEALBYTES;
+		unsigned char msgData[lenMsgData];
+		if (crypto_box_seal_open(msgData, browseData + offset, msgBytes, userKey_public, userKey_secret) != 0) {
+			// Error decrypting
+			offset += msgBytes;
+			continue;
+		}
+
 		// TODO
+
+		offset += msgBytes;
 	}
 
 	free(browseData);

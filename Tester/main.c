@@ -67,14 +67,14 @@ static int performTests(int * const retNum, const char onionId[56], const unsign
 	// User1
 	if (allears_init(onionId, pkApi, pkSig, saltNm, key_user1) != 0) return -1;
 	(*retNum)++; if ((ret = allears_message_upload("test.txt", 8, (unsigned char*)"This is an uploaded test file.", 30)) != 0) return ret;
-//	(*retNum)++; if ((ret = allears_message_browse()) != 0) return ret;
+	(*retNum)++; if ((ret = allears_message_browse()) != 0) return ret;
 
 	// TODO: Check messages
 
 	// TODO: Delete a message
 	// TODO: Delete a non-existing message
 
-//	(*retNum)++; if ((ret = allears_message_browse()) != 0) return ret;
+	(*retNum)++; if ((ret = allears_message_browse()) != 0) return ret;
 	// TODO: Check messages
 
 	(*retNum)++; if ((ret = allears_address_delete(addr.hash)) != 0) return ret;
