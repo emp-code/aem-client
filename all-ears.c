@@ -348,7 +348,7 @@ int allears_message_browse() {
 					memcpy(intMsg[count_intMsg - 1].subj, msgData + 27 + crypto_kx_PUBLICKEYBYTES, lenSubj);
 					intMsg[count_intMsg - 1].subj[lenSubj] = '\0';
 
-					const size_t lenBody = lenMsgData - 26 - crypto_kx_PUBLICKEYBYTES - lenSubj - crypto_sign_BYTES - padAmount;
+					const size_t lenBody = lenMsgData - 27 - crypto_kx_PUBLICKEYBYTES - lenSubj - crypto_sign_BYTES - padAmount;
 					intMsg[count_intMsg - 1].body = malloc(lenBody + 1);
 					if (intMsg[count_intMsg - 1].body == NULL) {free(browseData); return -1;}
 					memcpy(intMsg[count_intMsg - 1].body, msgData + 27 + crypto_kx_PUBLICKEYBYTES + lenSubj, lenBody);
