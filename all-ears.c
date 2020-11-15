@@ -329,7 +329,11 @@ int allears_message_browse() {
 
 				const int lenSubj = (msgData[26 + crypto_kx_PUBLICKEYBYTES] & 127) + 1; // 128 unused
 
-				if ((intMsg[count_intMsg - 1].flags & AEM_INTMSG_FLAGS_ENCRYPTED) != 0) {
+				if ((intMsg[count_intMsg - 1].flags & AEM_INTMSG_FLAGS_PUBLIC) != 0) {
+					// TODO
+					intMsg[count_intMsg - 1].subj = strdup("TODO-Pub");
+					intMsg[count_intMsg - 1].body = strdup("TODO-Pub");
+				} else if ((intMsg[count_intMsg - 1].flags & AEM_INTMSG_FLAGS_ENCRYPTED) != 0) {
 					// TODO
 					intMsg[count_intMsg - 1].subj = strdup("TODO-Enc");
 					intMsg[count_intMsg - 1].body = strdup("TODO-Enc");
