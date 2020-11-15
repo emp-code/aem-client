@@ -495,4 +495,9 @@ void allears_free(void) {
 		intMsg = NULL;
 		count_intMsg = 0;
 	}
+
+	bzero(api_pubkey, crypto_box_PUBLICKEYBYTES);
+	bzero(sig_pubkey, crypto_sign_PUBLICKEYBYTES);
+	bzero(saltNm, crypto_pwhash_SALTBYTES);
+	bzero(onionId, 56);
 }
