@@ -72,7 +72,7 @@ static int performTests(int * const retNum, const char onionId[56], const unsign
 	struct aem_intMsg *msg = allears_intmsg(0);
 	if (strcmp(msg->subj, "Test Message") != 0) return -1000;
 
-	// TODO: Delete a message
+	(*retNum)++; if ((ret = allears_message_delete(msg->msgId)) != 0) return ret;
 	// TODO: Delete a non-existing message
 
 	(*retNum)++; if ((ret = allears_message_browse()) != 0) return ret;
