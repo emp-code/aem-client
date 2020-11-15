@@ -1,5 +1,17 @@
 # All-Ears Mail - Clients #
 
+## Status ##
+
+[![Language grade: JavaScript](https://img.shields.io/lgtm/grade/javascript/g/emp-code/aem-client.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/emp-code/aem-client/context:javascript)
+
+[![Language grade: C/C++](https://img.shields.io/lgtm/grade/cpp/g/emp-code/aem-client.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/emp-code/aem-client/context:cpp)
+
+[![CodeFactor](https://www.codefactor.io/repository/github/emp-code/aem-client/badge)](https://www.codefactor.io/repository/github/emp-code/aem-client)
+
+[![deepcode](https://www.deepcode.ai/api/gh/badge?key=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwbGF0Zm9ybTEiOiJnaCIsIm93bmVyMSI6ImVtcC1jb2RlIiwicmVwbzEiOiJhZW0tY2xpZW50IiwiaW5jbHVkZUxpbnQiOmZhbHNlLCJhdXRob3JJZCI6MjIxMjgsImlhdCI6MTYwNTQzMDUzN30.5tP-JY5i3U0PjiMdSYhf3CRqQBqmx8br55Q9sVYQ_98)](https://www.deepcode.ai/app/gh/emp-code/aem-client/_/dashboard?utm_content=gh%2Femp-code%2Faem-client)
+
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/591b5d5d78ca4d97a5224cb68439e341)](https://www.codacy.com/manual/empcode/aem-client/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=emp-code/aem-client&amp;utm_campaign=Badge_Grade)
+
 ## Web ##
 
 The JavaScript library, *all-ears.js*, is made for web clients.
