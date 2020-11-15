@@ -30,7 +30,6 @@
 #define AEM_ADDRESS_ARGON2_MEMLIMIT 67108864
 
 // Local settings
-#define AEM_MAXLEN_HOST 32
 #define AEM_PORT_TOR 9050
 #define AEM_SOCKET_TIMEOUT 30
 
