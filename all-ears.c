@@ -269,7 +269,8 @@ int allears_account_update(const unsigned char * const targetPk, const uint8_t l
 int allears_message_browse() {
 	unsigned char *browseData;
 	const int lenBrowseData = apiFetch(AEM_API_MESSAGE_BROWSE, (const unsigned char[]){0}, 1, &browseData);
-	if (lenBrowseData < 6) {printf("nodata: %d\n", lenBrowseData); return 0;}
+	if (lenBrowseData < 0) return lenBrowseData;
+	if (lenBrowseData < 6) return -100;
 
 	memcpy(&totalMsgCount, browseData, 2);
 	memcpy(&totalMsgBlock, browseData + 2, 4);
