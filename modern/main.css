@@ -102,7 +102,7 @@ noscript {
 	grid-template-columns: 1fr 1em 1fr;
 	background-image: radial-gradient(ellipse, #110a04, #080502);
 	color: #fff;
-	box-sizing:  border-box;
+	box-sizing: border-box;
 }
 
 .main {
@@ -110,7 +110,7 @@ noscript {
 	border-radius: 3em;
 	overflow: hidden;
 
-	display:grid;
+	display: grid;
 	grid-template-rows: 3em auto 3em;
 }
 
@@ -130,7 +130,7 @@ noscript {
 }
 
 #div_main pre {
-	margin:0;
+	margin: 0;
 	padding: 0 1em;
 	opacity: 0.55;
 	white-space: pre-wrap;
@@ -156,7 +156,7 @@ noscript {
 	overflow: hidden;
 	border-left: 1em solid #001;
 	border-right: 1em solid #001;
-	border-radius:2em;
+	border-radius: 2em;
 }
 
 #midright {
@@ -243,7 +243,7 @@ table, td {
 }
 
 #tbl_inbox, #tbl_drbox {
-	table-layout:fixed;
+	table-layout: fixed;
 	width: 100%;
 	transition: opacity 0.2s;
 }
@@ -349,7 +349,7 @@ table, td {
 	display: flex;
 	flex-flow: column;
 	padding: 0 1em;
-	height:100%;
+	height: 100%;
 }
 
 #div_write_1 {
