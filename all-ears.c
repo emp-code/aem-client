@@ -294,6 +294,17 @@ int allears_message_browse() {
 			continue;
 		}
 
+		unsigned char msgInfo = msgData[0];
+		const uint8_t padAmount = msgInfo & 15;
+
+		unsigned char padBytes[padAmount];
+		randombytes_buf_deterministic(padBytes, padAmount, msgData);
+		const bool validPad = (memcmp(padBytes, msgData + lenMsgData - crypto_sign_BYTES - padAmount, padAmount) == 0);
+		const bool validSig = (crypto_sign_verify_detached(msgData + lenMsgData - crypto_sign_BYTES, msgData, lenMsgData - crypto_sign_BYTES, sig_pubkey) == 0);
+
+		uint32_t msgTs;
+		memcpy(&msgTs, msgData + 1, 4);
+
 		// TODO
 
 		offset += msgBytes;
