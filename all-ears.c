@@ -322,6 +322,7 @@ int allears_message_browse() {
 				intMsg = intMsg2;
 
 				memcpy(intMsg[count_intMsg - 1].msgId, msgId, 16);
+				memcpy(&intMsg[count_intMsg - 1].ts, &msgTs, 4);
 
 				// 128/64 unused; used to store ValidSig/ValidPad
 				intMsg[count_intMsg - 1].flags = msgData[5] & 63;
