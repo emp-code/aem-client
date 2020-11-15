@@ -61,7 +61,7 @@ static int makeTorSocket(void) {
 	torAddr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
 
 	const int sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-	if (sock < 0) {perror("socket()"); return -1;}
+	if (sock < 0) return -1;
 
 	// Socket Timeout
 	struct timeval tv;
@@ -69,7 +69,7 @@ static int makeTorSocket(void) {
 	tv.tv_usec = 0;
 	setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, (char*)&tv, sizeof(struct timeval));
 
-	if (connect(sock, (struct sockaddr*)&torAddr, sizeof(struct sockaddr)) == -1) {perror("connect()"); return -1;}
+	if (connect(sock, (struct sockaddr*)&torAddr, sizeof(struct sockaddr)) == -1) return -1;
 	return sock;
 }
 
