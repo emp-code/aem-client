@@ -320,8 +320,8 @@ int allears_message_browse() {
 
 				// 128/64 unused; used to store ValidSig/ValidPad
 				intMsg[count_intMsg - 1].flags = msgData[5] & 63;
-				if (validPad) intMsg[count_intMsg - 1].flags |= 64;
-				if (validSig) intMsg[count_intMsg - 1].flags |= 128;
+				if (validPad) intMsg[count_intMsg - 1].flags |= AEM_INTMSG_FLAGS_VALIDPAD;
+				if (validSig) intMsg[count_intMsg - 1].flags |= AEM_INTMSG_FLAGS_VALIDSIG;
 
 				memcpy(intMsg[count_intMsg - 1].addr32_from, msgData + 6, 10);
 				memcpy(intMsg[count_intMsg - 1].addr32_to, msgData + 16, 10);
