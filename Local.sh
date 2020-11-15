@@ -68,7 +68,7 @@ readonly LineJsFirst=$(grep -F '<script' -n -m 1 modern/index.html | sed 's/:.*/
 readonly LineJsLast=$(grep -F '<script' -n modern/index.html | tail -n 1 | sed 's/:.*//')
 
 readonly html=\
-$(head -n $(($LineCss - 1)) modern/index.html)\
+$(head -n $((LineCss - 1)) modern/index.html)\
 $(echo -en '\n\t\t<meta charset="utf-8">')\
 $(echo -en '\n\t\t<meta name="referrer" content="no-referrer">')\
 $(echo -en '\n\t\t<meta http-equiv="Content-Security-Policy" content="')\
@@ -76,12 +76,12 @@ $(echo -n 'connect-src https://'$apidom':302/api data:;')\
 $(echo -n " script-src 'unsafe-eval' 'sha384-$hash_js_brotli' 'sha384-$hash_js_sodium' 'sha384-$hash_js_aem_js' 'sha384-$hash_js_modern'; style-src 'sha384-$hash_css_modern';")\
 $(echo -n " base-uri 'none'; child-src 'none'; default-src 'none'; font-src 'none'; form-action 'none'; frame-src blob:; img-src blob: data:; manifest-src 'none'; media-src blob:; object-src blob:; prefetch-src 'none'; worker-src 'none'; plugin-types application/pdf;\">")\
 $(echo -en '\n\t\t<style>')$(echo -n "$css_modern")$(echo -en '</style>\n ')\
-$(tail -n +$(($LineCss + 2)) modern/index.html | head -n $(($LineJsFirst - $LineCss - 2)))\
+$(tail -n +$((LineCss + 2)) modern/index.html | head -n $((LineJsFirst - LineCss - 2)))\
 $(echo -en '\n\t\t<script>')$(echo -n "$js_brotli")$(echo -en '</script>')\
 $(echo -en '\n\t\t<script>')$(echo -n "$js_sodium")$(echo -en '\n</script>')\
 $(echo -en '\n\t\t<script>')$(cat all-ears.js)$(echo -en '</script>')\
 $(echo -en '\n\t\t<script>')$(cat modern/main.js)$(echo -en '</script>\n ')\
-$(tail -n +$(($LineJsLast + 1)) modern/index.html)\
+$(tail -n +$((LineJsLast + 1)) modern/index.html)\
 
 echo "$html" | sed \
 -e "s~<title>All-Ears Mail</title>~<title>$title</title>~" \
