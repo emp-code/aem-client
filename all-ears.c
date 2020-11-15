@@ -194,6 +194,7 @@ int allears_account_browse(struct aem_user ** const userList) {
 	memcpy(&userCount, res + 12, 4);
 
 	*userList = malloc(sizeof(struct aem_user) * userCount);
+	if (*userList == NULL) {free(res); return -100;}
 
 	size_t offset = 16;
 	for (unsigned int i = 0; i < userCount; i++) {
