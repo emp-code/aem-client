@@ -48,6 +48,10 @@ static uint32_t totalMsgBlock = 0;
 static int count_intMsg = 0;
 static struct aem_intMsg *intMsg = NULL;
 
+static uint8_t maxStorage[AEM_LEVEL_MAX + 1];
+static uint8_t maxNormalA[AEM_LEVEL_MAX + 1];
+static uint8_t maxShieldA[AEM_LEVEL_MAX + 1];
+
 struct aem_intMsg *allears_intmsg(const int num) {
 	return (intMsg == NULL || num >= count_intMsg) ? NULL : intMsg + num;
 }
@@ -186,12 +190,11 @@ int allears_account_browse(struct aem_user ** const userList) {
 	if (ret < 0) return ret;
 	if (ret < 47) return -2;
 
-/*	for (int i = 0; i < 4; i++) {
+	for (int i = 0; i < 4; i++) {
 		maxStorage[i] = res[(i * 3) + 0];
 		maxNormalA[i] = res[(i * 3) + 1];
 		maxShieldA[i] = res[(i * 3) + 2];
 	}
-*/
 
 	uint32_t userCount;
 	memcpy(&userCount, res + 12, 4);
