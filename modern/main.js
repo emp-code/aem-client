@@ -767,11 +767,11 @@ function addAccountToTable(i) {
 	cell = row.insertCell(-1); cell.textContent = ae.Admin_GetUserLevel(i);
 
 	cell = row.insertCell(-1); cell.innerHTML = "<button type=\"button\" autocomplete=\"off\">+</button>";
-	cell.children[0].onclick = function() {const c = this.parentElement.parentElement.cells; adjustLevel(c[0].textContent, parseInt(c[4].textContent) + 1, c);};
+	cell.children[0].onclick = function() {const c = this.parentElement.parentElement.cells; adjustLevel(c[0].textContent, parseInt(c[4].textContent, 10) + 1, c);};
 	cell.children[0].disabled = (ae.Admin_GetUserLevel(i) === 3);
 
 	cell = row.insertCell(-1); cell.innerHTML = "<button type=\"button\" autocomplete=\"off\">&minus;</button>";
-	cell.children[0].onclick = function() {const c = this.parentElement.parentElement.cells; adjustLevel(c[0].textContent, parseInt(c[4].textContent) - 1, c);};
+	cell.children[0].onclick = function() {const c = this.parentElement.parentElement.cells; adjustLevel(c[0].textContent, parseInt(c[4].textContent, 10) - 1, c);};
 	cell.children[0].disabled = (ae.Admin_GetUserLevel(i) === 0);
 
 	cell = row.insertCell(-1); cell.innerHTML = "<button type=\"button\" autocomplete=\"off\">X</button>";
@@ -818,7 +818,7 @@ function reloadAccount() {
 
 	cell = row.insertCell(-1); cell.innerHTML = "<button id=\"btn_downme\" type=\"button\" autocomplete=\"off\" disabled=\"disabled\">&minus;</button>";
 	cell.children[0].onclick = function() {
-		const newLevel = parseInt(row.cells[4].textContent) - 1;
+		const newLevel = parseInt(row.cells[4].textContent, 10) - 1;
 		ae.Account_Update(ae.GetUserPkHex(), newLevel, function(success) {
 			if (success) row.cells[4].textContent = newLevel;
 		});
