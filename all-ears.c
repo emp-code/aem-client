@@ -317,6 +317,8 @@ int allears_message_browse() {
 				if (intMsg2 == NULL) break;
 				intMsg = intMsg2;
 
+				memcpy(intMsg[count_intMsg - 1].msgId, msgId, 16);
+
 				// 128/64 unused; used to store ValidSig/ValidPad
 				intMsg[count_intMsg - 1].flags = msgData[5] & 63;
 				if (validPad) intMsg[count_intMsg - 1].flags |= AEM_INTMSG_FLAGS_VALIDPAD;

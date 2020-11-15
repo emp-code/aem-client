@@ -44,6 +44,7 @@ struct aem_address {
 };
 
 struct aem_intMsg {
+	unsigned char msgId[16];
 	unsigned char flags;
 	uint32_t ts;
 
