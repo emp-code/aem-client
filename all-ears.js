@@ -580,9 +580,9 @@ function AllEars(readyCallback) {
 		let offset = 4;
 		for (let i = 0; i < (browseData[0] >> 3); i++) {
 			const hash = browseData.slice(offset, offset + 8);
-			const accExt = (browseData[offset + 8] & _AEM_ADDR_FLAG_ACCEXT) != 0;
-			const accInt = (browseData[offset + 8] & _AEM_ADDR_FLAG_ACCINT) != 0;
-			const is_shd = (browseData[offset + 8] & _AEM_ADDR_FLAG_SHIELD) != 0;
+			const accExt = (browseData[offset + 8] & _AEM_ADDR_FLAG_ACCEXT) !== 0;
+			const accInt = (browseData[offset + 8] & _AEM_ADDR_FLAG_ACCINT) !== 0;
+			const is_shd = (browseData[offset + 8] & _AEM_ADDR_FLAG_SHIELD) !== 0;
 
 			_userAddress.push(new _NewAddress(hash, null, is_shd, accExt, accInt));
 			offset += 9;
@@ -1089,18 +1089,18 @@ function AllEars(readyCallback) {
 						const msgTlsVer = msgData[6] >> 5;
 						const msgAttach = msgData[6] & 31;
 
-						const msgEsmtp = (msgData[7] & 128) != 0;
-						const msgQuitR = (msgData[7] &  64) != 0;
-						const msgProtV = (msgData[7] &  32) != 0;
-						const msgInval = (msgData[8] & 128) != 0;
-						const msgRares = (msgData[8] &  64) != 0;
+						const msgEsmtp = (msgData[7] & 128) !== 0;
+						const msgQuitR = (msgData[7] &  64) !== 0;
+						const msgProtV = (msgData[7] &  32) !== 0;
+						const msgInval = (msgData[8] & 128) !== 0;
+						const msgRares = (msgData[8] &  64) !== 0;
 						// [8] & 32 unused
 
 						const msgCc = ((msgData[7] & 31) > 26 || (msgData[8] & 31) > 26) ? "??" : String.fromCharCode("A".charCodeAt(0) + (msgData[7] & 31)) + String.fromCharCode("A".charCodeAt(0) + (msgData[8] & 31));
 
 						// Infobyte [9]
 
-						const msgShield = (msgData[10] & 128) != 0;
+						const msgShield = (msgData[10] & 128) !== 0;
 						// & 128 unused: [11], [12], [13]
 
 						const lenGreet = msgData[10] & 127;
@@ -1137,21 +1137,20 @@ function AllEars(readyCallback) {
 
 					case 16: { // IntMsg
 						// 128/64 unused
-						if ((msgData[0] & 32) != 0) {
+						if ((msgData[0] & 32) !== 0) {
 							const bodyAndTitle = sodium.to_string(msgData.slice(1));
 							const separator = bodyAndTitle.indexOf('\n');
 							_intMsg.push(new _NewIntMsg(validPad, validSig, msgId, msgTs, false, 3, null, "system", "", bodyAndTitle.slice(0, separator), bodyAndTitle.slice(separator + 1)));
 							break;
 						}
 
-						const msgEncrypted  = (msgData[0] & 16) != 0;
-						const msgFromShield = (msgData[0] &  8) != 0;
-						const msgToShield   = (msgData[0] &  4) != 0;
+						const msgEncrypted  = (msgData[0] & 16) !== 0;
+						const msgFromShield = (msgData[0] &  8) !== 0;
+						const msgToShield   = (msgData[0] &  4) !== 0;
 						const msgFromLv = msgData[0] & 3;
 
 						const msgFrom = _addr32_decode(msgData.slice( 1, 11), msgFromShield);
 						const msgTo   = _addr32_decode(msgData.slice(11, 21), msgToShield);
-
 						const msgFromPk = msgData.slice(21, 21 + sodium.crypto_kx_PUBLICKEYBYTES);
 
 						const msgTitleLen = msgData[21 + sodium.crypto_kx_PUBLICKEYBYTES] & 127; // 128 unused
@@ -1211,10 +1210,10 @@ function AllEars(readyCallback) {
 					case 48: { // OutMsg (Delivery report for sent message)
 						const lenSb = msgData[0] & 127;
 
-						if ((msgData[0] & 128) != 0) { // Internal message
-							const isE2ee       = (msgData[1] & 16) != 0;
-							const isFromShield = (msgData[1] &  8) != 0;
-							const isToShield   = (msgData[1] &  4) != 0;
+						if ((msgData[0] & 128) !== 0) { // Internal message
+							const isE2ee       = (msgData[1] & 16) !== 0;
+							const isFromShield = (msgData[1] &  8) !== 0;
+							const isToShield   = (msgData[1] &  4) !== 0;
 
 							const msgFr = _addr32_decode(msgData.slice(2, 12), isFromShield);
 							const msgTo = _addr32_decode(msgData.slice(12, 22), isToShield);
@@ -1413,7 +1412,7 @@ function AllEars(readyCallback) {
 			_uplMsg.unshift(new _NewUplMsg(newMsgId, Date.now() / 1000, title, body, null, (final.length + sodium.crypto_box_SEALBYTES) / 16));
 
 			let x = final.length + 117; // 5 (info + ts) + 64 (sig) + 48 (sealed box)
-			if (x % 16 != 0) x+= (16 - (x % 16));
+			if (x % 16 !== 0) x+= (16 - (x % 16));
 			_totalMsgBytes += x;
 			_readyMsgBytes += x;
 
