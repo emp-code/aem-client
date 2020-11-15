@@ -125,7 +125,7 @@ int main(int argc, char *argv[]) {
 	// Perform the tests
 	int retNum = 0;
 	const int ret = performTests(&retNum, argv[1], pkApi, pkSig, saltNm, key_admin, key_user1, upk_user1, upk_user2);
-	if (ret != 0) printf("Failed test %d\n", retNum);
+	if (ret != 0) printf("Failed test %d: %d\n", retNum, ret);
 
 	allears_free();
 	return EXIT_SUCCESS;
