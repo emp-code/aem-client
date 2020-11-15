@@ -69,7 +69,8 @@ static int performTests(int * const retNum, const char onionId[56], const unsign
 	(*retNum)++; if ((ret = allears_message_upload("test.txt", 8, (unsigned char*)"This is an uploaded test file.", 30)) != 0) return ret;
 	(*retNum)++; if ((ret = allears_message_browse()) != 0) return ret;
 
-	// TODO: Check messages
+	struct aem_intMsg *msg = allears_intmsg(0);
+	if (strcmp(msg->subj, "Test Message") != 0) return -1000;
 
 	// TODO: Delete a message
 	// TODO: Delete a non-existing message
