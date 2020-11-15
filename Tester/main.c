@@ -73,8 +73,8 @@ static int performTests(int * const retNum, const char onionId[56], const unsign
 	if (strcmp(msg->subj, "Test Message") != 0) return -1000;
 	if (strcmp(msg->body, "This here is a test message.") != 0) return -1001;
 
-	(*retNum)++; if ((ret = allears_message_delete(msg->msgId)) != 0) return ret;
 	(*retNum)++; if ((ret = allears_message_delete((unsigned char[]){0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0})) >= 0) return -1;
+	(*retNum)++; if ((ret = allears_message_delete(msg->msgId)) != 0) return ret;
 
 	(*retNum)++; if ((ret = allears_message_browse()) != 0) return ret;
 	// TODO: Check messages
