@@ -101,10 +101,10 @@ static uint64_t normalHash(const char addr32[10]) {
 }
 
 static int apiFetch(const int apiCmd, const void * const clear, const size_t lenClear, unsigned char **result) {
-	if (apiCmd < 0 || clear == NULL || lenClear < 1 || lenClear > AEM_API_BOX_SIZE_MAX) return -100;
+	if (apiCmd < 0 || clear == NULL || lenClear < 1 || lenClear > AEM_API_BOX_SIZE_MAX) return -999;
 
 	const int sock = torConnect();
-	if (sock < 0) return -101;
+	if (sock < 0) return -998;
 
 	size_t lenReq = AEM_SEALCLEAR_LEN + crypto_box_SEALBYTES + lenClear + crypto_box_MACBYTES;
 	unsigned char req[141 + lenReq];
