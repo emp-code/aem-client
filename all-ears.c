@@ -45,7 +45,7 @@ static unsigned char userKey_secret[crypto_box_SECRETKEYBYTES];
 
 static uint16_t totalMsgCount = 0;
 static uint32_t totalMsgBlock = 0;
-static unsigned int count_intMsg = 0;
+static int count_intMsg = 0;
 static struct aem_intMsg *intMsg = NULL;
 
 struct aem_intMsg *allears_intmsg(const int num) {
