@@ -433,6 +433,11 @@ int allears_message_create(const char * const title, const size_t lenTitle, cons
 	return apiFetch(AEM_API_MESSAGE_CREATE, final, lenFinal, NULL);
 }
 
+int allears_message_delete(const unsigned char msgId[16]) {
+	// TODO: Support deleting multiple messages at a time
+	return apiFetch(AEM_API_MESSAGE_DELETE, msgId, 16, NULL);
+}
+
 int allears_message_public(const char * const title, const size_t lenTitle, const char * const body, const size_t lenBody) {
 	if (title == NULL || body == NULL || lenTitle < 1 || lenBody < 1) return -1;
 
