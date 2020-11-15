@@ -1,7 +1,5 @@
 #define _GNU_SOURCE
 
-#include <arpa/inet.h>
-#include <netdb.h>
 #include <netinet/in.h>
 #include <stdbool.h>
 #include <stdint.h>
