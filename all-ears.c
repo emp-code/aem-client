@@ -328,7 +328,7 @@ int allears_message_browse() {
 				memcpy(intMsg[count_intMsg - 1].addr32_to, msgData + 16, 10);
 				memcpy(intMsg[count_intMsg - 1].senderPubkey, msgData + 26, crypto_kx_PUBLICKEYBYTES);
 
-				const int lenSubj = (msgData[26 + crypto_kx_PUBLICKEYBYTES] & 127) + 1; // 128 unused
+				const int lenSubj = (msgData[26 + crypto_kx_PUBLICKEYBYTES] & 127); // 128 unused
 
 				if ((intMsg[count_intMsg - 1].flags & AEM_INTMSG_FLAGS_PUBLIC) != 0) {
 					// TODO
@@ -341,13 +341,13 @@ int allears_message_browse() {
 				} else {
 					intMsg[count_intMsg - 1].subj = malloc(lenSubj + 1);
 					if (intMsg[count_intMsg - 1].subj == NULL) {free(browseData); return -1;}
-					memcpy(intMsg[count_intMsg - 1].subj, msgData + 26 + crypto_kx_PUBLICKEYBYTES, lenSubj);
+					memcpy(intMsg[count_intMsg - 1].subj, msgData + 27 + crypto_kx_PUBLICKEYBYTES, lenSubj);
 					intMsg[count_intMsg - 1].subj[lenSubj] = '\0';
 
 					const size_t lenBody = lenMsgData - 26 - crypto_kx_PUBLICKEYBYTES - lenSubj - crypto_sign_BYTES - padAmount;
 					intMsg[count_intMsg - 1].body = malloc(lenBody + 1);
 					if (intMsg[count_intMsg - 1].body == NULL) {free(browseData); return -1;}
-					memcpy(intMsg[count_intMsg - 1].body, msgData + 26 + crypto_kx_PUBLICKEYBYTES + lenSubj, lenBody);
+					memcpy(intMsg[count_intMsg - 1].body, msgData + 27 + crypto_kx_PUBLICKEYBYTES + lenSubj, lenBody);
 					intMsg[count_intMsg - 1].body[lenBody] = '\0';
 				}
 			break;}
