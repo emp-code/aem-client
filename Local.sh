@@ -72,7 +72,7 @@ $(head -n $((LineCss - 1)) modern/index.html)\
 $(echo -en '\n\t\t<meta charset="utf-8">')\
 $(echo -en '\n\t\t<meta name="referrer" content="no-referrer">')\
 $(echo -en '\n\t\t<meta http-equiv="Content-Security-Policy" content="')\
-$(echo -n 'connect-src https://'$apidom':302/api data:;')\
+$(echo -n "connect-src https://$apidom:302/api data:;")\
 $(echo -n " script-src 'unsafe-eval' 'sha384-$hash_js_brotli' 'sha384-$hash_js_sodium' 'sha384-$hash_js_aem_js' 'sha384-$hash_js_modern'; style-src 'sha384-$hash_css_modern';")\
 $(echo -n " base-uri 'none'; child-src 'none'; default-src 'none'; font-src 'none'; form-action 'none'; frame-src blob:; img-src blob: data:; manifest-src 'none'; media-src blob:; object-src blob:; prefetch-src 'none'; worker-src 'none'; plugin-types application/pdf;\">")\
 $(echo -en '\n\t\t<style>')$(echo -n "$css_modern")$(echo -en '</style>\n ')\
