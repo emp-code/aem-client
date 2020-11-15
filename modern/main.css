@@ -48,12 +48,9 @@ noscript {
 	display: inline-grid;
 	grid-template-columns: auto;
 	grid-template-rows: 1fr auto 1fr;
-
 	place-items: center center;
 	place-content: center center;
-
 	padding: 0 2em;
-
 	border: 0.4em double #642;
 	box-shadow: 0 0.4em #321;
 	background: #0d0804;
