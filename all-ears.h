@@ -43,6 +43,23 @@ struct aem_address {
 	uint8_t flags;
 };
 
+struct aem_intMsg {
+	unsigned char flags;
+	uint32_t ts;
+
+	unsigned char addr32_from[10];
+	unsigned char addr32_to[10];
+	unsigned char senderPubkey[crypto_kx_PUBLICKEYBYTES];
+
+	char *subj;
+	char *body;
+};
+
+#define AEM_INTMSG_FLAGS_ENCRYPTED 16
+#define AEM_INTMSG_FLAGS_FROMSHIELD 8
+#define AEM_INTMSG_FLAGS_TOSHIELD   4
+#define AEM_INTMSG_FLAGS_FROMLEVEL  3
+
 int allears_init(const char * const newOnionId, const unsigned char pkApi[crypto_box_PUBLICKEYBYTES], const unsigned char pkSig[crypto_sign_PUBLICKEYBYTES], const unsigned char newSaltNm[crypto_pwhash_SALTBYTES], const unsigned char userKey[crypto_kdf_KEYBYTES]);
 void allears_free(void);
 

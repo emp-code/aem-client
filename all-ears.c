@@ -47,7 +47,7 @@ static unsigned char userKey_secret[crypto_box_SECRETKEYBYTES];
 static uint16_t totalMsgCount = 0;
 static uint32_t totalMsgBlock = 0;
 static unsigned int count_intMsg = 0;
-static struct aem_intMsg *intMsg;
+static struct aem_intMsg *intMsg = NULL;
 
 static int makeTorSocket(void) {
 	struct sockaddr_in torAddr;
@@ -305,7 +305,55 @@ int allears_message_browse() {
 		uint32_t msgTs;
 		memcpy(&msgTs, msgData + 1, 4);
 
-		// TODO
+		switch (msgInfo & 48) {
+			case 0: { // ExtMsg
+				// TODO
+			break;}
+
+			case 16: { // IntMsg
+				count_intMsg++;
+
+				struct aem_intMsg *intMsg2 = realloc(intMsg, sizeof(struct aem_intMsg) * count_intMsg);
+				if (intMsg2 == NULL) break;
+				intMsg = intMsg2;
+
+				// 128/64 unused; used to store ValidSig/ValidPad
+				intMsg[count_intMsg - 1].flags = msgData[5] & 63;
+				if (validPad) intMsg[count_intMsg - 1].flags |= 64;
+				if (validSig) intMsg[count_intMsg - 1].flags |= 128;
+
+				memcpy(intMsg[count_intMsg - 1].addr32_from, msgData + 6, 10);
+				memcpy(intMsg[count_intMsg - 1].addr32_to, msgData + 16, 10);
+				memcpy(intMsg[count_intMsg - 1].senderPubkey, msgData + 26, crypto_kx_PUBLICKEYBYTES);
+
+				const int lenSubj = (msgData[26 + crypto_kx_PUBLICKEYBYTES] & 127) + 1; // 128 unused
+
+				if ((intMsg[count_intMsg - 1].flags & AEM_INTMSG_FLAGS_ENCRYPTED) != 0) {
+					// TODO
+					intMsg[count_intMsg - 1].subj = strdup("TODO-Enc");
+					intMsg[count_intMsg - 1].body = strdup("TODO-Enc");
+				} else {
+					intMsg[count_intMsg - 1].subj = malloc(lenSubj + 1);
+					if (intMsg[count_intMsg - 1].subj == NULL) {free(browseData); return -1;}
+					memcpy(intMsg[count_intMsg - 1].subj, msgData + 26 + crypto_kx_PUBLICKEYBYTES, lenSubj);
+					intMsg[count_intMsg - 1].subj[lenSubj] = '\0';
+
+					const size_t lenBody = lenMsgData - 26 - crypto_kx_PUBLICKEYBYTES - lenSubj - crypto_sign_BYTES - padAmount;
+					intMsg[count_intMsg - 1].body = malloc(lenBody + 1);
+					if (intMsg[count_intMsg - 1].body == NULL) {free(browseData); return -1;}
+					memcpy(intMsg[count_intMsg - 1].body, msgData + 26 + crypto_kx_PUBLICKEYBYTES + lenSubj, lenBody);
+					intMsg[count_intMsg - 1].body[lenBody] = '\0';
+				}
+			break;}
+
+			case 32: { // UplMsg
+				// TODO
+			break;}
+
+			case 48: { // OutMsg
+				// TODO
+			break;}
+		}
 
 		offset += msgBytes;
 	}
@@ -432,4 +480,15 @@ void allears_free(void) {
 	sodium_memzero(userKey_kxHash, crypto_generichash_KEYBYTES);
 	sodium_memzero(userKey_secret, crypto_box_SECRETKEYBYTES);
 	sodium_memzero(userKey_symmetric, crypto_secretbox_KEYBYTES);
+
+	if (intMsg != NULL) {
+		for (int i = 0; i < count_intMsg; i++) {
+			free(intMsg[i].subj);
+			free(intMsg[i].body);
+		}
+
+		free(intMsg);
+		intMsg = NULL;
+		count_intMsg = 0;
+	}
 }
