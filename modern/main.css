@@ -14,7 +14,9 @@ html, body {
 	}
 }
 
-*:focus {outline: none;}
+*:focus {
+	outline: none;
+}
 
 body > svg {
 	display: none;

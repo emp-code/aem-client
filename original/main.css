@@ -51,13 +51,33 @@ td {
 	text-align: center;
 }
 
-.bold {font-weight: bold;}
-.mono {font-family: monospace, monospace;}
-.topmargin {margin-top: 1em;}
-.center {text-align: center;}
-.left {text-align: left;}
-.flex {display: flex;}
-.flex input {flex: 1;}
+.bold {
+	font-weight: bold;
+}
+
+.mono {
+	font-family: monospace, monospace;
+}
+
+.topmargin {
+	margin-top: 1em;
+}
+
+.center {
+	text-align: center;
+}
+
+.left {
+	text-align: left;
+}
+
+.flex {
+	display: flex;
+}
+
+.flex input {
+	flex: 1;
+}
 
 #readmsg_title, #readmsg_body {
 	white-space: pre-wrap;
@@ -87,10 +107,17 @@ td {
 	text-align: left;
 }
 
-#tbl_limits input {width: 3em;}
-#tbl_limits th, #tbl_limits td {text-align: center;}
+#tbl_limits input {
+	width: 3em;
+}
 
-#div_prefs_gatekeeper {margin: 0 auto;}
+#tbl_limits th, #tbl_limits td {
+	text-align: center;
+}
+
+#div_prefs_gatekeeper {
+	margin: 0 auto;
+}
 
 @media (prefers-color-scheme: dark) {
 	body, input, textarea, select, button, a {
