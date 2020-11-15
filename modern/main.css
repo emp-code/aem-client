@@ -96,7 +96,7 @@ noscript {
 	scrollbar-color: #222 #333;
 	padding: 2em;
 
-	height:100%;
+	height: 100%;
 	display: none; /*grid*/
 	grid-template-columns: 1fr 1em 1fr;
 	background-image: radial-gradient(ellipse, #110a04, #080502);
@@ -300,12 +300,25 @@ table, td {
 	font-weight: bold;
 }
 
-#div_gk > p:first-of-type {margin: 0;}
-#div_gk > p:not(:first-of-type) {margin: 1em 0 0 0;}
+#div_gk > p:first-of-type {
+	margin: 0;
+}
 
-#div_gk select {width: 100%;}
-#div_gk .flex {display: flex;}
-#div_gk .flex input {flex: 1;}
+#div_gk > p:not(:first-of-type) {
+	margin: 1em 0 0 0;
+}
+
+#div_gk select {
+	width: 100%;
+}
+
+#div_gk .flex {
+	display: flex;
+}
+
+#div_gk .flex input {
+	flex: 1;
+}
 
 #div_acc > table, #fs_accs {
 	border: 0;
