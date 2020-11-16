@@ -330,17 +330,33 @@ int allears_message_browse() {
 				if (validPad) intMsg[count_intMsg - 1].flags |= AEM_INTMSG_FLAGS_VALIDPAD;
 				if (validSig) intMsg[count_intMsg - 1].flags |= AEM_INTMSG_FLAGS_VALIDSIG;
 
+				if ((intMsg[count_intMsg - 1].flags & AEM_INTMSG_FLAGS_PUBLIC) != 0) {
+					const size_t lenData = lenMsgData - 6 - crypto_sign_BYTES - padAmount;
+					const unsigned char * const br = memchr(msgData + 6, '\n', lenData);
+					if (br == NULL) return -1; // Invalid format, shouldn't happen
+
+					const size_t lenSubj = br - (msgData + 6);
+					const size_t lenBody = lenData - lenSubj - 1;
+					if (lenSubj < 1 || lenBody < 1) return -1; // Invalid format, shouldn't happen
+
+					intMsg[count_intMsg - 1].subj = malloc(lenSubj + 1);
+					memcpy(intMsg[count_intMsg - 1].subj, msgData + 6, lenSubj);
+					intMsg[count_intMsg - 1].subj[lenSubj] = '\0';
+
+					intMsg[count_intMsg - 1].body = malloc(lenBody + 1);
+					memcpy(intMsg[count_intMsg - 1].body, msgData + 7 + lenSubj, lenBody);
+					intMsg[count_intMsg - 1].body[lenBody] = '\0';
+
+					break;
+				}
+
 				memcpy(intMsg[count_intMsg - 1].addr32_from, msgData + 6, 10);
 				memcpy(intMsg[count_intMsg - 1].addr32_to, msgData + 16, 10);
 				memcpy(intMsg[count_intMsg - 1].senderPubkey, msgData + 26, crypto_kx_PUBLICKEYBYTES);
 
 				const int lenSubj = (msgData[26 + crypto_kx_PUBLICKEYBYTES] & 127); // 128 unused
 
-				if ((intMsg[count_intMsg - 1].flags & AEM_INTMSG_FLAGS_PUBLIC) != 0) {
-					// TODO
-					intMsg[count_intMsg - 1].subj = strdup("TODO-Pub");
-					intMsg[count_intMsg - 1].body = strdup("TODO-Pub");
-				} else if ((intMsg[count_intMsg - 1].flags & AEM_INTMSG_FLAGS_ENCRYPTED) != 0) {
+				if ((intMsg[count_intMsg - 1].flags & AEM_INTMSG_FLAGS_ENCRYPTED) != 0) {
 					// TODO
 					intMsg[count_intMsg - 1].subj = strdup("TODO-Enc");
 					intMsg[count_intMsg - 1].body = strdup("TODO-Enc");
