@@ -71,12 +71,14 @@ static int performTests(int * const retNum, const char onionId[56], const unsign
 	(*retNum)++; if ((ret = allears_message_browse()) != 0) return ret;
 
 	struct aem_intMsg *msg = allears_intmsg(0);
-	if (strcmp(msg->subj, "Test Message") != 0) return -1000;
-	if (strcmp(msg->body, "This here is a test message.") != 0) return -1001;
+	if (msg == NULL) return -1000;
+	if (strcmp(msg->subj, "Test Message") != 0) return -1001;
+	if (strcmp(msg->body, "This here is a test message.") != 0) return -1002;
 
 	msg = allears_intmsg(1);
-	if (strcmp(msg->subj, "Test announcement") != 0) return -1002;
-	if (strcmp(msg->body, "This announcement is a part of a test run.") != 0) return -1003;
+	if (msg == NULL) return -1010;
+	if (strcmp(msg->subj, "Test announcement") != 0) return -1011;
+	if (strcmp(msg->body, "This announcement is a part of a test run.") != 0) return -1012;
 
 	(*retNum)++; if ((ret = allears_message_delete((unsigned char[]){0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0})) >= 0) return -1;
 	(*retNum)++; if ((ret = allears_message_delete(msg->msgId)) != 0) return ret;
