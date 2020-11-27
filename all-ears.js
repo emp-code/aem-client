@@ -1282,7 +1282,12 @@ function AllEars(readyCallback) {
 		if (typeof(title) !== "string" || typeof(body) !== "string" || typeof(addr_from) !== "string" || typeof(addr_to) !== "string") {callback(false); return;}
 
 		if (addr_to.indexOf("@") >= 0) { // Email
-			if (typeof(replyId) !== "string") {callback(false); return;}
+			if (replyId === null) {
+				replyId = "";
+			} else if (typeof(replyId) !== "string") {
+				callback(false);
+				return;
+			}
 
 			// First byte is title length for internal messages, values over 127 are treated as email
 			const bin = sodium.from_string("x" + addr_from + "\n" + addr_to + "\n" + replyId + "\n" + title + "\n" + body);
