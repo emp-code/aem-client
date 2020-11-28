@@ -723,9 +723,9 @@ function AllEars(readyCallback) {
 	this.GetExtMsgFlagPErr = function(num) {return _extMsg[num].protV;};
 
 	this.GetExtMsgReplyAddress = function(num) {
-		let resultStart = _extMsg[num].headers.toUpperCase().lastIndexOf("REPLY-TO:");
+		let resultStart = ("\n" + _extMsg[num].headers.toUpperCase()).lastIndexOf("\nREPLY-TO:");
 		if (resultStart == -1) {
-			resultStart = _extMsg[num].headers.toUpperCase().lastIndexOf("FROM:");
+			resultStart = ("\n" + _extMsg[num].headers.toUpperCase()).lastIndexOf("\nFROM:");
 			if (resultStart == -1) return _extMsg[num].envFrom; // No address in headers; use envelope address
 			resultStart += 5;
 		} else resultStart += 9;
@@ -1122,9 +1122,9 @@ function AllEars(readyCallback) {
 
 							const body = msgBodyTx.slice(lenGreet + lenRdns + lenCharset + lenEnvFrom);
 
-							const titleStart = body.indexOf("\nSubject:");
-							const titleEnd = (titleStart < 0) ? -1 : body.slice(titleStart + 9).indexOf("\n");
-							const msgTitle = (titleStart < 0) ? "(Missing title)" : body.substr(titleStart + 9, titleEnd).trim();
+							const titleStart = ("\n" + body).indexOf("\nSubject:");
+							const titleEnd = (titleStart < 0) ? -1 : body.slice(titleStart + 8).indexOf("\n");
+							const msgTitle = (titleStart < 0) ? "(Missing title)" : body.substr(titleStart + 8, titleEnd).trim();
 
 							const headersEnd = body.indexOf("\n\n");
 							const msgHeaders = body.slice(0, headersEnd);
