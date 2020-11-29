@@ -1057,6 +1057,12 @@ document.getElementById("btn_savecontacts").onclick = function() {
 };
 
 function writeVerify() {
+	if (
+	   !document.getElementById("write_recv").reportValidity()
+	|| !document.getElementById("write_subj").reportValidity()
+	|| !document.getElementById("write_body").reportValidity()
+	) {tabs[TAB_WRITE].cur = 0; return;}
+
 	document.getElementById("div_write_1").hidden = true;
 	document.getElementById("div_write_2").hidden = false;
 
