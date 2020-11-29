@@ -27,7 +27,7 @@ function TabState(cur, max, btnDele, btnUpdt) {
 const tabs = [
 	new TabState(0, 0, false, true), // Inbox
 	new TabState(0, 0, false, true), // Outbx
-	new TabState(0, 2, true, false), // Write
+	new TabState(0, 1, true, false), // Write
 	new TabState(0, 2, false, false), // Notes
 	new TabState(0, 3, false, true) // Tools
 ];
@@ -1092,32 +1092,16 @@ function updateTab() {
 
 		case TAB_WRITE:
 			switch (tabs[tab].cur) {
-				case 0: // Write
+				case 0:
 					document.getElementById("div_write_1").hidden = false;
 					document.getElementById("div_write_2").hidden = true;
 					document.getElementById("write_body").focus();
+					document.querySelector("#write2_send > button").disabled = false;
+					document.getElementById("write2_btntxt").textContent = "Send to";
 				break;
 
-				case 1: // Verify
+				case 1:
 					writeVerify();
-				break;
-
-				case 2: // Send
-					ae.Message_Create(
-						document.getElementById("write_subj").value,
-						document.getElementById("write_body").value,
-						document.getElementById("write_from").value,
-						document.getElementById("write_recv").value,
-						document.getElementById("write_subj").getAttribute("data-replyid"),
-						(document.getElementById("write2_recv").textContent.indexOf("@") > 0) ? null : sodium.from_base64(document.querySelector("#write2_pkey > input").value, sodium.base64_variants.ORIGINAL_NO_PADDING),
-						function(success) {
-							if (success) {
-								console.log("Sent ok");
-							} else {
-								console.log("Failed sending");
-							}
-						}
-					);
 				break;
 			}
 		break;
@@ -1296,6 +1280,32 @@ document.getElementById("btn_upload").onclick = function() {
 
 document.getElementById("btn_pg").onclick = function() {
 	localStorage.greeting = document.getElementById("txt_pg").value;
+};
+
+document.querySelector("#write2_send > button").onclick = function() {
+	const btn = this;
+	btn.disabled = true;
+	document.getElementById("write2_btntxt").textContent = "Sending to";
+
+	ae.Message_Create(
+		document.getElementById("write_subj").value,
+		document.getElementById("write_body").value,
+		document.getElementById("write_from").value,
+		document.getElementById("write_recv").value,
+		document.getElementById("write_subj").getAttribute("data-replyid"),
+		(document.getElementById("write2_recv").textContent.indexOf("@") > 0) ? null : sodium.from_base64(document.querySelector("#write2_pkey > input").value, sodium.base64_variants.ORIGINAL_NO_PADDING),
+		function(success) {
+			if (success) {
+				document.getElementById("write2_btntxt").textContent = "Successfully sent to";
+				document.getElementById("write_recv").value = "";
+				document.getElementById("write_subj").value = "";
+				document.getElementById("write_body").value = "";
+			} else {
+				document.getElementById("write2_btntxt").textContent = "Retry sending to";
+				btn.disabled = false;
+			}
+		}
+	);
 };
 
 document.getElementById("txt_skey").onkeyup = function(event) {

@@ -430,19 +430,18 @@ hr {
 	opacity: 0.25;
 }
 
-#write2_recv, #write2_from, #write2_subj, #write2_body {
+#write2_from, #write2_subj, #write2_body {
 	opacity: 0.55;
 	white-space: pre-wrap;
 }
 
-#write2_recv {
+#write2_pkey, #write2_send {
 	width: 100%;
 	text-align: center;
-	font-weight: bold;
 }
 
-#write2_pkey {
-	text-align: center;
+#write2_recv {
+	font-weight: bold;
 }
 
 #write2_pkey input {
