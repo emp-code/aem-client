@@ -688,6 +688,7 @@ function displayOutMsg(num) {
 
 	document.getElementById("readmsg_envto").textContent = ae.GetOutMsgTo(num);
 	document.getElementById("readmsg_envfrom").textContent = ae.GetOutMsgFrom(num);
+	document.getElementById("readmsg_to").textContent = ae.GetOutMsgMxDom(num);
 
 	const ts = ae.GetOutMsgTime(num);
 	const tzOs = new Date().getTimezoneOffset();
