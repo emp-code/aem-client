@@ -505,6 +505,7 @@ function displayMsg(isInt, num) {
 		if (ae.GetExtMsgFlagRare(num)) flagText += "<abbr title=\"The sender issued unusual command(s)\">RARE</abbr> ";
 		if (ae.GetExtMsgFlagFail(num)) flagText += "<abbr title=\"The sender issued invalid command(s)\">FAIL</abbr> ";
 		if (ae.GetExtMsgFlagPErr(num)) flagText += "<abbr title=\"The sender violated the protocol\">PROT</abbr> ";
+		if (ae.GetExtMsgFlagMult(num)) flagText += "<abbr title=\"Multiple recipients on this service\">MULT</abbr> ";
 		document.getElementById("readmsg_flags").children[0].innerHTML = flagText.trim();
 	} else {
 		document.getElementById("readmsg_ip").hidden = true;
