@@ -322,21 +322,6 @@ function getClockIcon(d) {
 	return "&#" + ((128335 + h12) + m30) + ";";
 }
 
-function getMsgId(num) {
-	let i;
-	if (ae.GetExtMsgHeaders(num).toLowerCase().slice(0, 11) === "message-id:") {
-		i = 0;
-	} else {
-		i = ae.GetExtMsgHeaders(num).toLowerCase().indexOf("\nmessage-id:");
-		if (i < 1) return "ERR";
-		i++;
-	}
-
-	const x = ae.GetExtMsgHeaders(num).slice(i + 11).trim();
-	if (x[0] !== "<") return "ERR2";
-	return x.slice(1, x.indexOf(">"));
-}
-
 function clearDisplay() {
 	let el = document.getElementById("midright").getElementsByTagName("img");
 	if (el.length !== 1) el = document.getElementById("midright").getElementsByTagName("audio");
@@ -447,7 +432,7 @@ function displayMsg(isInt, num) {
 
 		document.getElementById("write_recv").readOnly = !isInt;
 		document.getElementById("write_subj").readOnly = !isInt;
-		document.getElementById("write_subj").setAttribute("data-replyid", isInt? "" : getMsgId(num));
+		document.getElementById("write_subj").setAttribute("data-replyid", isInt? "" : ae.GetExtMsgHdrId(num));
 
 		tabs[TAB_WRITE].cur = 0;
 		document.getElementById("btn_write").disabled = false;
@@ -455,7 +440,7 @@ function displayMsg(isInt, num) {
 		document.getElementById("write_body").focus();
 
 		for (const opt of document.getElementById("write_from").options) {
-			if (opt.value === (isInt ? ae.GetIntMsgTo(num) : ae.GetExtMsgTo(num))) {
+			if (opt.value === (isInt ? ae.GetIntMsgTo(num) : ae.GetExtMsgEnvTo(num))) {
 				opt.selected = true;
 			}
 		}
@@ -485,7 +470,8 @@ function displayMsg(isInt, num) {
 		document.getElementById("midright").children[1].style.cursor = "pointer";
 	}
 
-	document.getElementById("readmsg_envto").textContent = isInt ? ae.GetIntMsgTo(num) : ae.GetExtMsgTo(num);
+	document.getElementById("readmsg_envto").textContent = isInt ? ae.GetIntMsgTo(num) : ae.GetExtMsgEnvTo(num);
+	document.getElementById("readmsg_hdrto").textContent = isInt ? "" : ae.GetExtMsgHdrTo(num);
 
 	const tzOs = new Date().getTimezoneOffset();
 	const tz = ((tzOs < 0) ? "+" : "-") + Math.floor(tzOs / -60).toString().padStart(2, "0") + (tzOs % 60 * -1).toString().padStart(2, "0");
@@ -502,11 +488,14 @@ function displayMsg(isInt, num) {
 
 		const cc = ae.GetExtMsgCountry(num);
 
-		document.getElementById("readmsg_ip").children[0].textContent = ae.GetExtMsgIp(num);
-		document.getElementById("readmsg_country").textContent = getCountryFlag(cc) + " " + getCountryName(cc);
+		document.getElementById("readmsg_country").textContent = getCountryFlag(cc);
+		document.getElementById("readmsg_country").title = getCountryName(cc);
+		document.getElementById("readmsg_ip").children[1].textContent = ae.GetExtMsgIp(num);
+		document.getElementById("readmsg_rdns").children[0].textContent = ae.GetExtMsgRdns(num);
 		document.getElementById("readmsg_tls").children[0].textContent = ae.GetExtMsgTLS(num);
 		document.getElementById("readmsg_greet").children[0].textContent = ae.GetExtMsgGreet(num);
-		document.getElementById("readmsg_envfrom").textContent = ae.GetExtMsgFrom(num);
+		document.getElementById("readmsg_envfrom").textContent = ae.GetExtMsgEnvFrom(num);
+		document.getElementById("readmsg_hdrfrom").textContent = ae.GetExtMsgHdrFrom(num);
 
 		let flagText = "";
 		if (!ae.GetExtMsgFlagVPad(num)) flagText += "<abbr title=\"Invalid padding\">PAD</abbr> ";
@@ -559,7 +548,7 @@ function addMsg(isInt, i) {
 		cellSnd.textContent = ae.GetIntMsgFrom(i);
 		cellSnd.className = (ae.GetIntMsgFrom(i).length === 16) ? "mono" : "";
 	} else {
-		const from1 = ae.GetExtMsgFrom(i);
+		const from1 = ae.GetExtMsgEnvFrom(i);
 		const from2 = from1.substring(from1.indexOf("@") + 1);
 		const cc = ae.GetExtMsgCountry(i);
 		const cellSnd1 = row.insertCell(-1);
@@ -686,9 +675,9 @@ function displayOutMsg(num) {
 	document.getElementById("midright").children[1].textContent = ae.GetOutMsgSubj(num);
 	document.getElementById("midright").children[2].textContent = ae.GetOutMsgBody(num);
 
-	document.getElementById("readmsg_envto").textContent = ae.GetOutMsgTo(num);
 	document.getElementById("readmsg_envfrom").textContent = ae.GetOutMsgFrom(num);
-	document.getElementById("readmsg_to").textContent = ae.GetOutMsgMxDom(num);
+	document.getElementById("readmsg_envto").textContent = ae.GetOutMsgMxDom(num);
+	document.getElementById("readmsg_hdrto").textContent = ae.GetOutMsgEnvTo(num);
 
 	const ts = ae.GetOutMsgTime(num);
 	const tzOs = new Date().getTimezoneOffset();

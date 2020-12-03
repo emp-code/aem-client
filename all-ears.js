@@ -99,7 +99,7 @@ function AllEars(readyCallback) {
 	const _admin_userLevel = [];
 
 // Private functions
-	function _NewExtMsg(validPad, validSig, id, ts, ip, cc, cs, tlsver, esmtp, quitR, protV, inval, rares, attach, greet, rdns, charset, envFrom, to, headers, title, body) {
+	function _NewExtMsg(validPad, validSig, id, ts, ip, cc, cs, tlsver, esmtp, quitR, protV, inval, rares, attach, greet, rdns, envFrom, hdrFrom, envTo, hdrTo, hdrId, headers, subj, body) {
 		this.validPad = validPad;
 		this.validSig = validSig;
 		this.id = id;
@@ -116,11 +116,13 @@ function AllEars(readyCallback) {
 		this.attach = attach;
 		this.greet = greet;
 		this.rdns = rdns;
-		this.charset = charset;
 		this.envFrom = envFrom;
-		this.to = to;
+		this.hdrFrom = hdrFrom;
+		this.envTo = envTo;
+		this.hdrTo = hdrTo;
+		this.hdrId = hdrId;
 		this.headers = headers;
-		this.title = title;
+		this.subj = subj;
 		this.body = body;
 	}
 
@@ -705,13 +707,17 @@ function AllEars(readyCallback) {
 	this.GetExtMsgIdHex   = function(num) {return sodium.to_hex(_extMsg[num].id);};
 	this.GetExtMsgTime    = function(num) {return _extMsg[num].ts;};
 	this.GetExtMsgTLS     = function(num) {return _GetTlsVersion(_extMsg[num].tlsver) + " " + _GetCiphersuite(_extMsg[num].cs);};
-	this.GetExtMsgGreet   = function(num) {return _extMsg[num].greet;};
 	this.GetExtMsgIp      = function(num) {return String(_extMsg[num].ip[0] + "." + _extMsg[num].ip[1] + "." + _extMsg[num].ip[2] + "." + _extMsg[num].ip[3]);};
+	this.GetExtMsgGreet   = function(num) {return _extMsg[num].greet;};
+	this.GetExtMsgRdns    = function(num) {return _extMsg[num].rdns;};
 	this.GetExtMsgCountry = function(num) {return _extMsg[num].countryCode;};
-	this.GetExtMsgFrom    = function(num) {return _extMsg[num].envFrom;};
-	this.GetExtMsgTo      = function(num) {return _extMsg[num].to;};
-	this.GetExtMsgTitle   = function(num) {return _extMsg[num].title;};
+	this.GetExtMsgEnvFrom = function(num) {return _extMsg[num].envFrom;};
+	this.GetExtMsgHdrFrom = function(num) {return _extMsg[num].hdrFrom;};
+	this.GetExtMsgEnvTo   = function(num) {return _extMsg[num].envTo;};
+	this.GetExtMsgHdrTo   = function(num) {return _extMsg[num].hdrTo;};
+	this.GetExtMsgHdrId   = function(num) {return _extMsg[num].hdrId;};
 	this.GetExtMsgHeaders = function(num) {return _extMsg[num].headers;};
+	this.GetExtMsgTitle   = function(num) {return _extMsg[num].subj;};
 	this.GetExtMsgBody    = function(num) {return _extMsg[num].body;};
 
 	this.GetExtMsgFlagVPad = function(num) {return _extMsg[num].validPad;};
@@ -724,12 +730,10 @@ function AllEars(readyCallback) {
 
 	this.GetExtMsgReplyAddress = function(num) {
 		let resultStart = ("\n" + _extMsg[num].headers.toUpperCase()).lastIndexOf("\nREPLY-TO:");
-		if (resultStart == -1) {
-			resultStart = ("\n" + _extMsg[num].headers.toUpperCase()).lastIndexOf("\nFROM:");
-			if (resultStart == -1) return _extMsg[num].envFrom; // No address in headers; use envelope address
-			resultStart += 5;
-		} else resultStart += 9;
+		if (resultStart == -1) return (_extMsg[num].hdrFrom) ? _extMsg[num].hdrFrom : _extMsg[num].envFrom;
 
+		// Reply-To found, use it
+		resultStart += 9;
 		let result = _extMsg[num].headers.slice(resultStart);
 		result = result.slice(0, result.indexOf("\n"));
 
@@ -1086,52 +1090,64 @@ function AllEars(readyCallback) {
 					case 0: { // ExtMsg
 						const msgIp = msgData.slice(0, 4);
 						const msgCs = new Uint16Array(msgData.slice(4, 6).buffer)[0];
+
 						const msgTlsVer = msgData[6] >> 5;
 						const msgAttach = msgData[6] & 31;
 
-						const msgEsmtp = (msgData[7] & 128) !== 0;
-						const msgQuitR = (msgData[7] &  64) !== 0;
-						const msgProtV = (msgData[7] &  32) !== 0;
-						const msgInval = (msgData[8] & 128) !== 0;
-						const msgRares = (msgData[8] &  64) !== 0;
-						// [8] & 32 unused
+						const msgEsmtp = (msgData[7]  & 128) !== 0;
+						const msgQuitR = (msgData[7]  &  64) !== 0;
+						const msgProtV = (msgData[7]  &  32) !== 0;
+						const msgInval = (msgData[8]  & 128) !== 0;
+						const msgRares = (msgData[8]  &  64) !== 0;
+						const msgMulti = (msgData[8]  &  32) !== 0;
+						const msgSpf   = (msgData[9]  & 192);
+						const msgGrDom = (msgData[9]  &  32) !== 0;
+						const msgDmarc = (msgData[10] & 192);
+						const msgIpBlk = (msgData[10] &  32) !== 0;
+						const msgDnSec = (msgData[11] & 128) !== 0;
+						const msgDane  = (msgData[12] & 128) !== 0;
+						const msgCrt = msgData[13];
 
-						const msgCc = ((msgData[7] & 31) > 26 || (msgData[8] & 31) > 26) ? "??" : String.fromCharCode("A".charCodeAt(0) + (msgData[7] & 31)) + String.fromCharCode("A".charCodeAt(0) + (msgData[8] & 31));
+						const msgCaa   = (msgData[14] & 192);
+						// [14] & 48 open
+						const msgDkim  = (msgData[14] &   7);
 
-						// Infobyte [9]
+						const msgCc = ((msgData[7] & 31) <= 26 && (msgData[8] & 31) <= 26) ? String.fromCharCode("A".charCodeAt(0) + (msgData[7] & 31)) + String.fromCharCode("A".charCodeAt(0) + (msgData[8] & 31)) : "??";
+						const lenEnvTo = msgData[9]  &  31;
+						const lenHdrTo = msgData[10] &  31;
+						const lenGreet = msgData[11] & 127;
+						const lenRdns  = msgData[12] & 127;
 
-						const msgShield = (msgData[10] & 128) !== 0;
-						// & 128 unused: [11], [12], [13]
+						// [15] Tz
+						// [16] Ts
 
-						const lenGreet = msgData[10] & 127;
-						const lenRdns = msgData[11] & 127;
-						const lenCharset = msgData[12] & 127;
-						const lenEnvFrom = msgData[13] & 127;
-
-						const msgTo = _addr32_decode(msgData.slice(14, 24), msgShield);
+						// TODO: DKIM bytes
 
 						try {
-							const msgBodyBr = new Int8Array(msgData.slice(24));
+							const msgBodyBr = new Int8Array(msgData.slice(17));
 							const msgBodyU8 = new Uint8Array(window.BrotliDecode(msgBodyBr));
 							const msgBodyTx = new TextDecoder("utf-8").decode(msgBodyU8);
 
-							const msgGreet   = msgBodyTx.slice(0,                               lenGreet);
-							const msgRdns    = msgBodyTx.slice(lenGreet,                        lenGreet + lenRdns);
-							const msgCharset = msgBodyTx.slice(lenGreet + lenRdns,              lenGreet + lenRdns + lenCharset);
-							const msgEnvFrom = msgBodyTx.slice(lenGreet + lenRdns + lenCharset, lenGreet + lenRdns + lenCharset + lenEnvFrom);
+							const msgEnvTo = msgBodyTx.slice(0,                              lenEnvTo) + "@" + _AEM_DOMAIN_EML;
+							const msgHdrTo = msgBodyTx.slice(lenEnvTo,                       lenEnvTo + lenHdrTo);
+							const msgGreet = msgBodyTx.slice(lenEnvTo + lenHdrTo,            lenEnvTo + lenHdrTo + lenGreet);
+							const msgRdns  = msgBodyTx.slice(lenEnvTo + lenHdrTo + lenGreet, lenEnvTo + lenHdrTo + lenGreet + lenRdns);
 
-							const body = msgBodyTx.slice(lenGreet + lenRdns + lenCharset + lenEnvFrom);
+							const msgParts = msgBodyTx.slice(lenEnvTo + lenHdrTo + lenGreet + lenRdns).split("\n");
 
-							const titleStart = ("\n" + body).indexOf("\nSubject:");
-							const titleEnd = (titleStart < 0) ? -1 : body.slice(titleStart + 8).indexOf("\n");
-							const msgTitle = (titleStart < 0) ? "(Missing title)" : body.substr(titleStart + 8, titleEnd).trim();
+							const msgEnvFrom = msgParts[0];
+							const msgHdrFrom = msgParts[1];
+							const msgHdrId   = msgParts[2];
+							const msgSubject = msgParts[3];
 
+							const body = msgParts.slice(4).join("\n");
 							const headersEnd = body.indexOf("\n\n");
 							const msgHeaders = body.slice(0, headersEnd);
 							const msgBody = body.slice(headersEnd + 2);
-							_extMsg.push(new _NewExtMsg(validPad, validSig, msgId, msgTs, msgIp, msgCc, msgCs, msgTlsVer, msgEsmtp, msgQuitR, msgProtV, msgInval, msgRares, msgAttach, msgGreet, msgRdns, msgCharset, msgEnvFrom, msgTo, msgHeaders, msgTitle, msgBody));
+
+							_extMsg.push(new _NewExtMsg(validPad, validSig, msgId, msgTs, msgIp, msgCc, msgCs, msgTlsVer, msgEsmtp, msgQuitR, msgProtV, msgInval, msgRares, msgAttach, msgGreet, msgRdns, msgEnvFrom, msgHdrFrom, msgEnvTo, msgHdrTo, msgHdrId, msgHeaders, msgSubject, msgBody));
 						} catch(e) {
-							_extMsg.push(new _NewExtMsg(validPad, validSig, msgId, msgTs, msgIp, msgCc, msgCs, msgTlsVer, msgEsmtp, msgQuitR, msgProtV, msgInval, msgRares, msgAttach, "", "", "", "", msgTo, "", "Failed decompression", "Size: " + msgData.length));
+							_extMsg.push(new _NewExtMsg(validPad, validSig, msgId, msgTs, msgIp, msgCc, msgCs, msgTlsVer, msgEsmtp, msgQuitR, msgProtV, msgInval, msgRares, msgAttach, "", "", "", "", "", "", "", "", "Failed decompression", "Size: " + msgData.length));
 						}
 					break;}
 
