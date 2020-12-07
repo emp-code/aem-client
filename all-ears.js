@@ -190,13 +190,13 @@ function AllEars(readyCallback) {
 		this.accInt = accInt;
 	}
 
-	function _NewCertInfo(type, status, cn_envFrom, cn_hdrFrom, cn_greeting, cn_rdns) {
+	function _NewCertInfo(type, status, match_envFrom, match_hdrFrom, match_greeting, match_rdns) {
 		this.type = type;
 		this.status = status;
-		this.cn_envFrom  = cn_envFrom;
-		this.cn_hdrFrom  = cn_hdrFrom;
-		this.cn_greeting = cn_greeting;
-		this.cn_rdns     = cn_rdns;
+		this.match_envFrom  = match_envFrom;
+		this.match_hdrFrom  = match_hdrFrom;
+		this.match_greeting = match_greeting;
+		this.match_rdns     = match_rdns;
 	}
 
 	const _FetchBinary = function(postData, callback) {
