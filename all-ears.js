@@ -99,7 +99,7 @@ function AllEars(readyCallback) {
 	const _admin_userLevel = [];
 
 // Private functions
-	function _NewExtMsg(validPad, validSig, id, ts, ip, cc, cs, tlsver, esmtp, quitR, protV, inval, rares, multi, attach, cert, greet, rdns, envFrom, hdrFrom, envTo, hdrTo, hdrId, headers, subj, body) {
+	function _NewExtMsg(validPad, validSig, id, ts, ip, cc, cs, tlsver, esmtp, quitR, protV, inval, rares, multi, attach, certInfo, greet, rdns, envFrom, hdrFrom, envTo, hdrTo, hdrId, headers, subj, body) {
 		this.validPad = validPad;
 		this.validSig = validSig;
 		this.id = id;
