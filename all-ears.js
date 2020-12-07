@@ -99,7 +99,7 @@ function AllEars(readyCallback) {
 	const _admin_userLevel = [];
 
 // Private functions
-	function _NewExtMsg(validPad, validSig, id, ts, ip, cc, cs, tlsver, esmtp, quitR, protV, inval, rares, multi, attach, greet, rdns, envFrom, hdrFrom, envTo, hdrTo, hdrId, headers, subj, body) {
+	function _NewExtMsg(validPad, validSig, id, ts, ip, cc, cs, tlsver, esmtp, quitR, protV, inval, rares, multi, attach, cert, greet, rdns, envFrom, hdrFrom, envTo, hdrTo, hdrId, headers, subj, body) {
 		this.validPad = validPad;
 		this.validSig = validSig;
 		this.id = id;
@@ -114,6 +114,7 @@ function AllEars(readyCallback) {
 		this.inval = inval;
 		this.rares = rares;
 		this.multi = multi;
+		this.certInfo = certInfo;
 		this.attach = attach;
 		this.greet = greet;
 		this.rdns = rdns;
@@ -187,6 +188,15 @@ function AllEars(readyCallback) {
 		this.is_shd = is_shd;
 		this.accExt = accExt;
 		this.accInt = accInt;
+	}
+
+	function _NewCertInfo(type, status, cn_envFrom, cn_hdrFrom, cn_greeting, cn_rdns) {
+		this.type = type;
+		this.status = status;
+		this.cn_envFrom  = cn_envFrom;
+		this.cn_hdrFrom  = cn_hdrFrom;
+		this.cn_greeting = cn_greeting;
+		this.cn_rdns     = cn_rdns;
 	}
 
 	const _FetchBinary = function(postData, callback) {
@@ -709,6 +719,7 @@ function AllEars(readyCallback) {
 	this.GetExtMsgTime    = function(num) {return _extMsg[num].ts;};
 	this.GetExtMsgTLS     = function(num) {return _GetTlsVersion(_extMsg[num].tlsver) + " " + _GetCiphersuite(_extMsg[num].cs);};
 	this.GetExtMsgIp      = function(num) {return String(_extMsg[num].ip[0] + "." + _extMsg[num].ip[1] + "." + _extMsg[num].ip[2] + "." + _extMsg[num].ip[3]);};
+	this.GetExtMsgCert    = function(num) {return _extMsg[num].certInfo;};
 	this.GetExtMsgGreet   = function(num) {return _extMsg[num].greet;};
 	this.GetExtMsgRdns    = function(num) {return _extMsg[num].rdns;};
 	this.GetExtMsgCountry = function(num) {return _extMsg[num].countryCode;};
@@ -1105,22 +1116,20 @@ function AllEars(readyCallback) {
 						const msgSpf   = (msgData[9]  & 192);
 						const msgGrDom = (msgData[9]  &  32) !== 0;
 						const lenEnvTo =  msgData[9]  &  31;
-						const msgCrtKs =  msgData[10] & 224;
 						const lenHdrTo =  msgData[10] &  31;
 						const msgDnSec = (msgData[11] & 128) !== 0;
 						const lenGreet =  msgData[11] & 127;
 						const msgDane  = (msgData[12] & 128) !== 0;
 						const lenRdns  =  msgData[12] & 127;
 						const msgDmarc = (msgData[13] & 192);
-						const msgCrt   =  msgData[13] &  63;
 						const msgCaa   = (msgData[14] & 192);
 						// [14] & 48 open
 						const msgDkim  = (msgData[14] &   7);
 						const msgIpBlk = (msgData[15] & 128) !== 0;
 						const msgHdrTz =  msgData[15] & 127;
 
+						const msgCert = new _NewCertInfo(msgData[10] & 224, msgData[13] & 48, (msgData[13] & 8) != 0, (msgData[13] & 4) != 0, (msgData[13] & 2) != 0, (msgData[13] & 1) != 0);
 						const msgHdrTs = new Uint16Array(msgData.slice(16, 18).buffer)[0] - 736;
-
 						const msgCc = ((msgData[7] & 31) <= 26 && (msgData[8] & 31) <= 26) ? String.fromCharCode("A".charCodeAt(0) + (msgData[7] & 31)) + String.fromCharCode("A".charCodeAt(0) + (msgData[8] & 31)) : "??";
 
 						// TODO: DKIM bytes
@@ -1147,9 +1156,9 @@ function AllEars(readyCallback) {
 							const msgHeaders = body.slice(0, headersEnd);
 							const msgBody = body.slice(headersEnd + 2);
 
-							_extMsg.push(new _NewExtMsg(validPad, validSig, msgId, msgTs, msgIp, msgCc, msgCs, msgTlsVer, msgEsmtp, msgQuitR, msgProtV, msgInval, msgRares, msgMulti, msgAttach, msgGreet, msgRdns, msgEnvFrom, msgHdrFrom, msgEnvTo, msgHdrTo, msgHdrId, msgHeaders, msgSubject, msgBody));
+							_extMsg.push(new _NewExtMsg(validPad, validSig, msgId, msgTs, msgIp, msgCc, msgCs, msgTlsVer, msgEsmtp, msgQuitR, msgProtV, msgInval, msgRares, msgMulti, msgAttach, msgCert, msgGreet, msgRdns, msgEnvFrom, msgHdrFrom, msgEnvTo, msgHdrTo, msgHdrId, msgHeaders, msgSubject, msgBody));
 						} catch(e) {
-							_extMsg.push(new _NewExtMsg(validPad, validSig, msgId, msgTs, msgIp, msgCc, msgCs, msgTlsVer, msgEsmtp, msgQuitR, msgProtV, msgInval, msgRares, msgMulti, msgAttach, "", "", "", "", "", "", "", "", "Failed decompression", "Size: " + msgData.length));
+							_extMsg.push(new _NewExtMsg(validPad, validSig, msgId, msgTs, msgIp, msgCc, msgCs, msgTlsVer, msgEsmtp, msgQuitR, msgProtV, msgInval, msgRares, msgMulti, msgAttach, msgCert, "", "", "", "", "", "", "", "", "Failed decompression", "Size: " + msgData.length));
 						}
 					break;}
 
