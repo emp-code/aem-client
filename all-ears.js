@@ -1104,29 +1104,29 @@ function AllEars(readyCallback) {
 						const msgMulti = (msgData[8]  &  32) !== 0;
 						const msgSpf   = (msgData[9]  & 192);
 						const msgGrDom = (msgData[9]  &  32) !== 0;
-						const msgDmarc = (msgData[10] & 192);
-						const msgIpBlk = (msgData[10] &  32) !== 0;
+						const lenEnvTo =  msgData[9]  &  31;
+						const msgCrtKs =  msgData[10] & 224;
+						const lenHdrTo =  msgData[10] &  31;
 						const msgDnSec = (msgData[11] & 128) !== 0;
+						const lenGreet =  msgData[11] & 127;
 						const msgDane  = (msgData[12] & 128) !== 0;
-						const msgCrt = msgData[13];
-
+						const lenRdns  =  msgData[12] & 127;
+						const msgDmarc = (msgData[13] & 192);
+						const msgCrt   =  msgData[13] &  63;
 						const msgCaa   = (msgData[14] & 192);
 						// [14] & 48 open
 						const msgDkim  = (msgData[14] &   7);
+						const msgIpBlk = (msgData[15] & 128) !== 0;
+						const msgHdrTz =  msgData[15] & 127;
+
+						const msgHdrTs = new Uint16Array(msgData.slice(16, 18).buffer)[0] - 736;
 
 						const msgCc = ((msgData[7] & 31) <= 26 && (msgData[8] & 31) <= 26) ? String.fromCharCode("A".charCodeAt(0) + (msgData[7] & 31)) + String.fromCharCode("A".charCodeAt(0) + (msgData[8] & 31)) : "??";
-						const lenEnvTo = msgData[9]  &  31;
-						const lenHdrTo = msgData[10] &  31;
-						const lenGreet = msgData[11] & 127;
-						const lenRdns  = msgData[12] & 127;
-
-						// [15] Tz
-						// [16] Ts
 
 						// TODO: DKIM bytes
 
 						try {
-							const msgBodyBr = new Int8Array(msgData.slice(17));
+							const msgBodyBr = new Int8Array(msgData.slice(18));
 							const msgBodyU8 = new Uint8Array(window.BrotliDecode(msgBodyBr));
 							const msgBodyTx = new TextDecoder("utf-8").decode(msgBodyU8);
 
