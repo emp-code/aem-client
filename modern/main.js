@@ -465,8 +465,8 @@ function displayMsg(isInt, num) {
 		const certText = document.getElementById("readmsg_cert");
 
 		let names = [];
-		if (certInfo.match_envFrom)  names.push(ae.GetExtMsgEnvFrom(num));
-		if (certInfo.match_hdrFrom)  names.push(ae.GetExtMsgHdrFrom(num));
+		if (certInfo.match_envFrom)  names.push(ae.GetExtMsgEnvFrom(num).split("@")[1]);
+		if (certInfo.match_hdrFrom)  names.push(ae.GetExtMsgHdrFrom(num).split("@")[1]);
 		if (certInfo.match_greeting) names.push(ae.GetExtMsgGreet(num));
 		if (certInfo.match_rdns)     names.push(ae.GetExtMsgRdns(num));
 		names = [...new Set(names)];
