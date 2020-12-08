@@ -470,7 +470,7 @@ function displayMsg(isInt, num) {
 		if (ae.GetExtMsgTls_MatchHdrFrom(num))  names.push(ae.GetExtMsgHdrFrom(num).split("@")[1]);
 		names = [...new Set(names)];
 
-		certText.children[0].textContent = (names[0]) ? (names.join(" ") + " " + ae.GetExtMsgTls_CertType(num)).trim() : "";
+		certText.children[0].textContent = (names[0]) ? (names.join(" ") + " " + ae.GetExtMsgTls_CertType(num)).trim() : ae.GetExtMsgTls_CertType(num);
 
 		const body = document.createElement("p");
 		body.textContent = ae.GetExtMsgBody(num);
