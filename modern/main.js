@@ -461,32 +461,16 @@ function displayMsg(isInt, num) {
 		headers.hidden = !showHeaders;
 		document.getElementById("midright").children[2].appendChild(headers);
 
-		const certInfo = ae.GetExtMsgCert(num);
 		const certText = document.getElementById("readmsg_cert");
 
 		let names = [];
-		if (certInfo.match_envFrom)  names.push(ae.GetExtMsgEnvFrom(num).split("@")[1]);
-		if (certInfo.match_hdrFrom)  names.push(ae.GetExtMsgHdrFrom(num).split("@")[1]);
-		if (certInfo.match_greeting) names.push(ae.GetExtMsgGreet(num));
-		if (certInfo.match_rdns)     names.push(ae.GetExtMsgRdns(num));
+		if (ae.GetExtMsgTls_MatchGreeting(num)) names.push(ae.GetExtMsgGreet(num));
+		if (ae.GetExtMsgTls_MatchRdns(num))     names.push(ae.GetExtMsgRdns(num));
+		if (ae.GetExtMsgTls_MatchEnvFrom(num))  names.push(ae.GetExtMsgEnvFrom(num).split("@")[1]);
+		if (ae.GetExtMsgTls_MatchHdrFrom(num))  names.push(ae.GetExtMsgHdrFrom(num).split("@")[1]);
 		names = [...new Set(names)];
 
-		if (names[0]) {
-			certText.children[0].textContent = names.join(" ");
-
-			if (certInfo.type != 0) {
-				switch (certInfo.type) {
-					case 224: certText.children[0].textContent += " EdDSA"; break;
-					case 192: certText.children[0].textContent += " ECDSA-521"; break;
-					case 160: certText.children[0].textContent += " ECDSA-384"; break;
-					case 128: certText.children[0].textContent += " ECDSA-256"; break;
-					case  96: certText.children[0].textContent += " RSA-4096"; break;
-					case  64: certText.children[0].textContent += " RSA-2048"; break;
-					case  32: certText.children[0].textContent += " RSA-1024"; break;
-					default: certText.children[0].textContent = "";
-				}
-			} else certText.children[0].textContent = "";
-		} else certText.children[0].textContent = "";
+		certText.children[0].textContent = (names[0]) ? (names.join(" ") + " " + ae.GetExtMsgTls_CertType(num)).trim() : "";
 
 		const body = document.createElement("p");
 		body.textContent = ae.GetExtMsgBody(num);
