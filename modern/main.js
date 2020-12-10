@@ -44,6 +44,7 @@ const TAB_TOOLS = 4;
 // Helper functions
 function getCountryName(countryCode) {
 	switch (countryCode) {
+		case "??": return "Unknown";
 		case "DZ": return "Algeria";
 		case "AO": return "Angola";
 		case "BJ": return "Benin";
