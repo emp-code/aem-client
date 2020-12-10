@@ -499,6 +499,7 @@ function displayMsg(isInt, num) {
 		document.getElementById("readmsg_country").hidden = false;
 		document.getElementById("readmsg_tls").hidden = false;
 		document.getElementById("readmsg_greet").hidden = false;
+		document.getElementById("readmsg_envfrom").style.visibility = "visible";
 
 		const cc = ae.GetExtMsgCountry(num);
 
@@ -690,7 +691,9 @@ function displayOutMsg(num) {
 	document.getElementById("midright").children[1].textContent = ae.GetOutMsgSubj(num);
 	document.getElementById("midright").children[2].textContent = ae.GetOutMsgBody(num);
 
-	document.getElementById("readmsg_envfrom").textContent = ae.GetOutMsgFrom(num);
+	document.getElementById("readmsg_envfrom").style.visibility = "hidden";
+	document.getElementById("readmsg_hdrfrom").textContent = ae.GetOutMsgFrom(num);
+
 	document.getElementById("readmsg_envto").textContent = ae.GetOutMsgMxDom(num);
 	document.getElementById("readmsg_hdrto").textContent = ae.GetOutMsgTo(num);
 
