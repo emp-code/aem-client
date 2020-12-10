@@ -296,6 +296,8 @@ function getCountryName(countryCode) {
 		case "UY": return "Uruguay";
 		case "VE": return "Venezuela";
 	}
+
+	return "Error";
 }
 
 function getCountryFlag(countryCode) {
