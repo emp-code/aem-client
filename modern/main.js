@@ -299,7 +299,7 @@ function getCountryName(countryCode) {
 }
 
 function getCountryFlag(countryCode) {
-	return sodium.to_string(new Uint8Array([
+	return (countryCode == "??") ? "❔" : sodium.to_string(new Uint8Array([
 		240, 159, 135, 166 + countryCode.codePointAt(0) - 65,
 		240, 159, 135, 166 + countryCode.codePointAt(1) - 65
 	]));
