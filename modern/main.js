@@ -484,8 +484,8 @@ function displayMsg(isInt, num) {
 		document.getElementById("midright").children[1].style.cursor = "pointer";
 	}
 
-	document.getElementById("readmsg_envto").textContent = isInt ? ae.GetIntMsgTo(num) : ae.GetExtMsgEnvTo(num);
-	document.getElementById("readmsg_hdrto").textContent = isInt ? "" : ae.GetExtMsgHdrTo(num);
+	document.getElementById("readmsg_envto").textContent = isInt ? "" : ae.GetExtMsgEnvTo(num);
+	document.getElementById("readmsg_hdrto").textContent = isInt ? ae.GetIntMsgTo(num) : ae.GetExtMsgHdrTo(num);
 
 	const tzOs = new Date().getTimezoneOffset();
 	const tz = ((tzOs < 0) ? "+" : "-") + Math.floor(tzOs / -60).toString().padStart(2, "0") + (tzOs % 60 * -1).toString().padStart(2, "0");
@@ -495,11 +495,13 @@ function displayMsg(isInt, num) {
 	document.getElementById("readmsg_date").children[1].textContent = msgDate.toISOString().slice(0, 19).replace("T", " ") + " " + tz;
 
 	if (!isInt) {
-		document.getElementById("readmsg_ip").hidden = false;
-		document.getElementById("readmsg_country").hidden = false;
-		document.getElementById("readmsg_tls").hidden = false;
-		document.getElementById("readmsg_greet").hidden = false;
+		document.getElementById("readmsg_ip").style.visibility = "visible";
+		document.getElementById("readmsg_rdns").style.visibility = "visible";
+		document.getElementById("readmsg_dkim").style.visibility = "visible";
+		document.getElementById("readmsg_greet").style.visibility = "visible";
+		document.getElementById("readmsg_cert").style.visibility = "visible";
 		document.getElementById("readmsg_envfrom").style.visibility = "visible";
+		document.getElementById("readmsg_envto").style.visibility = "visible";
 
 		const cc = ae.GetExtMsgCountry(num);
 
@@ -523,11 +525,15 @@ function displayMsg(isInt, num) {
 		if (ae.GetExtMsgFlagMult(num)) flagText += "<abbr title=\"Multiple recipients on this service\">MULT</abbr> ";
 		document.getElementById("readmsg_flags").children[0].innerHTML = flagText.trim();
 	} else {
-		document.getElementById("readmsg_ip").hidden = true;
-		document.getElementById("readmsg_country").hidden = true;
-		document.getElementById("readmsg_greet").hidden = true;
+		document.getElementById("readmsg_ip").style.visibility = "hidden";
+		document.getElementById("readmsg_rdns").style.visibility = "hidden";
+		document.getElementById("readmsg_dkim").style.visibility = "hidden";
+		document.getElementById("readmsg_greet").style.visibility = "hidden";
+		document.getElementById("readmsg_cert").style.visibility = "hidden";
+		document.getElementById("readmsg_envfrom").style.visibility = "hidden";
+		document.getElementById("readmsg_envto").style.visibility = "hidden";
 
-		document.getElementById("readmsg_tls").hidden = false;
+		document.getElementById("readmsg_tls").style.visibility = "visible";
 		document.getElementById("readmsg_tls").children[0].textContent = ae.GetIntMsgFromPk(num);
 
 		let symbol = "<span title=\"Invalid level\">&#x26a0;</span>";
@@ -536,7 +542,7 @@ function displayMsg(isInt, num) {
 		else if (ae.GetIntMsgLevel(num) === 1) symbol = "<span title=\"Level 1 User\">&#x278a;</span>"; // 1
 		else if (ae.GetIntMsgLevel(num) === 2) symbol = "<span title=\"Level 2 User\">&#x278b;</span>"; // 2
 		else if (ae.GetIntMsgLevel(num) === 3) symbol = "<span title=\"Administrator\">&#x1f150;</span>"; // A (Admin)
-		document.getElementById("readmsg_envfrom").innerHTML = symbol + " " + ae.GetIntMsgFrom(num);
+		document.getElementById("readmsg_hdrfrom").innerHTML = symbol + " " + ae.GetIntMsgFrom(num);
 
 		let flagText = "";
 		if (!ae.GetIntMsgFlagVPad(num)) flagText += "<abbr title=\"Invalid padding\">PAD</abbr> ";
@@ -691,7 +697,12 @@ function displayOutMsg(num) {
 	document.getElementById("midright").children[1].textContent = ae.GetOutMsgSubj(num);
 	document.getElementById("midright").children[2].textContent = ae.GetOutMsgBody(num);
 
+	document.getElementById("readmsg_dkim").style.visibility    = "hidden";
+	document.getElementById("readmsg_hdrto").style.visibility   = "visible";
+	document.getElementById("readmsg_hdrfrom").style.visibility = "visible";
+	document.getElementById("readmsg_envto").style.visibility   = "visible";
 	document.getElementById("readmsg_envfrom").style.visibility = "hidden";
+
 	document.getElementById("readmsg_hdrfrom").textContent = ae.GetOutMsgFrom(num);
 
 	document.getElementById("readmsg_envto").textContent = ae.GetOutMsgMxDom(num);
@@ -703,10 +714,11 @@ function displayOutMsg(num) {
 	document.getElementById("readmsg_date").children[1].textContent = new Date((ts * 1000) + (tzOs * -60000)).toISOString().slice(0, 19).replace("T", " ") + " " + tz;
 
 	const isInt = ae.GetOutMsgIsInt(num);
-	document.getElementById("readmsg_ip").hidden      = isInt;
-	document.getElementById("readmsg_country").hidden = isInt;
-	document.getElementById("readmsg_tls").hidden     = isInt;
-	document.getElementById("readmsg_greet").hidden   = isInt;
+	document.getElementById("readmsg_ip").style.visibility    = isInt? "hidden" : "visible";
+	document.getElementById("readmsg_rdns").style.visibility  = /*isInt?*/ "hidden" /*: "visible"*/; // TODO
+	document.getElementById("readmsg_tls").style.visibility   = /*isInt?*/ "hidden" /*: "visible"*/; // TODO
+	document.getElementById("readmsg_cert").style.visibility  = /*isInt?*/ "hidden" /*: "visible"*/; // TODO
+	document.getElementById("readmsg_greet").style.visibility = isInt? "hidden" : "visible";
 
 	if (!isInt) {
 //		const cc = ae.GetExtMsgCountry(num);
