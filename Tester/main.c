@@ -35,18 +35,21 @@ static int performTests(int * const retNum, const char onionId[56], const unsign
 
 	struct aem_address addr;
 
+	char testAddress[16];
+	sprintf(testAddress, "aemtest%.8x", randombytes_random());
+
 	// User1
 	if (allears_init(onionId, pkApi, pkSig, saltNm, key_user1) != 0) return -1;
 	(*retNum)++; if ((ret = allears_account_create(upk_user2)) >= 0) return -1;
 	(*retNum)++; if ((ret = allears_private_update(privateData)) != 0) return -1;
-	(*retNum)++; if ((ret = allears_address_create(&addr, "aemtest1", 8)) != 0) return -1;
+	(*retNum)++; if ((ret = allears_address_create(&addr, testAddress, 15)) != 0) return -1;
 	addr.flags = AEM_ADDR_FLAG_ACCINT | AEM_ADDR_FLAG_ACCEXT;
 
 	// Admin
 	if (allears_init(onionId, pkApi, pkSig, saltNm, key_admin) != 0) return -1;
 	(*retNum)++; if ((ret = allears_account_create(upk_user2)) != 0) return ret;
 	(*retNum)++; if ((ret = allears_account_update(upk_user2, 2)) != 0) return -1;
-	(*retNum)++; if ((ret = allears_message_create("Test Message", 12, "This here is a test message.", 28, "admin", 5, "aemtest1", 8, NULL, 0, NULL)) >= 0) return -1;
+	(*retNum)++; if ((ret = allears_message_create("Test Message", 12, "This here is a test message.", 28, "admin", 5, testAddress, 15, NULL, 0, NULL)) >= 0) return -1;
 
 	// User1
 	if (allears_init(onionId, pkApi, pkSig, saltNm, key_user1) != 0) return -1;
@@ -63,7 +66,7 @@ static int performTests(int * const retNum, const char onionId[56], const unsign
 	if (allears_init(onionId, pkApi, pkSig, saltNm, key_admin) != 0) return -1;
 	(*retNum)++; if ((ret = allears_account_delete(upk_user2)) != 0) return ret;
 	(*retNum)++; if ((ret = allears_message_public("Test announcement", 17, "This announcement is a part of a test run.", 42)) != 0) return ret;
-	(*retNum)++; if ((ret = allears_message_create("Test Message", 12, "This here is a test message.", 28, "admin", 5, "aemtest1", 8, NULL, 0, NULL)) != 0) return ret;
+	(*retNum)++; if ((ret = allears_message_create("Test Message", 12, "This here is a test message.", 28, "admin", 5, testAddress, 15, NULL, 0, NULL)) != 0) return ret;
 
 	// User1
 	if (allears_init(onionId, pkApi, pkSig, saltNm, key_user1) != 0) return -1;
