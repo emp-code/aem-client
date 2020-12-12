@@ -113,12 +113,13 @@ function AllEars(readyCallback) {
 	const _admin_userLevel = [];
 
 // Private functions
-	function _NewExtMsg(validPad, validSig, id, ts, hdrTs, ip, cc, cs, tls, esmtp, quitR, protV, inval, rares, multi, attach, greet, rdns, envFrom, hdrFrom, envTo, hdrTo, hdrId, headers, subj, body) {
+	function _NewExtMsg(validPad, validSig, id, ts, hdrTs, hdrTz, ip, cc, cs, tls, esmtp, quitR, protV, inval, rares, multi, attach, greet, rdns, envFrom, hdrFrom, envTo, hdrTo, hdrId, headers, subj, body) {
 		this.validPad = validPad;
 		this.validSig = validSig;
 		this.id = id;
 		this.ts = ts;
 		this.hdrTs = hdrTs;
+		this.hdrTz = hdrTz;
 		this.ip = ip;
 		this.countryCode = cc;
 		this.cs = cs;
@@ -723,6 +724,7 @@ function AllEars(readyCallback) {
 	this.GetExtMsgIdHex   = function(num) {return sodium.to_hex(_extMsg[num].id);};
 	this.GetExtMsgTime    = function(num) {return _extMsg[num].ts;};
 	this.GetExtMsgHdrTime = function(num) {return _extMsg[num].hdrTs;};
+	this.GetExtMsgHdrTz   = function(num) {return _extMsg[num].hdrTz;};
 	this.GetExtMsgTLS     = function(num) {return _GetTlsVersion(_extMsg[num].tls & 7) + " " + _GetCiphersuite(_extMsg[num].cs);};
 	this.GetExtMsgIp      = function(num) {return String(_extMsg[num].ip[0] + "." + _extMsg[num].ip[1] + "." + _extMsg[num].ip[2] + "." + _extMsg[num].ip[3]);};
 	this.GetExtMsgGreet   = function(num) {return _extMsg[num].greet;};
@@ -1146,8 +1148,8 @@ function AllEars(readyCallback) {
 						const msgDnSec = (msgData[14] & 128) !== 0;
 						const lenRdns  =  msgData[14] & 127;
 						const msgDane  = (msgData[15] & 128) !== 0;
-						const msgHdrTz =  msgData[15] & 127;
 
+						const msgHdrTz =  ((msgData[15] & 127) - 60) * 15; // Timezone offset in minutes; -900m..900m (-15h..+15h)
 						const msgHdrTs = new Uint16Array(msgData.slice(16, 18).buffer)[0] - 736;
 						const msgCc = ((msgData[9] & 31) <= 26 && (msgData[10] & 31) <= 26) ? String.fromCharCode("A".charCodeAt(0) + (msgData[9] & 31)) + String.fromCharCode("A".charCodeAt(0) + (msgData[10] & 31)) : "??";
 
@@ -1175,9 +1177,9 @@ function AllEars(readyCallback) {
 							const msgHeaders = body.slice(0, headersEnd);
 							const msgBody = body.slice(headersEnd + 2);
 
-							_extMsg.push(new _NewExtMsg(validPad, validSig, msgId, msgTs, msgHdrTs, msgIp, msgCc, msgCs, msgTls, msgEsmtp, msgQuitR, msgProtV, msgInval, msgRares, msgMulti, msgAttach, msgGreet, msgRdns, msgEnvFrom, msgHdrFrom, msgEnvTo, msgHdrTo, msgHdrId, msgHeaders, msgSubject, msgBody));
+							_extMsg.push(new _NewExtMsg(validPad, validSig, msgId, msgTs, msgHdrTs, msgHdrTz, msgIp, msgCc, msgCs, msgTls, msgEsmtp, msgQuitR, msgProtV, msgInval, msgRares, msgMulti, msgAttach, msgGreet, msgRdns, msgEnvFrom, msgHdrFrom, msgEnvTo, msgHdrTo, msgHdrId, msgHeaders, msgSubject, msgBody));
 						} catch(e) {
-							_extMsg.push(new _NewExtMsg(validPad, validSig, msgId, msgTs, msgHdrTs, msgIp, msgCc, msgCs, msgTls, msgEsmtp, msgQuitR, msgProtV, msgInval, msgRares, msgMulti, msgAttach, "", "", "", "", "", "", "", "", "Failed decompression", "Size: " + msgData.length));
+							_extMsg.push(new _NewExtMsg(validPad, validSig, msgId, msgTs, msgHdrTs, msgHdrTz, msgIp, msgCc, msgCs, msgTls, msgEsmtp, msgQuitR, msgProtV, msgInval, msgRares, msgMulti, msgAttach, "", "", "", "", "", "", "", "", "Failed decompression", "Size: " + msgData.length));
 						}
 					break;}
 
