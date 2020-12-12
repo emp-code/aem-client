@@ -488,11 +488,26 @@ function displayMsg(isInt, num) {
 	document.getElementById("readmsg_hdrto").textContent = isInt ? ae.GetIntMsgTo(num) : ae.GetExtMsgHdrTo(num);
 
 	const tzOs = new Date().getTimezoneOffset();
-	const tz = ((tzOs < 0) ? "+" : "-") + Math.floor(tzOs / -60).toString().padStart(2, "0") + (tzOs % 60 * -1).toString().padStart(2, "0");
+//	const tz = ((tzOs < 0) ? "+" : "-") + Math.floor(tzOs / -60).toString().padStart(2, "0") + (tzOs % 60 * -1).toString().padStart(2, "0");
 	const msgDate = new Date((ts * 1000) + (tzOs * -60000));
+	const hdrTz = (ae.GetExtMsgHdrTz(num) >= 0 ? "+" : "-") + Math.floor(Math.abs(ae.GetExtMsgHdrTz(num)) / 60).toString().padStart(2, "0") + (Math.abs(ae.GetExtMsgHdrTz(num)) % 60).toString().padStart(2, "0");
+
+	let hdrSecs = Math.abs(ae.GetExtMsgHdrTime(num));
+	let hdrTime = "";
+	if (hdrSecs >= 3600) {
+		const hdrHours = Math.floor(hdrSecs / 3600);
+		hdrTime += hdrHours.toString() + "h ";
+		hdrSecs -= hdrHours * 3600;
+	}
+	if (hdrSecs >= 60) {
+		const hdrMins = Math.floor(hdrSecs / 60);
+		hdrTime += hdrMins.toString() + "m ";
+		hdrSecs -= hdrMins * 60;
+	}
+	hdrTime += hdrSecs + "s";
 
 	document.getElementById("readmsg_date").children[0].innerHTML = getClockIcon(msgDate);
-	document.getElementById("readmsg_date").children[1].textContent = msgDate.toISOString().slice(0, 19).replace("T", " ") + " " + tz;
+	document.getElementById("readmsg_date").children[1].textContent = msgDate.toISOString().slice(0, 19).replace("T", " ") + (isInt? "" : "; " + hdrTz + " " + ((ae.GetExtMsgHdrTime(num) >= 0) ? "+" : "-") + hdrTime);
 
 	if (!isInt) {
 		document.getElementById("readmsg_ip").style.visibility = "visible";
