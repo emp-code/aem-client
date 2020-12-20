@@ -60,6 +60,9 @@ readonly hash_js_aem_js=$(echo -n "$js_aem_js" | openssl dgst -sha384 -binary | 
 readonly hash_js_modern=$(echo -n "$js_modern" | openssl dgst -sha384 -binary | openssl base64 -A)
 readonly hash_css_modern=$(echo -n "$css_modern" | openssl dgst -sha384 -binary | openssl base64 -A)
 
+readonly favicon=$(grep -m 1 --no-filename --only-matching '<link.* rel="icon".*>' modern/index.html | sed 's~<link.* rel="icon".* href="data:image/[a-z]*;base64,~~' | sed 's~".*~~')
+readonly hash_favicon=$(echo -n "$favicon" | base64 -d | openssl dgst -sha384 -binary | openssl base64 -A)
+
 if [ $(echo -n "$js_brotli" | openssl dgst -sha384 -binary | openssl base64 -A) != "$hash_js_brotli" ]; then echo "Brotli hash mismatch"; exit; fi
 if [ $(echo    "$js_sodium" | openssl dgst -sha384 -binary | openssl base64 -A) != "$hash_js_sodium" ]; then echo "Sodium hash mismatch"; exit; fi
 
@@ -74,7 +77,7 @@ $(echo -en '\n\t\t<meta name="referrer" content="no-referrer">')\
 $(echo -en '\n\t\t<meta http-equiv="Content-Security-Policy" content="')\
 $(echo -n "connect-src https://$apidom:302/api data:;")\
 $(echo -n " script-src 'unsafe-eval' 'sha384-$hash_js_brotli' 'sha384-$hash_js_sodium' 'sha384-$hash_js_aem_js' 'sha384-$hash_js_modern'; style-src 'sha384-$hash_css_modern';")\
-$(echo -n " base-uri 'none'; child-src 'none'; default-src 'none'; font-src 'none'; form-action 'none'; frame-src blob:; img-src blob: data:; manifest-src 'none'; media-src blob:; object-src blob:; prefetch-src 'none'; worker-src 'none'; plugin-types application/pdf;\">")\
+$(echo -n " base-uri 'none'; child-src 'none'; default-src 'none'; font-src 'none'; form-action 'none'; frame-src blob:; img-src 'sha384-$hash_favicon' blob:; manifest-src 'none'; media-src blob:; object-src blob:; prefetch-src 'none'; worker-src 'none'; plugin-types application/pdf;\">")\
 $(echo -en '\n\t\t<style>')$(echo -n "$css_modern")$(echo -en '</style>\n ')\
 $(tail -n +$((LineCss + 2)) modern/index.html | head -n $((LineJsFirst - LineCss - 2)))\
 $(echo -en '\n\t\t<script>')$(echo -n "$js_brotli")$(echo -en '</script>')\
