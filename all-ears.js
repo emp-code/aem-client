@@ -402,6 +402,7 @@ function AllEars(readyCallback) {
 
 			// For non-text formats, only formats supported by browsers are sensible
 			case "apng":
+			case "avif":
 			case "bmp":
 			case "gif":
 			case "ico":
