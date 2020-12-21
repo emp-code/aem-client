@@ -70,12 +70,14 @@ readonly LineCss=$(grep -F 'main.css' -n -m 1 modern/index.html | sed 's/:.*//')
 readonly LineJsFirst=$(grep -F '<script' -n -m 1 modern/index.html | sed 's/:.*//')
 readonly LineJsLast=$(grep -F '<script' -n modern/index.html | tail -n 1 | sed 's/:.*//')
 
+readonly apidom_sec=$(if [ $(echo "$apidom" | tail -c 7) != '.onion' ]; then echo "s"; fi)
+
 readonly html=\
 $(head -n $((LineCss - 1)) modern/index.html)\
 $(echo -en '\n\t\t<meta charset="utf-8">')\
 $(echo -en '\n\t\t<meta name="referrer" content="no-referrer">')\
 $(echo -en '\n\t\t<meta http-equiv="Content-Security-Policy" content="')\
-$(echo -n "connect-src https://$apidom:302/api data:; script-src 'unsafe-eval' 'sha384-$hash_js_brotli' 'sha384-$hash_js_sodium' 'sha384-$hash_js_aem_js' 'sha384-$hash_js_modern'; style-src 'sha384-$hash_css_modern'; img-src 'sha384-$hash_favicon' blob:;")\
+$(echo -n "connect-src http$apidom_sec://$apidom:302/api data:; script-src 'unsafe-eval' 'sha384-$hash_js_brotli' 'sha384-$hash_js_sodium' 'sha384-$hash_js_aem_js' 'sha384-$hash_js_modern'; style-src 'sha384-$hash_css_modern'; img-src 'sha384-$hash_favicon' blob:;")\
 $(echo -n " frame-src blob:; media-src blob:; object-src blob:; base-uri 'none'; child-src 'none'; default-src 'none'; font-src 'none'; form-action 'none'; manifest-src 'none'; prefetch-src 'none'; worker-src 'none'; plugin-types application/pdf;\">")\
 $(echo -en '\n\t\t<style>')$(echo -n "$css_modern")$(echo -en '</style>\n ')\
 $(tail -n +$((LineCss + 2)) modern/index.html | head -n $((LineJsFirst - LineCss - 2)))\
