@@ -60,8 +60,8 @@ readonly hash_js_aem_js=$(echo -n "$js_aem_js" | openssl dgst -sha384 -binary | 
 readonly hash_js_modern=$(echo -n "$js_modern" | openssl dgst -sha384 -binary | openssl base64 -A)
 readonly hash_css_modern=$(echo -n "$css_modern" | openssl dgst -sha384 -binary | openssl base64 -A)
 
-readonly favicon=$(grep -m 1 --no-filename --only-matching '<link.* rel="icon".*>' modern/index.html | sed 's~<link.* rel="icon".* href="data:image/.*;base64,~~' | sed 's~".*~~')
-readonly hash_favicon=$(echo -n "$favicon" | base64 -d | openssl dgst -sha384 -binary | openssl base64 -A)
+readonly favicon=$(grep -m 1 --no-filename --only-matching '<link.* rel="icon".*>' modern/index.html | sed 's~<link.* rel="icon".* href="data:image/[^,]*,~~' | sed 's~".*~~')
+readonly hash_favicon=$(echo -n "$favicon" | openssl dgst -sha384 -binary | openssl base64 -A)
 
 if [ $(echo -n "$js_brotli" | openssl dgst -sha384 -binary | openssl base64 -A) != "$hash_js_brotli" ]; then echo "Brotli hash mismatch"; exit; fi
 if [ $(echo    "$js_sodium" | openssl dgst -sha384 -binary | openssl base64 -A) != "$hash_js_sodium" ]; then echo "Sodium hash mismatch"; exit; fi
