@@ -325,10 +325,10 @@ int allears_message_browse() {
 				memcpy(intMsg[count_intMsg - 1].msgId, msgId, 16);
 				memcpy(&intMsg[count_intMsg - 1].ts, &msgTs, 4);
 
-				// 128/64 unused; used to store ValidSig/ValidPad
-				intMsg[count_intMsg - 1].flags = msgData[5] & 63;
-				if (validPad) intMsg[count_intMsg - 1].flags |= AEM_INTMSG_FLAGS_VALIDPAD;
-				if (validSig) intMsg[count_intMsg - 1].flags |= AEM_INTMSG_FLAGS_VALIDSIG;
+				intMsg[count_intMsg - 1].flags = msgData[5];
+				// TODO store validPad/Sig flags
+//				if (validPad) 
+//				if (validSig) 
 
 				if ((intMsg[count_intMsg - 1].flags & AEM_INTMSG_FLAGS_PUBLIC) != 0) {
 					const size_t lenData = lenMsgData - 6 - crypto_sign_BYTES - padAmount;
