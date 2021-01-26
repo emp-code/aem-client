@@ -1192,7 +1192,7 @@ function AllEars(readyCallback) {
 
 							const bodyAndTitle = sodium.to_string(msgData.slice(1));
 							const separator = bodyAndTitle.indexOf('\n');
-							_intMsg.push(new _NewIntMsg(validPad, validSig, msgId, msgTs, false, 3, null, (msgData[0] & 192 !== 0) ? "system" : "public", "", bodyAndTitle.slice(0, separator), bodyAndTitle.slice(separator + 1)));
+							_intMsg.push(new _NewIntMsg(validPad, validSig, msgId, msgTs, false, 3, null, (msgData[0] & 192 === 192) ? "system" : "public", "", bodyAndTitle.slice(0, separator), bodyAndTitle.slice(separator + 1)));
 							break;
 						}
 
