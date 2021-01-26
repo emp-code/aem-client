@@ -1185,15 +1185,20 @@ function AllEars(readyCallback) {
 					break;}
 
 					case 16: { // IntMsg
-						// 128/64 unused
-						if ((msgData[0] & 32) !== 0) {
+						const msgType = msgData[0] & 192;
+
+						if (msgType >= 128) { // 192: System, 128: Public
+							// 32/16/8/4/2/1 unused
+
 							const bodyAndTitle = sodium.to_string(msgData.slice(1));
 							const separator = bodyAndTitle.indexOf('\n');
-							_intMsg.push(new _NewIntMsg(validPad, validSig, msgId, msgTs, false, 3, null, "system", "", bodyAndTitle.slice(0, separator), bodyAndTitle.slice(separator + 1)));
+							_intMsg.push(new _NewIntMsg(validPad, validSig, msgId, msgTs, false, 3, null, (msgData[0] & 192 !== 0) ? "system" : "public", "", bodyAndTitle.slice(0, separator), bodyAndTitle.slice(separator + 1)));
 							break;
 						}
 
-						const msgEncrypted  = (msgData[0] & 16) !== 0;
+						// User-to-user message; 64: E2EE, 0: Non-E2EE
+						// 32/16 unused
+						const msgEncrypted  = (msgData[0] & 64) !== 0;
 						const msgFromShield = (msgData[0] &  8) !== 0;
 						const msgToShield   = (msgData[0] &  4) !== 0;
 						const msgFromLv = msgData[0] & 3;
@@ -1374,8 +1379,8 @@ function AllEars(readyCallback) {
 		const final = new Uint8Array((sodium.crypto_kx_PUBLICKEYBYTES * 2) + 26 + msgBox.length);
 		final.fill(0);
 
-		// 128/64/32 unused
-		final[0] = isE2ee? 16 : 0;
+		// 128/32/16 unused
+		final[0] = isE2ee? 64 : 0;
 		if (addr_from.length === 16) final[0] |= 8;
 		if (addr_to.length   === 16) final[0] |= 4;
 		// Server sets sender level (0-3)
