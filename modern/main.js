@@ -490,26 +490,27 @@ function displayMsg(isInt, num) {
 	const tzOs = new Date().getTimezoneOffset();
 //	const tz = ((tzOs < 0) ? "+" : "-") + Math.floor(tzOs / -60).toString().padStart(2, "0") + (tzOs % 60 * -1).toString().padStart(2, "0");
 	const msgDate = new Date((ts * 1000) + (tzOs * -60000));
-	const hdrTz = (ae.GetExtMsgHdrTz(num) >= 0 ? "+" : "-") + Math.floor(Math.abs(ae.GetExtMsgHdrTz(num)) / 60).toString().padStart(2, "0") + (Math.abs(ae.GetExtMsgHdrTz(num)) % 60).toString().padStart(2, "0");
-
-	let hdrSecs = Math.abs(ae.GetExtMsgHdrTime(num));
-	let hdrTime = "";
-	if (hdrSecs >= 3600) {
-		const hdrHours = Math.floor(hdrSecs / 3600);
-		hdrTime += hdrHours.toString() + "h ";
-		hdrSecs -= hdrHours * 3600;
-	}
-	if (hdrSecs >= 60) {
-		const hdrMins = Math.floor(hdrSecs / 60);
-		hdrTime += hdrMins.toString() + "m ";
-		hdrSecs -= hdrMins * 60;
-	}
-	hdrTime += hdrSecs + "s";
 
 	document.getElementById("readmsg_date").children[0].innerHTML = getClockIcon(msgDate);
-	document.getElementById("readmsg_date").children[1].textContent = msgDate.toISOString().slice(0, 19).replace("T", " ") + (isInt? "" : "; " + hdrTz + " " + ((ae.GetExtMsgHdrTime(num) >= 0) ? "+" : "-") + hdrTime);
 
 	if (!isInt) {
+		let hdrSecs = Math.abs(ae.GetExtMsgHdrTime(num));
+		let hdrTime = "";
+		if (hdrSecs >= 3600) {
+			const hdrHours = Math.floor(hdrSecs / 3600);
+			hdrTime += hdrHours.toString() + "h ";
+			hdrSecs -= hdrHours * 3600;
+		}
+		if (hdrSecs >= 60) {
+			const hdrMins = Math.floor(hdrSecs / 60);
+			hdrTime += hdrMins.toString() + "m ";
+			hdrSecs -= hdrMins * 60;
+		}
+		hdrTime += hdrSecs + "s";
+
+		const hdrTz = (ae.GetExtMsgHdrTz(num) >= 0 ? "+" : "-") + Math.floor(Math.abs(ae.GetExtMsgHdrTz(num)) / 60).toString().padStart(2, "0") + (Math.abs(ae.GetExtMsgHdrTz(num)) % 60).toString().padStart(2, "0");
+		document.getElementById("readmsg_date").children[1].textContent = msgDate.toISOString().slice(0, 19).replace("T", " ") + "; " + hdrTz + " " + ((ae.GetExtMsgHdrTime(num) >= 0) ? "+" : "-") + hdrTime;
+
 		document.getElementById("readmsg_ip").style.visibility = "visible";
 		document.getElementById("readmsg_rdns").style.visibility = "visible";
 		document.getElementById("readmsg_dkim").style.visibility = "visible";
@@ -540,6 +541,8 @@ function displayMsg(isInt, num) {
 		if (ae.GetExtMsgFlagMult(num)) flagText += "<abbr title=\"Multiple recipients on this service\">MULT</abbr> ";
 		document.getElementById("readmsg_flags").children[0].innerHTML = flagText.trim();
 	} else {
+		document.getElementById("readmsg_date").children[1].textContent = msgDate.toISOString().slice(0, 19).replace("T", " ");
+
 		document.getElementById("readmsg_ip").style.visibility = "hidden";
 		document.getElementById("readmsg_rdns").style.visibility = "hidden";
 		document.getElementById("readmsg_dkim").style.visibility = "hidden";
