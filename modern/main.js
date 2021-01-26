@@ -621,11 +621,16 @@ function getRowsPerPage() {
 }
 
 function addMessages() {
-	const rowsPerPage = getRowsPerPage();
-	let skipMsgs = rowsPerPage * tabs[TAB_INBOX].cur;
-
 	const maxExt = ae.GetExtMsgCount();
 	const maxInt = ae.GetIntMsgCount();
+
+	if (maxExt + maxInt < 1) {
+		tabs[TAB_INBOX].max = 0;
+		return;
+	}
+
+	const rowsPerPage = getRowsPerPage();
+	let skipMsgs = rowsPerPage * tabs[TAB_INBOX].cur;
 
 	tabs[TAB_INBOX].max = Math.floor((maxExt + maxInt - 1) / rowsPerPage);
 
