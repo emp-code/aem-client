@@ -355,23 +355,42 @@ int allears_message_browse() {
 				memcpy(intMsg[count_intMsg - 1].senderPubkey, msgData + 26, crypto_kx_PUBLICKEYBYTES);
 
 				const int lenSubj = (msgData[26 + crypto_kx_PUBLICKEYBYTES] & 127); // 128 unused
+				const bool isE2ee = (intMsg[count_intMsg - 1].flags & AEM_INTMSG_FLAGS_ENCRYPTED) != 0;
 
-				if ((intMsg[count_intMsg - 1].flags & AEM_INTMSG_FLAGS_ENCRYPTED) != 0) {
-					// TODO
-					intMsg[count_intMsg - 1].subj = strdup("TODO-Enc");
-					intMsg[count_intMsg - 1].body = strdup("TODO-Enc");
-				} else {
-					intMsg[count_intMsg - 1].subj = malloc(lenSubj + 1);
-					if (intMsg[count_intMsg - 1].subj == NULL) {free(browseData); return -1;}
-					memcpy(intMsg[count_intMsg - 1].subj, msgData + 27 + crypto_kx_PUBLICKEYBYTES, lenSubj);
-					intMsg[count_intMsg - 1].subj[lenSubj] = '\0';
+				unsigned char *msgBox = msgData + 27 + crypto_kx_PUBLICKEYBYTES;
 
-					const size_t lenBody = lenMsgData - 27 - crypto_kx_PUBLICKEYBYTES - lenSubj - crypto_sign_BYTES - padAmount;
-					intMsg[count_intMsg - 1].body = malloc(lenBody + 1);
-					if (intMsg[count_intMsg - 1].body == NULL) {free(browseData); return -1;}
-					memcpy(intMsg[count_intMsg - 1].body, msgData + 27 + crypto_kx_PUBLICKEYBYTES + lenSubj, lenBody);
-					intMsg[count_intMsg - 1].body[lenBody] = '\0';
+				unsigned char *decrypted;
+				if (isE2ee) {
+					unsigned char nonce[crypto_secretbox_NONCEBYTES];
+					memcpy(nonce, &msgTs, 4);
+					bzero(nonce + 4, crypto_secretbox_NONCEBYTES - 4);
+
+					unsigned char seedHash[crypto_kx_SEEDBYTES];
+					crypto_generichash(seedHash, crypto_kx_SEEDBYTES, intMsg[count_intMsg - 1].addr32_to, 10, userKey_kxHash, crypto_generichash_KEYBYTES);
+
+					unsigned char kxKeyPk[crypto_kx_PUBLICKEYBYTES];
+					unsigned char kxKeySk[crypto_kx_SECRETKEYBYTES];
+					crypto_kx_seed_keypair(kxKeyPk, kxKeySk, seedHash);
+
+					unsigned char rx[crypto_kx_SESSIONKEYBYTES];
+					unsigned char tx[crypto_kx_SESSIONKEYBYTES];
+					crypto_kx_server_session_keys(rx, tx, kxKeyPk, kxKeySk, intMsg[count_intMsg - 1].senderPubkey);
+
+					decrypted = malloc(lenMsgData - 27 - crypto_kx_PUBLICKEYBYTES - crypto_secretbox_MACBYTES);
+					crypto_secretbox_open_easy(decrypted, msgData + 27 + crypto_kx_PUBLICKEYBYTES, lenMsgData - 27 - crypto_kx_PUBLICKEYBYTES, nonce, rx);
+					msgBox = decrypted;
 				}
+
+				intMsg[count_intMsg - 1].subj = malloc(lenSubj + 1);
+				if (intMsg[count_intMsg - 1].subj == NULL) {free(browseData); return -1;}
+				memcpy(intMsg[count_intMsg - 1].subj, msgBox, lenSubj);
+				intMsg[count_intMsg - 1].subj[lenSubj] = '\0';
+
+				const size_t lenBody = lenMsgData - 27 - crypto_kx_PUBLICKEYBYTES - lenSubj - crypto_sign_BYTES - padAmount;
+				intMsg[count_intMsg - 1].body = malloc(lenBody + 1);
+				if (intMsg[count_intMsg - 1].body == NULL) {free(browseData); return -1;}
+				memcpy(intMsg[count_intMsg - 1].body, msgBox + lenSubj, lenBody);
+				intMsg[count_intMsg - 1].body[lenBody] = '\0';
 			break;}
 
 			case 32: { // UplMsg
