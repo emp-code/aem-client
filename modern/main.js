@@ -452,9 +452,43 @@ function displayMsg(isInt, num) {
 	document.getElementById("midright").children[0].hidden = false;
 	document.getElementById("midright").children[2].hidden = false;
 
+	document.getElementById("readmsg_envto").textContent = isInt ? "" : ae.GetExtMsgEnvTo(num);
+	document.getElementById("readmsg_hdrto").textContent = isInt ? ae.GetIntMsgTo(num) : ae.GetExtMsgHdrTo(num);
+
+	const tzOs = new Date().getTimezoneOffset();
+	const msgDate = new Date((ts * 1000) + (tzOs * -60000));
+	document.getElementById("readmsg_date").children[0].innerHTML = getClockIcon(msgDate);
+
 	if (isInt) {
 		document.getElementById("midright").children[1].textContent = ae.GetIntMsgTitle(num);
 		document.getElementById("midright").children[2].textContent = ae.GetIntMsgBody(num);
+
+		document.getElementById("readmsg_date").children[1].textContent = msgDate.toISOString().slice(0, 19).replace("T", " ");
+
+		document.getElementById("readmsg_ip").style.visibility = "hidden";
+		document.getElementById("readmsg_rdns").style.visibility = "hidden";
+		document.getElementById("readmsg_dkim").style.visibility = "hidden";
+		document.getElementById("readmsg_greet").style.visibility = "hidden";
+		document.getElementById("readmsg_cert").style.visibility = "hidden";
+		document.getElementById("readmsg_envfrom").style.visibility = "hidden";
+		document.getElementById("readmsg_envto").style.visibility = "hidden";
+
+		document.getElementById("readmsg_tls").style.visibility = "visible";
+		document.getElementById("readmsg_tls").children[0].textContent = ae.GetIntMsgFromPk(num);
+
+		let symbol = "<span title=\"Invalid level\">&#x26a0;</span>";
+		if (ae.GetIntMsgFrom(num) === "system") {if (ae.GetIntMsgLevel(num) === 3) symbol = "<span title=\"System\">&#x1f162;</span>";} // S (System)
+		else if (ae.GetIntMsgLevel(num) === 0) symbol = "<span title=\"Level 0 User\">&#x1f10c;</span>"; // 0
+		else if (ae.GetIntMsgLevel(num) === 1) symbol = "<span title=\"Level 1 User\">&#x278a;</span>"; // 1
+		else if (ae.GetIntMsgLevel(num) === 2) symbol = "<span title=\"Level 2 User\">&#x278b;</span>"; // 2
+		else if (ae.GetIntMsgLevel(num) === 3) symbol = "<span title=\"Administrator\">&#x1f150;</span>"; // A (Admin)
+		document.getElementById("readmsg_hdrfrom").innerHTML = symbol + " " + ae.GetIntMsgFrom(num);
+
+		let flagText = "";
+		if (!ae.GetIntMsgFlagVPad(num)) flagText += "<abbr title=\"Invalid padding\">PAD</abbr> ";
+		if (!ae.GetIntMsgFlagVSig(num)) flagText += "<abbr title=\"Invalid signature\">SIG</abbr> ";
+		if (ae.GetIntMsgFlagE2ee(num)) flagText += "<abbr title=\"End-to-end encrypted\">E2EE</abbr> ";
+		document.getElementById("readmsg_flags").children[0].innerHTML = flagText.trim();
 	} else {
 		document.getElementById("midright").children[2].innerHTML = "";
 
@@ -482,18 +516,7 @@ function displayMsg(isInt, num) {
 		document.getElementById("midright").children[1].textContent = ae.GetExtMsgTitle(num);
 		document.getElementById("midright").children[1].onclick = function() {showHeaders = !showHeaders; headers.hidden = !showHeaders;};
 		document.getElementById("midright").children[1].style.cursor = "pointer";
-	}
 
-	document.getElementById("readmsg_envto").textContent = isInt ? "" : ae.GetExtMsgEnvTo(num);
-	document.getElementById("readmsg_hdrto").textContent = isInt ? ae.GetIntMsgTo(num) : ae.GetExtMsgHdrTo(num);
-
-	const tzOs = new Date().getTimezoneOffset();
-//	const tz = ((tzOs < 0) ? "+" : "-") + Math.floor(tzOs / -60).toString().padStart(2, "0") + (tzOs % 60 * -1).toString().padStart(2, "0");
-	const msgDate = new Date((ts * 1000) + (tzOs * -60000));
-
-	document.getElementById("readmsg_date").children[0].innerHTML = getClockIcon(msgDate);
-
-	if (!isInt) {
 		let hdrSecs = Math.abs(ae.GetExtMsgHdrTime(num));
 		let hdrTime = "";
 		if (hdrSecs >= 3600) {
@@ -539,33 +562,6 @@ function displayMsg(isInt, num) {
 		if (ae.GetExtMsgFlagFail(num)) flagText += "<abbr title=\"The sender issued invalid command(s)\">FAIL</abbr> ";
 		if (ae.GetExtMsgFlagPErr(num)) flagText += "<abbr title=\"The sender violated the protocol\">PROT</abbr> ";
 		if (ae.GetExtMsgFlagMult(num)) flagText += "<abbr title=\"Multiple recipients on this service\">MULT</abbr> ";
-		document.getElementById("readmsg_flags").children[0].innerHTML = flagText.trim();
-	} else {
-		document.getElementById("readmsg_date").children[1].textContent = msgDate.toISOString().slice(0, 19).replace("T", " ");
-
-		document.getElementById("readmsg_ip").style.visibility = "hidden";
-		document.getElementById("readmsg_rdns").style.visibility = "hidden";
-		document.getElementById("readmsg_dkim").style.visibility = "hidden";
-		document.getElementById("readmsg_greet").style.visibility = "hidden";
-		document.getElementById("readmsg_cert").style.visibility = "hidden";
-		document.getElementById("readmsg_envfrom").style.visibility = "hidden";
-		document.getElementById("readmsg_envto").style.visibility = "hidden";
-
-		document.getElementById("readmsg_tls").style.visibility = "visible";
-		document.getElementById("readmsg_tls").children[0].textContent = ae.GetIntMsgFromPk(num);
-
-		let symbol = "<span title=\"Invalid level\">&#x26a0;</span>";
-		if (ae.GetIntMsgFrom(num) === "system") {if (ae.GetIntMsgLevel(num) === 3) symbol = "<span title=\"System\">&#x1f162;</span>";} // S (System)
-		else if (ae.GetIntMsgLevel(num) === 0) symbol = "<span title=\"Level 0 User\">&#x1f10c;</span>"; // 0
-		else if (ae.GetIntMsgLevel(num) === 1) symbol = "<span title=\"Level 1 User\">&#x278a;</span>"; // 1
-		else if (ae.GetIntMsgLevel(num) === 2) symbol = "<span title=\"Level 2 User\">&#x278b;</span>"; // 2
-		else if (ae.GetIntMsgLevel(num) === 3) symbol = "<span title=\"Administrator\">&#x1f150;</span>"; // A (Admin)
-		document.getElementById("readmsg_hdrfrom").innerHTML = symbol + " " + ae.GetIntMsgFrom(num);
-
-		let flagText = "";
-		if (!ae.GetIntMsgFlagVPad(num)) flagText += "<abbr title=\"Invalid padding\">PAD</abbr> ";
-		if (!ae.GetIntMsgFlagVSig(num)) flagText += "<abbr title=\"Invalid signature\">SIG</abbr> ";
-		if (ae.GetIntMsgFlagE2ee(num)) flagText += "<abbr title=\"End-to-end encrypted\">E2EE</abbr> ";
 		document.getElementById("readmsg_flags").children[0].innerHTML = flagText.trim();
 	}
 }
