@@ -733,8 +733,7 @@ function displayOutMsg(num) {
 
 	const ts = ae.GetOutMsgTime(num);
 	const tzOs = new Date().getTimezoneOffset();
-	const tz = ((tzOs < 0) ? "+" : "-") + Math.floor(tzOs / -60).toString().padStart(2, "0") + (tzOs % 60 * -1).toString().padStart(2, "0");
-	document.getElementById("readmsg_date").children[1].textContent = new Date((ts * 1000) + (tzOs * -60000)).toISOString().slice(0, 19).replace("T", " ") + " " + tz;
+	document.getElementById("readmsg_date").children[1].textContent = new Date((ts * 1000) + (tzOs * -60000)).toISOString().slice(0, 19).replace("T", " ");
 
 	const isInt = ae.GetOutMsgIsInt(num);
 	document.getElementById("readmsg_ip").style.visibility    = isInt? "hidden" : "visible";
