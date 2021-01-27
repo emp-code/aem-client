@@ -1338,7 +1338,7 @@ document.querySelector("#write2_send > button").onclick = function() {
 		(document.getElementById("write2_recv").textContent.indexOf("@") > 0) ? null : sodium.from_base64(document.querySelector("#write2_pkey > input").value, sodium.base64_variants.ORIGINAL_NO_PADDING),
 		function(success) {
 			if (success) {
-				document.getElementById("write2_btntxt").textContent = "Successfully sent to";
+				document.getElementById("write2_btntxt").textContent = "Delivered to";
 				document.getElementById("write_recv").value = "";
 				document.getElementById("write_subj").value = "";
 				document.getElementById("write_body").value = "";
