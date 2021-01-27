@@ -482,8 +482,8 @@ function displayMsg(isInt, num) {
 		document.getElementById("readmsg_tls").children[0].textContent = ae.GetIntMsgFromPk(num);
 
 		let symbol = "<span title=\"Invalid level\">&#x26a0;</span>";
-		if      (ae.GetIntMsgFrom(num) === "system") {if (ae.GetIntMsgLevel(num) === 3) symbol = "<span title=\"System\">&#x1f162;</span>";} // S (System)
-		else if (ae.GetIntMsgFrom(num) === "public") {if (ae.GetIntMsgLevel(num) === 3) symbol = "<span title=\"Public\">&#x1f15f;</span>";} // P (Public)
+		if      (ae.GetIntMsgFrom(num) === "system") {if (ae.GetIntMsgLevel(num) === 3) symbol = "<span title=\"System message\">&#x1f162;</span>";} // (S)
+		else if (ae.GetIntMsgFrom(num) === "public") {if (ae.GetIntMsgLevel(num) === 3) symbol = "<span title=\"Public announcement\">&#x1f15f;</span>";} // (P)
 		else if (ae.GetIntMsgLevel(num) === 0) symbol = "<span title=\"Level 0 User\">&#x1f10c;</span>"; // 0
 		else if (ae.GetIntMsgLevel(num) === 1) symbol = "<span title=\"Level 1 User\">&#x278a;</span>"; // 1
 		else if (ae.GetIntMsgLevel(num) === 2) symbol = "<span title=\"Level 2 User\">&#x278b;</span>"; // 2
