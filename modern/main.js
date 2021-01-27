@@ -1067,6 +1067,12 @@ function refreshContactList(mail, name, note) {
 		el.value = ae.GetContactMail(i);
 		lst.appendChild(el);
 	}
+
+	if (ae.IsUserAdmin()) {
+		const el = document.createElement("option");
+		el.value = "public";
+		lst.appendChild(el);
+	}
 }
 
 function addContact(mail, name, note) {
