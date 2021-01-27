@@ -1265,7 +1265,7 @@ function AllEars(readyCallback) {
 						const lenSb = msgData[0] & 127;
 
 						if ((msgData[0] & 128) !== 0) { // Internal message
-							const isE2ee       = (msgData[1] & 16) !== 0;
+							const isE2ee       = (msgData[1] & 64) !== 0;
 							const isFromShield = (msgData[1] &  8) !== 0;
 							const isToShield   = (msgData[1] &  4) !== 0;
 
