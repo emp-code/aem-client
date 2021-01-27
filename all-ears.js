@@ -749,10 +749,10 @@ function AllEars(readyCallback) {
 	this.GetExtMsgFlagPErr = function(num) {return _extMsg[num].protV;};
 	this.GetExtMsgFlagMult = function(num) {return _extMsg[num].multi;};
 
-	this.GetExtMsgTls_MatchGreeting = function(num) {return _extMsg[num].tls & _AEM_EMAIL_CERT_MATCH_GREETING;}
-	this.GetExtMsgTls_MatchRdns     = function(num) {return _extMsg[num].tls & _AEM_EMAIL_CERT_MATCH_RDNS;}
-	this.GetExtMsgTls_MatchEnvFrom  = function(num) {return _extMsg[num].tls & _AEM_EMAIL_CERT_MATCH_ENVFROM;}
-	this.GetExtMsgTls_MatchHdrFrom  = function(num) {return _extMsg[num].tls & _AEM_EMAIL_CERT_MATCH_HDRFROM;}
+	this.GetExtMsgTls_MatchGreeting = function(num) {return _extMsg[num].tls & _AEM_EMAIL_CERT_MATCH_GREETING;};
+	this.GetExtMsgTls_MatchRdns     = function(num) {return _extMsg[num].tls & _AEM_EMAIL_CERT_MATCH_RDNS;};
+	this.GetExtMsgTls_MatchEnvFrom  = function(num) {return _extMsg[num].tls & _AEM_EMAIL_CERT_MATCH_ENVFROM;};
+	this.GetExtMsgTls_MatchHdrFrom  = function(num) {return _extMsg[num].tls & _AEM_EMAIL_CERT_MATCH_HDRFROM;};
 	this.GetExtMsgTls_CertType = function(num) {
 		switch (_extMsg[num].tls & _AEM_EMAIL_CERT_EDDSA) {
 			case _AEM_EMAIL_CERT_EDDSA: return "EdDSA";
@@ -764,7 +764,7 @@ function AllEars(readyCallback) {
 			case _AEM_EMAIL_CERT_RSA1K: return "RSA-1k";
 			default: return "";
 		}
-	}
+	};
 
 	this.GetExtMsgReplyAddress = function(num) {
 		let resultStart = ("\n" + _extMsg[num].headers.toUpperCase()).lastIndexOf("\nREPLY-TO:");
