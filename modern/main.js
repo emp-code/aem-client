@@ -1136,7 +1136,7 @@ function writeVerify() {
 		document.getElementById("write2_pkey").hidden = true;
 	} else {
 		document.getElementById("write2_from").textContent = document.getElementById("write_from").value;
-		document.getElementById("write2_pkey").hidden = false;
+		document.getElementById("write2_pkey").hidden = (document.getElementById("write_recv").value === "public");
 	}
 
 	document.querySelector("#write2_send > button").disabled = false;
