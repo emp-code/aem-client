@@ -426,28 +426,33 @@ function displayMsg(isInt, num) {
 
 	const ts = isInt? ae.GetIntMsgTime(num) : ae.GetExtMsgTime(num);
 
-	document.getElementById("btn_reply").disabled = false;
-	document.getElementById("btn_reply").onclick = function() {
-		document.getElementById("write_recv").value = isInt? ae.GetIntMsgFrom(num) : ae.GetExtMsgReplyAddress(num);
-		document.getElementById("write_subj").value = isInt? ae.GetIntMsgTitle(num) : ae.GetExtMsgTitle(num);
-		if (!document.getElementById("write_subj").value.startsWith("Re:")) document.getElementById("write_subj").value = "Re: " + document.getElementById("write_subj").value;
-		document.querySelector("#write2_pkey > input").value = isInt? ae.GetIntMsgFromPk(num) : "";
+	if (!isInt || (ae.GetIntMsgFrom(num) !== "public" && ae.GetIntMsgFrom(num) !== "system")) {
+		document.getElementById("btn_reply").disabled = false;
 
-		document.getElementById("write_recv").readOnly = !isInt;
-		document.getElementById("write_subj").readOnly = !isInt;
-		document.getElementById("write_subj").setAttribute("data-replyid", isInt? "" : ae.GetExtMsgHdrId(num));
+		document.getElementById("btn_reply").onclick = function() {
+			document.getElementById("write_recv").value = isInt? ae.GetIntMsgFrom(num) : ae.GetExtMsgReplyAddress(num);
+			document.getElementById("write_subj").value = isInt? ae.GetIntMsgTitle(num) : ae.GetExtMsgTitle(num);
+			if (!document.getElementById("write_subj").value.startsWith("Re:")) document.getElementById("write_subj").value = "Re: " + document.getElementById("write_subj").value;
+			document.querySelector("#write2_pkey > input").value = isInt? ae.GetIntMsgFromPk(num) : "";
 
-		tabs[TAB_WRITE].cur = 0;
-		document.getElementById("btn_write").disabled = false;
-		document.getElementById("btn_write").click();
-		document.getElementById("write_body").focus();
+			document.getElementById("write_recv").readOnly = !isInt;
+			document.getElementById("write_subj").readOnly = !isInt;
+			document.getElementById("write_subj").setAttribute("data-replyid", isInt? "" : ae.GetExtMsgHdrId(num));
 
-		for (const opt of document.getElementById("write_from").options) {
-			if (opt.value === (isInt ? ae.GetIntMsgTo(num) : ae.GetExtMsgEnvTo(num))) {
-				opt.selected = true;
+			tabs[TAB_WRITE].cur = 0;
+			document.getElementById("btn_write").disabled = false;
+			document.getElementById("btn_write").click();
+			document.getElementById("write_body").focus();
+
+			for (const opt of document.getElementById("write_from").options) {
+				if (opt.value === (isInt ? ae.GetIntMsgTo(num) : ae.GetExtMsgEnvTo(num))) {
+					opt.selected = true;
+				}
 			}
-		}
-	};
+		};
+	} else {
+		document.getElementById("btn_reply").disabled = true;
+	}
 
 	document.getElementById("midright").children[0].hidden = false;
 	document.getElementById("midright").children[2].hidden = false;
