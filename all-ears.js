@@ -1440,6 +1440,23 @@ function AllEars(readyCallback) {
 		});
 	};
 
+	this.Message_Public = function(title, body, callback) {
+		const binMsg = sodium.from_string(title + "\n" + body);
+
+		_FetchEncrypted(_AEM_API_MESSAGE_PUBLIC, binMsg, function(fetchOk, newMsgId) {
+			if (!fetchOk) {callback(false); return;}
+
+			_intMsg.unshift(new _NewIntMsg(true, true, null, Date.now() / 1000, false, 3, null, "public", "", title, body));
+
+			let x = binMsg.length + 117; // 5 (info + ts) + 64 (sig) + 48 (sealed box)
+			if (x % 16 !== 0) x+= (16 - (x % 16));
+			_totalMsgBytes += x;
+			_readyMsgBytes += x;
+
+			callback(true);
+		});
+	}
+
 	this.Message_Upload = function(title, body, callback) {
 		if (typeof(title) !== "string" || title.length < 1 || body.length < 1) {callback(false); return;}
 
