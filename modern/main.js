@@ -1122,6 +1122,9 @@ function writeVerify() {
 		document.getElementById("write2_from").textContent = document.getElementById("write_from").value;
 		document.getElementById("write2_pkey").hidden = false;
 	}
+
+	document.querySelector("#write2_send > button").disabled = false;
+	document.getElementById("write2_btntxt").textContent = (document.getElementById("write_recv").value === "public") ? "Make" : "Send to";
 }
 
 function updateTab() {
@@ -1140,8 +1143,6 @@ function updateTab() {
 					document.getElementById("div_write_1").hidden = false;
 					document.getElementById("div_write_2").hidden = true;
 					document.getElementById("write_body").focus();
-					document.querySelector("#write2_send > button").disabled = false;
-					document.getElementById("write2_btntxt").textContent = "Send to";
 				break;
 
 				case 1:
@@ -1329,6 +1330,25 @@ document.getElementById("btn_pg").onclick = function() {
 document.querySelector("#write2_send > button").onclick = function() {
 	const btn = this;
 	btn.disabled = true;
+
+	// Public announcement
+	if (document.getElementById("write2_recv").textContent === "public") {
+		ae.Message_Public(document.getElementById("write_subj").value, document.getElementById("write_body").value, function(success) {
+			if (success) {
+				document.getElementById("write2_btntxt").textContent = "Announced to";
+				document.getElementById("write_recv").value = "";
+				document.getElementById("write_subj").value = "";
+				document.getElementById("write_body").value = "";
+			} else {
+				document.getElementById("write2_btntxt").textContent = "Retry making";
+				btn.disabled = false;
+			}
+		});
+
+		return;
+	}
+
+	// Email or internal message
 	document.getElementById("write2_btntxt").textContent = "Sending to";
 
 	ae.Message_Create(
