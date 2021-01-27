@@ -887,6 +887,8 @@ function reloadAccount() {
 		);
 	}
 
+	refreshContactList();
+
 	// Addresses
 	for (let i = 0; i < ae.GetAddressCount(); i++) {
 		addAddress(i);
@@ -1056,6 +1058,17 @@ document.getElementById("btn_mdele").onclick = function() {
 	});
 };
 
+function refreshContactList(mail, name, note) {
+	const lst = document.getElementById("contact_emails");
+	lst.innerHTML = "";
+
+	for (let i = 0; i < ae.GetContactCount(); i++) {
+		const el = document.createElement("option");
+		el.value = ae.GetContactMail(i);
+		lst.appendChild(el);
+	}
+}
+
 function addContact(mail, name, note) {
 	const tbl = document.getElementById("tbl_ctact");
 	const row = tbl.insertRow(-1);
@@ -1088,6 +1101,8 @@ document.getElementById("btn_savecontacts").onclick = function() {
 	for (const row of document.getElementById("tbl_ctact").rows) {
 		ae.AddContact(row.cells[0].textContent, row.cells[1].textContent, row.cells[2].textContent);
 	}
+
+	refreshContactList();
 
 	const btn = this;
 	btn.disabled = true;
