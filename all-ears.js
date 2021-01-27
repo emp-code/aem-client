@@ -786,7 +786,7 @@ function AllEars(readyCallback) {
 	};
 
 	this.GetIntMsgCount = function() {return _intMsg.length;};
-	this.GetIntMsgIdHex  = function(num) {return sodium.to_hex(_intMsg[num].id);};
+	this.GetIntMsgIdHex  = function(num) {return _intMsg[num].id? sodium.to_hex(_intMsg[num].id) : null;};
 	this.GetIntMsgTime   = function(num) {return _intMsg[num].ts;};
 	this.GetIntMsgLevel  = function(num) {return _intMsg[num].fromLv;};
 	this.GetIntMsgFromPk = function(num) {return _intMsg[num].fromPk? sodium.to_base64(_intMsg[num].fromPk, sodium.base64_variants.ORIGINAL_NO_PADDING) : "";};
