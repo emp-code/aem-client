@@ -996,6 +996,8 @@ document.getElementById("btn_dele").onclick = function() {
 		tabs[tab].cur = 0;
 		updateTab();
 
+		document.getElementById("write2_pkey").children[0].value = "";
+
 		document.getElementById("write_recv").value = "";
 		document.getElementById("write_subj").value = "";
 		document.getElementById("write_body").value = "";
