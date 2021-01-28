@@ -1455,7 +1455,7 @@ function AllEars(readyCallback) {
 
 			callback(true);
 		});
-	}
+	};
 
 	this.Message_Upload = function(title, body, callback) {
 		if (typeof(title) !== "string" || title.length < 1 || body.length < 1) {callback(false); return;}
