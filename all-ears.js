@@ -1442,6 +1442,7 @@ function AllEars(readyCallback) {
 
 	this.Message_Public = function(title, body, callback) {
 		const binMsg = sodium.from_string(title + "\n" + body);
+		if (binMsg.length < 59) {callback(false); return;} // 59 = 177-48-64-5-1
 
 		_FetchEncrypted(_AEM_API_MESSAGE_PUBLIC, binMsg, function(fetchOk, newMsgId) {
 			if (!fetchOk) {callback(false); return;}
