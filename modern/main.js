@@ -1058,7 +1058,7 @@ document.getElementById("btn_mdele").onclick = function() {
 	});
 };
 
-function refreshContactList(mail, name, note) {
+function refreshContactList() {
 	const lst = document.getElementById("contact_emails");
 	lst.innerHTML = "";
 
