@@ -1354,7 +1354,7 @@ function AllEars(readyCallback) {
 		// Internal mail
 		const isE2ee = (to_pubkey.constructor === Uint8Array && to_pubkey.length === sodium.crypto_kx_PUBLICKEYBYTES);
 		const msgTs = new Uint8Array(isE2ee? (new Uint32Array([Math.round(Date.now() / 1000) + 2]).buffer) : [0,0,0,0]); // +2 to account for connection delay
-		if (!isE2ee && (title.length + body.length) < 38) body = body.padEnd(38 - title.length, "\0"); // Minimum message size based on AEM_MSG_MINBLOCKS
+		if (!isE2ee && (title.length + body.length) < 6) body = body.padEnd(6 - title.length, "\0"); // Minimum message size: 177-48-64-5-1-32-10-10-1 = 6
 
 		const addr32_from = _addr32_encode(addr_from);
 		if (!addr32_from) {callback(false); return;}
@@ -1376,7 +1376,7 @@ function AllEars(readyCallback) {
 			msgBox = sodium.from_string(title + body);
 		}
 
-		const final = new Uint8Array((sodium.crypto_kx_PUBLICKEYBYTES * 2) + 26 + msgBox.length);
+		const final = new Uint8Array((sodium.crypto_kx_PUBLICKEYBYTES * 2) + 26 + msgBox.length); // 1+4+10+10+1=26
 		final.fill(0);
 
 		// 128/32/16 unused
