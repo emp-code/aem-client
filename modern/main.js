@@ -666,15 +666,15 @@ function addMessages() {
 		row.onclick = function() {
 			this.onclick = "";
 
-			ae.Message_Browse(false, false, function(successBrowse) {
+			ae.Message_Browse(false, false, function(errorBrowse) {
 				document.getElementById("tbl_inbox").style.opacity = 1;
 
-				if (successBrowse) {
+				if (!errorBrowse) {
 					addMessages();
 					addUploads();
 					addSent();
 					if (tabs[tab].cur < tabs[tab].max) document.getElementById("btn_rght").disabled = false;
-				}
+				} // else TODO
 			});
 		};
 	}
@@ -702,8 +702,9 @@ function addUploads() {
 
 			cell.children[0].onclick = function() {
 				const tr = this.parentElement.parentElement;
-				ae.Message_Delete(this.getAttribute("data-msgid"), function(success) {
-					if (success) tr.remove();
+				ae.Message_Delete(this.getAttribute("data-msgid"), function(error) {
+					if (!error) tr.remove();
+					else console.log("Error " + error);
 				});
 			};
 		}
@@ -789,14 +790,14 @@ function adjustLevel(pubkey, level, c) {
 	const fs = document.getElementById("fs_accs");
 	fs.disabled = true;
 
-	ae.Account_Update(pubkey, level, function(success) {
+	ae.Account_Update(pubkey, level, function(error) {
 		fs.disabled = false;
 
-		if (success) {
+		if (!error) {
 			c[4].textContent = level;
 			c[5].children[0].disabled = (level === 3);
 			c[6].children[0].disabled = (level === 0);
-		}
+		} else console.log("Error " + error)
 	});
 }
 
@@ -821,8 +822,9 @@ function addAccountToTable(i) {
 	cell = row.insertCell(-1); cell.innerHTML = "<button type=\"button\" autocomplete=\"off\">X</button>";
 	cell.children[0].onclick = function() {
 		const tr = this.parentElement.parentElement;
-		ae.Account_Delete(tr.cells[0].textContent, function(success) {
-			if (success) tr.remove();
+		ae.Account_Delete(tr.cells[0].textContent, function(error) {
+			if (!error) tr.remove();
+			else console.log("Error " + error);
 		});
 	};
 }
@@ -863,15 +865,17 @@ function reloadAccount() {
 	cell = row.insertCell(-1); cell.innerHTML = "<button id=\"btn_downme\" type=\"button\" autocomplete=\"off\" disabled=\"disabled\">&minus;</button>";
 	cell.children[0].onclick = function() {
 		const newLevel = parseInt(row.cells[4].textContent, 10) - 1;
-		ae.Account_Update(ae.GetUserPkHex(), newLevel, function(success) {
-			if (success) row.cells[4].textContent = newLevel;
+		ae.Account_Update(ae.GetUserPkHex(), newLevel, function(error) {
+			if (!error) row.cells[4].textContent = newLevel;
+			else console.log("Error " + error);
 		});
 	};
 
 	cell = row.insertCell(-1); cell.innerHTML = "<button id=\"btn_killme\" type=\"button\" autocomplete=\"off\" disabled=\"disabled\">X</button>";
 	cell.children[0].onclick = function() {
-		ae.Account_Delete(ae.GetUserPkHex(), function(success) {
-			if (success) row.remove();
+		ae.Account_Delete(ae.GetUserPkHex(), function(error) {
+			if (!error) row.remove();
+			else console.log("Error " + error);
 		});
 	};
 
@@ -917,8 +921,8 @@ function deleteAddress(addr) {
 
 	if (addressToDelete === -1) return;
 
-	ae.Address_Delete(addressToDelete, function(success) {
-		if (success) {
+	ae.Address_Delete(addressToDelete, function(error1) {
+		if (!error1) {
 			document.getElementById("tbl_addrs").deleteRow(addressToDelete);
 			document.getElementById("write_from").remove(addressToDelete);
 			updateAddressCounts();
@@ -927,14 +931,14 @@ function deleteAddress(addr) {
 			document.getElementById("btn_address_create_normal").disabled = (limitReached || ae.GetAddressCountNormal() > ae.GetLimitNormalA(ae.GetUserLevel()));
 			document.getElementById("btn_address_create_shield").disabled = (limitReached || ae.GetAddressCountShield() > ae.GetLimitShieldA(ae.GetUserLevel()));
 
-			ae.Private_Update(function(success2) {
-				if (!success2) console.log("Failed to update the Private field");
+			ae.Private_Update(function(error2) {
+				if (error2) console.log("Failed to update the Private field: " + error2);
 
 				btns = document.getElementById("tbl_addrs").getElementsByTagName("button");
 				for (let i = 0; i < btns.length; i++) btns[i].disabled = false;
 			});
 		} else {
-			console.log("Failed to delete address");
+			console.log("Failed to delete address: " + error1);
 
 			btns = document.getElementById("tbl_addrs").getElementsByTagName("button");
 			for (let i = 0; i < btns.length; i++) btns[i].disabled = false;
@@ -1021,15 +1025,15 @@ document.getElementById("btn_updt").onclick = function() {
 	if (tab === TAB_INBOX) {
 		document.getElementById("tbl_inbox").style.opacity = 0.5;
 
-		ae.Message_Browse(true, false, function(successBrowse) {
+		ae.Message_Browse(true, false, function(error) {
 			document.getElementById("tbl_inbox").style.opacity = 1;
 
-			if (successBrowse) {
+			if (!error) {
 				addMessages();
 				addUploads();
 				btn.disabled = false;
 			} else {
-				console.log("Failed to refresh");
+				console.log("Failed to refresh: " + error);
 				btn.disabled = false;
 			}
 		});
@@ -1044,8 +1048,8 @@ document.getElementById("btn_mdele").onclick = function() {
 	const delId = document.getElementById("midright").getAttribute("data-msgid");
 	if (!delId) return;
 
-	ae.Message_Delete(delId, function(success) {
-		if (success) {
+	ae.Message_Delete(delId, function(error) {
+		if (!error) {
 			["tbl_inbox", "tbl_drbox", "tbd_uploads"].forEach(function(tbl_name) {
 				const tbl = document.getElementById(tbl_name);
 				for (let i = 0; i < tbl.rows.length; i++) {if (tbl.rows[i].getAttribute("data-msgid") === delId) tbl.deleteRow(i);}
@@ -1054,7 +1058,7 @@ document.getElementById("btn_mdele").onclick = function() {
 			addMessages();
 			addUploads();
 			addSent();
-		} else btn.disabled = false;
+		} else btn.disabled = false; // TODO display error
 	});
 };
 
@@ -1113,11 +1117,11 @@ document.getElementById("btn_savecontacts").onclick = function() {
 	const btn = this;
 	btn.disabled = true;
 
-	ae.Private_Update(function(success) {
+	ae.Private_Update(function(error) {
 		btn.disabled = false;
 
-		if (!success) {
-			console.log("Failed contacts update");
+		if (error) {
+			console.log("Failed contacts update: " + error);
 		}
 	});
 };
@@ -1229,20 +1233,20 @@ function addressCreate(addr) {
 	document.getElementById("btn_address_create_normal").disabled = true;
 	document.getElementById("btn_address_create_shield").disabled = true;
 
-	ae.Address_Create(addr, function(success1) {
-		if (success1) {
-			ae.Private_Update(function(success2) {
+	ae.Address_Create(addr, function(error1) {
+		if (!error1) {
+			ae.Private_Update(function(error2) {
 				updateAddressCounts();
 
-				if (success2) {
+				if (!error2) {
 					addAddress(ae.GetAddressCount() - 1);
 					if (addr !== "SHIELD") document.getElementById("txt_address_create_normal").value = "";
 				} else {
-					console.log("Failed to update the Private field");
+					console.log("Failed to update the Private field: " + error2);
 				}
 			});
 		} else {
-			console.log("Failed to add address");
+			console.log("Failed to add address: " + error1);
 			updateAddressCounts();
 		}
 	});
@@ -1274,8 +1278,8 @@ document.getElementById("btn_address_update").onclick = function() {
 		ae.SetAddressAccInt(i, rows[i].getElementsByTagName("input")[1].checked);
 	}
 
-	ae.Address_Update(function(success) {
-		if (!success) console.log("Address/Update failed");
+	ae.Address_Update(function(error) {
+		if (error) console.log("Address/Update failed: " + error);
 		btn.disabled = false;
 	});
 };
@@ -1286,11 +1290,11 @@ document.getElementById("btn_reg").onclick = function() {
 	if (!txt.reportValidity()) return;
 	btn.disabled = true;
 
-	ae.Account_Create(txt.value, function(success) {
-		if (success) {
+	ae.Account_Create(txt.value, function(error) {
+		if (!error) {
 			addAccountToTable(ae.Admin_GetUserCount() - 1);
 			txt.value = "";
-		}
+		} // else TODO
 
 		btn.disabled = false;
 	});
@@ -1306,14 +1310,15 @@ document.getElementById("btn_notepad_saveupl").onclick = function() {
 	let fname = prompt("Save as...", "Untitled");
 	if (!fname.endsWith(".txt")) fname += ".txt";
 
-	ae.Message_Upload(fname, np.value, function(success) {
-		if (success) {
+	ae.Message_Upload(fname, np.value, function(error) {
+		if (!error) {
 			np.value = "";
 			addUploads();
 			document.getElementById("tbd_accs").children[0].children[1].textContent = Math.round(ae.GetTotalMsgBytes() / 1024 / 1024);
+		} else {
+			console.log("Failed to add text: " + error);
 		}
 
-		console.log("Failed to add text");
 		np.disabled = false;
 	});
 };
@@ -1329,12 +1334,12 @@ document.getElementById("btn_upload").onclick = function() {
 
 		const reader = new FileReader();
 		reader.onload = function() {
-			ae.Message_Upload(fileSelector.files[0].name, new Uint8Array(reader.result), function(success) {
-				if (success) {
+			ae.Message_Upload(fileSelector.files[0].name, new Uint8Array(reader.result), function(error) {
+				if (!error) {
 					addUploads();
 					document.getElementById("tbd_accs").children[0].children[1].textContent = Math.round(ae.GetTotalMsgBytes() / 1024 / 1024);
 				} else {
-					console.log("Failed upload");
+					console.log("Failed upload: " + error);
 				}
 
 				btn.disabled = false;
@@ -1355,13 +1360,14 @@ document.querySelector("#write2_send > button").onclick = function() {
 
 	// Public announcement
 	if (document.getElementById("write2_recv").textContent === "public") {
-		ae.Message_Public(document.getElementById("write_subj").value, document.getElementById("write_body").value, function(success) {
-			if (success) {
+		ae.Message_Public(document.getElementById("write_subj").value, document.getElementById("write_body").value, function(error) {
+			if (!error) {
 				document.getElementById("write2_btntxt").textContent = "Announced to";
 				document.getElementById("write_recv").value = "";
 				document.getElementById("write_subj").value = "";
 				document.getElementById("write_body").value = "";
 			} else {
+				// TODO display error
 				document.getElementById("write2_btntxt").textContent = "Retry making";
 				btn.disabled = false;
 			}
@@ -1380,13 +1386,14 @@ document.querySelector("#write2_send > button").onclick = function() {
 		document.getElementById("write_recv").value,
 		document.getElementById("write_subj").getAttribute("data-replyid"),
 		(document.getElementById("write2_recv").textContent.indexOf("@") > 0) ? null : sodium.from_base64(document.querySelector("#write2_pkey > input").value, sodium.base64_variants.ORIGINAL_NO_PADDING),
-		function(success) {
-			if (success) {
+		function(error) {
+			if (!error) {
 				document.getElementById("write2_btntxt").textContent = "Delivered to";
 				document.getElementById("write_recv").value = "";
 				document.getElementById("write_subj").value = "";
 				document.getElementById("write_body").value = "";
 			} else {
+				// TODO display error
 				document.getElementById("write2_btntxt").textContent = "Retry sending to";
 				btn.disabled = false;
 			}
@@ -1411,21 +1418,24 @@ document.getElementById("btn_enter").onclick = function() {
 
 	ae.SetKeys(txtSkey.value, function(successSetKeys) {
 		if (successSetKeys) {
-			ae.Message_Browse(false, true, function(successBrowse) {
-				if (successBrowse) {
+			ae.Message_Browse(false, true, function(errorBrowse) {
+				if (!errorBrowse) {
 					txtSkey.value = "";
 					document.getElementById("div_begin").hidden = true;
 					document.getElementById("div_main").style.display = "grid";
 					reloadAccount();
 
 					if (ae.IsUserAdmin()) {
-						ae.Account_Browse(function(successAcc) {
-							if (successAcc) {for (let i = 0; i < ae.Admin_GetUserCount(); i++) {addAccountToTable(i);}}
-							else console.log("Failed to Account_Browse");
+						ae.Account_Browse(function(errorAcc) {
+							if (!errorAcc) {
+								for (let i = 0; i < ae.Admin_GetUserCount(); i++) {addAccountToTable(i);}
+							} else {
+								console.log("Failed to Account_Browse: " + errorAcc);
+							}
 						});
 					}
 				} else {
-					console.log("Failed to enter");
+					console.log("Failed to enter: " + errorBrowse);
 					btn.disabled = false;
 					document.getElementById("txt_skey").style.background = "#466";
 					txtSkey.focus();

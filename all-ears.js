@@ -228,7 +228,7 @@ function AllEars(readyCallback) {
 	};
 
 	const _FetchEncrypted = function(apiCmd, clearU8, callback) {
-		if (clearU8.length > _AEM_API_BOX_SIZE_MAX) {callback(false); return;}
+		if (clearU8.length > _AEM_API_BOX_SIZE_MAX) {callback(0xFA); return;}
 
 		// postBox: clearU8 encrypted
 		const nonce = new Uint8Array(sodium.crypto_box_NONCEBYTES);
@@ -248,19 +248,19 @@ function AllEars(readyCallback) {
 		postMsg.set(postBox, sealBox.length);
 
 		_FetchBinary(postMsg, function(success, encData) {
-			if (!success) {callback(false); return;}
+			if (!success) {callback(0xFB); return;}
 
 			let decData;
 			try {decData = sodium.crypto_box_open_easy(encData.slice(sodium.crypto_box_NONCEBYTES), encData.slice(0, sodium.crypto_box_NONCEBYTES), _AEM_API_PUBKEY, _userKeySecret);}
-			catch(e) {callback(false); return;}
+			catch(e) {callback(0xFC); return;}
 
-			if (decData.length > 33) {callback(true, decData); return;} // Long response
-			if (decData.length !== 33) {callback(false, decData); return;}
+			if (decData.length > 33) {callback(0, decData); return;} // Long response
+			if (decData.length !== 33) {callback(0xFD, decData); return;}
 
 			// Short response
-			if (decData[0] > 32) callback(false); // Error
-			else if (decData[0] === 0) callback(true, null); // No-content ok
-			else callback(true, decData.slice(1, 1 + decData[0]));
+			if (decData[0] > 32) callback(decData[0]); // Error
+			else if (decData[0] === 0) callback(0, null); // No-content ok
+			else callback(0, decData.slice(1, 1 + decData[0]));
 		});
 	};
 
@@ -880,8 +880,8 @@ function AllEars(readyCallback) {
 	this.Account_Browse = function(callback) {
 		if (_userLevel !== _AEM_USER_MAXLEVEL) {callback(false); return;}
 
-		_FetchEncrypted(_AEM_API_ACCOUNT_BROWSE, new Uint8Array([0]), function(fetchOk, browseData) {
-			if (!fetchOk) {callback(false); return;}
+		_FetchEncrypted(_AEM_API_ACCOUNT_BROWSE, new Uint8Array([0]), function(fetchErr, browseData) {
+			if (fetchErr) {callback(fetchErr); return;}
 
 			_maxStorage.splice(0);
 			_maxNormalA.splice(0);
@@ -917,13 +917,13 @@ function AllEars(readyCallback) {
 				offset += 35;
 			}
 
-			callback(true);
+			callback(0);
 		});
 	};
 
 	this.Account_Create = function(pk_hex, callback) {
-		_FetchEncrypted(_AEM_API_ACCOUNT_CREATE, sodium.from_hex(pk_hex), function(fetchOk) {
-			if (!fetchOk) {callback(false); return;}
+		_FetchEncrypted(_AEM_API_ACCOUNT_CREATE, sodium.from_hex(pk_hex), function(fetchErr) {
+			if (fetchErr) {callback(fetchErr); return;}
 
 			_admin_userPkHex.push(pk_hex);
 			_admin_userLevel.push(0);
@@ -931,13 +931,13 @@ function AllEars(readyCallback) {
 			_admin_userNaddr.push(0);
 			_admin_userSaddr.push(0);
 
-			callback(true);
+			callback(0);
 		});
 	};
 
 	this.Account_Delete = function(pk_hex, callback) {
-		_FetchEncrypted(_AEM_API_ACCOUNT_DELETE, sodium.from_hex(pk_hex), function(fetchOk) {
-			if (!fetchOk) {callback(false); return;}
+		_FetchEncrypted(_AEM_API_ACCOUNT_DELETE, sodium.from_hex(pk_hex), function(fetchErr) {
+			if (fetchErr) {callback(fetchErr); return;}
 
 			let num = -1;
 			for (let i = 0; i < _admin_userPkHex.length; i++) {
@@ -960,14 +960,14 @@ function AllEars(readyCallback) {
 	};
 
 	this.Account_Update = function(pk_hex, level, callback) {
-		if (level < 0 || level > _AEM_USER_MAXLEVEL) {callback(false); return;}
+		if (level < 0 || level > _AEM_USER_MAXLEVEL) {callback(0xF0); return;}
 
 		const upData = new Uint8Array(33);
 		upData[0] = level;
 		upData.set(sodium.from_hex(pk_hex), 1);
 
-		_FetchEncrypted(_AEM_API_ACCOUNT_UPDATE, upData, function(fetchOk) {
-			if (!fetchOk) {callback(false); return;}
+		_FetchEncrypted(_AEM_API_ACCOUNT_UPDATE, upData, function(fetchErr) {
+			if (fetchErr) {callback(fetchErr); return;}
 
 			let num = -1;
 			for (let i = 0; i < _admin_userPkHex.length; i++) {
@@ -986,15 +986,15 @@ function AllEars(readyCallback) {
 
 	this.Address_Create = function(addr, callback) {
 		if (addr == "SHIELD") {
-			_FetchEncrypted(_AEM_API_ADDRESS_CREATE, sodium.from_string("SHIELD"), function(fetchOk, byteArray) {
-				if (!fetchOk) {callback(false); return;}
+			_FetchEncrypted(_AEM_API_ADDRESS_CREATE, sodium.from_string("SHIELD"), function(fetchErr, byteArray) {
+				if (fetchErr) {callback(fetchErr); return;}
 
 				_userAddress.push(new _NewAddress(byteArray.slice(0, 8), byteArray.slice(8, 18), true, true, false));
-				callback(true);
+				callback(0);
 			});
 		} else {
 			const addr32 = _addr32_encode(addr);
-			if (addr32 === null) {callback(false); return;}
+			if (addr32 === null) {callback(0xF0); return;}
 
 			const full = sodium.crypto_pwhash(16, addr32, _AEM_SALT_NORMAL, _AEM_ARGON2_OPSLIMIT, _AEM_ARGON2_MEMLIMIT, sodium.crypto_pwhash_ALG_ARGON2ID13);
 			const hash = new Uint8Array([
@@ -1008,30 +1008,27 @@ function AllEars(readyCallback) {
 				full[7] ^ full[15]
 			]);
 
-			_FetchEncrypted(_AEM_API_ADDRESS_CREATE, hash, function(fetchOk) {
-				if (!fetchOk) {callback(false); return;}
+			_FetchEncrypted(_AEM_API_ADDRESS_CREATE, hash, function(fetchErr) {
+				if (fetchErr) {callback(fetchErr); return;}
 
 				_userAddress.push(new _NewAddress(hash, addr32, false, true, false));
-				callback(true);
+				callback(0);
 			});
 		}
 	};
 
 	this.Address_Delete = function(num, callback) {
-		_FetchEncrypted(_AEM_API_ADDRESS_DELETE, _userAddress[num].hash, function(fetchOk) {
-			if (!fetchOk) {
-				callback(false);
-				return;
-			}
+		_FetchEncrypted(_AEM_API_ADDRESS_DELETE, _userAddress[num].hash, function(fetchErr) {
+			if (fetchErr) {callback(fetchErr); return;}
 
 			_userAddress.splice(num, 1);
-			callback(true);
+			callback(0);
 		});
 	};
 
 	this.Address_Lookup = function(addr, callback) {
-		_FetchEncrypted(_AEM_API_ADDRESS_LOOKUP, sodium.from_string(addr), function(fetchOk, result) {
-			callback(fetchOk? result : null);
+		_FetchEncrypted(_AEM_API_ADDRESS_LOOKUP, sodium.from_string(addr), function(fetchErr, result) {
+			callback(fetchErr? fetchErr : result);
 		});
 	};
 
@@ -1048,11 +1045,11 @@ function AllEars(readyCallback) {
 			data[(i * 9) + 8] = flags;
 		}
 
-		_FetchEncrypted(_AEM_API_ADDRESS_UPDATE, data, function(fetchOk) {callback(fetchOk);});
+		_FetchEncrypted(_AEM_API_ADDRESS_UPDATE, data, function(fetchErr) {callback(fetchErr);});
 	};
 
 	this.Message_Browse = function(newest, u_info, callback) {
-		if (typeof(newest) !== "boolean" || typeof(u_info) !== "boolean") {callback(false); return;}
+		if (typeof(newest) !== "boolean" || typeof(u_info) !== "boolean") {callback(0xF0); return;}
 
 		let fetchId;
 		if (_newestMsgTs !== -1) {
@@ -1063,16 +1060,16 @@ function AllEars(readyCallback) {
 			fetchId.set(newest? _newestMsgId : _oldestMsgId, 1);
 		} else fetchId = new Uint8Array([u_info? _AEM_FLAG_UINFO : 0]);
 
-		_FetchEncrypted(_AEM_API_MESSAGE_BROWSE, fetchId, function(fetchOk, browseData) {
-			if (!fetchOk) {callback(false); return;}
+		_FetchEncrypted(_AEM_API_MESSAGE_BROWSE, fetchId, function(fetchErr, browseData) {
+			if (fetchErr) {callback(fetchErr); return;}
 
 			if (u_info) {
-				if (browseData.length < 1000) {callback(false); return;}
+				if (browseData.length < 1000) {callback(0xF1); return;}
 				const uinfo_bytes = _ParseUinfo(browseData);
 				browseData = browseData.slice(uinfo_bytes);
 			}
 
-			if (browseData.length <= 6) {callback(true); return;} // No messages or error getting messages
+			if (browseData.length <= 6) {callback(0xF2); return;} // No messages or error getting messages
 
 			_totalMsgCount = new Uint16Array(browseData.slice(0, 2).buffer)[0];
 			_totalMsgBytes = new Uint32Array(browseData.slice(2, 6).buffer)[0] * 16;
@@ -1328,18 +1325,18 @@ function AllEars(readyCallback) {
 			_uplMsg.sort((a, b) => (a.ts < b.ts) ? 1 : -1);
 			_outMsg.sort((a, b) => (a.ts < b.ts) ? 1 : -1);
 
-			callback(true);
+			callback(0);
 		});
 	};
 
 	this.Message_Create = function(title, body, addr_from, addr_to, replyId, to_pubkey, callback) {
-		if (typeof(title) !== "string" || typeof(body) !== "string" || typeof(addr_from) !== "string" || typeof(addr_to) !== "string") {callback(false); return;}
+		if (typeof(title) !== "string" || typeof(body) !== "string" || typeof(addr_from) !== "string" || typeof(addr_to) !== "string") {callback(0xF0); return;}
 
 		if (addr_to.indexOf("@") >= 0) { // Email
 			if (replyId === null) {
 				replyId = "";
 			} else if (typeof(replyId) !== "string") {
-				callback(false);
+				callback(0xF1);
 				return;
 			}
 
@@ -1347,7 +1344,7 @@ function AllEars(readyCallback) {
 			const bin = sodium.from_string("x" + addr_from + "\n" + addr_to + "\n" + replyId + "\n" + title + "\n" + body);
 			bin[0] = 0xFF;
 
-			_FetchEncrypted(_AEM_API_MESSAGE_CREATE, bin, function(fetchOk) {callback(fetchOk);});
+			_FetchEncrypted(_AEM_API_MESSAGE_CREATE, bin, function(fetchErr) {callback(fetchErr);});
 			return;
 		}
 
@@ -1357,10 +1354,10 @@ function AllEars(readyCallback) {
 		if (!isE2ee && (title.length + body.length) < 6) body = body.padEnd(6 - title.length, "\0"); // Minimum message size: 177-48-64-5-1-32-10-10-1 = 6
 
 		const addr32_from = _addr32_encode(addr_from);
-		if (!addr32_from) {callback(false); return;}
+		if (!addr32_from) {callback(0xF2); return;}
 
 		const addr32_to = _addr32_encode(addr_to);
-		if (!addr32_to) {callback(false); return;}
+		if (!addr32_to) {callback(0xF3); return;}
 
 		const kxKeys = sodium.crypto_kx_seed_keypair(sodium.crypto_generichash(sodium.crypto_kx_SEEDBYTES, addr32_from, _userKeyKxHash));
 		let msgBox;
@@ -1395,14 +1392,14 @@ function AllEars(readyCallback) {
 		final[(sodium.crypto_kx_PUBLICKEYBYTES * 2) + 25] = title.length;
 		final.set(msgBox, (sodium.crypto_kx_PUBLICKEYBYTES * 2) + 26);
 
-		_FetchEncrypted(_AEM_API_MESSAGE_CREATE, final, function(fetchOk) {callback(fetchOk);});
+		_FetchEncrypted(_AEM_API_MESSAGE_CREATE, final, function(fetchErr) {callback(fetchErr);});
 	};
 
 	this.Message_Delete = function(hexIds, callback) {
 		if (typeof(hexIds) === "string") {
 			hexIds = [hexIds];
 		} else if (typeof(hexIds) !== "object") {
-			callback(false);
+			callback(0xF0);
 			return;
 		}
 
@@ -1412,13 +1409,13 @@ function AllEars(readyCallback) {
 
 		for (let i = 0; i < hexIds.length; i++) {
 			const id = sodium.from_hex(hexIds[i]);
-			if (id.length !== 16) {callback(false); return;}
+			if (id.length !== 16) {callback(0xF1); return;}
 
 			data.set(id, i * 16);
 		}
 
-		_FetchEncrypted(_AEM_API_MESSAGE_DELETE, data, function(fetchOk) {
-			if (!fetchOk) {callback(false); return;}
+		_FetchEncrypted(_AEM_API_MESSAGE_DELETE, data, function(fetchErr) {
+			if (fetchErr) {callback(fetchErr); return;}
 
 			for (let i = 0; i < hexIds.length; i++) {
 				const id = sodium.from_hex(hexIds[i]);
@@ -1436,16 +1433,16 @@ function AllEars(readyCallback) {
 				});
 			}
 
-			callback(true);
+			callback(0);
 		});
 	};
 
 	this.Message_Public = function(title, body, callback) {
 		const binMsg = sodium.from_string(title + "\n" + body);
-		if (binMsg.length < 59) {callback(false); return;} // 59 = 177-48-64-5-1
+		if (binMsg.length < 59) {callback(0xF0); return;} // 59 = 177-48-64-5-1
 
-		_FetchEncrypted(_AEM_API_MESSAGE_PUBLIC, binMsg, function(fetchOk, newMsgId) {
-			if (!fetchOk) {callback(false); return;}
+		_FetchEncrypted(_AEM_API_MESSAGE_PUBLIC, binMsg, function(fetchErr, newMsgId) {
+			if (fetchErr) {callback(fetchErr); return;}
 
 			_intMsg.unshift(new _NewIntMsg(true, true, newMsgId, Date.now() / 1000, false, 3, null, "public", "", title, body));
 
@@ -1454,19 +1451,19 @@ function AllEars(readyCallback) {
 			_totalMsgBytes += x;
 			_readyMsgBytes += x;
 
-			callback(true);
+			callback(0);
 		});
 	};
 
 	this.Message_Upload = function(title, body, callback) {
-		if (typeof(title) !== "string" || title.length < 1 || body.length < 1) {callback(false); return;}
+		if (typeof(title) !== "string" || title.length < 1 || body.length < 1) {callback(0xF0); return;}
 
 		const u8title = sodium.from_string(title);
-		if (u8title.length > 256) {callback(false); return;}
+		if (u8title.length > 256) {callback(0xF1); return;}
 		const u8body = (typeof(body) === "string") ? sodium.from_string(body) : body;
 
 		const lenData = 1 + u8title.length + u8body.length;
-		if (lenData + sodium.crypto_secretbox_NONCEBYTES + sodium.crypto_secretbox_MACBYTES > _AEM_API_BOX_SIZE_MAX) {callback(false); return;}
+		if (lenData + sodium.crypto_secretbox_NONCEBYTES + sodium.crypto_secretbox_MACBYTES > _AEM_API_BOX_SIZE_MAX) {callback(0xF2); return;}
 
 		const u8data = new Uint8Array(lenData);
 		u8data[0] = u8title.length - 1;
@@ -1483,8 +1480,8 @@ function AllEars(readyCallback) {
 		final.set(nonce);
 		final.set(sbox, sodium.crypto_secretbox_NONCEBYTES);
 
-		_FetchEncrypted(_AEM_API_MESSAGE_UPLOAD, final, function(fetchOk, newMsgId) {
-			if (!fetchOk) {callback(false); return;}
+		_FetchEncrypted(_AEM_API_MESSAGE_UPLOAD, final, function(fetchErr, newMsgId) {
+			if (fetchErr) {callback(fetchErr); return;}
 
 			_uplMsg.unshift(new _NewUplMsg(newMsgId, Date.now() / 1000, title, body, null, (final.length + sodium.crypto_box_SEALBYTES) / 16));
 
@@ -1493,7 +1490,7 @@ function AllEars(readyCallback) {
 			_totalMsgBytes += x;
 			_readyMsgBytes += x;
 
-			callback(true);
+			callback(0);
 		});
 	};
 
@@ -1536,7 +1533,7 @@ function AllEars(readyCallback) {
 		final.set(nonce);
 		final.set(sbox, sodium.crypto_secretbox_NONCEBYTES);
 
-		_FetchEncrypted(_AEM_API_PRIVATE_UPDATE, final, function(fetchOk) {callback(fetchOk);});
+		_FetchEncrypted(_AEM_API_PRIVATE_UPDATE, final, function(fetchErr) {callback(fetchErr);});
 	};
 
 	readyCallback(true);
