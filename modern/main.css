@@ -98,7 +98,7 @@ noscript {
 
 	height: 100%;
 	display: none; /*grid*/
-	grid-template-columns: 1fr 1em 1fr;
+	grid-template-columns: 1fr 1fr;
 	background-image: radial-gradient(ellipse, #110a04, #080502);
 	color: #fff;
 	box-sizing: border-box;
@@ -115,10 +115,12 @@ noscript {
 
 #main1 {
 	box-shadow: -0.25em 0.25em black;
+	margin-right: 0.5em;
 }
 
 #main2 {
 	box-shadow: 0.25em 0.25em black;
+	margin-left: 0.5em;
 }
 
 #div_main h1 {
