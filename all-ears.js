@@ -694,6 +694,11 @@ function AllEars(readyCallback) {
 		_admin_userSaddr.splice(0);
 		_admin_userLevel.splice(0);
 
+		if (_userKeyPublic) sodium.memzero(_userKeyPublic);
+		if (_userKeySecret) sodium.memzero(_userKeySecret);
+		if (_userKeyKxHash) sodium.memzero(_userKeyKxHash);
+		if (_userKeySymmetric) sodium.memzero(_userKeySymmetric);
+
 		_userKeySecret = null;
 		_userKeyPublic = null;
 		_userKeyKxHash = null;
