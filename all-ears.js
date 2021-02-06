@@ -1473,7 +1473,7 @@ function AllEars(readyCallback) {
 
 			_intMsg.unshift(new _NewIntMsg(true, true, newMsgId, Date.now() / 1000, false, 3, null, "public", "", title, body));
 
-			let x = binMsg.length + 117; // 5 (info + ts) + 64 (sig) + 48 (sealed box)
+			let x = binMsg.length + 118; // 5 (BoxInfo + ts) + 1 (InfoByte) + 64 (sig) + 48 (sealed box)
 			if (x % 16 !== 0) x+= (16 - (x % 16));
 			_totalMsgBytes += x;
 			_readyMsgBytes += x;
