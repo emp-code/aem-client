@@ -1447,20 +1447,20 @@ document.getElementById("btn_enter").onclick = function() {
 						});
 					}
 				} else {
-					console.log("Failed to enter: " + errorBrowse);
 					document.getElementById("txt_skey").disabled = false;
 					document.getElementById("txt_skey").style.background = "#466";
 					txtSkey.focus();
 
+					document.getElementById("greeting").textContent = "Error " + errorBrowse;
 					btn.disabled = false;
 				}
 			});
 		} else {
-			console.log("Invalid format for key");
 			document.getElementById("txt_skey").disabled = false;
 			document.getElementById("txt_skey").style.background = "#466";
 			txtSkey.focus();
 
+			document.getElementById("greeting").textContent = "SetKeys failed";
 			btn.disabled = false;
 		}
 	});
