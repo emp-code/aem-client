@@ -884,6 +884,7 @@ function reloadAccount() {
 
 	document.getElementById("txt_reg").disabled = !ae.IsUserAdmin();
 	document.getElementById("btn_reg").disabled = !ae.IsUserAdmin();
+	document.getElementById("chk_lowme").disabled = (ae.GetUserLevel() === 0);
 
 	// Contacts
 	for (let i = 0; i < ae.GetContactCount(); i++) {
@@ -1315,7 +1316,6 @@ document.getElementById("btn_reg").onclick = function() {
 
 document.getElementById("chk_delme").onclick = function() {document.getElementById("btn_delme").disabled = !this.checked;};
 document.getElementById("chk_lowme").onclick = function() {document.getElementById("btn_lowme").disabled = !this.checked;};
-document.getElementById("chk_lowme").disabled = (ae.GetUserLevel() === 0);
 
 document.getElementById("btn_notepad_saveupl").onclick = function() {
 	const np = document.getElementById("txt_notepad");
