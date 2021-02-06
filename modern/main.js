@@ -1453,7 +1453,11 @@ document.getElementById("btn_enter").onclick = function() {
 
 	ae.SetKeys(txtSkey.value, function(successSetKeys) {
 		if (successSetKeys) {
+			document.body.style.cursor = "wait";
+
 			ae.Message_Browse(false, true, function(errorBrowse) {
+				document.body.style.cursor = "auto";
+
 				if (!errorBrowse) {
 					txtSkey.value = "";
 					document.getElementById("div_begin").hidden = true;
