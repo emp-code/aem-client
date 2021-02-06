@@ -497,6 +497,10 @@ caption {
 	opacity: 0.55;
 }
 
+#tbl_addrs td:first-of-type {
+	cursor: copy;
+}
+
 #tbl_addrs td:first-of-type, #table_addrs tfoot input {
 	font-family: monospace, monospace;
 	text-align: right;
