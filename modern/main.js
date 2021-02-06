@@ -4,10 +4,9 @@ sodium.ready.then(function() {
 
 const ae = new AllEars(function(ok) {
 	if (ok) {
-		const greeting = localStorage.greeting;
-		if (greeting) {
-			document.getElementById("greeting").textContent = greeting;
-			document.getElementById("txt_pg").value = greeting;
+		if (localStorage.greeting) {
+			document.getElementById("greeting").textContent = localStorage.greeting;
+			document.getElementById("txt_pg").value = localStorage.greeting;
 		} else localStorage.greeting = document.getElementById("greeting").textContent;
 
 		document.getElementById("txt_skey").style.background = "#466";
