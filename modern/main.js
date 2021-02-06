@@ -1410,6 +1410,13 @@ document.getElementById("txt_skey").onkeyup = function(event) {
 
 document.getElementById("btn_enter").onclick = function() {
 	const txtSkey = document.getElementById("txt_skey");
+
+	if (txtSkey.value === "") {
+		ae.Reset();
+		document.getElementById("greeting").textContent = "Data cleared";
+		return;
+	}
+
 	if (!txtSkey.reportValidity()) return;
 
 	const btn = this;
