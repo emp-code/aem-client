@@ -579,8 +579,8 @@ function addMsg(isInt, i) {
 
 	const ts = isInt? ae.GetIntMsgTime(i) : ae.GetExtMsgTime(i);
 	const el = document.createElement("time");
-	el.dateTime = new Date((ts * 1000) + (new Date().getTimezoneOffset() * -60000)).toISOString();
-	el.textContent = el.dateTime.slice(0, 10);
+	el.dateTime = new Date(ts * 1000).toISOString();
+	el.textContent = new Date((ts * 1000) + (new Date().getTimezoneOffset() * -60000)).toISOString().slice(0, 10);
 
 	const cellTime = row.insertCell(-1);
 	cellTime.appendChild(el);
