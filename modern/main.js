@@ -1313,8 +1313,9 @@ document.getElementById("btn_reg").onclick = function() {
 	});
 };
 
-document.getElementById("chk_lowme").onclick = function() {document.getElementById("btn_lowme").disabled = !this.checked;};
 document.getElementById("chk_delme").onclick = function() {document.getElementById("btn_delme").disabled = !this.checked;};
+document.getElementById("chk_lowme").onclick = function() {document.getElementById("btn_lowme").disabled = !this.checked;};
+document.getElementById("chk_lowme").disabled = (ae.GetUserLevel() === 0);
 
 document.getElementById("btn_notepad_saveupl").onclick = function() {
 	const np = document.getElementById("txt_notepad");
