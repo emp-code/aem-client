@@ -1401,6 +1401,10 @@ document.querySelector("#write2_send > button").onclick = function() {
 	);
 };
 
+document.getElementById("txt_skey").onfocus = function(event) {
+	document.getElementById("greeting").textContent = localStorage.greeting;
+};
+
 document.getElementById("txt_skey").onkeyup = function(event) {
 	if (event.key === "Enter") {
 		event.preventDefault();
