@@ -1449,7 +1449,7 @@ document.getElementById("btn_enter").onclick = function() {
 				} else {
 					document.getElementById("txt_skey").disabled = false;
 					document.getElementById("txt_skey").style.background = "#466";
-					txtSkey.focus();
+					btn.focus();
 
 					document.getElementById("greeting").textContent = "Error " + errorBrowse;
 					btn.disabled = false;
