@@ -462,13 +462,13 @@ function displayMsg(isInt, num) {
 	const tzOs = new Date().getTimezoneOffset();
 	const msgDate = new Date((ts * 1000) + (tzOs * -60000));
 	document.getElementById("readmsg_date").children[0].innerHTML = getClockIcon(msgDate);
+	document.getElementById("readmsg_date").children[1].dateTime = new Date(ts * 1000).toISOString();
 
 	if (isInt) {
 		document.getElementById("midright").children[1].textContent = ae.GetIntMsgTitle(num);
 		document.getElementById("midright").children[2].textContent = ae.GetIntMsgBody(num);
 
 		document.getElementById("readmsg_date").children[1].textContent = msgDate.toISOString().slice(0, 19).replace("T", " ");
-		document.getElementById("readmsg_date").children[1].dateTime = new Date(ts * 1000).toISOString();
 
 		document.getElementById("readmsg_ip").style.visibility = "hidden";
 		document.getElementById("readmsg_rdns").style.visibility = "hidden";
