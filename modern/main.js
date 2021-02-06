@@ -1424,6 +1424,8 @@ document.getElementById("btn_enter").onclick = function() {
 
 	const btn = this;
 	btn.disabled = true;
+
+	document.getElementById("txt_skey").disabled = true;
 	document.getElementById("txt_skey").style.background = "#233";
 
 	ae.SetKeys(txtSkey.value, function(successSetKeys) {
@@ -1446,16 +1448,20 @@ document.getElementById("btn_enter").onclick = function() {
 					}
 				} else {
 					console.log("Failed to enter: " + errorBrowse);
-					btn.disabled = false;
+					document.getElementById("txt_skey").disabled = false;
 					document.getElementById("txt_skey").style.background = "#466";
 					txtSkey.focus();
+
+					btn.disabled = false;
 				}
 			});
 		} else {
 			console.log("Invalid format for key");
-			btn.disabled = false;
+			document.getElementById("txt_skey").disabled = false;
 			document.getElementById("txt_skey").style.background = "#466";
 			txtSkey.focus();
+
+			btn.disabled = false;
 		}
 	});
 };
