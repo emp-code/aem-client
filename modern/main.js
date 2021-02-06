@@ -468,6 +468,7 @@ function displayMsg(isInt, num) {
 		document.getElementById("midright").children[2].textContent = ae.GetIntMsgBody(num);
 
 		document.getElementById("readmsg_date").children[1].textContent = msgDate.toISOString().slice(0, 19).replace("T", " ");
+		document.getElementById("readmsg_date").children[1].dateTime = new Date(ts * 1000).toISOString();
 
 		document.getElementById("readmsg_ip").style.visibility = "hidden";
 		document.getElementById("readmsg_rdns").style.visibility = "hidden";
