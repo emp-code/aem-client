@@ -865,10 +865,6 @@ function AllEars(readyCallback) {
 
 	this.SetKeys = function(skey_hex, callback) {
 		if (!skey_hex || typeof(skey_hex) !== "string" || skey_hex.length !== sodium.crypto_box_SECRETKEYBYTES * 2) {
-			_userKeySecret = null;
-			_userKeyPublic = null;
-			_userKeyKxHash = null;
-			_userKeySymmetric = null;
 			callback(false);
 			return;
 		}
