@@ -678,6 +678,7 @@ function AllEars(readyCallback) {
 		_maxShieldA.splice(0);
 		_userLevel = 0;
 		_userAddress.splice(0);
+
 		_extMsg.splice(0);
 		_intMsg.splice(0);
 		_uplMsg.splice(0);
@@ -697,6 +698,15 @@ function AllEars(readyCallback) {
 		_userKeyPublic = null;
 		_userKeyKxHash = null;
 		_userKeySymmetric = null;
+
+		_totalMsgCount = 0;
+		_totalMsgBytes = 0;
+		_readyMsgBytes = 0;
+
+		_newestMsgId.fill(0);
+		_oldestMsgId.fill(0);
+		_newestMsgTs = -1;
+		_oldestMsgTs = Math.pow(2, 32);
 	};
 
 	this.GetDomainApi = function() {return _AEM_DOMAIN_API;};
