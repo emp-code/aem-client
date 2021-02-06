@@ -692,6 +692,11 @@ function AllEars(readyCallback) {
 		_admin_userNaddr.splice(0);
 		_admin_userSaddr.splice(0);
 		_admin_userLevel.splice(0);
+
+		_userKeySecret = null;
+		_userKeyPublic = null;
+		_userKeyKxHash = null;
+		_userKeySymmetric = null;
 	};
 
 	this.GetDomainApi = function() {return _AEM_DOMAIN_API;};
