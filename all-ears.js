@@ -877,6 +877,15 @@ function AllEars(readyCallback) {
 		_userKeyKxHash = sodium.crypto_kdf_derive_from_key(sodium.crypto_generichash_KEYBYTES, 4, "AEM-Usr0", sodium.from_hex(skey_hex));
 		_userKeySymmetric = sodium.crypto_kdf_derive_from_key(sodium.crypto_secretbox_KEYBYTES, 5, "AEM-Usr0", sodium.from_hex(skey_hex));
 
+		if (!_userKeyPublic || !_userKeySecret || !_userKeyKxHash || !_userKeySymmetric) {
+			_userKeySecret = null;
+			_userKeyPublic = null;
+			_userKeyKxHash = null;
+			_userKeySymmetric = null;
+			callback(false);
+			return;
+		}
+
 		callback(true);
 	};
 
