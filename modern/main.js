@@ -1090,6 +1090,15 @@ function addContact(mail, name, note) {
 	const cellNote = row.insertCell(-1);
 	const cellBtnD = row.insertCell(-1);
 
+	cellMail.autocapitalize = "off";
+	cellMail.spellcheck = false;
+
+	cellName.autocapitalize = "words";
+	cellName.spellcheck = false;
+
+	cellNote.autocapitalize = "off";
+	cellNote.spellcheck = false;
+
 	cellMail.textContent = mail;
 	cellName.textContent = name;
 	cellNote.textContent = note;
