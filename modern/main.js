@@ -1298,6 +1298,14 @@ document.getElementById("btn_address_update").onclick = function() {
 	});
 };
 
+
+document.getElementById("txt_reg").onkeyup = function(event) {
+	if (event.key === "Enter") {
+		event.preventDefault();
+		document.getElementById("btn_reg").click();
+	}
+};
+
 document.getElementById("btn_reg").onclick = function() {
 	const btn = document.getElementById("btn_reg");
 	const txt = document.getElementById("txt_reg");
