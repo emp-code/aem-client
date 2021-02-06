@@ -905,7 +905,7 @@ function AllEars(readyCallback) {
 	};
 
 	this.Account_Browse = function(callback) {
-		if (_userLevel !== _AEM_USER_MAXLEVEL) {callback(false); return;}
+		if (_userLevel !== _AEM_USER_MAXLEVEL) {callback(0xF0); return;}
 
 		_FetchEncrypted(_AEM_API_ACCOUNT_BROWSE, new Uint8Array([0]), function(fetchErr, browseData) {
 			if (fetchErr) {callback(fetchErr); return;}
@@ -982,7 +982,7 @@ function AllEars(readyCallback) {
 				_admin_userSaddr.splice(num, 1);
 			}
 
-			callback(true);
+			callback(0);
 		});
 	};
 
@@ -1007,7 +1007,7 @@ function AllEars(readyCallback) {
 			if (num >= 0)
 				_admin_userLevel[num] = level;
 
-			callback(true);
+			callback(0);
 		});
 	};
 
