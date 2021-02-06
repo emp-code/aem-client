@@ -8,7 +8,7 @@ const ae = new AllEars(function(ok) {
 		if (greeting) {
 			document.getElementById("greeting").textContent = greeting;
 			document.getElementById("txt_pg").value = greeting;
-		}
+		} else localStorage.greeting = document.getElementById("greeting").textContent;
 
 		document.getElementById("txt_skey").style.background = "#466";
 		document.getElementById("txt_skey").maxLength = "64";
