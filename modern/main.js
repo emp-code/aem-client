@@ -576,10 +576,13 @@ function addMsg(isInt, i) {
 	const row = document.getElementById("tbl_inbox").insertRow(-1);
 	row.setAttribute("data-msgid", isInt? ae.GetIntMsgIdHex(i) : ae.GetExtMsgIdHex(i));
 
-	const cellTime = row.insertCell(-1);
 	const ts = isInt? ae.GetIntMsgTime(i) : ae.GetExtMsgTime(i);
-	cellTime.setAttribute("data-ts", ts);
-	cellTime.textContent = new Date((ts * 1000) + (new Date().getTimezoneOffset() * -60000)).toISOString().slice(0, 10);
+	const el = document.createElement("time");
+	el.dateTime = new Date((ts * 1000) + (new Date().getTimezoneOffset() * -60000)).toISOString();
+	el.textContent = el.dateTime.slice(0, 10);
+
+	const cellTime = row.insertCell(-1);
+	cellTime.appendChild(el);
 
 	const cellSubj = row.insertCell(-1);
 	cellSubj.textContent = isInt? ae.GetIntMsgTitle(i) : ae.GetExtMsgTitle(i);
