@@ -51,9 +51,9 @@
 					<div id="div_write" hidden>
 						<div id="div_write_1">
 							<p class="flex0"><select id="write_from" required></select></p>
-							<p class="flex0"><input id="write_recv" type="text" required placeholder="Receiver" pattern="[0-9a-z]{1,16}|\S+@\S+" list="contact_emails"></p>
-							<p class="flex0"><input id="write_subj" type="text" required placeholder="Subject"></p>
-							<p class="flex1"><textarea id="write_body" required placeholder="Message" spellcheck="true"></textarea></p>
+							<p class="flex0"><input id="write_recv" type="text" required placeholder="Receiver" pattern="[0-9a-z]{1,16}|\S+@\S+" list="contact_emails" autocapitalize="off" spellcheck="false"></p>
+							<p class="flex0"><input id="write_subj" type="text" required placeholder="Subject" autocapitalize="sentences" spellcheck="true"></p>
+							<p class="flex1"><textarea id="write_body" required placeholder="Message" autocapitalize="sentences" spellcheck="true"></textarea></p>
 
 							<datalist id="contact_emails"></datalist>
 						</div>
