@@ -1092,6 +1092,7 @@ function addContact(mail, name, note) {
 
 	cellMail.autocapitalize = "off";
 	cellMail.spellcheck = false;
+	cellMail.inputMode = "email";
 
 	cellName.autocapitalize = "words";
 	cellName.spellcheck = false;
