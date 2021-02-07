@@ -1424,7 +1424,7 @@ document.querySelector("#write2_send > button").onclick = function() {
 	);
 };
 
-document.getElementById("txt_skey").onfocus = function(event) {
+document.getElementById("txt_skey").onfocus = function() {
 	document.getElementById("greeting").textContent = localStorage.greeting;
 };
 
