@@ -215,6 +215,7 @@ function AllEars(readyCallback) {
 			}),
 			mode: "cors",
 			redirect: "error",
+			referrer: "",
 			referrerPolicy: "no-referrer",
 			body: postData
 		}).then(function(response) {
