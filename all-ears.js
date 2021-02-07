@@ -228,7 +228,10 @@ function AllEars(readyCallback) {
 	};
 
 	const _FetchEncrypted = function(apiCmd, clearU8, callback) {
-		if (clearU8.length > _AEM_API_BOX_SIZE_MAX) {callback(0xFA); return;}
+		if (typeof(apiCmd) !== "number" || apiCmd < 0 || apiCmd > 255 || typeof(clearU8) !== "object" || clearU8.length > _AEM_API_BOX_SIZE_MAX) {
+			callback(0xFA);
+			return;
+		}
 
 		// postBox: clearU8 encrypted
 		const nonce = new Uint8Array(sodium.crypto_box_NONCEBYTES);
