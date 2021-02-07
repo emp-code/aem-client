@@ -409,6 +409,7 @@ function displayFile(num) {
 			const el = document.createElement("iframe");
 			el.allow = "";
 			el.sandbox = "";
+			el.referrerPolicy = "no-referrer";
 			el.csp = "base-uri 'none'; child-src 'none'; connect-src 'none'; default-src 'none'; font-src 'none'; form-action 'none'; frame-ancestors 'none'; frame-src 'none'; img-src 'none'; manifest-src 'none'; media-src 'none'; object-src 'none'; script-src 'none'; style-src 'none'; worker-src 'none';";
 			el.srcdoc = sodium.to_string(ae.GetUplMsgBody(num).buffer);
 			document.getElementById("midright").appendChild(el);
