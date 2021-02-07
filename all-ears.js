@@ -215,7 +215,7 @@ function AllEars(readyCallback) {
 			}),
 			mode: "cors",
 			redirect: "error",
-			referrer: "no-referrer",
+			referrerPolicy: "no-referrer",
 			body: postData
 		}).then(function(response) {
 			return response.ok ? response.arrayBuffer() : null;
