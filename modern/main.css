@@ -499,6 +499,7 @@ caption {
 
 #tbl_addrs td:first-of-type {
 	cursor: copy;
+	padding-right: 2px;
 }
 
 #tbl_addrs td:first-of-type, #table_addrs tfoot input {
@@ -509,10 +510,6 @@ caption {
 
 #table_addrs tfoot td, #table_addrs tfoot button {
 	text-align: center;
-}
-
-#tbl_addrs td:first-of-type {
-	padding-right: 2px;
 }
 
 .half {
