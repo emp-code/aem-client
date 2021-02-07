@@ -208,6 +208,7 @@ function AllEars(readyCallback) {
 	const _FetchBinary = function(postData, callback) {
 		fetch((_AEM_DOMAIN_API.endsWith(".onion") ? "http://" : "https://") + _AEM_DOMAIN_API + ":302/api", {
 			method: "POST",
+			cache: "no-store",
 			credentials: "omit",
 			headers: new Headers({
 				"Accept": "",
