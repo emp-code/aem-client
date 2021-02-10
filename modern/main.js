@@ -791,7 +791,7 @@ function updateAddressCounts() {
 }
 
 function adjustLevel(pubkey, level, c) {
-	const fs = document.getElementById("fs_accs");
+	const fs = document.getElementById("tbl_accs");
 	fs.disabled = true;
 
 	ae.Account_Update(pubkey, level, function(error) {
