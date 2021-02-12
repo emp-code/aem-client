@@ -1203,9 +1203,9 @@ function AllEars(readyCallback) {
 							const msgSubject = msgParts[3];
 
 							const body = msgParts.slice(4).join("\n");
-							const headersEnd = body.indexOf("\n\n");
+							const headersEnd = body.indexOf("\r");
 							const msgHeaders = body.slice(0, headersEnd);
-							const msgBody = body.slice(headersEnd + 2);
+							const msgBody = body.slice(headersEnd + 1);
 
 							_extMsg.push(new _NewExtMsg(validPad, validSig, msgId, msgTs, msgHdrTs, msgHdrTz, msgIp, msgCc, msgCs, msgTls, msgEsmtp, msgQuitR, msgProtV, msgInval, msgRares, msgMulti, msgAttach, msgGreet, msgRdns, msgEnvFrom, msgHdrFrom, msgEnvTo, msgHdrTo, msgHdrId, msgHeaders, msgSubject, msgBody));
 						} catch(e) {
