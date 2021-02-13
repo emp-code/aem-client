@@ -1179,16 +1179,12 @@ function updateTab() {
 		break;
 
 		case TAB_WRITE:
-			switch (tabs[tab].cur) {
-				case 0:
-					document.getElementById("div_write_1").hidden = false;
-					document.getElementById("div_write_2").hidden = true;
-					document.getElementById("write_body").focus();
-				break;
-
-				case 1:
-					writeVerify();
-				break;
+			if (tabs[tab].cur == 0) {
+				document.getElementById("div_write_1").hidden = false;
+				document.getElementById("div_write_2").hidden = true;
+				document.getElementById("write_body").focus();
+			} else {
+				writeVerify();
 			}
 		break;
 
