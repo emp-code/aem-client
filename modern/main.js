@@ -465,6 +465,8 @@ function displayMsg(isInt, num) {
 	document.getElementById("readmsg_date").children[0].innerHTML = getClockIcon(msgDate);
 	document.getElementById("readmsg_date").children[1].dateTime = new Date(ts * 1000).toISOString();
 
+	document.getElementById("readmsg_tls").style.visibility = "visible";
+
 	if (isInt) {
 		document.getElementById("midright").children[1].textContent = ae.GetIntMsgTitle(num);
 		document.getElementById("midright").children[2].textContent = ae.GetIntMsgBody(num);
@@ -479,7 +481,6 @@ function displayMsg(isInt, num) {
 		document.getElementById("readmsg_envfrom").style.visibility = "hidden";
 		document.getElementById("readmsg_envto").style.visibility = "hidden";
 
-		document.getElementById("readmsg_tls").style.visibility = "visible";
 		document.getElementById("readmsg_tls").children[0].textContent = ae.GetIntMsgFromPk(num);
 
 		let symbol = "<span title=\"Invalid level\">&#x26a0;</span>";
