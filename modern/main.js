@@ -1458,7 +1458,7 @@ document.getElementById("btn_enter").onclick = function() {
 				if (!errorBrowse) {
 					txtSkey.value = "";
 					document.getElementById("div_begin").hidden = true;
-					document.getElementById("div_main").style.display = "grid";
+					document.getElementById("div_main").hidden = false;
 					reloadAccount();
 
 					if (ae.IsUserAdmin()) {

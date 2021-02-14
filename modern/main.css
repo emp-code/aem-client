@@ -97,7 +97,7 @@ noscript {
 	padding: 2em;
 
 	height: 100%;
-	display: none; /*grid*/
+	display: grid;
 	grid-template-columns: 1fr 1fr;
 	background-image: radial-gradient(ellipse, #110a04, #080502);
 	color: #fff;
