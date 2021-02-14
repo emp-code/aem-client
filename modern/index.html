@@ -21,8 +21,8 @@
 
 				<main>
 					<noscript>Javascript required</noscript>
-					<input id="txt_skey" type="password" maxlength="0" pattern="[0-9a-f]{64}" autocomplete="current-password" required autofocus>
-					<button id="btn_enter" type="button"></button>
+					<input type="password" id="txt_skey" maxlength="0" pattern="[0-9a-f]{64}" autocomplete="current-password" required autofocus>
+					<button type="button" id="btn_enter"></button>
 				</main>
 
 				<footer>
@@ -53,8 +53,8 @@
 					<div id="div_write" hidden>
 						<div id="div_write_1">
 							<p class="flex0"><select id="write_from" required></select></p>
-							<p class="flex0"><input id="write_recv" type="text" required placeholder="Receiver" pattern="[0-9a-z]{1,16}|\S+@\S+" list="contact_emails" autocapitalize="off" spellcheck="false" inputmode="email"></p>
-							<p class="flex0"><input id="write_subj" type="text" required placeholder="Subject" autocapitalize="sentences" spellcheck="true"></p>
+							<p class="flex0"><input type="text" id="write_recv" required placeholder="Receiver" pattern="[0-9a-z]{1,16}|\S+@\S+" list="contact_emails" autocapitalize="off" spellcheck="false" inputmode="email"></p>
+							<p class="flex0"><input type="text" id="write_subj" required placeholder="Subject" autocapitalize="sentences" spellcheck="true"></p>
 							<p class="flex1"><textarea id="write_body" required placeholder="Message" autocapitalize="sentences" spellcheck="true"></textarea></p>
 
 							<datalist id="contact_emails"></datalist>
@@ -196,20 +196,20 @@
 							<hr>
 
 							<p class="half">Check to enable dangerous operations on the next page</p>
-							<p><input id="chk_lowme" type="checkbox"> <span class="half">I want to <b>lower my level</b></span></p>
-							<p><input id="chk_delme" type="checkbox"> <span class="half">I want to <b>delete my account</b></span></p>
+							<p><input type="checkbox" id="chk_lowme"> <span class="half">I want to <b>lower my level</b></span></p>
+							<p><input type="checkbox" id="chk_delme"> <span class="half">I want to <b>delete my account</b></span></p>
 
 							<hr>
 
 							<p>
-								<input id="txt_pg" type="text" autocomplete="off" placeholder="Personal greeting">
+								<input type="text" id="txt_pg" autocomplete="off" placeholder="Personal greeting">
 								<button type="button" id="btn_pg" autocomplete="off">Set</button>
 							</p>
 
 							<hr>
 
 							<p>
-								<input id="txt_reg" type="text" size="64" maxlength="64" pattern="[0-9a-f]{64}" autocomplete="off" required>
+								<input type="text" id="txt_reg" size="64" maxlength="64" pattern="[0-9a-f]{64}" autocomplete="off" required>
 								<button type="button" id="btn_reg" autocomplete="off">Register</button>
 							</p>
 						</div>
