@@ -33,11 +33,11 @@
 		<div id="div_main">
 			<div id="main1" class="main">
 				<nav class="top">
-					<button type="button" autocomplete="off" id="btn_inbox" disabled><svg viewbox="0 0 96 64"><use xlink:href="#svg_inbx"/></svg></button>
-					<button type="button" autocomplete="off" id="btn_snbox"><svg viewbox="0 0 96 64"><use xlink:href="#svg_snbx"/></svg></button>
-					<button type="button" autocomplete="off" id="btn_write"><svg viewbox="0 0 96 64"><use xlink:href="#svg_writ"/></svg></button>
-					<button type="button" autocomplete="off" id="btn_notes"><svg viewbox="0 0 96 64"><use xlink:href="#svg_note"/></svg></button>
-					<button type="button" autocomplete="off" id="btn_prefs"><svg viewbox="0 0 96 64"><use xlink:href="#svg_sett"/></svg></button>
+					<button type="button" id="btn_inbox" autocomplete="off" disabled><svg viewbox="0 0 96 64"><use xlink:href="#svg_inbx"/></svg></button>
+					<button type="button" id="btn_snbox" autocomplete="off"><svg viewbox="0 0 96 64"><use xlink:href="#svg_snbx"/></svg></button>
+					<button type="button" id="btn_write" autocomplete="off"><svg viewbox="0 0 96 64"><use xlink:href="#svg_writ"/></svg></button>
+					<button type="button" id="btn_notes" autocomplete="off"><svg viewbox="0 0 96 64"><use xlink:href="#svg_note"/></svg></button>
+					<button type="button" id="btn_prefs" autocomplete="off"><svg viewbox="0 0 96 64"><use xlink:href="#svg_sett"/></svg></button>
 				</nav>
 
 				<div class="mid">
@@ -89,8 +89,8 @@
 							</table>
 
 							<p class="center">
-								<button type="button" autocomplete="off" id="btn_newcontact">New</button>
-								<button type="button" autocomplete="off" id="btn_savecontacts">Save</button>
+								<button type="button" id="btn_newcontact" autocomplete="off">New</button>
+								<button type="button" id="btn_savecontacts" autocomplete="off">Save</button>
 							</p>
 						</div>
 
@@ -138,17 +138,17 @@
 								</tr>
 								<tr>
 									<td><input type="text" id="txt_address_create_normal" size="16" maxlength="15" pattern="[0-9a-z]{1,15}" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="new"></td>
-									<td colspan="2"><button type="button" autocomplete="off" id="btn_address_create_normal">Register</button></td>
+									<td colspan="2"><button type="button" id="btn_address_create_normal" autocomplete="off">Register</button></td>
 									<td id="limit_normal"></td>
 								</tr>
 								<tr>
 									<td class="half">Shield</td>
-									<td colspan="2"><button type="button" autocomplete="off" id="btn_address_create_shield">Generate</button></td>
+									<td colspan="2"><button type="button" id="btn_address_create_shield" autocomplete="off">Generate</button></td>
 									<td id="limit_shield"></td>
 								</tr>
 								<tr>
 									<td class="half">Total</td>
-									<td colspan="2"><button type="button" autocomplete="off" id="btn_address_update">Update</button></td>
+									<td colspan="2"><button type="button" id="btn_address_update" autocomplete="off">Update</button></td>
 									<td id="limit_total"></td>
 								</tr>
 							</tfoot>
@@ -202,14 +202,14 @@
 
 							<p>
 								<input id="txt_pg" type="text" autocomplete="off" placeholder="Personal greeting">
-								<button type="button" autocomplete="off" id="btn_pg">Set</button>
+								<button type="button" id="btn_pg" autocomplete="off">Set</button>
 							</p>
 
 							<hr>
 
 							<p>
 								<input id="txt_reg" type="text" size="64" maxlength="64" pattern="[0-9a-f]{64}" autocomplete="off" required>
-								<button type="button" autocomplete="off" id="btn_reg">Register</button>
+								<button type="button" id="btn_reg" autocomplete="off">Register</button>
 							</p>
 						</div>
 
@@ -231,21 +231,21 @@
 					</div>
 				</div>
 				<nav class="bot">
-					<button type="button" autocomplete="off" id="btn_dele" disabled><svg viewbox="0 0 96 64"><use xlink:href="#svg_dele"/></svg></button>
-					<button type="button" autocomplete="off" id="btn_left" disabled><svg viewbox="0 0 96 64"><use xlink:href="#svg_arrL"/></svg></button>
-					<button type="button" autocomplete="off" id="btn_cent" disabled><svg viewbox="0 0 96 64"><use xlink:href="#svg_cent"/></svg></button>
-					<button type="button" autocomplete="off" id="btn_rght" disabled><svg viewbox="0 0 96 64"><use xlink:href="#svg_arrR"/></svg></button>
-					<button type="button" autocomplete="off" id="btn_updt"><svg viewbox="0 0 96 64"><use xlink:href="#svg_updt"/></svg></button>
+					<button type="button" id="btn_dele" autocomplete="off" disabled><svg viewbox="0 0 96 64"><use xlink:href="#svg_dele"/></svg></button>
+					<button type="button" id="btn_left" autocomplete="off" disabled><svg viewbox="0 0 96 64"><use xlink:href="#svg_arrL"/></svg></button>
+					<button type="button" id="btn_cent" autocomplete="off" disabled><svg viewbox="0 0 96 64"><use xlink:href="#svg_cent"/></svg></button>
+					<button type="button" id="btn_rght" autocomplete="off" disabled><svg viewbox="0 0 96 64"><use xlink:href="#svg_arrR"/></svg></button>
+					<button type="button" id="btn_updt" autocomplete="off"><svg viewbox="0 0 96 64"><use xlink:href="#svg_updt"/></svg></button>
 				</nav>
 			</div>
 
 			<div id="main2" class="main">
 				<nav class="top">
-					<button type="button" autocomplete="off" id="btn_top21" disabled><svg viewbox="0 0 96 64"><use xlink:href="#svg_inbx"/></svg></button>
-					<button type="button" autocomplete="off" id="btn_top22" disabled><svg viewbox="0 0 96 64"><use xlink:href="#svg_snbx"/></svg></button>
-					<button type="button" autocomplete="off" id="btn_reply" disabled><svg viewbox="0 0 96 64"><use xlink:href="#svg_writ"/></svg></button>
-					<button type="button" autocomplete="off" id="btn_top24" disabled><svg viewbox="0 0 96 64"><use xlink:href="#svg_note"/></svg></button>
-					<button type="button" autocomplete="off" id="btn_top25" disabled><svg viewbox="0 0 96 64"><use xlink:href="#svg_sett"/></svg></button>
+					<button type="button" id="btn_top21" autocomplete="off" disabled><svg viewbox="0 0 96 64"><use xlink:href="#svg_inbx"/></svg></button>
+					<button type="button" id="btn_top22" autocomplete="off" disabled><svg viewbox="0 0 96 64"><use xlink:href="#svg_snbx"/></svg></button>
+					<button type="button" id="btn_reply" autocomplete="off" disabled><svg viewbox="0 0 96 64"><use xlink:href="#svg_writ"/></svg></button>
+					<button type="button" id="btn_top24" autocomplete="off" disabled><svg viewbox="0 0 96 64"><use xlink:href="#svg_note"/></svg></button>
+					<button type="button" id="btn_top25" autocomplete="off" disabled><svg viewbox="0 0 96 64"><use xlink:href="#svg_sett"/></svg></button>
 				</nav>
 				<div id="midright" class="mid">
 					<table hidden>
@@ -279,11 +279,11 @@
 					<pre></pre>
 				</div>
 				<nav class="bot">
-					<button type="button" autocomplete="off" id="btn_mdele" disabled><svg viewbox="0 0 96 64"><use xlink:href="#svg_dele"/></svg></button>
-					<button type="button" autocomplete="off" id="btn_mprev" disabled><svg viewbox="0 0 96 64"><use xlink:href="#svg_arrL"/></svg></button>
-					<button type="button" autocomplete="off" id="btn_bot23" disabled><svg viewbox="0 0 96 64"><use xlink:href="#svg_cent"/></svg></button>
-					<button type="button" autocomplete="off" id="btn_mnext" disabled><svg viewbox="0 0 96 64"><use xlink:href="#svg_arrR"/></svg></button>
-					<button type="button" autocomplete="off" id="btn_bot25" disabled><svg viewbox="0 0 96 64"><use xlink:href="#svg_updt"/></svg></button>
+					<button type="button" id="btn_mdele" autocomplete="off" disabled><svg viewbox="0 0 96 64"><use xlink:href="#svg_dele"/></svg></button>
+					<button type="button" id="btn_mprev" autocomplete="off" disabled><svg viewbox="0 0 96 64"><use xlink:href="#svg_arrL"/></svg></button>
+					<button type="button" id="btn_bot23" autocomplete="off" disabled><svg viewbox="0 0 96 64"><use xlink:href="#svg_cent"/></svg></button>
+					<button type="button" id="btn_mnext" autocomplete="off" disabled><svg viewbox="0 0 96 64"><use xlink:href="#svg_arrR"/></svg></button>
+					<button type="button" id="btn_bot25" autocomplete="off" disabled><svg viewbox="0 0 96 64"><use xlink:href="#svg_updt"/></svg></button>
 				</nav>
 			</div>
 		</div>
