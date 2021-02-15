@@ -1182,7 +1182,7 @@ function updateTab() {
 		break;
 
 		case TAB_WRITE:
-			if (tabs[tab].cur == 0) {
+			if (tabs[tab].cur === 0) {
 				document.getElementById("div_write_1").hidden = false;
 				document.getElementById("div_write_2").hidden = true;
 				document.getElementById("write_body").focus();
