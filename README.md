@@ -10,6 +10,8 @@
 
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/4b18ae1da10d40759732e4c63644a6fd)](https://www.codacy.com/gh/emp-code/aem-client/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=emp-code/aem-client&amp;utm_campaign=Badge_Grade)
 
+[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/emp-code/aem-client/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/emp-code/aem-client/?branch=master)
+
 [![Code Inspector](https://www.code-inspector.com/project/11148/score/svg)](https://frontend.code-inspector.com/public/project/11148/aem-client/dashboard)
 
 [![deepcode](https://www.deepcode.ai/api/gh/badge?key=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwbGF0Zm9ybTEiOiJnaCIsIm93bmVyMSI6ImVtcC1jb2RlIiwicmVwbzEiOiJhZW0tY2xpZW50IiwiaW5jbHVkZUxpbnQiOmZhbHNlLCJhdXRob3JJZCI6MjIxMjgsImlhdCI6MTYwNTQzMDUzN30.5tP-JY5i3U0PjiMdSYhf3CRqQBqmx8br55Q9sVYQ_98)](https://www.deepcode.ai/app/gh/emp-code/aem-client/_/dashboard?utm_content=gh%2Femp-code%2Faem-client)
