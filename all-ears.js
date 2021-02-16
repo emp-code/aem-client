@@ -1188,14 +1188,14 @@ function AllEars(readyCallback) {
 						try {
 							const msgBodyBr = new Int8Array(msgData.slice(18));
 							const msgBodyU8 = new Uint8Array(window.BrotliDecode(msgBodyBr));
-							const msgBodyTx = new TextDecoder("utf-8").decode(msgBodyU8);
 
-							const msgEnvTo = msgBodyTx.slice(0,                              lenEnvTo) + "@" + _AEM_DOMAIN_EML;
-							const msgHdrTo = msgBodyTx.slice(lenEnvTo,                       lenEnvTo + lenHdrTo);
-							const msgGreet = msgBodyTx.slice(lenEnvTo + lenHdrTo,            lenEnvTo + lenHdrTo + lenGreet);
-							const msgRdns  = msgBodyTx.slice(lenEnvTo + lenHdrTo + lenGreet, lenEnvTo + lenHdrTo + lenGreet + lenRdns);
+							const d = new TextDecoder("utf-8");
+							const msgEnvTo = d.decode(msgBodyU8.slice(0,                              lenEnvTo)) + "@" + _AEM_DOMAIN_EML;
+							const msgHdrTo = d.decode(msgBodyU8.slice(lenEnvTo,                       lenEnvTo + lenHdrTo));
+							const msgGreet = d.decode(msgBodyU8.slice(lenEnvTo + lenHdrTo,            lenEnvTo + lenHdrTo + lenGreet));
+							const msgRdns  = d.decode(msgBodyU8.slice(lenEnvTo + lenHdrTo + lenGreet, lenEnvTo + lenHdrTo + lenGreet + lenRdns));
 
-							const msgParts = msgBodyTx.slice(lenEnvTo + lenHdrTo + lenGreet + lenRdns).split("\n");
+							const msgParts = d.decode(msgBodyU8.slice(lenEnvTo + lenHdrTo + lenGreet + lenRdns)).split("\n");
 
 							const msgEnvFrom = msgParts[0];
 							const msgHdrFrom = msgParts[1];
