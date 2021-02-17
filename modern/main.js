@@ -349,7 +349,7 @@ function downloadFile(num) {
 
 function displayFile(num) {
 	const fileType = ae.GetUplMsgType(num);
-	if (!fileType) return downloadFile(num);
+	if (!fileType) {downloadFile(num); return;}
 
 	clearDisplay();
 	document.getElementById("midright").scroll(0, 0);
