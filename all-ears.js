@@ -1381,10 +1381,10 @@ function AllEars(readyCallback) {
 				offset += msgBytes;
 			}
 
-			_extMsg.sort((a, b) => (a.ts < b.ts) ? 1 : -1);
-			_intMsg.sort((a, b) => (a.ts < b.ts) ? 1 : -1);
-			_uplMsg.sort((a, b) => (a.ts < b.ts) ? 1 : -1);
-			_outMsg.sort((a, b) => (a.ts < b.ts) ? 1 : -1);
+			_extMsg.sort((a, b) => (a.ts < b.ts) ? 1 : 0);
+			_intMsg.sort((a, b) => (a.ts < b.ts) ? 1 : 0);
+			_uplMsg.sort((a, b) => (a.ts < b.ts) ? 1 : 0);
+			_outMsg.sort((a, b) => (a.ts < b.ts) ? 1 : 0);
 
 			callback(0);
 		});
