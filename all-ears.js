@@ -795,6 +795,25 @@ function AllEars(readyCallback) {
 		}
 	};
 
+	this.ExportExtMsg = function(num) {
+		return "Received: from " + _extMsg[num].greet +" (" + this.GetExtMsgRdns(num) + " [" + this.GetExtMsgIp(num) + "])"
+			+ " by " + _AEM_DOMAIN_EML
+			+ " with " + (_extMsg[num].esmtp ? "E" : "") + "SMTP" + (_extMsg[num].tls ? "S" : "")
+			+ " id " + sodium.to_base64(_extMsg[num].id, sodium.base64_variants.URLSAFE_NO_PADDING)
+			+ " for <" + _extMsg[num].envTo + ">; "
+			+ new Date(_extMsg[num].ts * 1000).toUTCString().slice(0, 26) + "+0000" // TODO: Preserve timezone info
+		+ "\r\nMessage-ID: <" + _extMsg[num].hdrId + ">"
+		+ "\r\nMIME-Version: 1.0"
+		+ "\r\nContent-Type: text/plain; charset=utf-8"
+		+ "\r\nContent-Transfer-Encoding: 8bit"
+		+ "\r\nDate: " + new Date((_extMsg[num].ts + _extMsg[num].hdrTs) * 1000).toUTCString().slice(0, 26) + "+0000" // TODO: Preserve timezone info
+		+ "\r\nFrom: " + (_extMsg[num].dnFrom ? ("\"" + _extMsg[num].dnFrom + "\" <" + _extMsg[num].hdrFrom + ">") : _extMsg[num].hdrFrom)
+		+ "\r\nTo: " + (_extMsg[num].dnTo ? ("\"" + _extMsg[num].dnTo + "\" <" + _extMsg[num].hdrTo + ">") : _extMsg[num].hdrTo)
+		+ "\r\nSubject: " + _extMsg[num].subj
+		+ "\r\n" + _extMsg[num].headers.replaceAll("\n", "\r\n")
+		+ "\r\n\r\n" + _extMsg[num].body.replaceAll("\n", "\r\n");
+	}
+
 	this.GetExtMsgReplyAddress = function(num) {
 		let resultStart = ("\n" + _extMsg[num].headers.toUpperCase()).lastIndexOf("\nREPLY-TO:");
 		if (resultStart == -1) return (_extMsg[num].hdrFrom) ? _extMsg[num].hdrFrom : _extMsg[num].envFrom;

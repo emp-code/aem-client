@@ -355,8 +355,11 @@ function displayFile(num) {
 
 	document.getElementById("midright").scroll(0, 0);
 	document.getElementById("midright").setAttribute("data-msgid", ae.GetUplMsgIdHex(num));
-	document.getElementById("btn_reply").disabled = true;
+
 	document.getElementById("btn_mdele").disabled = false;
+	document.getElementById("btn_msave").disabled = true;
+	document.getElementById("btn_reply").disabled = true;
+
 	document.getElementById("midright").children[0].hidden = true;
 	document.getElementById("midright").children[1].textContent = ae.GetUplMsgTitle(num);
 
@@ -421,10 +424,27 @@ function displayMsg(isInt, num) {
 	clearDisplay();
 
 	document.getElementById("btn_mdele").disabled = false;
+	document.getElementById("btn_msave").disabled = isInt;
+
 	document.getElementById("midright").scroll(0, 0);
 	document.getElementById("midright").setAttribute("data-msgid", isInt? ae.GetIntMsgIdHex(num) : ae.GetExtMsgIdHex(num));
 
 	const ts = isInt? ae.GetIntMsgTime(num) : ae.GetExtMsgTime(num);
+
+	if (!isInt) {
+		document.getElementById("btn_msave").onclick = function() {
+			this.blur();
+
+			const a = document.createElement("a");
+			a.href = URL.createObjectURL(new Blob([ae.ExportExtMsg(num)]));
+			a.download = ae.GetExtMsgTitle(num);
+			a.click();
+
+			URL.revokeObjectURL(a.href);
+			a.href = "";
+			a.download = "";
+		}
+	}
 
 	if (!isInt || (ae.GetIntMsgFrom(num) !== "public" && ae.GetIntMsgFrom(num) !== "system")) {
 		document.getElementById("btn_reply").disabled = false;
@@ -722,8 +742,11 @@ function displayOutMsg(num) {
 	clearDisplay();
 	document.getElementById("midright").scroll(0, 0);
 	document.getElementById("midright").setAttribute("data-msgid", ae.GetOutMsgIdHex(num));
-	document.getElementById("btn_reply").disabled = true;
+
 	document.getElementById("btn_mdele").disabled = false;
+	document.getElementById("btn_msave").disabled = true;
+	document.getElementById("btn_reply").disabled = true;
+
 	document.getElementById("midright").children[0].hidden = false;
 	document.getElementById("midright").children[2].hidden = false;
 
