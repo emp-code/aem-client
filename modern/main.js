@@ -458,7 +458,7 @@ function displayMsg(isInt, num) {
 	document.getElementById("midright").children[2].hidden = false;
 
 	document.getElementById("readmsg_envto").textContent = isInt ? "" : ae.GetExtMsgEnvTo(num);
-	document.getElementById("readmsg_hdrto").textContent = isInt ? ae.GetIntMsgTo(num) : ae.GetExtMsgHdrTo(num);
+	document.getElementById("readmsg_hdrto").textContent = isInt ? ae.GetIntMsgTo(num) : (ae.GetExtMsgHdrTo(num) + (ae.GetExtMsgDnTo(num) ? " (" + ae.GetExtMsgDnTo(num) + ")" : ""));
 
 	const tzOs = new Date().getTimezoneOffset();
 	const msgDate = new Date((ts * 1000) + (tzOs * -60000));
@@ -561,7 +561,7 @@ function displayMsg(isInt, num) {
 		document.getElementById("readmsg_tls").children[0].textContent = ae.GetExtMsgTLS(num);
 		document.getElementById("readmsg_greet").children[0].textContent = ae.GetExtMsgGreet(num);
 		document.getElementById("readmsg_envfrom").textContent = ae.GetExtMsgEnvFrom(num);
-		document.getElementById("readmsg_hdrfrom").textContent = ae.GetExtMsgHdrFrom(num);
+		document.getElementById("readmsg_hdrfrom").textContent = ae.GetExtMsgHdrFrom(num) + (ae.GetExtMsgDnFrom(num) ? " (" + ae.GetExtMsgDnFrom(num) + ")" : "");
 
 		let flagText = "";
 		if (!ae.GetExtMsgFlagVPad(num)) flagText += "<abbr title=\"Invalid padding\">PAD</abbr> ";
