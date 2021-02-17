@@ -58,7 +58,6 @@ readonly hash_js_brotli="D02d+8Zt5n4/7mnD+GctnXcW7NBcKHdgDsl3msmWdkOG3094pdP0ceN
 readonly hash_js_sodium="8Y8Mt8Fo5a34Wpg1Zl9A2KvsGwfL5IcBFgRUP3jd6uEKEHNW4fhAPKXixPH7WUtA"
 readonly hash_js_aem_js=$(echo -n "$js_aem_js" | openssl dgst -sha384 -binary | openssl base64 -A)
 readonly hash_js_modern=$(echo -n "$js_modern" | openssl dgst -sha384 -binary | openssl base64 -A)
-readonly hash_css_modern=$(echo -n "$css_modern" | openssl dgst -sha384 -binary | openssl base64 -A)
 
 readonly favicon=$(grep -m 1 --no-filename --only-matching '<link.* rel="icon".*>' modern/index.html | sed 's~<link.* rel="icon".* href="data:image/[^,]*,~~' | sed 's~".*~~')
 readonly hash_favicon=$(echo -n "$favicon" | openssl dgst -sha384 -binary | openssl base64 -A)
