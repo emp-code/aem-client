@@ -336,29 +336,30 @@ function clearDisplay() {
 	el[0].remove();
 }
 
+function downloadFile(num) {
+	const a = document.createElement("a");
+	a.href = URL.createObjectURL(new Blob([ae.GetUplMsgBody(num).buffer]));
+	a.download = ae.GetUplMsgTitle(num);
+	a.click();
+
+	URL.revokeObjectURL(a.href);
+	a.href = "";
+	a.download = "";
+}
+
 function displayFile(num) {
 	const fileType = ae.GetUplMsgType(num);
-
-	if (!fileType) { // Download
-		const a = document.createElement("a");
-		a.href = URL.createObjectURL(new Blob([ae.GetUplMsgBody(num).buffer]));
-		a.download = ae.GetUplMsgTitle(num);
-		a.click();
-
-		URL.revokeObjectURL(a.href);
-		a.href = "";
-		a.download = "";
-		return;
-	}
+	if (!fileType) return downloadFile(num);
 
 	clearDisplay();
-
 	document.getElementById("midright").scroll(0, 0);
 	document.getElementById("midright").setAttribute("data-msgid", ae.GetUplMsgIdHex(num));
 
 	document.getElementById("btn_mdele").disabled = false;
-	document.getElementById("btn_msave").disabled = true;
+	document.getElementById("btn_msave").disabled = false;
 	document.getElementById("btn_reply").disabled = true;
+
+	document.getElementById("btn_msave").onclick = function() {downloadFile(num);}
 
 	document.getElementById("midright").children[0].hidden = true;
 	document.getElementById("midright").children[1].textContent = ae.GetUplMsgTitle(num);
