@@ -802,15 +802,15 @@ function AllEars(readyCallback) {
 			+ " id " + sodium.to_base64(_extMsg[num].id, sodium.base64_variants.URLSAFE_NO_PADDING)
 			+ " for <" + _extMsg[num].envTo + ">; "
 			+ new Date(_extMsg[num].ts * 1000).toUTCString().slice(0, 26) + "+0000" // TODO: Preserve timezone info
-		+ "\r\nReturn-Path: <" + _extMsg[num].envFrom + ">"
-		+ "\r\nMessage-ID: <" + _extMsg[num].hdrId + ">"
-		+ "\r\nMIME-Version: 1.0"
-		+ "\r\nContent-Type: text/plain; charset=utf-8"
 		+ "\r\nContent-Transfer-Encoding: 8bit"
+		+ "\r\nContent-Type: text/plain; charset=utf-8"
 		+ "\r\nDate: " + new Date((_extMsg[num].ts + _extMsg[num].hdrTs) * 1000).toUTCString().slice(0, 26) + "+0000" // TODO: Preserve timezone info
 		+ "\r\nFrom: " + (_extMsg[num].dnFrom ? ("\"" + _extMsg[num].dnFrom + "\" <" + _extMsg[num].hdrFrom + ">") : _extMsg[num].hdrFrom)
-		+ "\r\nTo: " + (_extMsg[num].dnTo ? ("\"" + _extMsg[num].dnTo + "\" <" + _extMsg[num].hdrTo + ">") : _extMsg[num].hdrTo)
+		+ "\r\nMIME-Version: 1.0"
+		+ "\r\nMessage-ID: <" + _extMsg[num].hdrId + ">"
+		+ "\r\nReturn-Path: <" + _extMsg[num].envFrom + ">"
 		+ "\r\nSubject: " + _extMsg[num].subj
+		+ "\r\nTo: " + (_extMsg[num].dnTo ? ("\"" + _extMsg[num].dnTo + "\" <" + _extMsg[num].hdrTo + ">") : _extMsg[num].hdrTo)
 		+ "\r\n" + _extMsg[num].headers.replaceAll("\n", "\r\n")
 		+ "\r\n\r\n" + _extMsg[num].body.replaceAll("\n", "\r\n");
 	}
