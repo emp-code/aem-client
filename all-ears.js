@@ -802,6 +802,7 @@ function AllEars(readyCallback) {
 			+ " id " + sodium.to_base64(_extMsg[num].id, sodium.base64_variants.URLSAFE_NO_PADDING)
 			+ " for <" + _extMsg[num].envTo + ">; "
 			+ new Date(_extMsg[num].ts * 1000).toUTCString().slice(0, 26) + "+0000" // TODO: Preserve timezone info
+		+ "\r\nReturn-Path: <" + _extMsg[num].envFrom + ">"
 		+ "\r\nMessage-ID: <" + _extMsg[num].hdrId + ">"
 		+ "\r\nMIME-Version: 1.0"
 		+ "\r\nContent-Type: text/plain; charset=utf-8"
