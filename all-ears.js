@@ -1224,7 +1224,7 @@ function AllEars(readyCallback) {
 							const msgDnFr = hdrFr.includes("\r") ? hdrFr.slice(0, hdrFr.indexOf("\r")) : null;
 							const msgDnRt = hdrRt.includes("\r") ? hdrRt.slice(0, hdrRt.indexOf("\r")) : null;
 
-							const body = msgParts.slice(4).join("\n");
+							const body = msgParts.slice(5).join("\n");
 							const headersEnd = body.indexOf("\r");
 							const msgHeaders = body.slice(0, headersEnd);
 							const msgBody = body.slice(headersEnd + 1);
