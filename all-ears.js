@@ -113,7 +113,7 @@ function AllEars(readyCallback) {
 	const _admin_userLevel = [];
 
 // Private functions
-	function _NewExtMsg(validPad, validSig, id, ts, hdrTs, hdrTz, ip, cc, cs, tls, esmtp, quitR, protV, inval, rares, multi, attach, greet, rdns, envFrom, hdrFrom, dnFrom, envTo, hdrTo, dnTo, hdrId, headers, subj, body) {
+	function _NewExtMsg(validPad, validSig, id, ts, hdrTs, hdrTz, ip, cc, cs, tls, esmtp, quitR, protV, inval, rares, attach, greet, rdns, envFrom, hdrFrom, dnFrom, envTo, hdrTo, dnTo, hdrRt, dnRt, hdrId, headers, subj, body) {
 		this.validPad = validPad;
 		this.validSig = validSig;
 		this.id = id;
@@ -129,13 +129,14 @@ function AllEars(readyCallback) {
 		this.protV = protV;
 		this.inval = inval;
 		this.rares = rares;
-		this.multi = multi;
 		this.attach = attach;
 		this.greet = greet;
 		this.rdns = rdns;
 		this.envFrom = envFrom;
 		this.hdrFrom = hdrFrom;
 		this.dnFrom = dnFrom;
+		this.hdrRt = hdrRt;
+		this.dnRt = dnRt;
 		this.envTo = envTo;
 		this.hdrTo = hdrTo;
 		this.dnTo = dnTo;
@@ -761,6 +762,8 @@ function AllEars(readyCallback) {
 	this.GetExtMsgEnvFrom = function(num) {return _extMsg[num].envFrom;};
 	this.GetExtMsgHdrFrom = function(num) {return _extMsg[num].hdrFrom;};
 	this.GetExtMsgDnFrom  = function(num) {return _extMsg[num].dnFrom;};
+	this.GetExtMsgHdrRt   = function(num) {return _extMsg[num].hdrRt;};
+	this.GetExtMsgDnRt    = function(num) {return _extMsg[num].dnRt;};
 	this.GetExtMsgDnTo    = function(num) {return _extMsg[num].dnTo;};
 	this.GetExtMsgEnvTo   = function(num) {return _extMsg[num].envTo;};
 	this.GetExtMsgHdrTo   = function(num) {return _extMsg[num].hdrTo;};
@@ -776,7 +779,6 @@ function AllEars(readyCallback) {
 	this.GetExtMsgFlagRare = function(num) {return _extMsg[num].rares;};
 	this.GetExtMsgFlagFail = function(num) {return _extMsg[num].inval;};
 	this.GetExtMsgFlagPErr = function(num) {return _extMsg[num].protV;};
-	this.GetExtMsgFlagMult = function(num) {return _extMsg[num].multi;};
 
 	this.GetExtMsgTls_MatchGreeting = function(num) {return _extMsg[num].tls & _AEM_EMAIL_CERT_MATCH_GREETING;};
 	this.GetExtMsgTls_MatchRdns     = function(num) {return _extMsg[num].tls & _AEM_EMAIL_CERT_MATCH_RDNS;};
@@ -808,6 +810,7 @@ function AllEars(readyCallback) {
 		+ "\r\nFrom: " + (_extMsg[num].dnFrom ? ("\"" + _extMsg[num].dnFrom + "\" <" + _extMsg[num].hdrFrom + ">") : _extMsg[num].hdrFrom)
 		+ "\r\nMIME-Version: 1.0"
 		+ "\r\nMessage-ID: <" + _extMsg[num].hdrId + ">"
+		+ (_extMsg[num].hdrRt ? ("\r\nReply-To: " + (_extMsg[num].dnRt ? ("\"" + _extMsg[num].dnRt + "\" <" + _extMsg[num].hdrRt + ">") : _extMsg[num].hdrRt)) : "")
 		+ "\r\nReturn-Path: <" + _extMsg[num].envFrom + ">"
 		+ "\r\nSubject: " + _extMsg[num].subj
 		+ "\r\nTo: " + (_extMsg[num].dnTo ? ("\"" + _extMsg[num].dnTo + "\" <" + _extMsg[num].hdrTo + ">") : _extMsg[num].hdrTo)
@@ -816,22 +819,10 @@ function AllEars(readyCallback) {
 	};
 
 	this.GetExtMsgReplyAddress = function(num) {
-		let resultStart = ("\n" + _extMsg[num].headers.toUpperCase()).lastIndexOf("\nREPLY-TO:");
-		if (resultStart == -1) return (_extMsg[num].hdrFrom) ? _extMsg[num].hdrFrom : _extMsg[num].envFrom;
-
-		// Reply-To found, use it
-		resultStart += 9;
-		let result = _extMsg[num].headers.slice(resultStart);
-		result = result.slice(0, result.indexOf("\n"));
-
-		// Get address from headers
-		const start2 = result.indexOf("<");
-		if (start2 == -1) return result;
-
-		const end2 = result.indexOf(">");
-		if (end2 == -1) return null;
-
-		return result.slice(start2 + 1, end2);
+		if (_extMsg[num].hdrRt)   return _extMsg[num].hdrRt;
+		if (_extMsg[num].hdrFrom) return _extMsg[num].hdrFrom;
+		if (_extMsg[num].envFrom) return _extMsg[num].envFrom;
+		return null;
 	};
 
 	this.GetIntMsgCount = function() {return _intMsg.length;};
@@ -1191,19 +1182,18 @@ function AllEars(readyCallback) {
 						const msgProtV = (msgData[9]  &  32) !== 0;
 						const msgInval = (msgData[10] & 128) !== 0;
 						const msgRares = (msgData[10] &  64) !== 0;
-						const msgMulti = (msgData[10] &  32) !== 0;
+						const msgGrDom = (msgData[10] &  32) !== 0;
 						const msgSpf   = (msgData[11] & 192);
-						const msgGrDom = (msgData[11] &  32) !== 0;
-						const lenEnvTo =  msgData[11] &  31;
+						const lenEnvTo =  msgData[11] &  63;
 						const msgDmarc = (msgData[12] & 192);
 						const lenHdrTo =  msgData[12] &  63;
-						const msgIpBlk = (msgData[13] & 128) !== 0;
+						const msgDnSec = (msgData[13] & 128) !== 0;
 						const lenGreet =  msgData[13] & 127;
-						const msgDnSec = (msgData[14] & 128) !== 0;
-						const lenRdns  =  msgData[14] & 127;
-						const msgDane  = (msgData[15] & 128) !== 0;
+						const msgDane  = (msgData[14] & 128) !== 0;
+						const lenRvDns =  msgData[14] & 127;
+						const msgIpBlk = (msgData[15] & 128) !== 0;
+						const msgHdrTz = (msgData[15] & 127) * 15 - 900; // Timezone offset in minutes; -900m..900m (-15h..+15h)
 
-						const msgHdrTz =  ((msgData[15] & 127) - 60) * 15; // Timezone offset in minutes; -900m..900m (-15h..+15h)
 						const msgHdrTs = new Uint16Array(msgData.slice(16, 18).buffer)[0] - 736;
 						const msgCc = ((msgData[9] & 31) <= 26 && (msgData[10] & 31) <= 26) ? String.fromCharCode("A".charCodeAt(0) + (msgData[9] & 31)) + String.fromCharCode("A".charCodeAt(0) + (msgData[10] & 31)) : "??";
 
@@ -1217,29 +1207,31 @@ function AllEars(readyCallback) {
 							const msgEnvTo = d.decode(msgBodyU8.slice(0,                              lenEnvTo)) + "@" + _AEM_DOMAIN_EML;
 							const hdrTo    = d.decode(msgBodyU8.slice(lenEnvTo,                       lenEnvTo + lenHdrTo));
 							const msgGreet = d.decode(msgBodyU8.slice(lenEnvTo + lenHdrTo,            lenEnvTo + lenHdrTo + lenGreet));
-							const msgRdns  = d.decode(msgBodyU8.slice(lenEnvTo + lenHdrTo + lenGreet, lenEnvTo + lenHdrTo + lenGreet + lenRdns));
+							const msgRvDns = d.decode(msgBodyU8.slice(lenEnvTo + lenHdrTo + lenGreet, lenEnvTo + lenHdrTo + lenGreet + lenRvDns));
 
-							const msgParts = d.decode(msgBodyU8.slice(lenEnvTo + lenHdrTo + lenGreet + lenRdns)).split("\n");
-
-							const msgEnvFrom = msgParts[0];
-							const hdrFrom    = msgParts[1];
-							const msgHdrId   = msgParts[2];
-							const msgSubject = msgParts[3];
+							const msgParts = d.decode(msgBodyU8.slice(lenEnvTo + lenHdrTo + lenGreet + lenRvDns)).split("\n");
+							const msgEnvFr = msgParts[0];
+							const hdrFr    = msgParts[1];
+							const hdrRt    = msgParts[2];
+							const msgHdrId = msgParts[3];
+							const msgSbjct = msgParts[4];
 
 							const msgHdrTo = hdrTo.includes("\r") ? hdrTo.slice(hdrTo.indexOf("\r") + 1) : hdrTo;
-							const msgHdrFrom = hdrFrom.includes("\r") ? hdrFrom.slice(hdrFrom.indexOf("\r") + 1) : hdrFrom;
+							const msgHdrFr = hdrFr.includes("\r") ? hdrFr.slice(hdrFr.indexOf("\r") + 1) : hdrFr;
+							const msgHdrRt = hdrRt.includes("\r") ? hdrRt.slice(hdrRt.indexOf("\r") + 1) : hdrRt;
 
 							const msgDnTo = hdrTo.includes("\r") ? hdrTo.slice(0, hdrTo.indexOf("\r")) : null;
-							const msgDnFrom = hdrFrom.includes("\r") ? hdrFrom.slice(0, hdrFrom.indexOf("\r")) : null;
+							const msgDnFr = hdrFr.includes("\r") ? hdrFr.slice(0, hdrFr.indexOf("\r")) : null;
+							const msgDnRt = hdrRt.includes("\r") ? hdrRt.slice(0, hdrRt.indexOf("\r")) : null;
 
 							const body = msgParts.slice(4).join("\n");
 							const headersEnd = body.indexOf("\r");
 							const msgHeaders = body.slice(0, headersEnd);
 							const msgBody = body.slice(headersEnd + 1);
 
-							_extMsg.push(new _NewExtMsg(validPad, validSig, msgId, msgTs, msgHdrTs, msgHdrTz, msgIp, msgCc, msgCs, msgTls, msgEsmtp, msgQuitR, msgProtV, msgInval, msgRares, msgMulti, msgAttach, msgGreet, msgRdns, msgEnvFrom, msgHdrFrom, msgDnFrom, msgEnvTo, msgHdrTo, msgDnTo, msgHdrId, msgHeaders, msgSubject, msgBody));
+							_extMsg.push(new _NewExtMsg(validPad, validSig, msgId, msgTs, msgHdrTs, msgHdrTz, msgIp, msgCc, msgCs, msgTls, msgEsmtp, msgQuitR, msgProtV, msgInval, msgRares, msgAttach, msgGreet, msgRvDns, msgEnvFr, msgHdrFr, msgDnFr, msgEnvTo, msgHdrTo, msgDnTo, msgHdrRt, msgDnRt, msgHdrId, msgHeaders, msgSbjct, msgBody));
 						} catch(e) {
-							_extMsg.push(new _NewExtMsg(validPad, validSig, msgId, msgTs, msgHdrTs, msgHdrTz, msgIp, msgCc, msgCs, msgTls, msgEsmtp, msgQuitR, msgProtV, msgInval, msgRares, msgMulti, msgAttach, "", "", "", "", "", "", "", "", "Failed decompression", "Size: " + msgData.length));
+							_extMsg.push(new _NewExtMsg(validPad, validSig, msgId, msgTs, msgHdrTs, msgHdrTz, msgIp, msgCc, msgCs, msgTls, msgEsmtp, msgQuitR, msgProtV, msgInval, msgRares, msgAttach, "", "", "", "", "", "", "", "", "", "", "", "", "Failed decompression", "Size: " + msgData.length));
 						}
 					break;}
 
