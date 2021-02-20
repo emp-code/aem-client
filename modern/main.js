@@ -580,7 +580,7 @@ function displayMsg(isInt, num) {
 		document.getElementById("readmsg_ip").children[1].textContent = ae.GetExtMsgIp(num);
 		document.getElementById("readmsg_rdns").children[0].textContent = ae.GetExtMsgRdns(num);
 		document.getElementById("readmsg_tls").children[0].textContent = ae.GetExtMsgTLS(num);
-		document.getElementById("readmsg_greet").children[0].textContent = ae.GetExtMsgGreet(num);
+		document.getElementById("readmsg_greet").children[0].textContent = ae.GetExtMsgGreet(num) + (ae.GetExtMsgFlagGrDm(num) ? " ✓" : "");
 		document.getElementById("readmsg_envfrom").textContent = ae.GetExtMsgEnvFrom(num);
 		document.getElementById("readmsg_hdrfrom").textContent = ae.GetExtMsgHdrFrom(num) + (ae.GetExtMsgDnFrom(num) ? " (" + ae.GetExtMsgDnFrom(num) + ")" : "");
 

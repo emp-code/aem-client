@@ -113,7 +113,7 @@ function AllEars(readyCallback) {
 	const _admin_userLevel = [];
 
 // Private functions
-	function _NewExtMsg(validPad, validSig, id, ts, hdrTs, hdrTz, ip, cc, cs, tls, esmtp, quitR, protV, inval, rares, attach, greet, rdns, envFrom, hdrFrom, dnFrom, envTo, hdrTo, dnTo, hdrRt, dnRt, hdrId, headers, subj, body) {
+	function _NewExtMsg(validPad, validSig, id, ts, hdrTs, hdrTz, ip, cc, cs, tls, esmtp, quitR, protV, inval, rares, attach, greetDomainIp, greet, rdns, envFrom, hdrFrom, dnFrom, envTo, hdrTo, dnTo, hdrRt, dnRt, hdrId, headers, subj, body) {
 		this.validPad = validPad;
 		this.validSig = validSig;
 		this.id = id;
@@ -130,6 +130,7 @@ function AllEars(readyCallback) {
 		this.inval = inval;
 		this.rares = rares;
 		this.attach = attach;
+		this.greetDomainIp = greetDomainIp;
 		this.greet = greet;
 		this.rdns = rdns;
 		this.envFrom = envFrom;
@@ -779,6 +780,7 @@ function AllEars(readyCallback) {
 	this.GetExtMsgFlagRare = function(num) {return _extMsg[num].rares;};
 	this.GetExtMsgFlagFail = function(num) {return _extMsg[num].inval;};
 	this.GetExtMsgFlagPErr = function(num) {return _extMsg[num].protV;};
+	this.GetExtMsgFlagGrDm = function(num) {return _extMsg[num].greetDomainIp;};
 
 	this.GetExtMsgTls_MatchGreeting = function(num) {return _extMsg[num].tls & _AEM_EMAIL_CERT_MATCH_GREETING;};
 	this.GetExtMsgTls_MatchRdns     = function(num) {return _extMsg[num].tls & _AEM_EMAIL_CERT_MATCH_RDNS;};
@@ -1229,9 +1231,9 @@ function AllEars(readyCallback) {
 							const msgHeaders = (headersEnd > 0) ? body.slice(0, headersEnd) : "";
 							const msgBody = body.slice(headersEnd + 1);
 
-							_extMsg.push(new _NewExtMsg(validPad, validSig, msgId, msgTs, msgHdrTs, msgHdrTz, msgIp, msgCc, msgCs, msgTls, msgEsmtp, msgQuitR, msgProtV, msgInval, msgRares, msgAttach, msgGreet, msgRvDns, msgEnvFr, msgHdrFr, msgDnFr, msgEnvTo, msgHdrTo, msgDnTo, msgHdrRt, msgDnRt, msgHdrId, msgHeaders, msgSbjct, msgBody));
+							_extMsg.push(new _NewExtMsg(validPad, validSig, msgId, msgTs, msgHdrTs, msgHdrTz, msgIp, msgCc, msgCs, msgTls, msgEsmtp, msgQuitR, msgProtV, msgInval, msgRares, msgAttach, msgGrDom, msgGreet, msgRvDns, msgEnvFr, msgHdrFr, msgDnFr, msgEnvTo, msgHdrTo, msgDnTo, msgHdrRt, msgDnRt, msgHdrId, msgHeaders, msgSbjct, msgBody));
 						} catch(e) {
-							_extMsg.push(new _NewExtMsg(validPad, validSig, msgId, msgTs, msgHdrTs, msgHdrTz, msgIp, msgCc, msgCs, msgTls, msgEsmtp, msgQuitR, msgProtV, msgInval, msgRares, msgAttach, "", "", "", "", "", "", "", "", "", "", "", "", "Failed decompression", "Size: " + msgData.length));
+							_extMsg.push(new _NewExtMsg(validPad, validSig, msgId, msgTs, msgHdrTs, msgHdrTz, msgIp, msgCc, msgCs, msgTls, msgEsmtp, msgQuitR, msgProtV, msgInval, msgRares, msgAttach, msgGrDom, "", "", "", "", "", "", "", "", "", "", "", "", "Failed decompression", "Size: " + msgData.length));
 						}
 					break;}
 
