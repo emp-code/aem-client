@@ -813,7 +813,7 @@ function AllEars(readyCallback) {
 		+ "\r\nTo: " + (_extMsg[num].dnTo ? ("\"" + _extMsg[num].dnTo + "\" <" + _extMsg[num].hdrTo + ">") : _extMsg[num].hdrTo)
 		+ "\r\n" + _extMsg[num].headers.replaceAll("\n", "\r\n")
 		+ "\r\n\r\n" + _extMsg[num].body.replaceAll("\n", "\r\n");
-	}
+	};
 
 	this.GetExtMsgReplyAddress = function(num) {
 		let resultStart = ("\n" + _extMsg[num].headers.toUpperCase()).lastIndexOf("\nREPLY-TO:");

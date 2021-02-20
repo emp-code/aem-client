@@ -359,7 +359,7 @@ function displayFile(num) {
 	document.getElementById("btn_msave").disabled = false;
 	document.getElementById("btn_reply").disabled = true;
 
-	document.getElementById("btn_msave").onclick = function() {downloadFile(num);}
+	document.getElementById("btn_msave").onclick = function() {downloadFile(num);};
 
 	document.getElementById("midright").children[0].hidden = true;
 	document.getElementById("midright").children[1].textContent = ae.GetUplMsgTitle(num);
@@ -444,7 +444,7 @@ function displayMsg(isInt, num) {
 			URL.revokeObjectURL(a.href);
 			a.href = "";
 			a.download = "";
-		}
+		};
 	}
 
 	if (!isInt || (ae.GetIntMsgFrom(num) !== "public" && ae.GetIntMsgFrom(num) !== "system")) {
