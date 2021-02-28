@@ -113,7 +113,11 @@ function AllEars(readyCallback) {
 	const _admin_userLevel = [];
 
 // Private functions
-	function _NewExtMsg(validPad, validSig, id, ts, hdrTs, hdrTz, ip, cc, cs, tls, esmtp, quitR, protV, inval, rares, attach, greetDomainIp, ipBlacklisted, greet, rdns, envFrom, hdrFrom, dnFrom, envTo, hdrTo, dnTo, hdrRt, dnRt, hdrId, headers, subj, body) {
+	function _NewDkim() {
+		this.domain = [];
+	}
+
+	function _NewExtMsg(validPad, validSig, id, ts, hdrTs, hdrTz, ip, cc, cs, tls, esmtp, quitR, protV, inval, rares, attach, greetDomainIp, ipBlacklisted, dkim, greet, rdns, envFrom, hdrFrom, dnFrom, envTo, hdrTo, dnTo, hdrRt, dnRt, hdrId, headers, subj, body) {
 		this.validPad = validPad;
 		this.validSig = validSig;
 		this.id = id;
@@ -132,6 +136,7 @@ function AllEars(readyCallback) {
 		this.attach = attach;
 		this.greetDomainIp = greetDomainIp;
 		this.ipBlacklisted = ipBlacklisted;
+		this.dkim = dkim;
 		this.greet = greet;
 		this.rdns = rdns;
 		this.envFrom = envFrom;
@@ -758,6 +763,7 @@ function AllEars(readyCallback) {
 	this.GetExtMsgHdrTz   = function(num) {return _extMsg[num].hdrTz;};
 	this.GetExtMsgTLS     = function(num) {return _GetTlsVersion(_extMsg[num].tls & 7) + " " + _GetCiphersuite(_extMsg[num].cs);};
 	this.GetExtMsgIp      = function(num) {return String(_extMsg[num].ip[0] + "." + _extMsg[num].ip[1] + "." + _extMsg[num].ip[2] + "." + _extMsg[num].ip[3]);};
+	this.GetExtMsgDkim    = function(num) {return _extMsg[num].dkim;};
 	this.GetExtMsgGreet   = function(num) {return _extMsg[num].greet;};
 	this.GetExtMsgRdns    = function(num) {return _extMsg[num].rdns;};
 	this.GetExtMsgCountry = function(num) {return _extMsg[num].countryCode;};
@@ -1178,7 +1184,7 @@ function AllEars(readyCallback) {
 						const msgCs  = new Uint16Array(msgData.slice(4, 6).buffer)[0];
 						const msgTls = new Uint16Array(msgData.slice(6, 8).buffer)[0];
 
-						const msgDkimCount = msgData[8] >> 5;
+						const dkimCount = msgData[8] >> 5;
 						const msgAttach = msgData[8] & 31;
 
 						const msgEsmtp = (msgData[9]  & 128) !== 0;
@@ -1201,19 +1207,38 @@ function AllEars(readyCallback) {
 						const msgHdrTs = new Uint16Array(msgData.slice(16, 18).buffer)[0] - 736;
 						const msgCc = ((msgData[9] & 31) <= 26 && (msgData[10] & 31) <= 26) ? String.fromCharCode("A".charCodeAt(0) + (msgData[9] & 31)) + String.fromCharCode("A".charCodeAt(0) + (msgData[10] & 31)) : "??";
 
-						// TODO: DKIM bytes
+						let msgDkim = null;
+						let lenDkimDomain = [];
+
+						let extOffset = 18;
+
+						if (dkimCount > 0) {
+							msgDkim = new _NewDkim();
+
+							for (let i = 0; i < dkimCount; i++) {
+								lenDkimDomain.push((msgData[extOffset + 2] & 63) + 4);
+								extOffset += 3;
+							}
+						}
 
 						try {
-							const msgBodyBr = new Int8Array(msgData.slice(18));
+							const msgBodyBr = new Int8Array(msgData.slice(extOffset));
 							const msgBodyU8 = new Uint8Array(window.BrotliDecode(msgBodyBr));
 
 							const d = new TextDecoder("utf-8");
-							const msgEnvTo = d.decode(msgBodyU8.slice(0,                              lenEnvTo)) + "@" + _AEM_DOMAIN_EML;
-							const hdrTo    = d.decode(msgBodyU8.slice(lenEnvTo,                       lenEnvTo + lenHdrTo));
-							const msgGreet = d.decode(msgBodyU8.slice(lenEnvTo + lenHdrTo,            lenEnvTo + lenHdrTo + lenGreet));
-							const msgRvDns = d.decode(msgBodyU8.slice(lenEnvTo + lenHdrTo + lenGreet, lenEnvTo + lenHdrTo + lenGreet + lenRvDns));
+							let o = 0;
 
-							const msgParts = d.decode(msgBodyU8.slice(lenEnvTo + lenHdrTo + lenGreet + lenRvDns)).split("\n");
+							for (let i = 0; i < dkimCount; i++) {
+								msgDkim.domain.push(d.decode(msgBodyU8.slice(o, o + lenDkimDomain[i])));
+								o += lenDkimDomain[i];
+							}
+
+							const msgEnvTo = d.decode(msgBodyU8.slice(o, o + lenEnvTo)) + "@" + _AEM_DOMAIN_EML; o += lenEnvTo;
+							const hdrTo    = d.decode(msgBodyU8.slice(o, o + lenHdrTo)); o+= lenHdrTo;
+							const msgGreet = d.decode(msgBodyU8.slice(o, o + lenGreet)); o+= lenGreet;
+							const msgRvDns = d.decode(msgBodyU8.slice(o, o + lenRvDns)); o+= lenRvDns;
+
+							const msgParts = d.decode(msgBodyU8.slice(o)).split("\n");
 							const msgEnvFr = msgParts[0];
 							const hdrFr    = msgParts[1];
 							const hdrRt    = msgParts[2];
@@ -1233,9 +1258,9 @@ function AllEars(readyCallback) {
 							const msgHeaders = (headersEnd > 0) ? body.slice(0, headersEnd) : "";
 							const msgBody = body.slice(headersEnd + 1);
 
-							_extMsg.push(new _NewExtMsg(validPad, validSig, msgId, msgTs, msgHdrTs, msgHdrTz, msgIp, msgCc, msgCs, msgTls, msgEsmtp, msgQuitR, msgProtV, msgInval, msgRares, msgAttach, msgGrDom, msgIpBlk, msgGreet, msgRvDns, msgEnvFr, msgHdrFr, msgDnFr, msgEnvTo, msgHdrTo, msgDnTo, msgHdrRt, msgDnRt, msgHdrId, msgHeaders, msgSbjct, msgBody));
+							_extMsg.push(new _NewExtMsg(validPad, validSig, msgId, msgTs, msgHdrTs, msgHdrTz, msgIp, msgCc, msgCs, msgTls, msgEsmtp, msgQuitR, msgProtV, msgInval, msgRares, msgAttach, msgGrDom, msgIpBlk, msgDkim, msgGreet, msgRvDns, msgEnvFr, msgHdrFr, msgDnFr, msgEnvTo, msgHdrTo, msgDnTo, msgHdrRt, msgDnRt, msgHdrId, msgHeaders, msgSbjct, msgBody));
 						} catch(e) {
-							_extMsg.push(new _NewExtMsg(validPad, validSig, msgId, msgTs, msgHdrTs, msgHdrTz, msgIp, msgCc, msgCs, msgTls, msgEsmtp, msgQuitR, msgProtV, msgInval, msgRares, msgAttach, msgGrDom, msgIpBlk, "", "", "", "", "", "", "", "", "", "", "", "", "Failed decompression", "Size: " + msgData.length));
+							_extMsg.push(new _NewExtMsg(validPad, validSig, msgId, msgTs, msgHdrTs, msgHdrTz, msgIp, msgCc, msgCs, msgTls, msgEsmtp, msgQuitR, msgProtV, msgInval, msgRares, msgAttach, msgGrDom, msgIpBlk, null, "", "", "", "", "", "", "", "", "", "", "", "", "Failed decompression", "Size: " + msgData.length));
 						}
 					break;}
 
