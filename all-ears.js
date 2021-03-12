@@ -790,10 +790,13 @@ function AllEars(readyCallback) {
 	this.GetExtMsgFlagGrDm = function(num) {return _extMsg[num].greetDomainIp;};
 	this.GetExtMsgFlagIpBl = function(num) {return _extMsg[num].ipBlacklisted;};
 
-	this.GetExtMsgTls_MatchGreeting = function(num) {return _extMsg[num].tls & _AEM_EMAIL_CERT_MATCH_GREETING;};
-	this.GetExtMsgTls_MatchRdns     = function(num) {return _extMsg[num].tls & _AEM_EMAIL_CERT_MATCH_RDNS;};
-	this.GetExtMsgTls_MatchEnvFrom  = function(num) {return _extMsg[num].tls & _AEM_EMAIL_CERT_MATCH_ENVFROM;};
-	this.GetExtMsgTls_MatchHdrFrom  = function(num) {return _extMsg[num].tls & _AEM_EMAIL_CERT_MATCH_HDRFROM;};
+	this.GetExtMsgTlsDomain = function(num) {
+		if (_extMsg[num].tls & _AEM_EMAIL_CERT_MATCH_GREETING && _extMsg[num].greet)   return _extMsg[num].greet;
+		if (_extMsg[num].tls & _AEM_EMAIL_CERT_MATCH_RDNS     && _extMsg[num].rdns)    return _extMsg[num].rdns;
+		if (_extMsg[num].tls & _AEM_EMAIL_CERT_MATCH_ENVFROM  && _extMsg[num].envFrom) return _extMsg[num].envFrom.split("@")[1];
+		if (_extMsg[num].tls & _AEM_EMAIL_CERT_MATCH_HDRFROM  && _extMsg[num].hdrFrom) return _extMsg[num].hdrFrom.split("@")[1];
+	};
+
 	this.GetExtMsgTls_CertType = function(num) {
 		switch (_extMsg[num].tls & _AEM_EMAIL_CERT_EDDSA) {
 			case _AEM_EMAIL_CERT_EDDSA: return "EdDSA";
