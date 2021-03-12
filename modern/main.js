@@ -528,17 +528,6 @@ function displayMsg(isInt, num) {
 		headers.hidden = !showHeaders;
 		document.getElementById("midright").children[2].appendChild(headers);
 
-		const certText = document.getElementById("readmsg_cert");
-
-		let names = [];
-		if (ae.GetExtMsgTls_MatchGreeting(num)) names.push(ae.GetExtMsgGreet(num));
-		if (ae.GetExtMsgTls_MatchRdns(num))     names.push(ae.GetExtMsgRdns(num));
-		if (ae.GetExtMsgTls_MatchEnvFrom(num))  names.push(ae.GetExtMsgEnvFrom(num).split("@")[1]);
-		if (ae.GetExtMsgTls_MatchHdrFrom(num))  names.push(ae.GetExtMsgHdrFrom(num).split("@")[1]);
-		names = [...new Set(names)];
-
-		certText.children[0].textContent = (names[0]) ? (names.join(" ") + " " + ae.GetExtMsgTls_CertType(num)).trim() : ae.GetExtMsgTls_CertType(num);
-
 		const body = document.createElement("p");
 		body.textContent = ae.GetExtMsgBody(num);
 		document.getElementById("midright").children[2].appendChild(body);
@@ -575,15 +564,39 @@ function displayMsg(isInt, num) {
 
 		const cc = ae.GetExtMsgCountry(num);
 
-		const dkim = ae.GetExtMsgDkim(num);
+		// DKIM
+		let dkim = "";
+		if (ae.GetExtMsgDkim(num)) {
+			[ // Look for a matching domain in this order
+				ae.GetExtMsgHdrFrom(num).split("@")[1],
+				ae.GetExtMsgEnvFrom(num).split("@")[1],
+				ae.GetExtMsgRdns(num),
+				ae.GetExtMsgGreet(num),
+				ae.GetExtMsgTlsDomain(num)
+			].forEach(function(dom) {
+				if (dkim) return;
+				for (let i = 0; i < ae.GetExtMsgDkim(num).domain.length; i++) {
+					if (ae.GetExtMsgDkim(num).domain[i] === dom) {
+						dkim = dom + " ✓";
+						return;
+					}
+				}
+			});
 
+			if (!dkim) dkim = ae.GetExtMsgDkim(num).domain[0]; // Default to first signature domain
+		}
+
+		// Left side
 		document.getElementById("readmsg_country").textContent = getCountryFlag(cc);
 		document.getElementById("readmsg_country").title = getCountryName(cc);
 		document.getElementById("readmsg_ip").children[1].textContent = ae.GetExtMsgIp(num) + (ae.GetExtMsgFlagIpBl(num) ? " ❗" : "");
-		document.getElementById("readmsg_rdns").children[0].textContent = ae.GetExtMsgRdns(num);
 		document.getElementById("readmsg_tls").children[0].textContent = ae.GetExtMsgTLS(num);
-		document.getElementById("readmsg_dkim").children[0].textContent = dkim? ae.GetExtMsgDkim(num).domain[0] : "";
+
+		// Right side
 		document.getElementById("readmsg_greet").children[0].textContent = ae.GetExtMsgGreet(num) + (ae.GetExtMsgFlagGrDm(num) ? " ✓" : "");
+		document.getElementById("readmsg_rdns").children[0].textContent = ae.GetExtMsgRdns(num) + (ae.GetExtMsgGreet(num) === ae.GetExtMsgRdns(num) ? " ✓" : "");
+		document.getElementById("readmsg_cert").children[0].textContent = ae.GetExtMsgTlsDomain(num) ? (ae.GetExtMsgTlsDomain(num) + " ✓") : "";
+		document.getElementById("readmsg_dkim").children[0].textContent = dkim;
 		document.getElementById("readmsg_envfrom").textContent = ae.GetExtMsgEnvFrom(num);
 		document.getElementById("readmsg_hdrfrom").textContent = ae.GetExtMsgHdrFrom(num) + (ae.GetExtMsgDnFrom(num) ? " (" + ae.GetExtMsgDnFrom(num) + ")" : "");
 
