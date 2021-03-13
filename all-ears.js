@@ -115,6 +115,14 @@ function AllEars(readyCallback) {
 // Private functions
 	function _NewDkim() {
 		this.domain = [];
+		this.senderId = [];
+		this.sgnAll = [];
+		this.sgnDate = [];
+		this.sgnFrom = [];
+		this.sgnMsgId = [];
+		this.sgnReplyTo = [];
+		this.sgnSubject = [];
+		this.sgnTo = [];
 	}
 
 	function _NewExtMsg(validPad, validSig, id, ts, hdrTs, hdrTz, ip, cc, cs, tls, esmtp, quitR, protV, inval, rares, attach, greetDomainIp, ipBlacklisted, dkim, greet, rdns, envFrom, hdrFrom, dnFrom, envTo, hdrTo, dnTo, hdrRt, dnRt, hdrId, headers, subj, body) {
@@ -1219,7 +1227,17 @@ function AllEars(readyCallback) {
 							msgDkim = new _NewDkim();
 
 							for (let i = 0; i < dkimCount; i++) {
+								msgDkim.senderId   = [(msgData[extOffset + 1] & 128) != 0];
+								msgDkim.sgnAll     = [(msgData[extOffset + 1] &  64) != 0];
+								msgDkim.sgnDate    = [(msgData[extOffset + 1] &  32) != 0];
+								msgDkim.sgnFrom    = [(msgData[extOffset + 1] &  16) != 0];
+								msgDkim.sgnMsgId   = [(msgData[extOffset + 1] &   8) != 0];
+								msgDkim.sgnReplyTo = [(msgData[extOffset + 1] &   4) != 0];
+								msgDkim.sgnSubject = [(msgData[extOffset + 1] &   2) != 0];
+								msgDkim.sgnTo      = [(msgData[extOffset + 1] &   1) != 0];
+
 								lenDkimDomain.push((msgData[extOffset + 2] & 63) + 4);
+
 								extOffset += 3;
 							}
 						}
