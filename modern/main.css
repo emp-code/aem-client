@@ -57,11 +57,11 @@ noscript {
 	border-radius: 2em;
 }
 
-#div_begin header, footer, a {
+#div_begin header, #div_begin footer, #div_begin a {
 	color: #b3773b;
 }
 
-#div_begin header, footer {
+#div_begin header, #div_begin footer {
 	margin: 1.25em 0;
 }
 
