@@ -62,19 +62,19 @@ function AllEars(readyCallback) {
 	const _AEM_SIG_PUBKEY = sodium.from_hex(docSigPub);
 	const _AEM_SALT_NORMAL = sodium.from_hex(docSaltNm);
 
-	const _AEM_EMAIL_CERT_MATCH_ENVFROM  = 64;
-	const _AEM_EMAIL_CERT_MATCH_HDRFROM  = 32;
-	const _AEM_EMAIL_CERT_MATCH_GREETING = 16;
-	const _AEM_EMAIL_CERT_MATCH_RDNS     =  8;
+	const _AEM_EMAIL_CERT_MATCH_HDRFROM  = 768;
+	const _AEM_EMAIL_CERT_MATCH_ENVFROM  = 512;
+	const _AEM_EMAIL_CERT_MATCH_GREETING = 256;
+	const _AEM_EMAIL_CERT_MATCH_RDNS     =   0;
 
-	const _AEM_EMAIL_CERT_EDDSA = 57344;
-	const _AEM_EMAIL_CERT_EC521 = 49152;
-	const _AEM_EMAIL_CERT_EC384 = 40960;
-	const _AEM_EMAIL_CERT_EC256 = 32768;
-	const _AEM_EMAIL_CERT_RSA4K = 24576;
-	const _AEM_EMAIL_CERT_RSA2K = 16384;
-	const _AEM_EMAIL_CERT_RSA1K =  8192;
-	const _AEM_EMAIL_CERT_NONE  =     0;
+	const _AEM_EMAIL_CERT_EDDSA = 224;
+	const _AEM_EMAIL_CERT_EC521 = 192;
+	const _AEM_EMAIL_CERT_EC384 = 160;
+	const _AEM_EMAIL_CERT_EC256 = 128;
+	const _AEM_EMAIL_CERT_RSA4K =  96;
+	const _AEM_EMAIL_CERT_RSA2K =  64;
+	const _AEM_EMAIL_CERT_RSA1K =  32;
+	const _AEM_EMAIL_CERT_NONE  =   0;
 
 // Private variables
 	const _maxStorage = [];

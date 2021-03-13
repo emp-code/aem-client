@@ -529,7 +529,7 @@ function displayMsg(isInt, num) {
 		document.getElementById("midright").children[2].appendChild(headers);
 
 		const body = document.createElement("p");
-		body.textContent = ae.GetExtMsgBody(num);
+		body.innerHTML = ae.GetExtMsgBody(num);
 		document.getElementById("midright").children[2].appendChild(body);
 
 		document.getElementById("midright").children[1].textContent = ae.GetExtMsgTitle(num);
