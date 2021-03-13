@@ -823,6 +823,9 @@ function addSent() {
 }
 
 function updateAddressCounts() {
+	document.querySelector("#tbd_accs > tr > td:nth-child(3)").textContent = ae.GetAddressCountNormal();
+	document.querySelector("#tbd_accs > tr > td:nth-child(4)").textContent = ae.GetAddressCountShield();
+
 	document.getElementById("limit_normal").textContent = (ae.GetAddressCountNormal() + "/" + ae.GetLimitNormalA(ae.GetUserLevel())).padStart(ae.GetLimitNormalA(ae.GetUserLevel()) > 9 ? 5 : 1);
 	document.getElementById("limit_shield").textContent = (ae.GetAddressCountShield() + "/" + ae.GetLimitShieldA(ae.GetUserLevel())).padStart(ae.GetLimitShieldA(ae.GetUserLevel()) > 9 ? 5 : 1);
 	document.getElementById("limit_total").textContent = ((ae.GetAddressCountNormal() + ae.GetAddressCountShield()) + "/" + ae.GetAddrPerUser()).padStart(5);
