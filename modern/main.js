@@ -533,8 +533,12 @@ function displayMsg(isInt, num) {
 		document.getElementById("midright").children[2].appendChild(body);
 
 		document.getElementById("midright").children[1].textContent = ae.GetExtMsgTitle(num);
-		document.getElementById("midright").children[1].onclick = function() {showHeaders = !showHeaders; headers.hidden = !showHeaders;};
 		document.getElementById("midright").children[1].style.cursor = "pointer";
+		document.getElementById("midright").children[1].onclick = function() {
+			if (!headers.textContent) return;
+			showHeaders = !showHeaders;
+			headers.hidden = !showHeaders;
+		};
 
 		let hdrSecs = Math.abs(ae.GetExtMsgHdrTime(num));
 		let hdrTime = "";
