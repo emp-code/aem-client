@@ -775,7 +775,63 @@ function AllEars(readyCallback) {
 	this.GetExtMsgHdrId   = function(num) {return _extMsg[num].hdrId;};
 	this.GetExtMsgHeaders = function(num) {return _extMsg[num].headers;};
 	this.GetExtMsgTitle   = function(num) {return _extMsg[num].subj;};
-	this.GetExtMsgBody    = function(num) {return _extMsg[num].body;};
+	this.GetExtMsgBody    = function(num) {
+		let html = _extMsg[num].body.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
+
+		// Links
+		while(1) {
+			const begin = html.indexOf("\x11");
+			if (begin === -1) break;
+			const end = html.slice(begin).indexOf("\x12");
+			if (end === -1) break;
+
+			let linkDomain = html.slice(begin + 1);
+			linkDomain = linkDomain.slice(0, linkDomain.indexOf("\x12"));
+
+			let secure = false;
+			if (linkDomain.startsWith("https://")) {
+				secure = true;
+				linkDomain = linkDomain.slice(8);
+			} else if (linkDomain.startsWith("http://")) {
+				linkDomain = linkDomain.slice(7);
+			} else {
+				// TODO: Invalid link
+			}
+
+			const slash = linkDomain.indexOf("/");
+			if (slash !== -1) linkDomain = linkDomain.slice(0, slash);
+
+			html = html.replace("\x11", "<a href=\"").replace("\x12", "\">" + (secure? "🔒" : "🔗") + linkDomain + "</a> ");
+		}
+
+		// Images
+		while(1) {
+			const begin = html.indexOf("\x13");
+			if (begin === -1) break;
+			const end = html.slice(begin).indexOf("\x14");
+			if (end === -1) break;
+
+			let linkDomain = html.slice(begin + 1);
+			linkDomain = linkDomain.slice(0, linkDomain.indexOf("\x14"));
+
+			let secure = false;
+			if (linkDomain.startsWith("https://")) {
+				secure = true;
+				linkDomain = linkDomain.slice(8);
+			} else if (linkDomain.startsWith("http://")) {
+				linkDomain = linkDomain.slice(7);
+			} else {
+				// TODO: Invalid link
+			}
+
+			const slash = linkDomain.indexOf("/");
+			if (slash !== -1) linkDomain = linkDomain.slice(0, slash);
+
+			html = html.replace("\x13", "<a href=\"").replace("\x14", "\">" + (secure? "🖼" : "👁") + linkDomain + "</a> ");
+		}
+
+		return html;
+	};
 
 	this.GetExtMsgFlagVPad = function(num) {return _extMsg[num].validPad;};
 	this.GetExtMsgFlagVSig = function(num) {return _extMsg[num].validSig;};
