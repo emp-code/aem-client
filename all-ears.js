@@ -62,19 +62,17 @@ function AllEars(readyCallback) {
 	const _AEM_SIG_PUBKEY = sodium.from_hex(docSigPub);
 	const _AEM_SALT_NORMAL = sodium.from_hex(docSaltNm);
 
-	const _AEM_EMAIL_CERT_MATCH_HDRFROM  = 768;
-	const _AEM_EMAIL_CERT_MATCH_ENVFROM  = 512;
-	const _AEM_EMAIL_CERT_MATCH_GREETING = 256;
-	const _AEM_EMAIL_CERT_MATCH_RDNS     =   0;
+	const _AEM_EMAIL_CERT_MATCH_HDRFR = 96;
+	const _AEM_EMAIL_CERT_MATCH_ENVFR = 64;
+	const _AEM_EMAIL_CERT_MATCH_GREET = 32;
 
-	const _AEM_EMAIL_CERT_EDDSA = 224;
-	const _AEM_EMAIL_CERT_EC521 = 192;
-	const _AEM_EMAIL_CERT_EC384 = 160;
-	const _AEM_EMAIL_CERT_EC256 = 128;
-	const _AEM_EMAIL_CERT_RSA4K =  96;
-	const _AEM_EMAIL_CERT_RSA2K =  64;
-	const _AEM_EMAIL_CERT_RSA1K =  32;
-	const _AEM_EMAIL_CERT_NONE  =   0;
+	const _AEM_EMAIL_CERT_EDDSA = 28;
+	const _AEM_EMAIL_CERT_EC521 = 24;
+	const _AEM_EMAIL_CERT_EC384 = 20;
+	const _AEM_EMAIL_CERT_EC256 = 16;
+	const _AEM_EMAIL_CERT_RSA4K = 12;
+	const _AEM_EMAIL_CERT_RSA2K =  8;
+	const _AEM_EMAIL_CERT_RSA1K =  4;
 
 // Private variables
 	const _maxStorage = [];
@@ -846,10 +844,9 @@ function AllEars(readyCallback) {
 	this.GetExtMsgFlagIpBl = function(num) {return _extMsg[num].ipBlacklisted;};
 
 	this.GetExtMsgTlsDomain = function(num) {
-		if (_extMsg[num].tls & _AEM_EMAIL_CERT_MATCH_HDRFROM  && _extMsg[num].hdrFrom) return _extMsg[num].hdrFrom.split("@")[1];
-		if (_extMsg[num].tls & _AEM_EMAIL_CERT_MATCH_ENVFROM  && _extMsg[num].envFrom) return _extMsg[num].envFrom.split("@")[1];
-		if (_extMsg[num].tls & _AEM_EMAIL_CERT_MATCH_RDNS     && _extMsg[num].rdns)    return _extMsg[num].rdns;
-		if (_extMsg[num].tls & _AEM_EMAIL_CERT_MATCH_GREETING && _extMsg[num].greet)   return _extMsg[num].greet;
+		if (_extMsg[num].tls & _AEM_EMAIL_CERT_MATCH_HDRFR && _extMsg[num].hdrFrom) return _extMsg[num].hdrFrom.split("@")[1];
+		if (_extMsg[num].tls & _AEM_EMAIL_CERT_MATCH_ENVFR && _extMsg[num].envFrom) return _extMsg[num].envFrom.split("@")[1];
+		if (_extMsg[num].tls & _AEM_EMAIL_CERT_MATCH_GREET && _extMsg[num].greet)   return _extMsg[num].greet;
 	};
 
 	this.GetExtMsgTls_CertType = function(num) {
@@ -1240,35 +1237,35 @@ function AllEars(readyCallback) {
 					case 0: { // ExtMsg
 						const msgIp = msgData.slice(0, 4);
 						const msgCs  = new Uint16Array(msgData.slice(4, 6).buffer)[0];
-						const msgTls = new Uint16Array(msgData.slice(6, 8).buffer)[0];
+						const msgTls = msgData[6];
 
-						const dkimCount = msgData[8] >> 5;
-						const msgAttach = msgData[8] & 31;
+						const dkimCount = msgData[7] >> 5;
+						const msgAttach = msgData[7] & 31;
 
-						const msgEsmtp = (msgData[9]  & 128) !== 0;
-						const msgQuitR = (msgData[9]  &  64) !== 0;
-						const msgProtV = (msgData[9]  &  32) !== 0;
-						const msgInval = (msgData[10] & 128) !== 0;
-						const msgRares = (msgData[10] &  64) !== 0;
-						const msgGrDom = (msgData[10] &  32) !== 0;
-						const msgSpf   = (msgData[11] & 192);
-						const lenEnvTo =  msgData[11] &  63;
-						const msgDmarc = (msgData[12] & 192);
-						const lenHdrTo =  msgData[12] &  63;
-						const msgDnSec = (msgData[13] & 128) !== 0;
-						const lenGreet =  msgData[13] & 127;
-						const msgDane  = (msgData[14] & 128) !== 0;
-						const lenRvDns =  msgData[14] & 127;
-						const msgIpBlk = (msgData[15] & 128) !== 0;
-						const msgHdrTz = (msgData[15] & 127) * 15 - 900; // Timezone offset in minutes; -900m..900m (-15h..+15h)
+						const msgEsmtp = (msgData[8]  & 128) !== 0;
+						const msgQuitR = (msgData[8]  &  64) !== 0;
+						const msgProtV = (msgData[8]  &  32) !== 0;
+						const msgInval = (msgData[9] & 128) !== 0;
+						const msgRares = (msgData[9] &  64) !== 0;
+						const msgGrDom = (msgData[9] &  32) !== 0;
+						const msgSpf   = (msgData[10] & 192);
+						const lenEnvTo =  msgData[10] &  63;
+						const msgDmarc = (msgData[11] & 192);
+						const lenHdrTo =  msgData[11] &  63;
+						const msgDnSec = (msgData[12] & 128) !== 0;
+						const lenGreet =  msgData[12] & 127;
+						const msgDane  = (msgData[13] & 128) !== 0;
+						const lenRvDns =  msgData[13] & 127;
+						const msgIpBlk = (msgData[14] & 128) !== 0;
+						const msgHdrTz = (msgData[14] & 127) * 15 - 900; // Timezone offset in minutes; -900m..900m (-15h..+15h)
 
-						const msgHdrTs = new Uint16Array(msgData.slice(16, 18).buffer)[0] - 736;
-						const msgCc = ((msgData[9] & 31) <= 26 && (msgData[10] & 31) <= 26) ? String.fromCharCode("A".charCodeAt(0) + (msgData[9] & 31)) + String.fromCharCode("A".charCodeAt(0) + (msgData[10] & 31)) : "??";
+						const msgHdrTs = new Uint16Array(msgData.slice(15, 17).buffer)[0] - 736;
+						const msgCc = ((msgData[8] & 31) <= 26 && (msgData[9] & 31) <= 26) ? String.fromCharCode("A".charCodeAt(0) + (msgData[8] & 31)) + String.fromCharCode("A".charCodeAt(0) + (msgData[9] & 31)) : "??";
 
 						let msgDkim = null;
 						let lenDkimDomain = [];
 
-						let extOffset = 18;
+						let extOffset = 17;
 
 						if (dkimCount > 0) {
 							msgDkim = new _NewDkim();
