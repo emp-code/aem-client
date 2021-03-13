@@ -592,17 +592,6 @@ function AllEars(readyCallback) {
 		}
 	};
 
-	const _GetTlsVersion = function(tlsver) {
-		switch (tlsver) {
-			case 0: return "(No TLS)";
-			case 1: return "TLSv1.0";
-			case 2: return "TLSv1.1";
-			case 3: return "TLSv1.2";
-			case 4: return "TLSv1.3";
-			default: return "TLSv1.?";
-		}
-	};
-
 	const _ParseUinfo = function(browseData) {
 		_userLevel = browseData[0] & 3;
 
@@ -769,7 +758,7 @@ function AllEars(readyCallback) {
 	this.GetExtMsgTime    = function(num) {return _extMsg[num].ts;};
 	this.GetExtMsgHdrTime = function(num) {return _extMsg[num].hdrTs;};
 	this.GetExtMsgHdrTz   = function(num) {return _extMsg[num].hdrTz;};
-	this.GetExtMsgTLS     = function(num) {return _GetTlsVersion(_extMsg[num].tls & 7) + " " + _GetCiphersuite(_extMsg[num].cs);};
+	this.GetExtMsgTLS     = function(num) {return "TLS v1." + (_extMsg[num].tls & 3) + " " + _GetCiphersuite(_extMsg[num].cs);};
 	this.GetExtMsgIp      = function(num) {return String(_extMsg[num].ip[0] + "." + _extMsg[num].ip[1] + "." + _extMsg[num].ip[2] + "." + _extMsg[num].ip[3]);};
 	this.GetExtMsgDkim    = function(num) {return _extMsg[num].dkim;};
 	this.GetExtMsgGreet   = function(num) {return _extMsg[num].greet;};
@@ -799,10 +788,10 @@ function AllEars(readyCallback) {
 	this.GetExtMsgFlagIpBl = function(num) {return _extMsg[num].ipBlacklisted;};
 
 	this.GetExtMsgTlsDomain = function(num) {
-		if (_extMsg[num].tls & _AEM_EMAIL_CERT_MATCH_GREETING && _extMsg[num].greet)   return _extMsg[num].greet;
-		if (_extMsg[num].tls & _AEM_EMAIL_CERT_MATCH_RDNS     && _extMsg[num].rdns)    return _extMsg[num].rdns;
-		if (_extMsg[num].tls & _AEM_EMAIL_CERT_MATCH_ENVFROM  && _extMsg[num].envFrom) return _extMsg[num].envFrom.split("@")[1];
 		if (_extMsg[num].tls & _AEM_EMAIL_CERT_MATCH_HDRFROM  && _extMsg[num].hdrFrom) return _extMsg[num].hdrFrom.split("@")[1];
+		if (_extMsg[num].tls & _AEM_EMAIL_CERT_MATCH_ENVFROM  && _extMsg[num].envFrom) return _extMsg[num].envFrom.split("@")[1];
+		if (_extMsg[num].tls & _AEM_EMAIL_CERT_MATCH_RDNS     && _extMsg[num].rdns)    return _extMsg[num].rdns;
+		if (_extMsg[num].tls & _AEM_EMAIL_CERT_MATCH_GREETING && _extMsg[num].greet)   return _extMsg[num].greet;
 	};
 
 	this.GetExtMsgTls_CertType = function(num) {
@@ -888,7 +877,7 @@ function AllEars(readyCallback) {
 	this.GetOutMsgBody = function(num) {return _outMsg[num].body;};
 	this.GetOutMsgMxDom = function(num) {return _outMsg[num].mxDom;};
 	this.GetOutMsgGreet = function(num) {return _outMsg[num].greet;};
-	this.GetOutMsgTLS   = function(num) {return _GetTlsVersion(_outMsg[num].tlsVer) + " " + _GetCiphersuite(_outMsg[num].tlsCs);};
+	this.GetOutMsgTLS   = function(num) {return "TLS v1." + _outMsg[num].tlsVer + " " + _GetCiphersuite(_outMsg[num].tlsCs);};
 	this.GetOutMsgAttach = function(num) {return _outMsg[num].attach;};
 
 	this.GetOutMsgFlagE2ee = function(num) {return _outMsg[num].isE2ee;};
