@@ -1296,7 +1296,10 @@ function addressCreate(addr) {
 
 				if (!error2) {
 					addAddress(ae.GetAddressCount() - 1);
-					if (addr !== "SHIELD") document.getElementById("txt_address_create_normal").value = "";
+					if (addr !== "SHIELD") {
+						document.getElementById("txt_address_create_normal").value = "";
+						document.getElementById("txt_address_create_normal").focus();
+					}
 				} else {
 					console.log("Failed to update the Private field: " + error2);
 				}
