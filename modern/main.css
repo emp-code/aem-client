@@ -228,6 +228,10 @@ button:enabled:focus, button:enabled:hover {
 	cursor: pointer;
 }
 
+pre a {
+	color: #fff;
+}
+
 #div_inbox {
 	height: 100%;
 }
