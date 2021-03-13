@@ -466,7 +466,7 @@ function displayMsg(isInt, num) {
 			document.getElementById("write_body").focus();
 
 			for (const opt of document.getElementById("write_from").options) {
-				if (opt.value === (isInt ? ae.GetIntMsgTo(num) : ae.GetExtMsgEnvTo(num).split("@")[0])) {
+				if (opt.value === (isInt ? ae.GetIntMsgTo(num) : ae.GetExtMsgEnvTo(num).split("@")[0].toLowerCase())) {
 					opt.selected = true;
 				}
 			}
