@@ -774,7 +774,7 @@ function AllEars(readyCallback) {
 	this.GetExtMsgHeaders = function(num) {return _extMsg[num].headers;};
 	this.GetExtMsgTitle   = function(num) {return _extMsg[num].subj;};
 	this.GetExtMsgBody    = function(num) {
-		let html = _extMsg[num].body.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
+		let html = _extMsg[num].body.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replace("\r","<br><hr>");
 
 		// Links
 		while(1) {
