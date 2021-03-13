@@ -795,7 +795,8 @@ function AllEars(readyCallback) {
 			} else if (linkDomain.startsWith("http://")) {
 				linkDomain = linkDomain.slice(7);
 			} else {
-				// TODO: Invalid link
+				html = html.replace("\x11", "").replace("\x12", "");
+				continue;
 			}
 
 			const slash = linkDomain.indexOf("/");
@@ -821,7 +822,8 @@ function AllEars(readyCallback) {
 			} else if (linkDomain.startsWith("http://")) {
 				linkDomain = linkDomain.slice(7);
 			} else {
-				// TODO: Invalid link
+				html = html.replace("\x13", "").replace("\x14", "");
+				continue;
 			}
 
 			const slash = linkDomain.indexOf("/");
