@@ -933,8 +933,10 @@ function reloadAccount() {
 	cell = row.insertCell(-1); cell.innerHTML = "<button id=\"btn_delme\" type=\"button\" autocomplete=\"off\" disabled=\"disabled\">X</button>";
 	cell.children[0].onclick = function() {
 		ae.Account_Delete(ae.GetUserPkHex(), function(error) {
-			if (!error) row.remove();
-			else console.log("Error " + error);
+			if (!error) {
+				row.remove();
+				document.getElementById("chk_delme").disabled = true;
+			} else console.log("Error " + error);
 		});
 	};
 
