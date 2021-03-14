@@ -919,7 +919,13 @@ function reloadAccount() {
 	cell.children[0].onclick = function() {
 		const newLevel = parseInt(row.cells[4].textContent, 10) - 1;
 		ae.Account_Update(ae.GetUserPkHex(), newLevel, function(error) {
-			if (!error) row.cells[4].textContent = newLevel;
+			if (!error) {
+				row.cells[4].textContent = newLevel;
+				if (newLevel === 0) {
+					document.getElementById("btn_lowme").disabled = true;
+					document.getElementById("chk_lowme").disabled = true;
+				}
+			}
 			else console.log("Error " + error);
 		});
 	};
