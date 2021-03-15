@@ -1181,7 +1181,7 @@ function AllEars(readyCallback) {
 				browseData = browseData.slice(uinfo_bytes);
 			}
 
-			if (browseData.length <= 6) {callback(0xF2); return;} // No messages or error getting messages
+			if (browseData.length <= 6) {callback(0); return;} // No messages or error getting messages
 
 			_totalMsgCount = new Uint16Array(browseData.slice(0, 2).buffer)[0];
 			_totalMsgBytes = new Uint32Array(browseData.slice(2, 6).buffer)[0] * 16;
