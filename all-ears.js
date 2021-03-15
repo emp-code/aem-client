@@ -1271,14 +1271,14 @@ function AllEars(readyCallback) {
 							msgDkim = new _NewDkim();
 
 							for (let i = 0; i < dkimCount; i++) {
-								msgDkim.senderId   = [(msgData[extOffset + 1] & 128) != 0];
-								msgDkim.sgnAll     = [(msgData[extOffset + 1] &  64) != 0];
-								msgDkim.sgnDate    = [(msgData[extOffset + 1] &  32) != 0];
-								msgDkim.sgnFrom    = [(msgData[extOffset + 1] &  16) != 0];
-								msgDkim.sgnMsgId   = [(msgData[extOffset + 1] &   8) != 0];
-								msgDkim.sgnReplyTo = [(msgData[extOffset + 1] &   4) != 0];
-								msgDkim.sgnSubject = [(msgData[extOffset + 1] &   2) != 0];
-								msgDkim.sgnTo      = [(msgData[extOffset + 1] &   1) != 0];
+								msgDkim.senderId   = [(msgData[extOffset + 1] & 128) !== 0];
+								msgDkim.sgnAll     = [(msgData[extOffset + 1] &  64) !== 0];
+								msgDkim.sgnDate    = [(msgData[extOffset + 1] &  32) !== 0];
+								msgDkim.sgnFrom    = [(msgData[extOffset + 1] &  16) !== 0];
+								msgDkim.sgnMsgId   = [(msgData[extOffset + 1] &   8) !== 0];
+								msgDkim.sgnReplyTo = [(msgData[extOffset + 1] &   4) !== 0];
+								msgDkim.sgnSubject = [(msgData[extOffset + 1] &   2) !== 0];
+								msgDkim.sgnTo      = [(msgData[extOffset + 1] &   1) !== 0];
 
 								lenDkimDomain.push((msgData[extOffset + 2] & 63) + 4);
 
