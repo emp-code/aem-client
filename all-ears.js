@@ -798,8 +798,8 @@ function AllEars(readyCallback) {
 				continue;
 			}
 
-			const slash = linkDomain.indexOf("/");
-			if (slash !== -1) linkDomain = linkDomain.slice(0, slash);
+			const domainEnd = linkDomain.search("[/?]");
+			if (domainEnd !== -1) linkDomain = linkDomain.slice(0, domainEnd);
 
 			html = html.replace("\x11", "<a href=\"").replace("\x12", "\">" + (secure? "🔒" : "🔗") + linkDomain + "</a> ");
 		}
@@ -825,8 +825,8 @@ function AllEars(readyCallback) {
 				continue;
 			}
 
-			const slash = linkDomain.indexOf("/");
-			if (slash !== -1) linkDomain = linkDomain.slice(0, slash);
+			const domainEnd = linkDomain.search("[/?]");
+			if (domainEnd !== -1) linkDomain = linkDomain.slice(0, domainEnd);
 
 			html = html.replace("\x13", "<a href=\"").replace("\x14", "\">" + (secure? "🖼" : "👁") + linkDomain + "</a> ");
 		}
