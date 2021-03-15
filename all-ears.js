@@ -123,7 +123,7 @@ function AllEars(readyCallback) {
 		this.sgnTo = [];
 	}
 
-	function _NewExtMsg(validPad, validSig, id, ts, hdrTs, hdrTz, ip, cc, cs, tls, esmtp, quitR, protV, inval, rares, attach, greetDomainIp, ipBlacklisted, dkim, greet, rdns, envFrom, hdrFrom, dnFrom, envTo, hdrTo, dnTo, hdrRt, dnRt, hdrId, headers, subj, body) {
+	function _NewExtMsg(validPad, validSig, id, ts, hdrTs, hdrTz, ip, cc, cs, tls, esmtp, quitR, protV, inval, rares, attach, greetDomainIp, ipBlacklisted, dkimFail, dkim, greet, rdns, envFrom, hdrFrom, dnFrom, envTo, hdrTo, dnTo, hdrRt, dnRt, hdrId, headers, subj, body) {
 		this.validPad = validPad;
 		this.validSig = validSig;
 		this.id = id;
@@ -142,6 +142,7 @@ function AllEars(readyCallback) {
 		this.attach = attach;
 		this.greetDomainIp = greetDomainIp;
 		this.ipBlacklisted = ipBlacklisted;
+		this.dkimFail = dkimFail;
 		this.dkim = dkim;
 		this.greet = greet;
 		this.rdns = rdns;
@@ -842,6 +843,7 @@ function AllEars(readyCallback) {
 	this.GetExtMsgFlagPErr = function(num) {return _extMsg[num].protV;};
 	this.GetExtMsgFlagGrDm = function(num) {return _extMsg[num].greetDomainIp;};
 	this.GetExtMsgFlagIpBl = function(num) {return _extMsg[num].ipBlacklisted;};
+	this.GetExtMsgFlagDkFl = function(num) {return _extMsg[num].dkimFailed;};
 
 	this.GetExtMsgTlsDomain = function(num) {
 		if (_extMsg[num].tls & _AEM_EMAIL_CERT_MATCH_HDRFR && _extMsg[num].hdrFrom) return _extMsg[num].hdrFrom.split("@")[1];
@@ -1249,7 +1251,8 @@ function AllEars(readyCallback) {
 						const msgRares = (msgData[9] &  64) !== 0;
 						const msgGrDom = (msgData[9] &  32) !== 0;
 						const msgSpf   = (msgData[10] & 192);
-						const lenEnvTo =  msgData[10] &  63;
+						const dkimFail = (msgData[10] &  32) !== 0;
+						const lenEnvTo =  msgData[10] &  31;
 						const msgDmarc = (msgData[11] & 192);
 						const lenHdrTo =  msgData[11] &  63;
 						const msgDnSec = (msgData[12] & 128) !== 0;
@@ -1323,9 +1326,9 @@ function AllEars(readyCallback) {
 							const msgHeaders = (headersEnd > 0) ? body.slice(0, headersEnd) : "";
 							const msgBody = body.slice(headersEnd + 1);
 
-							_extMsg.push(new _NewExtMsg(validPad, validSig, msgId, msgTs, msgHdrTs, msgHdrTz, msgIp, msgCc, msgCs, msgTls, msgEsmtp, msgQuitR, msgProtV, msgInval, msgRares, msgAttach, msgGrDom, msgIpBlk, msgDkim, msgGreet, msgRvDns, msgEnvFr, msgHdrFr, msgDnFr, msgEnvTo, msgHdrTo, msgDnTo, msgHdrRt, msgDnRt, msgHdrId, msgHeaders, msgSbjct, msgBody));
+							_extMsg.push(new _NewExtMsg(validPad, validSig, msgId, msgTs, msgHdrTs, msgHdrTz, msgIp, msgCc, msgCs, msgTls, msgEsmtp, msgQuitR, msgProtV, msgInval, msgRares, msgAttach, msgGrDom, msgIpBlk, dkimFail, msgDkim, msgGreet, msgRvDns, msgEnvFr, msgHdrFr, msgDnFr, msgEnvTo, msgHdrTo, msgDnTo, msgHdrRt, msgDnRt, msgHdrId, msgHeaders, msgSbjct, msgBody));
 						} catch(e) {
-							_extMsg.push(new _NewExtMsg(validPad, validSig, msgId, msgTs, msgHdrTs, msgHdrTz, msgIp, msgCc, msgCs, msgTls, msgEsmtp, msgQuitR, msgProtV, msgInval, msgRares, msgAttach, msgGrDom, msgIpBlk, null, "", "", "", "", "", "", "", "", "", "", "", "", "Failed decompression", "Size: " + msgData.length));
+							_extMsg.push(new _NewExtMsg(validPad, validSig, msgId, msgTs, msgHdrTs, msgHdrTz, msgIp, msgCc, msgCs, msgTls, msgEsmtp, msgQuitR, msgProtV, msgInval, msgRares, msgAttach, msgGrDom, msgIpBlk, dkimFail, null, "", "", "", "", "", "", "", "", "", "", "", "", "Failed decompression", "Size: " + msgData.length));
 						}
 					break;}
 
