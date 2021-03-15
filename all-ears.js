@@ -756,7 +756,7 @@ function AllEars(readyCallback) {
 	this.GetExtMsgTime    = function(num) {return _extMsg[num].ts;};
 	this.GetExtMsgHdrTime = function(num) {return _extMsg[num].hdrTs;};
 	this.GetExtMsgHdrTz   = function(num) {return _extMsg[num].hdrTz;};
-	this.GetExtMsgTLS     = function(num) {return "TLS v1." + (_extMsg[num].tls & 3) + " " + _GetCiphersuite(_extMsg[num].cs);};
+	this.GetExtMsgTLS     = function(num) {return (_extMsg[num].cs === 0) ? "" : "TLS v1." + (_extMsg[num].tls & 3) + " " + _GetCiphersuite(_extMsg[num].cs);};
 	this.GetExtMsgIp      = function(num) {return String(_extMsg[num].ip[0] + "." + _extMsg[num].ip[1] + "." + _extMsg[num].ip[2] + "." + _extMsg[num].ip[3]);};
 	this.GetExtMsgDkim    = function(num) {return _extMsg[num].dkim;};
 	this.GetExtMsgGreet   = function(num) {return _extMsg[num].greet;};
@@ -932,7 +932,7 @@ function AllEars(readyCallback) {
 	this.GetOutMsgBody = function(num) {return _outMsg[num].body;};
 	this.GetOutMsgMxDom = function(num) {return _outMsg[num].mxDom;};
 	this.GetOutMsgGreet = function(num) {return _outMsg[num].greet;};
-	this.GetOutMsgTLS   = function(num) {return "TLS v1." + _outMsg[num].tlsVer + " " + _GetCiphersuite(_outMsg[num].tlsCs);};
+	this.GetOutMsgTLS   = function(num) {return (_outMsg[num].tlsCs === 0) ? "" : "TLS v1." + _outMsg[num].tlsVer + " " + _GetCiphersuite(_outMsg[num].tlsCs);};
 	this.GetOutMsgAttach = function(num) {return _outMsg[num].attach;};
 
 	this.GetOutMsgFlagE2ee = function(num) {return _outMsg[num].isE2ee;};
