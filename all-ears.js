@@ -843,7 +843,7 @@ function AllEars(readyCallback) {
 	this.GetExtMsgFlagPErr = function(num) {return _extMsg[num].protV;};
 	this.GetExtMsgFlagGrDm = function(num) {return _extMsg[num].greetDomainIp;};
 	this.GetExtMsgFlagIpBl = function(num) {return _extMsg[num].ipBlacklisted;};
-	this.GetExtMsgFlagDkFl = function(num) {return _extMsg[num].dkimFailed;};
+	this.GetExtMsgFlagDkFl = function(num) {return _extMsg[num].dkimFail;};
 
 	this.GetExtMsgTlsDomain = function(num) {
 		if (_extMsg[num].tls & _AEM_EMAIL_CERT_MATCH_HDRFR && _extMsg[num].hdrFrom) return _extMsg[num].hdrFrom.split("@")[1];
