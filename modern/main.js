@@ -590,6 +590,8 @@ function displayMsg(isInt, num) {
 			if (!dkim) dkim = ae.GetExtMsgDkim(num).domain[0]; // Default to first signature domain
 		}
 
+		if (ae.GetExtMsgFlagDkFl(num)) dkim += " (fail)";
+
 		// Left side
 		document.getElementById("readmsg_country").textContent = getCountryFlag(cc);
 		document.getElementById("readmsg_country").title = getCountryName(cc);
