@@ -190,6 +190,10 @@ noscript {
 	border-bottom: 1px solid #555;
 }
 
+#midright > pre > p:nth-child(2) {
+	margin-bottom: 0;
+}
+
 #div_tools {
 	overflow-x: hidden;
 	overflow-y: auto;
