@@ -262,7 +262,7 @@ table, td {
 	opacity: 0.5;
 }
 
-#tbl_inbox tr > td:nth-child(1), #tbl_drbox tr > td:nth-child(1) {
+#tbl_inbox tr > td:first-child, #tbl_drbox tr > td:first-child {
 	font-family: monospace, monospace;
 }
 
@@ -282,7 +282,7 @@ table, td {
 	direction: rtl;
 }
 
-#tbd_uploads td:nth-child(1) {
+#tbd_uploads td:first-child {
 	font-family: monospace, monospace;
 }
 
