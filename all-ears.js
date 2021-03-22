@@ -801,7 +801,7 @@ function AllEars(readyCallback) {
 			const domainEnd = linkDomain.search("[/?]");
 			if (domainEnd !== -1) linkDomain = linkDomain.slice(0, domainEnd);
 
-			html = html.replace("\x11", "<a href=\"").replace("\x12", "\">" + (secure? "🔒" : "🔗") + linkDomain + "</a> ");
+			html = html.replace("\x11", "<a href=\"").replace("\x12", "\">" + (secure? "🔒&NoBreak;" : "🔗&NoBreak;") + linkDomain + "</a> ");
 		}
 
 		// Images
@@ -828,7 +828,7 @@ function AllEars(readyCallback) {
 			const domainEnd = linkDomain.search("[/?]");
 			if (domainEnd !== -1) linkDomain = linkDomain.slice(0, domainEnd);
 
-			html = html.replace("\x13", "<a href=\"").replace("\x14", "\">" + (secure? "🖼" : "👁") + linkDomain + "</a> ");
+			html = html.replace("\x13", "<a href=\"").replace("\x14", "\">" + (secure? "🖼&NoBreak;" : "👁&NoBreak;") + linkDomain + "</a> ");
 		}
 
 		return html;
