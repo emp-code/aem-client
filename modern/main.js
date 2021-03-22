@@ -639,7 +639,7 @@ function addMsg(isInt, i) {
 		cellSnd.textContent = ae.GetIntMsgFrom(i);
 		cellSnd.className = (ae.GetIntMsgFrom(i).length === 16) ? "mono" : "";
 	} else {
-		const from1 = ae.GetExtMsgEnvFrom(i);
+		const from1 = ae.GetExtMsgHdrFrom(i);
 		const from2 = from1.substring(from1.indexOf("@") + 1);
 		const cc = ae.GetExtMsgCountry(i);
 		const cellSnd1 = row.insertCell(-1);
