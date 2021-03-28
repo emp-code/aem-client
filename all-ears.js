@@ -10,13 +10,13 @@ function AllEars(readyCallback) {
 		) {readyCallback(false); return;}
 	} catch(e) {readyCallback(false); return;}
 
-	const docApiDom = document.documentElement.getAttribute("data-aeapidom");
-	const docEmlDom = document.documentElement.getAttribute("data-aeemldom");
-	const docApiPub = document.documentElement.getAttribute("data-aeapipub");
-	const docSigPub = document.documentElement.getAttribute("data-aesigpub");
-	const docSaltNm = document.documentElement.getAttribute("data-aesaltnm");
+	const docDomApi = document.head.querySelector("meta[name='aem.domain.api']").content;
+	const docDomEml = document.head.querySelector("meta[name='aem.domain.eml']").content;
+	const docPubApi = document.head.querySelector("meta[name='aem.pubkey.api']").content;
+	const docPubSig = document.head.querySelector("meta[name='aem.pubkey.sig']").content;
+	const docSltNrm = document.head.querySelector("meta[name='aem.adrslt.nrm']").content;
 
-	if (!docApiPub || !docSigPub || !docSaltNm || docApiPub.length !== sodium.crypto_box_SECRETKEYBYTES * 2 || docSigPub.length !== sodium.crypto_sign_PUBLICKEYBYTES * 2 || docSaltNm.length !== sodium.crypto_pwhash_SALTBYTES * 2) {
+	if (!docPubApi || !docPubSig || !docSltNrm || docPubApi.length !== sodium.crypto_box_SECRETKEYBYTES * 2 || docPubSig.length !== sodium.crypto_sign_PUBLICKEYBYTES * 2 || docSltNrm.length !== sodium.crypto_pwhash_SALTBYTES * 2) {
 		readyCallback(false);
 		return;
 	}
@@ -56,11 +56,11 @@ function AllEars(readyCallback) {
 	const _AEM_ARGON2_MEMLIMIT = 67108864;
 	const _AEM_ARGON2_OPSLIMIT = 3;
 
-	const _AEM_DOMAIN_API = docApiDom? docApiDom : document.domain;
-	const _AEM_DOMAIN_EML = docEmlDom? docEmlDom : document.domain;
-	const _AEM_API_PUBKEY = sodium.from_hex(docApiPub);
-	const _AEM_SIG_PUBKEY = sodium.from_hex(docSigPub);
-	const _AEM_SALT_NORMAL = sodium.from_hex(docSaltNm);
+	const _AEM_DOMAIN_API = docDomApi? docDomApi : document.domain;
+	const _AEM_DOMAIN_EML = docDomEml? docDomEml : document.domain;
+	const _AEM_API_PUBKEY = sodium.from_hex(docPubApi);
+	const _AEM_SIG_PUBKEY = sodium.from_hex(docPubSig);
+	const _AEM_SALT_NORMAL = sodium.from_hex(docSltNrm);
 
 	const _AEM_EMAIL_CERT_MATCH_HDRFR = 96;
 	const _AEM_EMAIL_CERT_MATCH_ENVFR = 64;
