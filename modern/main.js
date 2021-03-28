@@ -384,17 +384,10 @@ function displayFile(num) {
 			};
 		break;}
 
-		case "audio": {
-			document.querySelector("article").children[2].hidden = true;
-			const el = document.createElement("audio");
-			el.controls = "controls";
-			el.src = URL.createObjectURL(new Blob([ae.GetUplMsgBody(num).buffer]));
-			document.querySelector("article").appendChild(el);
-		break;}
-
+		case "audio":
 		case "video": {
 			document.querySelector("article").children[2].hidden = true;
-			const el = document.createElement("video");
+			const el = document.createElement(fileType);
 			el.controls = "controls";
 			el.src = URL.createObjectURL(new Blob([ae.GetUplMsgBody(num).buffer]));
 			document.querySelector("article").appendChild(el);
