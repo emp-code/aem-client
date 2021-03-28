@@ -332,8 +332,8 @@ function clearDisplay() {
 	if (!el) el = document.querySelector("article > iframe");
 	if (!el) return;
 
-	URL.revokeObjectURL(el[0].src);
-	el[0].remove();
+	URL.revokeObjectURL(el.src);
+	el.remove();
 }
 
 function downloadFile(num) {
