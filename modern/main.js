@@ -325,12 +325,12 @@ function getClockIcon(d) {
 }
 
 function clearDisplay() {
-	let el = document.querySelector("article").getElementsByTagName("img");
-	if (el.length !== 1) el = document.querySelector("article").getElementsByTagName("audio");
-	if (el.length !== 1) el = document.querySelector("article").getElementsByTagName("video");
-	if (el.length !== 1) el = document.querySelector("article").getElementsByTagName("embed");
-	if (el.length !== 1) el = document.querySelector("article").getElementsByTagName("iframe");
-	if (el.length !== 1) return;
+	let      el = document.querySelector("article > img");
+	if (!el) el = document.querySelector("article > audio");
+	if (!el) el = document.querySelector("article > video");
+	if (!el) el = document.querySelector("article > embed");
+	if (!el) el = document.querySelector("article > iframe");
+	if (!el) return;
 
 	URL.revokeObjectURL(el[0].src);
 	el[0].remove();
@@ -971,7 +971,7 @@ function reloadAccount() {
 }
 
 function deleteAddress(addr) {
-	let btns = document.getElementById("tbl_addrs").getElementsByTagName("button");
+	let btns = document.querySelectorAll("#tbl_addrs button");
 	for (let i = 0; i < btns.length; i++) btns[i].disabled = true;
 
 	let addressToDelete = -1;
@@ -998,13 +998,13 @@ function deleteAddress(addr) {
 			ae.Private_Update(function(error2) {
 				if (error2) console.log("Failed to update the Private field: " + error2);
 
-				btns = document.getElementById("tbl_addrs").getElementsByTagName("button");
+				btns = document.querySelectorAll("#tbl_addrs button");
 				for (let i = 0; i < btns.length; i++) btns[i].disabled = false;
 			});
 		} else {
 			console.log("Failed to delete address: " + error1);
 
-			btns = document.getElementById("tbl_addrs").getElementsByTagName("button");
+			btns = document.querySelectorAll("#tbl_addrs button");
 			for (let i = 0; i < btns.length; i++) btns[i].disabled = false;
 		}
 	});
@@ -1280,7 +1280,7 @@ document.getElementById("btn_rght").onclick = function() {
 	this.blur();
 };
 
-const buttons = document.querySelector("#main1 > .top").getElementsByTagName("button");
+const buttons = document.querySelectorAll("#main1 > .top > button");
 for (let i = 0; i < buttons.length; i++) {
 	buttons[i].onclick = function() {
 		tab = i;
