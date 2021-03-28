@@ -325,11 +325,11 @@ function getClockIcon(d) {
 }
 
 function clearDisplay() {
-	let el = document.getElementById("midright").getElementsByTagName("img");
-	if (el.length !== 1) el = document.getElementById("midright").getElementsByTagName("audio");
-	if (el.length !== 1) el = document.getElementById("midright").getElementsByTagName("video");
-	if (el.length !== 1) el = document.getElementById("midright").getElementsByTagName("embed");
-	if (el.length !== 1) el = document.getElementById("midright").getElementsByTagName("iframe");
+	let el = document.querySelector("article").getElementsByTagName("img");
+	if (el.length !== 1) el = document.querySelector("article").getElementsByTagName("audio");
+	if (el.length !== 1) el = document.querySelector("article").getElementsByTagName("video");
+	if (el.length !== 1) el = document.querySelector("article").getElementsByTagName("embed");
+	if (el.length !== 1) el = document.querySelector("article").getElementsByTagName("iframe");
 	if (el.length !== 1) return;
 
 	URL.revokeObjectURL(el[0].src);
@@ -352,8 +352,8 @@ function displayFile(num) {
 	if (!fileType) {downloadFile(num); return;}
 
 	clearDisplay();
-	document.getElementById("midright").scroll(0, 0);
-	document.getElementById("midright").setAttribute("data-msgid", ae.GetUplMsgIdHex(num));
+	document.querySelector("article").scroll(0, 0);
+	document.querySelector("article").setAttribute("data-msgid", ae.GetUplMsgIdHex(num));
 
 	document.getElementById("btn_mdele").disabled = false;
 	document.getElementById("btn_msave").disabled = false;
@@ -361,20 +361,20 @@ function displayFile(num) {
 
 	document.getElementById("btn_msave").onclick = function() {downloadFile(num);};
 
-	document.getElementById("midright").children[0].hidden = true;
-	document.getElementById("midright").children[1].textContent = ae.GetUplMsgTitle(num);
+	document.querySelector("article").children[0].hidden = true;
+	document.querySelector("article").children[1].textContent = ae.GetUplMsgTitle(num);
 
 	switch (fileType) {
 		case "text": {
-			document.getElementById("midright").children[2].hidden = false;
-			document.getElementById("midright").children[2].textContent = sodium.to_string(ae.GetUplMsgBody(num));
+			document.querySelector("article").children[2].hidden = false;
+			document.querySelector("article").children[2].textContent = sodium.to_string(ae.GetUplMsgBody(num));
 		break;}
 
 		case "image": {
-			document.getElementById("midright").children[2].hidden = true;
+			document.querySelector("article").children[2].hidden = true;
 			const img = document.createElement("img");
 			img.src = URL.createObjectURL(new Blob([ae.GetUplMsgBody(num).buffer]));
-			document.getElementById("midright").appendChild(img);
+			document.querySelector("article").appendChild(img);
 
 			img.onclick = function() {
 				if (!document.fullscreen)
@@ -385,38 +385,38 @@ function displayFile(num) {
 		break;}
 
 		case "audio": {
-			document.getElementById("midright").children[2].hidden = true;
+			document.querySelector("article").children[2].hidden = true;
 			const el = document.createElement("audio");
 			el.controls = "controls";
 			el.src = URL.createObjectURL(new Blob([ae.GetUplMsgBody(num).buffer]));
-			document.getElementById("midright").appendChild(el);
+			document.querySelector("article").appendChild(el);
 		break;}
 
 		case "video": {
-			document.getElementById("midright").children[2].hidden = true;
+			document.querySelector("article").children[2].hidden = true;
 			const el = document.createElement("video");
 			el.controls = "controls";
 			el.src = URL.createObjectURL(new Blob([ae.GetUplMsgBody(num).buffer]));
-			document.getElementById("midright").appendChild(el);
+			document.querySelector("article").appendChild(el);
 		break;}
 
 		case "pdf": {
-			document.getElementById("midright").children[2].hidden = true;
+			document.querySelector("article").children[2].hidden = true;
 			const el = document.createElement("embed");
 			el.type = "application/pdf";
 			el.src = URL.createObjectURL(new Blob([ae.GetUplMsgBody(num).buffer], {type: "application/pdf"}));
-			document.getElementById("midright").appendChild(el);
+			document.querySelector("article").appendChild(el);
 		break;}
 
 		case "html": {
-			document.getElementById("midright").children[2].hidden = true;
+			document.querySelector("article").children[2].hidden = true;
 			const el = document.createElement("iframe");
 			el.allow = "";
 			el.sandbox = "";
 			el.referrerPolicy = "no-referrer";
 			el.csp = "base-uri 'none'; child-src 'none'; connect-src 'none'; default-src 'none'; font-src 'none'; form-action 'none'; frame-ancestors 'none'; frame-src 'none'; img-src 'none'; manifest-src 'none'; media-src 'none'; object-src 'none'; script-src 'none'; style-src 'none'; worker-src 'none';";
 			el.srcdoc = sodium.to_string(ae.GetUplMsgBody(num).buffer);
-			document.getElementById("midright").appendChild(el);
+			document.querySelector("article").appendChild(el);
 		break;}
 	}
 }
@@ -427,8 +427,8 @@ function displayMsg(isInt, num) {
 	document.getElementById("btn_mdele").disabled = false;
 	document.getElementById("btn_msave").disabled = isInt;
 
-	document.getElementById("midright").scroll(0, 0);
-	document.getElementById("midright").setAttribute("data-msgid", isInt? ae.GetIntMsgIdHex(num) : ae.GetExtMsgIdHex(num));
+	document.querySelector("article").scroll(0, 0);
+	document.querySelector("article").setAttribute("data-msgid", isInt? ae.GetIntMsgIdHex(num) : ae.GetExtMsgIdHex(num));
 
 	const ts = isInt? ae.GetIntMsgTime(num) : ae.GetExtMsgTime(num);
 
@@ -475,8 +475,8 @@ function displayMsg(isInt, num) {
 		document.getElementById("btn_reply").disabled = true;
 	}
 
-	document.getElementById("midright").children[0].hidden = false;
-	document.getElementById("midright").children[2].hidden = false;
+	document.querySelector("article").children[0].hidden = false;
+	document.querySelector("article").children[2].hidden = false;
 
 	document.getElementById("readmsg_envto").textContent = isInt ? "" : ae.GetExtMsgEnvTo(num);
 	document.getElementById("readmsg_hdrto").textContent = isInt ? ae.GetIntMsgTo(num) : (ae.GetExtMsgHdrTo(num) + (ae.GetExtMsgDnTo(num) ? " (" + ae.GetExtMsgDnTo(num) + ")" : ""));
@@ -487,8 +487,8 @@ function displayMsg(isInt, num) {
 	document.getElementById("readmsg_date").children[1].dateTime = new Date(ts * 1000).toISOString();
 
 	if (isInt) {
-		document.getElementById("midright").children[1].textContent = ae.GetIntMsgTitle(num);
-		document.getElementById("midright").children[2].textContent = ae.GetIntMsgBody(num);
+		document.querySelector("article").children[1].textContent = ae.GetIntMsgTitle(num);
+		document.querySelector("article").children[2].textContent = ae.GetIntMsgBody(num);
 
 		document.getElementById("readmsg_date").children[1].textContent = msgDate.toISOString().slice(0, 19).replace("T", " ");
 
@@ -520,21 +520,21 @@ function displayMsg(isInt, num) {
 		if (ae.GetIntMsgFlagE2ee(num)) flagText += "<abbr title=\"End-to-end encrypted\">E2EE</abbr> ";
 		document.getElementById("readmsg_flags").children[0].innerHTML = flagText.trim();
 	} else {
-		document.getElementById("midright").children[2].innerHTML = "";
+		document.querySelector("article").children[2].innerHTML = "";
 
 		const headers = document.createElement("p");
 		headers.textContent = ae.GetExtMsgHeaders(num);
 		headers.className = "mono";
 		headers.hidden = !showHeaders;
-		document.getElementById("midright").children[2].appendChild(headers);
+		document.querySelector("article").children[2].appendChild(headers);
 
 		const body = document.createElement("p");
 		body.innerHTML = ae.GetExtMsgBody(num);
-		document.getElementById("midright").children[2].appendChild(body);
+		document.querySelector("article").children[2].appendChild(body);
 
-		document.getElementById("midright").children[1].textContent = ae.GetExtMsgTitle(num);
-		document.getElementById("midright").children[1].style.cursor = headers.textContent? "pointer" : "";
-		document.getElementById("midright").children[1].onclick = function() {
+		document.querySelector("article").children[1].textContent = ae.GetExtMsgTitle(num);
+		document.querySelector("article").children[1].style.cursor = headers.textContent? "pointer" : "";
+		document.querySelector("article").children[1].onclick = function() {
 			if (!headers.textContent) return;
 			showHeaders = !showHeaders;
 			headers.hidden = !showHeaders;
@@ -762,18 +762,18 @@ function addUploads() {
 
 function displayOutMsg(num) {
 	clearDisplay();
-	document.getElementById("midright").scroll(0, 0);
-	document.getElementById("midright").setAttribute("data-msgid", ae.GetOutMsgIdHex(num));
+	document.querySelector("article").scroll(0, 0);
+	document.querySelector("article").setAttribute("data-msgid", ae.GetOutMsgIdHex(num));
 
 	document.getElementById("btn_mdele").disabled = false;
 	document.getElementById("btn_msave").disabled = true;
 	document.getElementById("btn_reply").disabled = true;
 
-	document.getElementById("midright").children[0].hidden = false;
-	document.getElementById("midright").children[2].hidden = false;
+	document.querySelector("article").children[0].hidden = false;
+	document.querySelector("article").children[2].hidden = false;
 
-	document.getElementById("midright").children[1].textContent = ae.GetOutMsgSubj(num);
-	document.getElementById("midright").children[2].textContent = ae.GetOutMsgBody(num);
+	document.querySelector("article").children[1].textContent = ae.GetOutMsgSubj(num);
+	document.querySelector("article").children[2].textContent = ae.GetOutMsgBody(num);
 
 	document.getElementById("readmsg_dkim").style.visibility    = "hidden";
 	document.getElementById("readmsg_hdrto").style.visibility   = "visible";
@@ -1109,7 +1109,7 @@ document.getElementById("btn_mdele").onclick = function() {
 	btn.blur();
 	btn.disabled = true;
 
-	const delId = document.getElementById("midright").getAttribute("data-msgid");
+	const delId = document.querySelector("article").getAttribute("data-msgid");
 	if (!delId) return;
 
 	ae.Message_Delete(delId, function(error) {

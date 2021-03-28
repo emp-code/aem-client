@@ -153,44 +153,44 @@ noscript {
 
 .mid {
 	background: #080a08;
-	overflow: hidden;
 	border-left: 1em solid #001;
 	border-right: 1em solid #001;
 	border-radius: 2em;
 }
 
-#midright {
+article {
 	overflow-y: auto;
 	display: flex;
 	flex-direction: column;
 }
 
-#midright > iframe {
+article > iframe {
 	background: #808080;
 	border: 0;
 }
 
-#midright > img, #midright > video, #midright > embed, #midright > iframe {
+article > img, article > video, article > embed, article > iframe {
 	flex-grow: 1;
 	object-fit: contain;
 	height: 1px;
 }
 
-#midright > audio {
+article > audio {
 	margin: 0 auto;
 	min-width: 90%;
 }
 
-#midright > table {
+article > table {
 	width: 100%;
 	table-layout: fixed;
 	opacity: 0.5;
 	font-family: monospace, monospace;
 	padding-bottom: 0.25em;
 	border-bottom: 1px solid #555;
+	flex: none;
 }
 
-#midright > pre > p:nth-child(2) {
+article > pre > p:nth-child(2) {
 	margin: 0;
 }
 
