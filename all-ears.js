@@ -248,7 +248,7 @@ function AllEars(readyCallback) {
 
 	const _FetchEncrypted = function(apiCmd, clearU8, callback) {
 		if (typeof(apiCmd) !== "number" || apiCmd < 0 || apiCmd > 255 || typeof(clearU8) !== "object" || clearU8.length > _AEM_API_BOX_SIZE_MAX) {
-			callback(0xFA);
+			callback(0x03);
 			return;
 		}
 
@@ -270,14 +270,14 @@ function AllEars(readyCallback) {
 		postMsg.set(postBox, sealBox.length);
 
 		_FetchBinary(postMsg, function(success, encData) {
-			if (!success) {callback(0xFB); return;}
+			if (!success) {callback(0x04); return;}
 
 			let decData;
 			try {decData = sodium.crypto_box_open_easy(encData.slice(sodium.crypto_box_NONCEBYTES), encData.slice(0, sodium.crypto_box_NONCEBYTES), _AEM_API_PUBKEY, _userKeySecret);}
-			catch(e) {callback(0xFC); return;}
+			catch(e) {callback(0x05); return;}
 
 			if (decData.length > 33) {callback(0, decData); return;} // Long response
-			if (decData.length !== 33) {callback(0xFD, decData); return;}
+			if (decData.length !== 33) {callback(0x06, decData); return;}
 
 			// Short response
 			if (decData[0] > 32) callback(decData[0]); // Error
@@ -992,7 +992,7 @@ function AllEars(readyCallback) {
 	};
 
 	this.Account_Browse = function(callback) {
-		if (_userLevel !== _AEM_USER_MAXLEVEL) {callback(0xF0); return;}
+		if (_userLevel !== _AEM_USER_MAXLEVEL) {callback(0x02); return;}
 
 		_FetchEncrypted(_AEM_API_ACCOUNT_BROWSE, new Uint8Array([0]), function(fetchErr, browseData) {
 			if (fetchErr) {callback(fetchErr); return;}
@@ -1074,7 +1074,7 @@ function AllEars(readyCallback) {
 	};
 
 	this.Account_Update = function(pk_hex, level, callback) {
-		if (level < 0 || level > _AEM_USER_MAXLEVEL) {callback(0xF0); return;}
+		if (level < 0 || level > _AEM_USER_MAXLEVEL) {callback(0x02); return;}
 
 		const upData = new Uint8Array(33);
 		upData[0] = level;
@@ -1108,7 +1108,7 @@ function AllEars(readyCallback) {
 			});
 		} else {
 			const addr32 = _addr32_encode(addr);
-			if (addr32 === null) {callback(0xF0); return;}
+			if (!addr32) {callback(0x20); return;}
 
 			const full = sodium.crypto_pwhash(16, addr32, _AEM_SALT_NORMAL, _AEM_ARGON2_OPSLIMIT, _AEM_ARGON2_MEMLIMIT, sodium.crypto_pwhash_ALG_ARGON2ID13);
 			const hash = new Uint8Array([
@@ -1163,7 +1163,7 @@ function AllEars(readyCallback) {
 	};
 
 	this.Message_Browse = function(newest, u_info, callback) {
-		if (typeof(newest) !== "boolean" || typeof(u_info) !== "boolean") {callback(0xF0); return;}
+		if (typeof(newest) !== "boolean" || typeof(u_info) !== "boolean") {callback(0x01); return;}
 
 		let fetchId;
 		if (_newestMsgTs !== -1) {
@@ -1178,7 +1178,7 @@ function AllEars(readyCallback) {
 			if (fetchErr) {callback(fetchErr); return;}
 
 			if (u_info) {
-				if (browseData.length < 1000) {callback(0xF1); return;}
+				if (browseData.length < 1000) {callback(0x07); return;}
 				const uinfo_bytes = _ParseUinfo(browseData);
 				browseData = browseData.slice(uinfo_bytes);
 			}
@@ -1481,13 +1481,13 @@ function AllEars(readyCallback) {
 	};
 
 	this.Message_Create = function(title, body, addr_from, addr_to, replyId, to_pubkey, callback) {
-		if (typeof(title) !== "string" || typeof(body) !== "string" || typeof(addr_from) !== "string" || typeof(addr_to) !== "string") {callback(0xF0); return;}
+		if (typeof(title) !== "string" || typeof(body) !== "string" || typeof(addr_from) !== "string" || typeof(addr_to) !== "string") {callback(0x01); return;}
 
 		if (addr_to.indexOf("@") >= 0) { // Email
 			if (replyId === null) {
 				replyId = "";
 			} else if (typeof(replyId) !== "string") {
-				callback(0xF1);
+				callback(0x01);
 				return;
 			}
 
@@ -1505,10 +1505,10 @@ function AllEars(readyCallback) {
 		if (!isE2ee && (title.length + body.length) < 6) body = body.padEnd(6 - title.length, "\0"); // Minimum message size: 177-48-64-5-1-32-10-10-1 = 6
 
 		const addr32_from = _addr32_encode(addr_from);
-		if (!addr32_from) {callback(0xF2); return;}
+		if (!addr32_from) {callback(0x08); return;}
 
 		const addr32_to = _addr32_encode(addr_to);
-		if (!addr32_to) {callback(0xF3); return;}
+		if (!addr32_to) {callback(0x08); return;}
 
 		const kxKeys = sodium.crypto_kx_seed_keypair(sodium.crypto_generichash(sodium.crypto_kx_SEEDBYTES, addr32_from, _userKeyKxHash));
 		let msgBox;
@@ -1550,7 +1550,7 @@ function AllEars(readyCallback) {
 		if (typeof(hexIds) === "string") {
 			hexIds = [hexIds];
 		} else if (typeof(hexIds) !== "object") {
-			callback(0xF0);
+			callback(0x01);
 			return;
 		}
 
@@ -1560,7 +1560,7 @@ function AllEars(readyCallback) {
 
 		for (let i = 0; i < hexIds.length; i++) {
 			const id = sodium.from_hex(hexIds[i]);
-			if (id.length !== 16) {callback(0xF1); return;}
+			if (id.length !== 16) {callback(0x01); return;}
 
 			data.set(id, i * 16);
 		}
@@ -1590,7 +1590,7 @@ function AllEars(readyCallback) {
 
 	this.Message_Public = function(title, body, callback) {
 		const binMsg = sodium.from_string(title + "\n" + body);
-		if (binMsg.length < 59) {callback(0xF0); return;} // 59 = 177-48-64-5-1
+		if (binMsg.length < 59) {callback(0x10); return;} // 59 = 177-48-64-5-1
 
 		_FetchEncrypted(_AEM_API_MESSAGE_PUBLIC, binMsg, function(fetchErr, newMsgId) {
 			if (fetchErr) {callback(fetchErr); return;}
@@ -1607,14 +1607,14 @@ function AllEars(readyCallback) {
 	};
 
 	this.Message_Upload = function(title, body, callback) {
-		if (typeof(title) !== "string" || title.length < 1 || body.length < 1) {callback(0xF0); return;}
+		if (typeof(title) !== "string" || title.length < 1 || body.length < 1) {callback(0x01); return;}
 
 		const u8title = sodium.from_string(title);
-		if (u8title.length > 256) {callback(0xF1); return;}
+		if (u8title.length > 256) {callback(0x11); return;}
 		const u8body = (typeof(body) === "string") ? sodium.from_string(body) : body;
 
 		const lenData = 1 + u8title.length + u8body.length;
-		if (lenData + sodium.crypto_secretbox_NONCEBYTES + sodium.crypto_secretbox_MACBYTES > _AEM_API_BOX_SIZE_MAX) {callback(0xF2); return;}
+		if (lenData + sodium.crypto_secretbox_NONCEBYTES + sodium.crypto_secretbox_MACBYTES > _AEM_API_BOX_SIZE_MAX) {callback(0x12); return;}
 
 		const u8data = new Uint8Array(lenData);
 		u8data[0] = u8title.length - 1;

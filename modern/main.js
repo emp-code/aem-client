@@ -611,7 +611,98 @@ function displayMsg(isInt, num) {
 	}
 }
 
+function getErrorMessage(err) {
+	switch (err) {
+		// 0x01-0x20	Client-side error codes
+		case 0x01: return "Invalid input";
+		case 0x02: return "Only administrators can perform this function";
+		case 0x03: return "_FetchEncrypted: Invalid input";
+		case 0x04: return "_FetchEncrypted: Failed connecting to server";
+		case 0x05: return "_FetchEncrypted: Failed decrypting response";
+		case 0x06: return "_FetchEncrypted: Invalid response length";
+		case 0x07: return "Invalid response from server";
+		case 0x08: return "Addr32 encoding failed"];
+
+		case 0x10: return "Message too short";
+		case 0x11: return "Name too long";
+		case 0x12: return "File too large";
+
+		// 0x21-0x25	Generic
+		case 0x21: return ["FORMAT",   "Invalid format"];
+		case 0x22: return ["MISC",     "Unknown error"];
+		case 0x23: return ["INTERNAL", "Internal server error"];
+		case 0x24: return ["TODO",     "Functionality missing - in development"];
+		case 0x25: return ["FIXME",    "Unexpected error encountered"];
+
+		// 0xE0-0xEF	Message/Create
+		case 0xE0: return ["MESSAGE_CREATE_EXT_MINLEVEL",        "Account level too low"];
+		case 0xE1: return ["MESSAGE_CREATE_EXT_FORMAT_FROM",     "Malformed from-address"];
+		case 0xE2: return ["MESSAGE_CREATE_EXT_FORMAT_TO",       "Malformed to-address"];
+		case 0xE3: return ["MESSAGE_CREATE_EXT_FORMAT_REPLYID",  "Malformed reply-id"];
+		case 0xE4: return ["MESSAGE_CREATE_EXT_FORMAT_SUBJECT",  "Malformed subject"];
+		case 0xE5: return ["MESSAGE_CREATE_EXT_INVALID_REPLYID", "Invalid reply-id"];
+		case 0xE6: return ["MESSAGE_CREATE_EXT_INVALID_FROM",    "Invalid from-address"];
+		case 0xE7: return ["MESSAGE_CREATE_EXT_INVALID_TO",      "Invalid to-address"];
+		case 0xE8: return ["MESSAGE_CREATE_EXT_BODY_SIZE",       "Body too long or short"];
+		case 0xE9: return ["MESSAGE_CREATE_EXT_BODY_UTF8",       "Body not UTF-8"];
+		case 0xEA: return ["MESSAGE_CREATE_EXT_BODY_CONTROL",    "Body contains control characters"];
+		case 0xEB: return ["MESSAGE_CREATE_EXT_LINE_TOOLONG",    "Body exceeds line-length limit"];
+		case 0xEC: return ["MESSAGE_CREATE_EXT_BODY_FORMAT",     "Malformed body"];
+		case 0xED: return ["MESSAGE_CREATE_EXT_BODY_TOOSHORT",   "Body too short"];
+		case 0xEE: return ["MESSAGE_CREATE_EXT_TODOMAIN",        "Invalid to-address domain"];
+//		case 0xEF: return ["", ""];
+
+		// 0xF0-0xF9	Message/Create sendMail()
+		case 0xF0: return ["MESSAGE_CREATE_SENDMAIL_GREET", "Failed greeting receiver server"];
+		case 0xF1: return ["MESSAGE_CREATE_SENDMAIL_EHLO",  "EHLO command failed"];
+		case 0xF2: return ["MESSAGE_CREATE_SENDMAIL_STLS",  "STARTTLS command failed"];
+		case 0xF3: return ["MESSAGE_CREATE_SENDMAIL_SHAKE", "TLS handshake failed"];
+		case 0xF4: return ["MESSAGE_CREATE_SENDMAIL_NOTLS", "TLS not available"];
+		case 0xF5: return ["MESSAGE_CREATE_SENDMAIL_MAIL",  "MAIL command failed"];
+		case 0xF6: return ["MESSAGE_CREATE_SENDMAIL_RCPT",  "RCPT command failed"];
+		case 0xF7: return ["MESSAGE_CREATE_SENDMAIL_DATA",  "DATA command failed"];
+		case 0xF8: return ["MESSAGE_CREATE_SENDMAIL_BODY",  "Sending body failed"];
+//		case 0xF9: return ["", ""];
+
+		// 0xFA-0xFF	Message/Create Int
+		case 0xFA: return ["MESSAGE_CREATE_INT_TOOSHORT",     "Message too short"];
+		case 0xFB: return ["MESSAGE_CREATE_INT_TS_INVALID",   "Invalid timestamp"];
+		case 0xFC: return ["MESSAGE_CREATE_INT_SUBJECT_SIZE", "Subject too long or short"];
+		case 0xFD: return ["MESSAGE_CREATE_INT_ADDR_NOTOWN",  "Sender address not owned"];
+		case 0xFE: return ["MESSAGE_CREATE_INT_TO_NOTACCEPT", "Receiver address does not accept messages"];
+		case 0xFF: return ["MESSAGE_CREATE_INT_TO_SELF",      "Sending to own account not allowed"];
+
+		default: return ["???", "Unknown error"];
+	}
+}
+
 // Interface
+function errorDialog(err) {
+	if (typeof(err) !== "number" || err < 1) return;
+
+	let btnDisable = [];
+	const btn = document.querySelectorAll("nav > button");
+	for (let i = 0; i < btn.length; i++) {
+		btnDisable.push(btn[i].disabled);
+		btn[i].disabled = true;
+	}
+
+	const errMsg = getErrorMessage(err);
+
+	const dlg = document.querySelector("dialog");
+	dlg.children[0].style.height = getComputedStyle(document.querySelector("#main1 > div[class='mid']")).height;
+	dlg.querySelector("h1").textContent = "ERROR 0x" + err.toString(16).padStart(2, "0").toUpperCase();
+	dlg.querySelector("p").textContent = (typeof(errMsg) === "string") ? errMsg : errMsg[1];
+	dlg.show();
+
+	document.querySelector("dialog > div").onclick = function() {
+		for (let i = 0; i < btn.length; i++) {
+			btn[i].disabled = btnDisable[i];
+			dlg.close();
+		}
+	}
+}
+
 function addMsg(isInt, i) {
 	const row = document.getElementById("tbl_inbox").insertRow(-1);
 	row.setAttribute("data-msgid", isInt? ae.GetIntMsgIdHex(i) : ae.GetExtMsgIdHex(i));
@@ -1279,7 +1370,7 @@ for (let i = 0; i < buttons.length; i++) {
 		tab = i;
 
 		for (let j = 0; j < buttons.length; j++) {
-			document.querySelector("#main1 > .mid").children[j].hidden = (tab !== j);
+			document.querySelectorAll("#main1 > .mid > div")[j].hidden = (tab !== j);
 			buttons[j].disabled = (tab === j);
 		}
 
@@ -1467,7 +1558,8 @@ document.querySelector("#write2_send > button").onclick = function() {
 				document.getElementById("write_subj").value = "";
 				document.getElementById("write_body").value = "";
 			} else {
-				// TODO display error
+				errorDialog(error);
+
 				document.getElementById("write2_btntxt").textContent = "Retry sending to";
 				btn.disabled = false;
 			}
