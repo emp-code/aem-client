@@ -630,7 +630,7 @@ function getErrorMessage(err) {
 		case 0x17: return "Server failed decrypting the request"; // 400
 		case 0x18: return "Account does not exist"; // 403
 		case 0x19: return "Server failed checking account data"; // 500
-		case 0x20: return "Invalid response from server"; // Other status
+		case 0x20: return "Invalid status code in response";
 
 		// 0x21-0x2F	Generic
 		case 0x21: return ["FORMAT",    "Invalid format"];
