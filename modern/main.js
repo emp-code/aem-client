@@ -621,7 +621,7 @@ function getErrorMessage(err) {
 		case 0x05: return "_FetchEncrypted: Failed decrypting response";
 		case 0x06: return "_FetchEncrypted: Invalid response length";
 		case 0x07: return "Invalid response from server";
-		case 0x08: return "Addr32 encoding failed"];
+		case 0x08: return "Addr32 encoding failed";
 
 		case 0x10: return "Message too short";
 		case 0x11: return "Name too long";
