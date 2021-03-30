@@ -620,7 +620,7 @@ function getErrorMessage(err) {
 		case 0x04: return "Invalid input to _FetchEncrypted";
 		case 0x05: return "Failed decrypting response from server";
 		case 0x06: return "Invalid response length";
-		case 0x07: return "Invalid response from server";
+		case 0x07: return "Server responded with invalid data";
 		case 0x08: return "Addr32 encoding failed";
 
 		case 0x10: return "Message too short";
