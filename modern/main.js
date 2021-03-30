@@ -641,6 +641,7 @@ function getErrorMessage(err) {
 		case 0x26: return ["FIXME",     "Unexpected error encountered"];
 
 		case 0x2A: return ["NOTEXIST",  "Item does not exist"];
+		case 0x2B: return ["EXIST",     "Item already exists"];
 
 		// 0xE0-0xEF	Message/Create
 		case 0xE0: return ["MESSAGE_CREATE_EXT_MINLEVEL",        "Account level too low"];
