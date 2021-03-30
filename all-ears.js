@@ -237,6 +237,7 @@ function AllEars(readyCallback) {
 			referrerPolicy: "no-referrer",
 			body: postData
 		}).then(function(response) {
+			if (response.statusText !== "aem") {callback(0x20); return null;}
 			if (response.status === 400) {callback(0x17); return null;}
 			if (response.status === 403) {callback(0x18); return null;}
 			if (response.status === 500) {callback(0x19); return null;}
