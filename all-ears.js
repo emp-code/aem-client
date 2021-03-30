@@ -237,17 +237,13 @@ function AllEars(readyCallback) {
 			referrerPolicy: "no-referrer",
 			body: postData
 		}).then(function(response) {
-			if (response.status === 200) return response.arrayBuffer();
 			if (response.status === 400) {callback(0x17); return;}
 			if (response.status === 403) {callback(0x18); return;}
 			if (response.status === 500) {callback(0x19); return;}
-
-			// Invalid response from server
-			callback(0x20);
-			return;
+			if (response.status !== 200) {callback(0x20); return;}
+			return response.arrayBuffer();
 		}).then(function(ab) {
-			if (!ab) {callback(false); return;}
-			callback(0, new Uint8Array(ab));
+			if (ab) callback(0, new Uint8Array(ab));
 		}).catch(() => {
 			callback(0x03);
 		});

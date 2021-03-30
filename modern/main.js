@@ -1607,21 +1607,21 @@ document.getElementById("btn_enter").onclick = function() {
 		if (successSetKeys) {
 			document.body.style.cursor = "wait";
 
-			ae.Message_Browse(false, true, function(errorBrowse) {
+			ae.Message_Browse(false, true, function(statusBrowse) {
 				document.body.style.cursor = "auto";
 
-				if (!errorBrowse) {
+				if (statusBrowse === 0) {
 					txtSkey.value = "";
 					document.getElementById("div_begin").hidden = true;
 					document.getElementById("div_main").hidden = false;
 					reloadAccount();
 
 					if (ae.IsUserAdmin()) {
-						ae.Account_Browse(function(errorAcc) {
-							if (!errorAcc) {
+						ae.Account_Browse(function(statusAcc) {
+							if (statusAcc === 0) {
 								for (let i = 0; i < ae.Admin_GetUserCount(); i++) {addAccountToTable(i);}
 							} else {
-								console.log("Failed to Account_Browse: " + errorAcc);
+								console.log("Failed to Account_Browse: " + statusAcc);
 							}
 						});
 					}
@@ -1630,7 +1630,7 @@ document.getElementById("btn_enter").onclick = function() {
 					document.getElementById("txt_skey").style.background = "#466";
 					btn.focus();
 
-					document.getElementById("greeting").textContent = getErrorMessage(errorBrowse) + " (0x" + errorBrowse.toString(16).padStart(2, "0").toUpperCase() + ")";
+					document.getElementById("greeting").textContent = getErrorMessage(statusBrowse) + " (0x" + statusBrowse.toString(16).padStart(2, "0").toUpperCase() + ")";
 					btn.disabled = false;
 				}
 			});
