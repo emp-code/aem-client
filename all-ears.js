@@ -1273,7 +1273,7 @@ function AllEars(readyCallback) {
 
 						let extOffset = 17;
 
-						if (dkimCount > 0) {
+						if (dkimCount !== 0) {
 							msgDkim = new _NewDkim();
 
 							for (let i = 0; i < dkimCount; i++) {
