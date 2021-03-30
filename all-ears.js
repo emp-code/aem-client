@@ -1111,7 +1111,7 @@ function AllEars(readyCallback) {
 			});
 		} else {
 			const addr32 = _addr32_encode(addr);
-			if (!addr32) {callback(0x20); return;}
+			if (!addr32) {callback(0x08); return;}
 
 			const full = sodium.crypto_pwhash(16, addr32, _AEM_SALT_NORMAL, _AEM_ARGON2_OPSLIMIT, _AEM_ARGON2_MEMLIMIT, sodium.crypto_pwhash_ALG_ARGON2ID13);
 			const hash = new Uint8Array([
