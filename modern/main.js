@@ -627,13 +627,15 @@ function getErrorMessage(err) {
 		case 0x11: return "Name too long";
 		case 0x12: return "File too large";
 
-		// 0x21-0x26	Generic
+		// 0x21-0x2F	Generic
 		case 0x21: return ["FORMAT",    "Invalid format"];
 		case 0x22: return ["ADMINONLY", "Only administrators can perform this action"];
 		case 0x23: return ["MISC",      "Unknown error"];
 		case 0x24: return ["INTERNAL",  "Internal server error"];
 		case 0x25: return ["TODO",      "Functionality missing - in development"];
 		case 0x26: return ["FIXME",     "Unexpected error encountered"];
+
+		case 0x2A: return ["NOTEXIST",  "Item does not exist"];
 
 		// 0xE0-0xEF	Message/Create
 		case 0xE0: return ["MESSAGE_CREATE_EXT_MINLEVEL",        "Account level too low"];
