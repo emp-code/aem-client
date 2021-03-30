@@ -237,12 +237,18 @@ function AllEars(readyCallback) {
 			referrerPolicy: "no-referrer",
 			body: postData
 		}).then(function(response) {
-			return (response.status === 200) ? response.arrayBuffer() : null;
+			if (response.status === 200) return response.arrayBuffer();
+			if (response.status === 403) {callback(0x18); return;}
+			if (response.status === 500) {callback(0x19); return;}
+
+			// Invalid response from server
+			callback(0x20);
+			return;
 		}).then(function(ab) {
 			if (!ab) {callback(false); return;}
-			callback(true, new Uint8Array(ab));
+			callback(0, new Uint8Array(ab));
 		}).catch(() => {
-			callback(false);
+			callback(0x04);
 		});
 	};
 
@@ -269,8 +275,8 @@ function AllEars(readyCallback) {
 		postMsg.set(sealBox);
 		postMsg.set(postBox, sealBox.length);
 
-		_FetchBinary(postMsg, function(success, encData) {
-			if (!success) {callback(0x04); return;}
+		_FetchBinary(postMsg, function(ret, encData) {
+			if (ret !== 0) {callback(ret); return;}
 
 			let decData;
 			try {decData = sodium.crypto_box_open_easy(encData.slice(sodium.crypto_box_NONCEBYTES), encData.slice(0, sodium.crypto_box_NONCEBYTES), _AEM_API_PUBKEY, _userKeySecret);}

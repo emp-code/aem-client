@@ -627,6 +627,10 @@ function getErrorMessage(err) {
 		case 0x11: return "Name too long";
 		case 0x12: return "File too large";
 
+		case 0x18: return "Account does not exist"; // 403
+		case 0x19: return "Server failed checking account data"; // 500
+		case 0x20: return "Invalid response from server"; // Other status
+
 		// 0x21-0x2F	Generic
 		case 0x21: return ["FORMAT",    "Invalid format"];
 		case 0x22: return ["ADMINONLY", "Only administrators can perform this action"];
@@ -1625,7 +1629,7 @@ document.getElementById("btn_enter").onclick = function() {
 					document.getElementById("txt_skey").style.background = "#466";
 					btn.focus();
 
-					document.getElementById("greeting").textContent = "Error " + errorBrowse;
+					document.getElementById("greeting").textContent = getErrorMessage(errorBrowse) + " (0x" + errorBrowse.toString(16).padStart(2, "0").toUpperCase() + ")";
 					btn.disabled = false;
 				}
 			});
