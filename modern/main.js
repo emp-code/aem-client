@@ -1460,7 +1460,7 @@ document.getElementById("btn_reg").onclick = function() {
 		if (error === 0) {
 			addAccountToTable(ae.Admin_GetUserCount() - 1);
 			txt.value = "";
-		} // else TODO
+		} else errorDialog(error);
 
 		btn.disabled = false;
 	});
