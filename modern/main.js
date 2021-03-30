@@ -627,6 +627,7 @@ function getErrorMessage(err) {
 		case 0x11: return "Name too long";
 		case 0x12: return "File too large";
 
+		case 0x17: return "Server failed decrypting the request"; // 400
 		case 0x18: return "Account does not exist"; // 403
 		case 0x19: return "Server failed checking account data"; // 500
 		case 0x20: return "Invalid response from server"; // Other status

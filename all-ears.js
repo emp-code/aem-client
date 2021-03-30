@@ -238,6 +238,7 @@ function AllEars(readyCallback) {
 			body: postData
 		}).then(function(response) {
 			if (response.status === 200) return response.arrayBuffer();
+			if (response.status === 400) {callback(0x17); return;}
 			if (response.status === 403) {callback(0x18); return;}
 			if (response.status === 500) {callback(0x19); return;}
 
