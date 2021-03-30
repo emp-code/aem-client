@@ -845,7 +845,7 @@ function addUploads() {
 				const tr = this.parentElement.parentElement;
 				ae.Message_Delete(this.getAttribute("data-msgid"), function(error) {
 					if (!error) tr.remove();
-					else console.log("Error " + error);
+					else errorDialog(error);
 				});
 			};
 		}
@@ -944,7 +944,7 @@ function adjustLevel(pubkey, level, c) {
 			c[4].textContent = level;
 			c[5].children[0].disabled = (level === 3);
 			c[6].children[0].disabled = (level === 0);
-		} else console.log("Error " + error)
+		} else errorDialog(error);
 	});
 }
 
@@ -971,7 +971,7 @@ function addAccountToTable(i) {
 		const tr = this.parentElement.parentElement;
 		ae.Account_Delete(tr.cells[0].textContent, function(error) {
 			if (!error) tr.remove();
-			else console.log("Error " + error);
+			else errorDialog(error);
 		});
 	};
 }
@@ -1020,7 +1020,7 @@ function reloadAccount() {
 					document.getElementById("chk_lowme").disabled = true;
 				}
 			}
-			else console.log("Error " + error);
+			else errorDialog(error);
 		});
 	};
 
@@ -1030,7 +1030,7 @@ function reloadAccount() {
 			if (!error) {
 				row.remove();
 				document.getElementById("chk_delme").disabled = true;
-			} else console.log("Error " + error);
+			} else errorDialog(error);
 		});
 	};
 
@@ -1088,16 +1088,14 @@ function deleteAddress(addr) {
 			document.getElementById("btn_address_create_shield").disabled = (limitReached || ae.GetAddressCountShield() > ae.GetLimitShieldA(ae.GetUserLevel()));
 
 			ae.Private_Update(function(error2) {
-				if (error2) console.log("Failed to update the Private field: " + error2);
-
 				btns = document.querySelectorAll("#tbl_addrs button");
 				for (let i = 0; i < btns.length; i++) btns[i].disabled = false;
+				if (error2) errorDialog(error2);
 			});
 		} else {
-			console.log("Failed to delete address: " + error1);
-
 			btns = document.querySelectorAll("#tbl_addrs button");
 			for (let i = 0; i < btns.length; i++) btns[i].disabled = false;
+			errorDialog(error1);
 		}
 	});
 }
@@ -1189,7 +1187,7 @@ document.getElementById("btn_updt").onclick = function() {
 				addUploads();
 				btn.disabled = false;
 			} else {
-				console.log("Failed to refresh: " + error);
+				errorDialog(error);
 				btn.disabled = false;
 			}
 		});
@@ -1285,10 +1283,7 @@ document.getElementById("btn_savecontacts").onclick = function() {
 
 	ae.Private_Update(function(error) {
 		btn.disabled = false;
-
-		if (error) {
-			console.log("Failed contacts update: " + error);
-		}
+		if (error) errorDialog(error);
 	});
 };
 
@@ -1406,12 +1401,10 @@ function addressCreate(addr) {
 						document.getElementById("txt_address_create_normal").value = "";
 						document.getElementById("txt_address_create_normal").focus();
 					}
-				} else {
-					console.log("Failed to update the Private field: " + error2);
-				}
+				} else errorDialog(error2);
 			});
 		} else {
-			console.log("Failed to add address: " + error1);
+			errorDialog(error1);
 			updateAddressCounts();
 		}
 	});
@@ -1444,8 +1437,8 @@ document.getElementById("btn_address_update").onclick = function() {
 	}
 
 	ae.Address_Update(function(error) {
-		if (error) console.log("Address/Update failed: " + error);
 		btn.disabled = false;
+		if (error) errorDialog(error);
 	});
 };
 
@@ -1488,9 +1481,7 @@ document.getElementById("btn_notepad_saveupl").onclick = function() {
 			np.value = "";
 			addUploads();
 			document.getElementById("tbd_accs").children[0].children[1].textContent = Math.round(ae.GetTotalMsgBytes() / 1024 / 1024);
-		} else {
-			console.log("Failed to add text: " + error);
-		}
+		} else errorDialog(error);
 
 		np.disabled = false;
 	});
@@ -1511,9 +1502,7 @@ document.getElementById("btn_upload").onclick = function() {
 				if (!error) {
 					addUploads();
 					document.getElementById("tbd_accs").children[0].children[1].textContent = Math.round(ae.GetTotalMsgBytes() / 1024 / 1024);
-				} else {
-					console.log("Failed upload: " + error);
-				}
+				} else errorDialog(error);
 
 				btn.disabled = false;
 			});
@@ -1621,7 +1610,7 @@ document.getElementById("btn_enter").onclick = function() {
 							if (statusAcc === 0) {
 								for (let i = 0; i < ae.Admin_GetUserCount(); i++) {addAccountToTable(i);}
 							} else {
-								console.log("Failed to Account_Browse: " + statusAcc);
+								errorDialog(statusAcc);
 							}
 						});
 					}
