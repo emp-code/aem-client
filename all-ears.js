@@ -237,7 +237,7 @@ function AllEars(readyCallback) {
 			referrerPolicy: "no-referrer",
 			body: postData
 		}).then(function(response) {
-			return response.ok ? response.arrayBuffer() : null;
+			return (response.status === 200) ? response.arrayBuffer() : null;
 		}).then(function(ab) {
 			if (!ab) {callback(false); return;}
 			callback(true, new Uint8Array(ab));
