@@ -1180,16 +1180,15 @@ document.getElementById("btn_updt").onclick = function() {
 		document.getElementById("tbl_inbox").style.opacity = 0.5;
 
 		ae.Message_Browse(true, false, function(error) {
-			document.getElementById("tbl_inbox").style.opacity = 1;
-
 			if (error === 0) {
 				addMessages();
 				addUploads();
-				btn.disabled = false;
 			} else {
 				errorDialog(error);
-				btn.disabled = false;
 			}
+
+			document.getElementById("tbl_inbox").style.opacity = 1;
+			btn.disabled = false;
 		});
 	}
 };
