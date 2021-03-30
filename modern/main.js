@@ -615,7 +615,7 @@ function getErrorMessage(err) {
 	switch (err) {
 		// 0x01-0x20	Client-side error codes
 		case 0x01: return "Invalid input";
-		case 0x02: return "Only administrators can perform this function";
+		case 0x02: return "Only administrators can perform this action";
 		case 0x03: return "_FetchEncrypted: Invalid input";
 		case 0x04: return "_FetchEncrypted: Failed connecting to server";
 		case 0x05: return "_FetchEncrypted: Failed decrypting response";
@@ -627,12 +627,13 @@ function getErrorMessage(err) {
 		case 0x11: return "Name too long";
 		case 0x12: return "File too large";
 
-		// 0x21-0x25	Generic
-		case 0x21: return ["FORMAT",   "Invalid format"];
-		case 0x22: return ["MISC",     "Unknown error"];
-		case 0x23: return ["INTERNAL", "Internal server error"];
-		case 0x24: return ["TODO",     "Functionality missing - in development"];
-		case 0x25: return ["FIXME",    "Unexpected error encountered"];
+		// 0x21-0x26	Generic
+		case 0x21: return ["FORMAT",    "Invalid format"];
+		case 0x22: return ["ADMINONLY", "Only administrators can perform this action"];
+		case 0x23: return ["MISC",      "Unknown error"];
+		case 0x24: return ["INTERNAL",  "Internal server error"];
+		case 0x25: return ["TODO",      "Functionality missing - in development"];
+		case 0x26: return ["FIXME",     "Unexpected error encountered"];
 
 		// 0xE0-0xEF	Message/Create
 		case 0xE0: return ["MESSAGE_CREATE_EXT_MINLEVEL",        "Account level too low"];
