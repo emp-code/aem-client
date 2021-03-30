@@ -248,13 +248,13 @@ function AllEars(readyCallback) {
 			if (!ab) {callback(false); return;}
 			callback(0, new Uint8Array(ab));
 		}).catch(() => {
-			callback(0x04);
+			callback(0x03);
 		});
 	};
 
 	const _FetchEncrypted = function(apiCmd, clearU8, callback) {
 		if (typeof(apiCmd) !== "number" || apiCmd < 0 || apiCmd > 255 || typeof(clearU8) !== "object" || clearU8.length > _AEM_API_BOX_SIZE_MAX) {
-			callback(0x03);
+			callback(0x04);
 			return;
 		}
 

@@ -616,10 +616,10 @@ function getErrorMessage(err) {
 		// 0x01-0x20	Client-side error codes
 		case 0x01: return "Invalid input";
 		case 0x02: return "Only administrators can perform this action";
-		case 0x03: return "_FetchEncrypted: Invalid input";
-		case 0x04: return "_FetchEncrypted: Failed connecting to server";
-		case 0x05: return "_FetchEncrypted: Failed decrypting response";
-		case 0x06: return "_FetchEncrypted: Invalid response length";
+		case 0x03: return "Failed connecting to server";
+		case 0x04: return "Invalid input to _FetchEncrypted";
+		case 0x05: return "Failed decrypting response from server";
+		case 0x06: return "Invalid response length";
 		case 0x07: return "Invalid response from server";
 		case 0x08: return "Addr32 encoding failed";
 
