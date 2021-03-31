@@ -856,35 +856,33 @@ function addMsg(isInt, i) {
 	const el = document.createElement("time");
 	el.dateTime = new Date(ts * 1000).toISOString();
 	el.textContent = new Date((ts * 1000) + (new Date().getTimezoneOffset() * -60000)).toISOString().slice(0, 10);
+	let cell = row.insertCell(-1);
+	cell.appendChild(el);
 
-	const cellTime = row.insertCell(-1);
-	cellTime.appendChild(el);
-
-	const cellSubj = row.insertCell(-1);
-	cellSubj.textContent = isInt? ae.GetIntMsgTitle(i) : ae.GetExtMsgTitle(i);
+	cell = row.insertCell(-1);
+	cell.textContent = isInt? ae.GetIntMsgTitle(i) : ae.GetExtMsgTitle(i);
 
 	if (isInt) {
-		const cellSnd = row.insertCell(-1);
-		cellSnd.textContent = ae.GetIntMsgFrom(i);
-		cellSnd.className = (ae.GetIntMsgFrom(i).length === 16) ? "mono" : "";
+		cell = row.insertCell(-1);
+		cell.textContent = ae.GetIntMsgFrom(i);
+		cell.className = (ae.GetIntMsgFrom(i).length === 16) ? "mono" : "";
 	} else {
 		const from1 = ae.GetExtMsgHdrFrom(i);
 		const from2 = from1.substring(from1.indexOf("@") + 1);
-
-		const cc = ae.GetExtMsgCountry(i);
-		const cellSnd1 = row.insertCell(-1);
-		cellSnd1.textContent = from1.substring(0, from1.indexOf("@"));
+		cell = row.insertCell(-1);
+		cell.textContent = from1.substring(0, from1.indexOf("@"));
 
 		const flag = document.createElement("abbr");
+		const cc = ae.GetExtMsgCountry(i);
 		flag.textContent = getCountryFlag(cc);
 		flag.title = getCountryName(cc);
 
 		const fromText = document.createElement("span");
 		fromText.textContent = " " + from2;
 
-		const cellSnd2 = row.insertCell(-1);
-		cellSnd2.appendChild(flag);
-		cellSnd2.appendChild(fromText);
+		cell = row.insertCell(-1);
+		cell.appendChild(flag);
+		cell.appendChild(fromText);
 	}
 
 	row.onclick = function() {
