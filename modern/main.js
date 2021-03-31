@@ -847,15 +847,20 @@ function addUploads() {
 
 		cell = row.insertCell(-1);
 		if (ae.GetUplMsgIdHex(i)) {
-			cell.innerHTML = "<button data-msgid=\"" + ae.GetUplMsgIdHex(i) + "\" type=\"button\">X</button>";
+			const btn = document.createElement("button");
+			btn.setAttribute("data-msgid", ae.GetUplMsgIdHex(i));
+			btn.type = "button";
+			btn.textContent = "X";
 
-			cell.children[0].onclick = function() {
+			btn.onclick = function() {
 				const tr = this.parentElement.parentElement;
 				ae.Message_Delete(this.getAttribute("data-msgid"), function(error) {
 					if (error === 0) tr.remove();
 					else errorDialog(error);
 				});
 			};
+
+			cell.appendChild(btn);
 		}
 	}
 }
