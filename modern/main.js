@@ -914,6 +914,7 @@ function addMessages() {
 	let skipMsgs = rowsPerPage * tabs[TAB_INBOX].cur;
 
 	tabs[TAB_INBOX].max = Math.floor((maxExt + maxInt - 1) / rowsPerPage);
+	if (tabs[TAB_INBOX].cur < tabs[TAB_INBOX].max) document.getElementById("btn_rght").disabled = false;
 
 	let numExt = 0;
 	let numInt = 0;
@@ -949,9 +950,6 @@ function addMessages() {
 				}
 
 				addMessages();
-				addUploads();
-				addSent();
-				if (tabs[tab].cur < tabs[tab].max) document.getElementById("btn_rght").disabled = false;
 			});
 		};
 	}
@@ -1231,7 +1229,6 @@ document.getElementById("btn_updt").onclick = function() {
 		ae.Message_Browse(true, false, function(error) {
 			if (error === 0) {
 				addMessages();
-				addUploads();
 			} else {
 				errorDialog(error);
 			}
