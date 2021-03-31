@@ -1451,22 +1451,22 @@ function addressCreate(addr) {
 	document.getElementById("btn_address_create_shield").disabled = true;
 
 	ae.Address_Create(addr, function(error1) {
-		if (error1 === 0) {
-			ae.Private_Update(function(error2) {
-				updateAddressCounts();
-
-				addAddress(ae.GetAddressCount() - 1);
-				if (addr !== "SHIELD") {
-					document.getElementById("txt_address_create_normal").value = "";
-					document.getElementById("txt_address_create_normal").focus();
-				}
-
-				if (error2 !== 0) errorDialog(error2);
-			});
-		} else {
+		if (error1 !== 0) {
 			errorDialog(error1);
-			updateAddressCounts();
+			return;
 		}
+
+		ae.Private_Update(function(error2) {
+			updateAddressCounts();
+
+			addAddress(ae.GetAddressCount() - 1);
+			if (addr !== "SHIELD") {
+				document.getElementById("txt_address_create_normal").value = "";
+				document.getElementById("txt_address_create_normal").focus();
+			}
+
+			if (error2 !== 0) errorDialog(error2);
+		});
 	});
 }
 
