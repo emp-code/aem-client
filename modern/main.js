@@ -914,7 +914,7 @@ function addMessages() {
 	let skipMsgs = rowsPerPage * tabs[TAB_INBOX].cur;
 
 	tabs[TAB_INBOX].max = Math.floor((maxExt + maxInt - 1) / rowsPerPage);
-	if (tabs[TAB_INBOX].cur < tabs[TAB_INBOX].max) document.getElementById("btn_rght").disabled = false;
+	document.getElementById("btn_rght").disabled = (tabs[TAB_INBOX].cur >= tabs[TAB_INBOX].max);
 
 	let numExt = 0;
 	let numInt = 0;
