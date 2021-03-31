@@ -1298,31 +1298,32 @@ function refreshContactList() {
 function addContact(mail, name, note) {
 	const tbl = document.getElementById("tbl_ctact");
 	const row = tbl.insertRow(-1);
-	const cellMail = row.insertCell(-1);
-	const cellName = row.insertCell(-1);
-	const cellNote = row.insertCell(-1);
-	const cellBtnD = row.insertCell(-1);
 
-	cellMail.autocapitalize = "off";
-	cellMail.spellcheck = false;
-	cellMail.inputMode = "email";
+	let cell = row.insertCell(-1);
+	cell.autocapitalize = "off";
+	cell.contentEditable = true;
+	cell.inputMode = "email";
+	cell.spellcheck = false;
+	cell.textContent = mail;
 
-	cellName.autocapitalize = "words";
-	cellName.spellcheck = false;
+	cell = row.insertCell(-1);
+	cell.autocapitalize = "words";
+	cell.contentEditable = true;
+	cell.spellcheck = false;
+	cell.textContent = name;
 
-	cellNote.autocapitalize = "off";
-	cellNote.spellcheck = false;
+	cell = row.insertCell(-1);
+	cell.autocapitalize = "off";
+	cell.contentEditable = true;
+	cell.spellcheck = false;
+	cell.textContent = note;
 
-	cellMail.textContent = mail;
-	cellName.textContent = name;
-	cellNote.textContent = note;
-	cellBtnD.innerHTML = "<button type=\"button\">X</button>";
-
-	cellMail.contentEditable = true;
-	cellName.contentEditable = true;
-	cellNote.contentEditable = true;
-
-	cellBtnD.onclick = function() {row.remove();};
+	cell = row.insertCell(-1);
+	const el = document.createElement("button");
+	el.type = "button";
+	el.textContent = "X";
+	el.onclick = function() {row.remove();};
+	cell.appendChild(el);
 }
 
 document.getElementById("btn_newcontact").onclick = function() {
