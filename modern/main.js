@@ -510,19 +510,20 @@ function displayFile(num) {
 	document.querySelector("article > table").hidden = true;
 	document.querySelector("article > h1").textContent = ae.GetUplMsgTitle(num);
 
+	if (fileType === "text") {
+		document.querySelector("article > pre").hidden = false;
+		document.querySelector("article > pre").textContent = sodium.to_string(ae.GetUplMsgBody(num));
+		return;
+	}
+
+	document.querySelector("article > pre").hidden = true;
+	let el;
+
 	switch (fileType) {
-		case "text": {
-			document.querySelector("article > pre").hidden = false;
-			document.querySelector("article > pre").textContent = sodium.to_string(ae.GetUplMsgBody(num));
-		break;}
-
 		case "image": {
-			document.querySelector("article > pre").hidden = true;
-			const img = document.createElement("img");
-			img.src = URL.createObjectURL(new Blob([ae.GetUplMsgBody(num).buffer]));
-			document.querySelector("article").appendChild(img);
-
-			img.onclick = function() {
+			el = document.createElement("img");
+			el.src = URL.createObjectURL(new Blob([ae.GetUplMsgBody(num).buffer]));
+			el.onclick = function() {
 				if (!document.fullscreen)
 					img.requestFullscreen();
 				else
@@ -532,32 +533,30 @@ function displayFile(num) {
 
 		case "audio":
 		case "video": {
-			document.querySelector("article > pre").hidden = true;
-			const el = document.createElement(fileType);
+			el = document.createElement(fileType);
 			el.controls = "controls";
 			el.src = URL.createObjectURL(new Blob([ae.GetUplMsgBody(num).buffer]));
-			document.querySelector("article").appendChild(el);
 		break;}
 
 		case "pdf": {
-			document.querySelector("article > pre").hidden = true;
-			const el = document.createElement("embed");
+			el = document.createElement("embed");
 			el.type = "application/pdf";
 			el.src = URL.createObjectURL(new Blob([ae.GetUplMsgBody(num).buffer], {type: "application/pdf"}));
-			document.querySelector("article").appendChild(el);
 		break;}
 
 		case "html": {
-			document.querySelector("article > pre").hidden = true;
-			const el = document.createElement("iframe");
+			el = document.createElement("iframe");
 			el.allow = "";
 			el.sandbox = "";
 			el.referrerPolicy = "no-referrer";
 			el.csp = "base-uri 'none'; child-src 'none'; connect-src 'none'; default-src 'none'; font-src 'none'; form-action 'none'; frame-ancestors 'none'; frame-src 'none'; img-src 'none'; manifest-src 'none'; media-src 'none'; object-src 'none'; script-src 'none'; style-src 'none'; worker-src 'none';";
 			el.srcdoc = sodium.to_string(ae.GetUplMsgBody(num).buffer);
-			document.querySelector("article").appendChild(el);
 		break;}
+
+		default: return;
 	}
+
+	document.querySelector("article").appendChild(el);
 }
 
 function displayMsg(isInt, num) {
