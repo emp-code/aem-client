@@ -20,11 +20,12 @@
 
 The JavaScript library, *all-ears.js*, is made for web clients.
 
-The library takes four data-attributes from the `<html>` tag.
-* data-aedomain (Domain; if blank, uses current domain)
-* data-aeapipub (API public key, hex)
-* data-aesigpub (Signature public key, hex)
-* data-aesaltnm (Normal address salt, hex)
+The library loads data from four `<meta>` tags:
+* aem.domain.api (API domain; if blank, uses current domain)
+* aem.domain.eml (Email domain; if blank, uses current domain)
+* aem.pubkey.api (API public key, hex)
+* aem.pubkey.sig (Signature public key, hex)
+* aem.adrslt.nrm (Normal address salt, hex)
 
 To use the library, create a new AllEars object:
 
