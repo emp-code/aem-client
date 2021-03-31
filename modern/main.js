@@ -1657,7 +1657,7 @@ document.getElementById("btn_enter").onclick = function() {
 		document.body.style.cursor = "wait";
 
 		ae.Message_Browse(false, true, function(statusBrowse) {
-			document.body.style.cursor = "auto";
+			document.body.style.cursor = "";
 
 			if (statusBrowse !== 0) {
 				document.getElementById("greeting").textContent = getErrorMessage(statusBrowse) + " (0x" + statusBrowse.toString(16).padStart(2, "0").toUpperCase() + ")";
