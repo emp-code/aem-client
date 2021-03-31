@@ -1168,10 +1168,6 @@ function deleteAddress(addr) {
 		document.getElementById("write_from").remove(addressToDelete);
 		updateAddressCounts();
 
-		const limitReached = (ae.GetAddressCountNormal() + ae.GetAddressCountShield() >= 31);
-		document.getElementById("btn_address_create_normal").disabled = (limitReached || ae.GetAddressCountNormal() > ae.GetLimitNormalA(ae.GetUserLevel()));
-		document.getElementById("btn_address_create_shield").disabled = (limitReached || ae.GetAddressCountShield() > ae.GetLimitShieldA(ae.GetUserLevel()));
-
 		ae.Private_Update(function(error2) {
 			document.querySelectorAll("#tbl_addrs button").forEach(function(btn) {btn.disabled = false;});
 			if (error2) errorDialog(error2);
