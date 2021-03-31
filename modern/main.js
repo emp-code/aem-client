@@ -658,17 +658,15 @@ function displayMsg(isInt, num) {
 		if (!ae.GetIntMsgFlagVSig(num)) addMsgFlag("SIG", "Invalid signature");
 		if ( ae.GetIntMsgFlagE2ee(num)) addMsgFlag("E2EE", "End-to-end encrypted");
 	} else {
-		document.querySelector("article").children[2].replaceChildren();
-
 		const headers = document.createElement("p");
 		headers.textContent = ae.GetExtMsgHeaders(num);
 		headers.className = "mono";
 		headers.hidden = !showHeaders;
-		document.querySelector("article").children[2].appendChild(headers);
 
 		const body = document.createElement("p");
 		body.innerHTML = ae.GetExtMsgBody(num);
-		document.querySelector("article").children[2].appendChild(body);
+
+		document.querySelector("article").children[2].replaceChildren(headers, body);
 
 		document.querySelector("article").children[1].textContent = ae.GetExtMsgTitle(num);
 		document.querySelector("article").children[1].style.cursor = headers.textContent? "pointer" : "";
