@@ -1455,13 +1455,13 @@ function addressCreate(addr) {
 			ae.Private_Update(function(error2) {
 				updateAddressCounts();
 
-				if (error2 === 0) {
-					addAddress(ae.GetAddressCount() - 1);
-					if (addr !== "SHIELD") {
-						document.getElementById("txt_address_create_normal").value = "";
-						document.getElementById("txt_address_create_normal").focus();
-					}
-				} else errorDialog(error2);
+				addAddress(ae.GetAddressCount() - 1);
+				if (addr !== "SHIELD") {
+					document.getElementById("txt_address_create_normal").value = "";
+					document.getElementById("txt_address_create_normal").focus();
+				}
+
+				if (error2 !== 0) errorDialog(error2);
 			});
 		} else {
 			errorDialog(error1);
