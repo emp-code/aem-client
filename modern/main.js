@@ -525,7 +525,7 @@ function displayFile(num) {
 			el.src = URL.createObjectURL(new Blob([ae.GetUplMsgBody(num).buffer]));
 			el.onclick = function() {
 				if (!document.fullscreen)
-					img.requestFullscreen();
+					el.requestFullscreen();
 				else
 					document.exitFullscreen();
 			};
