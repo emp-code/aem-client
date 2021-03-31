@@ -1468,6 +1468,13 @@ document.getElementById("btn_address_create_normal").onclick = function() {
 	addressCreate(txtNewAddr.value);
 };
 
+document.getElementById("txt_address_create_normal").onkeyup = function() {
+	if (event.key === "Enter") {
+		event.preventDefault();
+		document.getElementById("btn_address_create_normal").click();
+	}
+}
+
 document.getElementById("btn_address_create_shield").onclick = function() {
 	if (ae.GetAddressCountShield() >= ae.GetLimitShieldA(ae.GetUserLevel()) || ae.GetAddressCountNormal() + ae.GetAddressCountShield() >= 31) return;
 
