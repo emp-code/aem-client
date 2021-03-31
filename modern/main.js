@@ -477,7 +477,7 @@ function clearDisplay() {
 }
 
 function clearMsgFlags() {
-	const parent = document.getElementById("readmsg_flags").children[0].innerHTML = "";
+	document.getElementById("readmsg_flags").children[0].innerHTML = "";
 }
 
 function addMsgFlag(abbr, abbrTitle) {
