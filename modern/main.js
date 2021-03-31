@@ -1031,10 +1031,21 @@ function reloadAccount() {
 	cell = row.insertCell(-1); cell.textContent = ae.GetAddressCountNormal();
 	cell = row.insertCell(-1); cell.textContent = ae.GetAddressCountShield();
 	cell = row.insertCell(-1); cell.textContent = ae.GetUserLevel();
-	cell = row.insertCell(-1); cell.innerHTML = "<button type=\"button\" autocomplete=\"off\" disabled=\"disabled\">+</button>";
 
-	cell = row.insertCell(-1); cell.innerHTML = "<button id=\"btn_lowme\" type=\"button\" autocomplete=\"off\" disabled=\"disabled\">&minus;</button>";
-	cell.children[0].onclick = function() {
+	cell = row.insertCell(-1);
+	let btn = document.createElement("button");
+	btn.type = "button";
+	btn.textContent = "+";
+	btn.disabled = true;
+	cell.appendChild(btn);
+
+	cell = row.insertCell(-1);
+	btn = document.createElement("button");
+	btn.type = "button";
+	btn.textContent = "−";
+	btn.disabled = true;
+	btn.id = "btn_lowme";
+	btn.onclick = function() {
 		const newLevel = parseInt(row.cells[4].textContent, 10) - 1;
 		ae.Account_Update(ae.GetUserPkHex(), newLevel, function(error) {
 			if (error === 0) {
@@ -1043,13 +1054,18 @@ function reloadAccount() {
 					document.getElementById("btn_lowme").disabled = true;
 					document.getElementById("chk_lowme").disabled = true;
 				}
-			}
-			else errorDialog(error);
+			} else errorDialog(error);
 		});
 	};
+	cell.appendChild(btn);
 
-	cell = row.insertCell(-1); cell.innerHTML = "<button id=\"btn_delme\" type=\"button\" autocomplete=\"off\" disabled=\"disabled\">X</button>";
-	cell.children[0].onclick = function() {
+	cell = row.insertCell(-1);
+	btn = document.createElement("button");
+	btn.type = "button";
+	btn.textContent = "X";
+	btn.disabled = true;
+	btn.id = "btn_delme";
+	btn.onclick = function() {
 		ae.Account_Delete(ae.GetUserPkHex(), function(error) {
 			if (error === 0) {
 				row.remove();
@@ -1057,6 +1073,7 @@ function reloadAccount() {
 			} else errorDialog(error);
 		});
 	};
+	cell.appendChild(btn);
 
 	document.getElementById("txt_reg").disabled = !ae.IsUserAdmin();
 	document.getElementById("btn_reg").disabled = !ae.IsUserAdmin();
