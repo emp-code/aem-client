@@ -642,14 +642,19 @@ function displayMsg(isInt, num) {
 			document.getElementById("readmsg_tls").children[0].textContent = ae.GetIntMsgFromPk(num);
 		} else document.getElementById("readmsg_tls").style.visibility = "hidden";
 
-		let symbol = "<span title=\"Invalid level\">&#x26a0;</span>";
-		if      (ae.GetIntMsgFrom(num) === "system") {if (ae.GetIntMsgLevel(num) === 3) symbol = "<span title=\"System message\">&#x1f162;</span>";} // (S)
-		else if (ae.GetIntMsgFrom(num) === "public") {if (ae.GetIntMsgLevel(num) === 3) symbol = "<span title=\"Public announcement\">&#x1f15f;</span>";} // (P)
-		else if (ae.GetIntMsgLevel(num) === 0) symbol = "<span title=\"Level 0 User\">&#x1f10c;</span>"; // 0
-		else if (ae.GetIntMsgLevel(num) === 1) symbol = "<span title=\"Level 1 User\">&#x278a;</span>"; // 1
-		else if (ae.GetIntMsgLevel(num) === 2) symbol = "<span title=\"Level 2 User\">&#x278b;</span>"; // 2
-		else if (ae.GetIntMsgLevel(num) === 3) symbol = "<span title=\"Administrator\">&#x1f150;</span>"; // A (Admin)
-		document.getElementById("readmsg_hdrfrom").innerHTML = symbol + " " + ae.GetIntMsgFrom(num);
+		let symbol = document.createElement("span");
+		if      (ae.GetIntMsgLevel(num) === 3 && ae.GetIntMsgFrom(num) === "system") {symbol.title = "System message"; symbol.textContent = "🅢";}
+		else if (ae.GetIntMsgLevel(num) === 3 && ae.GetIntMsgFrom(num) === "public") {symbol.title = "Public announcement"; symbol.textContent = "🅟";}
+		else if (ae.GetIntMsgLevel(num) === 3) {symbol.title = "Administrator"; symbol.textContent = "🅐";}
+		else if (ae.GetIntMsgLevel(num) === 2) {symbol.title = "Level 2";  symbol.textContent = "➋";}
+		else if (ae.GetIntMsgLevel(num) === 1) {symbol.title = "Level 1";  symbol.textContent = "➊";}
+		else if (ae.GetIntMsgLevel(num) === 0) {symbol.title = "Level 0";  symbol.textContent = "🄌";}
+		else {symbol.title = "Invalid level"; symbol.textContent = "⚠";}
+
+		const elHdrFrom = document.getElementById("readmsg_hdrfrom");
+		elHdrFrom.innerHTML = "";
+		elHdrFrom.appendChild(symbol);
+		elHdrFrom.appendChild(document.createTextNode(" " + ae.GetIntMsgFrom(num)));
 
 		clearMsgFlags();
 		if (!ae.GetIntMsgFlagVPad(num)) addMsgFlag("PAD", "Invalid padding");
