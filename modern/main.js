@@ -1143,11 +1143,9 @@ function reloadAccount() {
 }
 
 function deleteAddress(addr) {
-	let btns = document.querySelectorAll("#tbl_addrs button");
-	for (let i = 0; i < btns.length; i++) btns[i].disabled = true;
+	document.querySelectorAll("#tbl_addrs button").forEach(function(btn) {btn.disabled = true;});
 
 	let addressToDelete = -1;
-
 	for (let i = 0; i < ae.GetAddressCount(); i++) {
 		if (addr === ae.GetAddress(i)) {
 			addressToDelete = i;
