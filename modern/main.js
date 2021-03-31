@@ -666,11 +666,12 @@ function displayMsg(isInt, num) {
 		const body = document.createElement("p");
 		body.innerHTML = ae.GetExtMsgBody(num);
 
-		document.querySelector("article").children[2].replaceChildren(headers, body);
+		document.querySelector("article > pre").replaceChildren(headers, body);
 
-		document.querySelector("article").children[1].textContent = ae.GetExtMsgTitle(num);
-		document.querySelector("article").children[1].style.cursor = headers.textContent? "pointer" : "";
-		document.querySelector("article").children[1].onclick = function() {
+		const h1 = document.querySelector("article > h1");
+		h1.textContent = ae.GetExtMsgTitle(num);
+		h1.style.cursor = headers.textContent? "pointer" : "";
+		h1.onclick = function() {
 			if (!headers.textContent) return;
 			showHeaders = !showHeaders;
 			headers.hidden = !showHeaders;
