@@ -465,14 +465,9 @@ function downloadFile(num) {
 }
 
 function clearDisplay() {
-	let      el = document.querySelector("article > img");
-	if (!el) el = document.querySelector("article > audio");
-	if (!el) el = document.querySelector("article > video");
-	if (!el) el = document.querySelector("article > embed");
-	if (!el) el = document.querySelector("article > iframe");
+	const el = document.querySelector("article > img, article > audio, article > video, article > embed, article > iframe");
 	if (!el) return;
-
-	URL.revokeObjectURL(el.src);
+	if (el.src) URL.revokeObjectURL(el.src);
 	el.remove();
 }
 
