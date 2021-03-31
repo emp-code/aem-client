@@ -1647,44 +1647,45 @@ document.getElementById("btn_enter").onclick = function() {
 	document.getElementById("txt_skey").style.background = "#233";
 
 	ae.SetKeys(txtSkey.value, function(successSetKeys) {
-		if (successSetKeys) {
-			document.body.style.cursor = "wait";
-
-			ae.Message_Browse(false, true, function(statusBrowse) {
-				document.body.style.cursor = "auto";
-
-				if (statusBrowse === 0) {
-					txtSkey.value = "";
-					document.getElementById("div_begin").hidden = true;
-					document.getElementById("div_main").hidden = false;
-					reloadAccount();
-
-					if (ae.IsUserAdmin()) {
-						ae.Account_Browse(function(statusAcc) {
-							if (statusAcc === 0) {
-								for (let i = 0; i < ae.Admin_GetUserCount(); i++) {addAccountToTable(i);}
-							} else {
-								errorDialog(statusAcc);
-							}
-						});
-					}
-				} else {
-					document.getElementById("txt_skey").disabled = false;
-					document.getElementById("txt_skey").style.background = "#466";
-					btn.focus();
-
-					document.getElementById("greeting").textContent = getErrorMessage(statusBrowse) + " (0x" + statusBrowse.toString(16).padStart(2, "0").toUpperCase() + ")";
-					btn.disabled = false;
-				}
-			});
-		} else {
+		if (!successSetKeys) {
 			document.getElementById("txt_skey").disabled = false;
 			document.getElementById("txt_skey").style.background = "#466";
 			txtSkey.focus();
 
 			document.getElementById("greeting").textContent = "SetKeys failed";
 			btn.disabled = false;
+			return;
 		}
+
+		document.body.style.cursor = "wait";
+
+		ae.Message_Browse(false, true, function(statusBrowse) {
+			document.body.style.cursor = "auto";
+
+			if (statusBrowse !== 0) {
+				document.getElementById("greeting").textContent = getErrorMessage(statusBrowse) + " (0x" + statusBrowse.toString(16).padStart(2, "0").toUpperCase() + ")";
+				document.getElementById("txt_skey").disabled = false;
+				document.getElementById("txt_skey").style.background = "#466";
+				btn.disabled = false;
+				btn.focus();
+				return;
+			}
+
+			txtSkey.value = "";
+			document.getElementById("div_begin").hidden = true;
+			document.getElementById("div_main").hidden = false;
+			reloadAccount();
+
+			if (!ae.IsUserAdmin()) return;
+
+			ae.Account_Browse(function(statusAcc) {
+				if (statusAcc === 0) {
+					for (let i = 0; i < ae.Admin_GetUserCount(); i++) {addAccountToTable(i);}
+				} else {
+					errorDialog(statusAcc);
+				}
+			});
+		});
 	});
 };
 
