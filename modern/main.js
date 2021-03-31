@@ -971,22 +971,33 @@ function addAccountToTable(i) {
 	cell = row.insertCell(-1); cell.textContent = ae.Admin_GetUserSAddr(i);
 	cell = row.insertCell(-1); cell.textContent = ae.Admin_GetUserLevel(i);
 
-	cell = row.insertCell(-1); cell.innerHTML = "<button type=\"button\" autocomplete=\"off\">+</button>";
-	cell.children[0].onclick = function() {const c = this.parentElement.parentElement.cells; adjustLevel(c[0].textContent, parseInt(c[4].textContent, 10) + 1, c);};
-	cell.children[0].disabled = (ae.Admin_GetUserLevel(i) === 3);
+	cell = row.insertCell(-1);
+	let btn = document.createElement("button");
+	btn.type = "button";
+	btn.textContent = "+";
+	btn.disabled = (ae.Admin_GetUserLevel(i) === 3);
+	btn.onclick = function() {const c = this.parentElement.parentElement.cells; adjustLevel(c[0].textContent, parseInt(c[4].textContent, 10) + 1, c);};
+	cell.appendChild(btn);
 
-	cell = row.insertCell(-1); cell.innerHTML = "<button type=\"button\" autocomplete=\"off\">&minus;</button>";
-	cell.children[0].onclick = function() {const c = this.parentElement.parentElement.cells; adjustLevel(c[0].textContent, parseInt(c[4].textContent, 10) - 1, c);};
-	cell.children[0].disabled = (ae.Admin_GetUserLevel(i) === 0);
+	cell = row.insertCell(-1);
+	btn = document.createElement("button");
+	btn.type = "button";
+	btn.textContent = "−";
+	btn.disabled = (ae.Admin_GetUserLevel(i) === 0);
+	btn.onclick = function() {const c = this.parentElement.parentElement.cells; adjustLevel(c[0].textContent, parseInt(c[4].textContent, 10) - 1, c);};
+	cell.appendChild(btn);
 
-	cell = row.insertCell(-1); cell.innerHTML = "<button type=\"button\" autocomplete=\"off\">X</button>";
-	cell.children[0].onclick = function() {
+	cell = row.insertCell(-1);
+	btn = document.createElement("button");
+	btn.type = "button";
+	btn.textContent = "X";
+	btn.onclick = function() {
 		const tr = this.parentElement.parentElement;
 		ae.Account_Delete(tr.cells[0].textContent, function(error) {
-			if (error === 0) tr.remove();
-			else errorDialog(error);
+			if (error === 0) tr.remove(); else errorDialog(error);
 		});
 	};
+	cell.appendChild(btn);
 }
 
 function reloadAccount() {
