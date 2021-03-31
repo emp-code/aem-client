@@ -41,6 +41,113 @@ const TAB_NOTES = 3;
 const TAB_TOOLS = 4;
 
 // Helper functions
+function getErrorMessage(err) {
+	switch (err) {
+		// 0x01-0x20	Client-side error codes
+		case 0x01: return "Invalid input";
+		case 0x02: return "Only administrators can perform this action";
+		case 0x03: return "Failed connecting to server";
+		case 0x04: return "Invalid input to _FetchEncrypted";
+		case 0x05: return "Failed decrypting response from server";
+		case 0x06: return "Invalid response length";
+		case 0x07: return "Server responded with invalid data";
+		case 0x08: return "Addr32 encoding failed";
+
+		case 0x10: return "Message too short";
+		case 0x11: return "Name too long";
+		case 0x12: return "File too large";
+
+		case 0x17: return "Server failed decrypting the request"; // 400
+		case 0x18: return "Account does not exist"; // 403
+		case 0x19: return "Server failed checking account data"; // 500
+		case 0x20: return "Invalid status code in response";
+
+		// 0x21-0x2F	Generic
+		case 0x21: return ["FORMAT",    "Invalid format"];
+		case 0x22: return ["ADMINONLY", "Only administrators can perform this action"];
+		case 0x23: return ["MISC",      "Unknown error"];
+		case 0x24: return ["INTERNAL",  "Internal server error"];
+		case 0x25: return ["TODO",      "Functionality missing - in development"];
+		case 0x26: return ["FIXME",     "Unexpected error encountered"];
+
+		case 0x2A: return ["NOTEXIST",  "Item does not exist"];
+
+		// 0xDA-0xDF	Address/Create|Delete|Update
+		case 0xDA: return ["ADDRESS_CREATE_INUSE",     "Address already taken"];
+		case 0xDB: return ["ADDRESS_CREATE_ATLIMIT",   "Limit reached - unable to register additional addresses"];
+		case 0xDC: return ["ADDRESS_DELETE_SOMEFOUND", "Delete successful, but some addresses were not found"];
+		case 0xDD: return ["ADDRESS_DELETE_NONEFOUND", "No such address(es)"];
+		case 0xDE: return ["ADDRESS_UPDATE_SOMEFOUND", "Partial success - some addresses not found"];
+		case 0xDF: return ["ADDRESS_UPDATE_NONEFOUND", "No update performed - address(es) not found"];
+
+		// 0xE0-0xEF	Message/Create
+		case 0xE0: return ["MESSAGE_CREATE_EXT_MINLEVEL",        "Account level too low"];
+		case 0xE1: return ["MESSAGE_CREATE_EXT_FORMAT_FROM",     "Malformed from-address"];
+		case 0xE2: return ["MESSAGE_CREATE_EXT_FORMAT_TO",       "Malformed to-address"];
+		case 0xE3: return ["MESSAGE_CREATE_EXT_FORMAT_REPLYID",  "Malformed reply-id"];
+		case 0xE4: return ["MESSAGE_CREATE_EXT_FORMAT_SUBJECT",  "Malformed subject"];
+		case 0xE5: return ["MESSAGE_CREATE_EXT_INVALID_REPLYID", "Invalid reply-id"];
+		case 0xE6: return ["MESSAGE_CREATE_EXT_INVALID_FROM",    "Invalid from-address"];
+		case 0xE7: return ["MESSAGE_CREATE_EXT_INVALID_TO",      "Invalid to-address"];
+		case 0xE8: return ["MESSAGE_CREATE_EXT_BODY_SIZE",       "Body too long or short"];
+		case 0xE9: return ["MESSAGE_CREATE_EXT_BODY_UTF8",       "Body not UTF-8"];
+		case 0xEA: return ["MESSAGE_CREATE_EXT_BODY_CONTROL",    "Body contains control characters"];
+		case 0xEB: return ["MESSAGE_CREATE_EXT_LINE_TOOLONG",    "Body exceeds line-length limit"];
+		case 0xEC: return ["MESSAGE_CREATE_EXT_BODY_FORMAT",     "Malformed body"];
+		case 0xED: return ["MESSAGE_CREATE_EXT_BODY_TOOSHORT",   "Body too short"];
+		case 0xEE: return ["MESSAGE_CREATE_EXT_TODOMAIN",        "Invalid to-address domain"];
+//		case 0xEF: return ["", ""];
+
+		// 0xF0-0xF9	Message/Create sendMail()
+		case 0xF0: return ["MESSAGE_CREATE_SENDMAIL_GREET", "Failed greeting receiver server"];
+		case 0xF1: return ["MESSAGE_CREATE_SENDMAIL_EHLO",  "EHLO command failed"];
+		case 0xF2: return ["MESSAGE_CREATE_SENDMAIL_STLS",  "STARTTLS command failed"];
+		case 0xF3: return ["MESSAGE_CREATE_SENDMAIL_SHAKE", "TLS handshake failed"];
+		case 0xF4: return ["MESSAGE_CREATE_SENDMAIL_NOTLS", "TLS not available"];
+		case 0xF5: return ["MESSAGE_CREATE_SENDMAIL_MAIL",  "MAIL command failed"];
+		case 0xF6: return ["MESSAGE_CREATE_SENDMAIL_RCPT",  "RCPT command failed"];
+		case 0xF7: return ["MESSAGE_CREATE_SENDMAIL_DATA",  "DATA command failed"];
+		case 0xF8: return ["MESSAGE_CREATE_SENDMAIL_BODY",  "Sending body failed"];
+//		case 0xF9: return ["", ""];
+
+		// 0xFA-0xFF	Message/Create Int
+		case 0xFA: return ["MESSAGE_CREATE_INT_TOOSHORT",     "Message too short"];
+		case 0xFB: return ["MESSAGE_CREATE_INT_TS_INVALID",   "Invalid timestamp"];
+		case 0xFC: return ["MESSAGE_CREATE_INT_SUBJECT_SIZE", "Subject too long or short"];
+		case 0xFD: return ["MESSAGE_CREATE_INT_ADDR_NOTOWN",  "Sender address not owned"];
+		case 0xFE: return ["MESSAGE_CREATE_INT_TO_NOTACCEPT", "Receiver address does not accept messages"];
+		case 0xFF: return ["MESSAGE_CREATE_INT_TO_SELF",      "Sending to own account not allowed"];
+
+		default: return ["???", "Unknown error"];
+	}
+}
+
+function errorDialog(err) {
+	if (typeof(err) !== "number" || err < 1) return;
+
+	let btnDisable = [];
+	const btn = document.querySelectorAll("nav > button");
+	for (let i = 0; i < btn.length; i++) {
+		btnDisable.push(btn[i].disabled);
+		btn[i].disabled = true;
+	}
+
+	const errMsg = getErrorMessage(err);
+
+	const dlg = document.querySelector("dialog");
+	dlg.children[0].style.height = getComputedStyle(document.querySelector("#main1 > div[class='mid']")).height;
+	dlg.querySelector("h1").textContent = "ERROR 0x" + err.toString(16).padStart(2, "0").toUpperCase();
+	dlg.querySelector("p").textContent = (typeof(errMsg) === "string") ? errMsg : errMsg[1];
+	dlg.show();
+
+	document.querySelector("dialog > div").onclick = function() {
+		for (let i = 0; i < btn.length; i++) {
+			btn[i].disabled = btnDisable[i];
+			dlg.close();
+		}
+	};
+}
+
 function getCountryName(countryCode) {
 	switch (countryCode) {
 		case "??": return "Unknown";
@@ -324,6 +431,39 @@ function getClockIcon(d) {
 	return String.fromCodePoint((128335 + h12) + m30);
 }
 
+function shieldMix(addr) {
+	let newAddr = "";
+
+	for (let i = 0; i < 16; i++) {
+		switch (addr.charAt(i)) {
+			case '1':
+				newAddr += "1iIlL".charAt(Math.floor(Math.random() * 5));
+				break;
+			case '0':
+				newAddr += "0oO".charAt(Math.floor(Math.random() * 3));
+				break;
+			case 'w':
+				newAddr += "VvWw".charAt(Math.floor(Math.random() * 4));
+				break;
+			default:
+				newAddr += (Math.random() > 0.5) ? addr.charAt(i) : addr.charAt(i).toUpperCase();
+		}
+	}
+
+	return newAddr;
+}
+
+function downloadFile(num) {
+	const a = document.createElement("a");
+	a.href = URL.createObjectURL(new Blob([ae.GetUplMsgBody(num).buffer]));
+	a.download = ae.GetUplMsgTitle(num);
+	a.click();
+
+	URL.revokeObjectURL(a.href);
+	a.href = "";
+	a.download = "";
+}
+
 function clearDisplay() {
 	let      el = document.querySelector("article > img");
 	if (!el) el = document.querySelector("article > audio");
@@ -336,15 +476,19 @@ function clearDisplay() {
 	el.remove();
 }
 
-function downloadFile(num) {
-	const a = document.createElement("a");
-	a.href = URL.createObjectURL(new Blob([ae.GetUplMsgBody(num).buffer]));
-	a.download = ae.GetUplMsgTitle(num);
-	a.click();
+function clearMsgFlags() {
+	const parent = document.getElementById("readmsg_flags").children[0].innerHTML = "";
+}
 
-	URL.revokeObjectURL(a.href);
-	a.href = "";
-	a.download = "";
+function addMsgFlag(abbr, abbrTitle) {
+	const parent = document.getElementById("readmsg_flags").children[0];
+
+	const el = document.createElement("abbr");
+	el.title = abbrTitle;
+	el.textContent = abbr;
+
+	parent.appendChild(document.createTextNode(" "));
+	parent.appendChild(el);
 }
 
 function displayFile(num) {
@@ -609,127 +753,99 @@ function displayMsg(isInt, num) {
 	}
 }
 
-function getErrorMessage(err) {
-	switch (err) {
-		// 0x01-0x20	Client-side error codes
-		case 0x01: return "Invalid input";
-		case 0x02: return "Only administrators can perform this action";
-		case 0x03: return "Failed connecting to server";
-		case 0x04: return "Invalid input to _FetchEncrypted";
-		case 0x05: return "Failed decrypting response from server";
-		case 0x06: return "Invalid response length";
-		case 0x07: return "Server responded with invalid data";
-		case 0x08: return "Addr32 encoding failed";
+function displayOutMsg(num) {
+	clearDisplay();
+	document.querySelector("article").scroll(0, 0);
+	document.querySelector("article").setAttribute("data-msgid", ae.GetOutMsgIdHex(num));
 
-		case 0x10: return "Message too short";
-		case 0x11: return "Name too long";
-		case 0x12: return "File too large";
+	document.getElementById("btn_mdele").disabled = false;
+	document.getElementById("btn_msave").disabled = true;
+	document.getElementById("btn_reply").disabled = true;
 
-		case 0x17: return "Server failed decrypting the request"; // 400
-		case 0x18: return "Account does not exist"; // 403
-		case 0x19: return "Server failed checking account data"; // 500
-		case 0x20: return "Invalid status code in response";
+	document.querySelector("article").children[0].hidden = false;
+	document.querySelector("article").children[2].hidden = false;
 
-		// 0x21-0x2F	Generic
-		case 0x21: return ["FORMAT",    "Invalid format"];
-		case 0x22: return ["ADMINONLY", "Only administrators can perform this action"];
-		case 0x23: return ["MISC",      "Unknown error"];
-		case 0x24: return ["INTERNAL",  "Internal server error"];
-		case 0x25: return ["TODO",      "Functionality missing - in development"];
-		case 0x26: return ["FIXME",     "Unexpected error encountered"];
+	document.querySelector("article").children[1].textContent = ae.GetOutMsgSubj(num);
+	document.querySelector("article").children[2].textContent = ae.GetOutMsgBody(num);
 
-		case 0x2A: return ["NOTEXIST",  "Item does not exist"];
+	document.getElementById("readmsg_dkim").style.visibility    = "hidden";
+	document.getElementById("readmsg_hdrto").style.visibility   = "visible";
+	document.getElementById("readmsg_hdrfrom").style.visibility = "visible";
+	document.getElementById("readmsg_envto").style.visibility   = "visible";
+	document.getElementById("readmsg_envfrom").style.visibility = "hidden";
 
-		// 0xDA-0xDF	Address/Create|Delete|Update
-		case 0xDA: return ["ADDRESS_CREATE_INUSE",     "Address already taken"];
-		case 0xDB: return ["ADDRESS_CREATE_ATLIMIT",   "Limit reached - unable to register additional addresses"];
-		case 0xDC: return ["ADDRESS_DELETE_SOMEFOUND", "Delete successful, but some addresses were not found"];
-		case 0xDD: return ["ADDRESS_DELETE_NONEFOUND", "No such address(es)"];
-		case 0xDE: return ["ADDRESS_UPDATE_SOMEFOUND", "Partial success - some addresses not found"];
-		case 0xDF: return ["ADDRESS_UPDATE_NONEFOUND", "No update performed - address(es) not found"];
+	document.getElementById("readmsg_hdrfrom").textContent = ae.GetOutMsgFrom(num);
 
-		// 0xE0-0xEF	Message/Create
-		case 0xE0: return ["MESSAGE_CREATE_EXT_MINLEVEL",        "Account level too low"];
-		case 0xE1: return ["MESSAGE_CREATE_EXT_FORMAT_FROM",     "Malformed from-address"];
-		case 0xE2: return ["MESSAGE_CREATE_EXT_FORMAT_TO",       "Malformed to-address"];
-		case 0xE3: return ["MESSAGE_CREATE_EXT_FORMAT_REPLYID",  "Malformed reply-id"];
-		case 0xE4: return ["MESSAGE_CREATE_EXT_FORMAT_SUBJECT",  "Malformed subject"];
-		case 0xE5: return ["MESSAGE_CREATE_EXT_INVALID_REPLYID", "Invalid reply-id"];
-		case 0xE6: return ["MESSAGE_CREATE_EXT_INVALID_FROM",    "Invalid from-address"];
-		case 0xE7: return ["MESSAGE_CREATE_EXT_INVALID_TO",      "Invalid to-address"];
-		case 0xE8: return ["MESSAGE_CREATE_EXT_BODY_SIZE",       "Body too long or short"];
-		case 0xE9: return ["MESSAGE_CREATE_EXT_BODY_UTF8",       "Body not UTF-8"];
-		case 0xEA: return ["MESSAGE_CREATE_EXT_BODY_CONTROL",    "Body contains control characters"];
-		case 0xEB: return ["MESSAGE_CREATE_EXT_LINE_TOOLONG",    "Body exceeds line-length limit"];
-		case 0xEC: return ["MESSAGE_CREATE_EXT_BODY_FORMAT",     "Malformed body"];
-		case 0xED: return ["MESSAGE_CREATE_EXT_BODY_TOOSHORT",   "Body too short"];
-		case 0xEE: return ["MESSAGE_CREATE_EXT_TODOMAIN",        "Invalid to-address domain"];
-//		case 0xEF: return ["", ""];
+	document.getElementById("readmsg_envto").textContent = ae.GetOutMsgMxDom(num);
+	document.getElementById("readmsg_hdrto").textContent = ae.GetOutMsgTo(num);
 
-		// 0xF0-0xF9	Message/Create sendMail()
-		case 0xF0: return ["MESSAGE_CREATE_SENDMAIL_GREET", "Failed greeting receiver server"];
-		case 0xF1: return ["MESSAGE_CREATE_SENDMAIL_EHLO",  "EHLO command failed"];
-		case 0xF2: return ["MESSAGE_CREATE_SENDMAIL_STLS",  "STARTTLS command failed"];
-		case 0xF3: return ["MESSAGE_CREATE_SENDMAIL_SHAKE", "TLS handshake failed"];
-		case 0xF4: return ["MESSAGE_CREATE_SENDMAIL_NOTLS", "TLS not available"];
-		case 0xF5: return ["MESSAGE_CREATE_SENDMAIL_MAIL",  "MAIL command failed"];
-		case 0xF6: return ["MESSAGE_CREATE_SENDMAIL_RCPT",  "RCPT command failed"];
-		case 0xF7: return ["MESSAGE_CREATE_SENDMAIL_DATA",  "DATA command failed"];
-		case 0xF8: return ["MESSAGE_CREATE_SENDMAIL_BODY",  "Sending body failed"];
-//		case 0xF9: return ["", ""];
+	const ts = ae.GetOutMsgTime(num);
+	const tzOs = new Date().getTimezoneOffset();
+	document.getElementById("readmsg_date").children[1].textContent = new Date((ts * 1000) + (tzOs * -60000)).toISOString().slice(0, 19).replace("T", " ");
 
-		// 0xFA-0xFF	Message/Create Int
-		case 0xFA: return ["MESSAGE_CREATE_INT_TOOSHORT",     "Message too short"];
-		case 0xFB: return ["MESSAGE_CREATE_INT_TS_INVALID",   "Invalid timestamp"];
-		case 0xFC: return ["MESSAGE_CREATE_INT_SUBJECT_SIZE", "Subject too long or short"];
-		case 0xFD: return ["MESSAGE_CREATE_INT_ADDR_NOTOWN",  "Sender address not owned"];
-		case 0xFE: return ["MESSAGE_CREATE_INT_TO_NOTACCEPT", "Receiver address does not accept messages"];
-		case 0xFF: return ["MESSAGE_CREATE_INT_TO_SELF",      "Sending to own account not allowed"];
+	const isInt = ae.GetOutMsgIsInt(num);
+	document.getElementById("readmsg_ip").style.visibility    = isInt? "hidden" : "visible";
+	document.getElementById("readmsg_rdns").style.visibility  = /*isInt?*/ "hidden" /*: "visible"*/; // TODO
+	document.getElementById("readmsg_tls").style.visibility   = /*isInt?*/ "hidden" /*: "visible"*/; // TODO
+	document.getElementById("readmsg_cert").style.visibility  = /*isInt?*/ "hidden" /*: "visible"*/; // TODO
+	document.getElementById("readmsg_greet").style.visibility = isInt? "hidden" : "visible";
 
-		default: return ["???", "Unknown error"];
+	if (!isInt) {
+//		const cc = ae.GetExtMsgCountry(num);
+
+		document.getElementById("readmsg_ip").children[1].textContent = ae.GetOutMsgIp(num);
+//		document.getElementById("readmsg_country").textContent = getCountryFlag(cc) + " " + getCountryName(cc);
+//		document.getElementById("readmsg_tls").children[0].textContent = ae.GetOutMsgTLS(num);
+		document.getElementById("readmsg_greet").children[0].textContent = ae.GetOutMsgGreet(num);
+	}
+
+	clearMsgFlags();
+	if (!ae.GetOutMsgFlagVPad(num)) addMsgFlag("PAD", "Invalid padding");
+	if (!ae.GetOutMsgFlagVSig(num)) addMsgFlag("SIG", "Invalid signature");
+	if ( ae.GetOutMsgFlagE2ee(num)) addMsgFlag("E2EE", "End-to-end encrypted");
+}
+
+function addSent() {
+	const tbl = document.getElementById("tbl_drbox");
+	tbl.innerHTML = "";
+
+	for (let i = 0; i < ae.GetOutMsgCount(); i++) {
+		const row = tbl.insertRow(-1);
+		row.setAttribute("data-msgid", ae.GetOutMsgIdHex(i));
+
+		let cell;
+		cell = row.insertCell(-1); cell.textContent = new Date(ae.GetOutMsgTime(i) * 1000).toISOString().slice(0, 10);
+		cell = row.insertCell(-1); cell.textContent = ae.GetOutMsgSubj(i);
+		row.onclick = function() {displayOutMsg(i);};
 	}
 }
 
-// Interface
-function clearMsgFlags() {
-	const parent = document.getElementById("readmsg_flags").children[0].innerHTML = "";
+function updateAddressCounts() {
+	document.querySelector("#tbd_accs > tr > td:nth-child(3)").textContent = ae.GetAddressCountNormal();
+	document.querySelector("#tbd_accs > tr > td:nth-child(4)").textContent = ae.GetAddressCountShield();
+
+	document.getElementById("limit_normal").textContent = (ae.GetAddressCountNormal() + "/" + ae.GetLimitNormalA(ae.GetUserLevel())).padStart(ae.GetLimitNormalA(ae.GetUserLevel()) > 9 ? 5 : 1);
+	document.getElementById("limit_shield").textContent = (ae.GetAddressCountShield() + "/" + ae.GetLimitShieldA(ae.GetUserLevel())).padStart(ae.GetLimitShieldA(ae.GetUserLevel()) > 9 ? 5 : 1);
+	document.getElementById("limit_total").textContent = ((ae.GetAddressCountNormal() + ae.GetAddressCountShield()) + "/" + ae.GetAddrPerUser()).padStart(5);
+
+	const limitReached = (ae.GetAddressCountNormal() + ae.GetAddressCountShield() >= 31);
+	document.getElementById("btn_address_create_normal").disabled = (limitReached || ae.GetAddressCountNormal() >= ae.GetLimitNormalA(ae.GetUserLevel()));
+	document.getElementById("btn_address_create_shield").disabled = (limitReached || ae.GetAddressCountShield() >= ae.GetLimitShieldA(ae.GetUserLevel()));
 }
 
-function addMsgFlag(abbr, abbrTitle) {
-	const parent = document.getElementById("readmsg_flags").children[0];
+function adjustLevel(pubkey, level, c) {
+	const fs = document.getElementById("tbl_accs");
+	fs.disabled = true;
 
-	const el = document.createElement("abbr");
-	el.title = abbrTitle;
-	el.textContent = abbr;
+	ae.Account_Update(pubkey, level, function(error) {
+		fs.disabled = false;
 
-	parent.appendChild(document.createTextNode(" "));
-	parent.appendChild(el);
-}
-
-function errorDialog(err) {
-	if (typeof(err) !== "number" || err < 1) return;
-
-	let btnDisable = [];
-	const btn = document.querySelectorAll("nav > button");
-	for (let i = 0; i < btn.length; i++) {
-		btnDisable.push(btn[i].disabled);
-		btn[i].disabled = true;
-	}
-
-	const errMsg = getErrorMessage(err);
-
-	const dlg = document.querySelector("dialog");
-	dlg.children[0].style.height = getComputedStyle(document.querySelector("#main1 > div[class='mid']")).height;
-	dlg.querySelector("h1").textContent = "ERROR 0x" + err.toString(16).padStart(2, "0").toUpperCase();
-	dlg.querySelector("p").textContent = (typeof(errMsg) === "string") ? errMsg : errMsg[1];
-	dlg.show();
-
-	document.querySelector("dialog > div").onclick = function() {
-		for (let i = 0; i < btn.length; i++) {
-			btn[i].disabled = btnDisable[i];
-			dlg.close();
-		}
-	};
+		if (error === 0) {
+			c[4].textContent = level;
+			c[5].children[0].disabled = (level === 3);
+			c[6].children[0].disabled = (level === 0);
+		} else errorDialog(error);
+	});
 }
 
 function addMsg(isInt, i) {
@@ -877,101 +993,6 @@ function addUploads() {
 			cell.appendChild(btn);
 		}
 	}
-}
-
-function displayOutMsg(num) {
-	clearDisplay();
-	document.querySelector("article").scroll(0, 0);
-	document.querySelector("article").setAttribute("data-msgid", ae.GetOutMsgIdHex(num));
-
-	document.getElementById("btn_mdele").disabled = false;
-	document.getElementById("btn_msave").disabled = true;
-	document.getElementById("btn_reply").disabled = true;
-
-	document.querySelector("article").children[0].hidden = false;
-	document.querySelector("article").children[2].hidden = false;
-
-	document.querySelector("article").children[1].textContent = ae.GetOutMsgSubj(num);
-	document.querySelector("article").children[2].textContent = ae.GetOutMsgBody(num);
-
-	document.getElementById("readmsg_dkim").style.visibility    = "hidden";
-	document.getElementById("readmsg_hdrto").style.visibility   = "visible";
-	document.getElementById("readmsg_hdrfrom").style.visibility = "visible";
-	document.getElementById("readmsg_envto").style.visibility   = "visible";
-	document.getElementById("readmsg_envfrom").style.visibility = "hidden";
-
-	document.getElementById("readmsg_hdrfrom").textContent = ae.GetOutMsgFrom(num);
-
-	document.getElementById("readmsg_envto").textContent = ae.GetOutMsgMxDom(num);
-	document.getElementById("readmsg_hdrto").textContent = ae.GetOutMsgTo(num);
-
-	const ts = ae.GetOutMsgTime(num);
-	const tzOs = new Date().getTimezoneOffset();
-	document.getElementById("readmsg_date").children[1].textContent = new Date((ts * 1000) + (tzOs * -60000)).toISOString().slice(0, 19).replace("T", " ");
-
-	const isInt = ae.GetOutMsgIsInt(num);
-	document.getElementById("readmsg_ip").style.visibility    = isInt? "hidden" : "visible";
-	document.getElementById("readmsg_rdns").style.visibility  = /*isInt?*/ "hidden" /*: "visible"*/; // TODO
-	document.getElementById("readmsg_tls").style.visibility   = /*isInt?*/ "hidden" /*: "visible"*/; // TODO
-	document.getElementById("readmsg_cert").style.visibility  = /*isInt?*/ "hidden" /*: "visible"*/; // TODO
-	document.getElementById("readmsg_greet").style.visibility = isInt? "hidden" : "visible";
-
-	if (!isInt) {
-//		const cc = ae.GetExtMsgCountry(num);
-
-		document.getElementById("readmsg_ip").children[1].textContent = ae.GetOutMsgIp(num);
-//		document.getElementById("readmsg_country").textContent = getCountryFlag(cc) + " " + getCountryName(cc);
-//		document.getElementById("readmsg_tls").children[0].textContent = ae.GetOutMsgTLS(num);
-		document.getElementById("readmsg_greet").children[0].textContent = ae.GetOutMsgGreet(num);
-	}
-
-	clearMsgFlags();
-	if (!ae.GetOutMsgFlagVPad(num)) addMsgFlag("PAD", "Invalid padding");
-	if (!ae.GetOutMsgFlagVSig(num)) addMsgFlag("SIG", "Invalid signature");
-	if ( ae.GetOutMsgFlagE2ee(num)) addMsgFlag("E2EE", "End-to-end encrypted");
-}
-
-function addSent() {
-	const tbl = document.getElementById("tbl_drbox");
-	tbl.innerHTML = "";
-
-	for (let i = 0; i < ae.GetOutMsgCount(); i++) {
-		const row = tbl.insertRow(-1);
-		row.setAttribute("data-msgid", ae.GetOutMsgIdHex(i));
-
-		let cell;
-		cell = row.insertCell(-1); cell.textContent = new Date(ae.GetOutMsgTime(i) * 1000).toISOString().slice(0, 10);
-		cell = row.insertCell(-1); cell.textContent = ae.GetOutMsgSubj(i);
-		row.onclick = function() {displayOutMsg(i);};
-	}
-}
-
-function updateAddressCounts() {
-	document.querySelector("#tbd_accs > tr > td:nth-child(3)").textContent = ae.GetAddressCountNormal();
-	document.querySelector("#tbd_accs > tr > td:nth-child(4)").textContent = ae.GetAddressCountShield();
-
-	document.getElementById("limit_normal").textContent = (ae.GetAddressCountNormal() + "/" + ae.GetLimitNormalA(ae.GetUserLevel())).padStart(ae.GetLimitNormalA(ae.GetUserLevel()) > 9 ? 5 : 1);
-	document.getElementById("limit_shield").textContent = (ae.GetAddressCountShield() + "/" + ae.GetLimitShieldA(ae.GetUserLevel())).padStart(ae.GetLimitShieldA(ae.GetUserLevel()) > 9 ? 5 : 1);
-	document.getElementById("limit_total").textContent = ((ae.GetAddressCountNormal() + ae.GetAddressCountShield()) + "/" + ae.GetAddrPerUser()).padStart(5);
-
-	const limitReached = (ae.GetAddressCountNormal() + ae.GetAddressCountShield() >= 31);
-	document.getElementById("btn_address_create_normal").disabled = (limitReached || ae.GetAddressCountNormal() >= ae.GetLimitNormalA(ae.GetUserLevel()));
-	document.getElementById("btn_address_create_shield").disabled = (limitReached || ae.GetAddressCountShield() >= ae.GetLimitShieldA(ae.GetUserLevel()));
-}
-
-function adjustLevel(pubkey, level, c) {
-	const fs = document.getElementById("tbl_accs");
-	fs.disabled = true;
-
-	ae.Account_Update(pubkey, level, function(error) {
-		fs.disabled = false;
-
-		if (error === 0) {
-			c[4].textContent = level;
-			c[5].children[0].disabled = (level === 3);
-			c[6].children[0].disabled = (level === 0);
-		} else errorDialog(error);
-	});
 }
 
 function addAccountToTable(i) {
@@ -1154,28 +1175,6 @@ function deleteAddress(addr) {
 	});
 }
 
-function shieldMix(addr) {
-	let newAddr = "";
-
-	for (let i = 0; i < 16; i++) {
-		switch (addr.charAt(i)) {
-			case '1':
-				newAddr += "1iIlL".charAt(Math.floor(Math.random() * 5));
-				break;
-			case '0':
-				newAddr += "0oO".charAt(Math.floor(Math.random() * 3));
-				break;
-			case 'w':
-				newAddr += "VvWw".charAt(Math.floor(Math.random() * 4));
-				break;
-			default:
-				newAddr += (Math.random() > 0.5) ? addr.charAt(i) : addr.charAt(i).toUpperCase();
-		}
-	}
-
-	return newAddr;
-}
-
 function addAddress(num) {
 	const addrTable = document.getElementById("tbl_addrs");
 	const row = addrTable.insertRow(-1);
@@ -1204,6 +1203,7 @@ function addAddress(num) {
 	document.getElementById("write_from").appendChild(opt);
 }
 
+// Interface
 document.getElementById("btn_dele").onclick = function() {
 	this.blur();
 
