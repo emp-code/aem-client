@@ -507,11 +507,10 @@ function displayMsg(isInt, num) {
 		else if (ae.GetIntMsgLevel(num) === 3) symbol = "<span title=\"Administrator\">&#x1f150;</span>"; // A (Admin)
 		document.getElementById("readmsg_hdrfrom").innerHTML = symbol + " " + ae.GetIntMsgFrom(num);
 
-		let flagText = "";
-		if (!ae.GetIntMsgFlagVPad(num)) flagText += "<abbr title=\"Invalid padding\">PAD</abbr> ";
-		if (!ae.GetIntMsgFlagVSig(num)) flagText += "<abbr title=\"Invalid signature\">SIG</abbr> ";
-		if (ae.GetIntMsgFlagE2ee(num)) flagText += "<abbr title=\"End-to-end encrypted\">E2EE</abbr> ";
-		document.getElementById("readmsg_flags").children[0].innerHTML = flagText.trim();
+		clearMsgFlags();
+		if (!ae.GetIntMsgFlagVPad(num)) addMsgFlag("PAD", "Invalid padding");
+		if (!ae.GetIntMsgFlagVSig(num)) addMsgFlag("SIG", "Invalid signature");
+		if ( ae.GetIntMsgFlagE2ee(num)) addMsgFlag("E2EE", "End-to-end encrypted");
 	} else {
 		document.querySelector("article").children[2].innerHTML = "";
 
@@ -599,15 +598,14 @@ function displayMsg(isInt, num) {
 		document.getElementById("readmsg_envfrom").textContent = ae.GetExtMsgEnvFrom(num);
 		document.getElementById("readmsg_hdrfrom").textContent = ae.GetExtMsgHdrFrom(num) + (ae.GetExtMsgDnFrom(num) ? " (" + ae.GetExtMsgDnFrom(num) + ")" : "");
 
-		let flagText = "";
-		if (!ae.GetExtMsgFlagVPad(num)) flagText += "<abbr title=\"Invalid padding\">PAD</abbr> ";
-		if (!ae.GetExtMsgFlagVSig(num)) flagText += "<abbr title=\"Invalid signature\">SIG</abbr> ";
-		if (!ae.GetExtMsgFlagPExt(num)) flagText += "<abbr title=\"The sender did not use the Extended (ESMTP) protocol\">SMTP</abbr> ";
-		if (!ae.GetExtMsgFlagQuit(num)) flagText += "<abbr title=\"The sender did not issue the required QUIT command\">QUIT</abbr> ";
-		if (ae.GetExtMsgFlagRare(num)) flagText += "<abbr title=\"The sender issued unusual command(s)\">RARE</abbr> ";
-		if (ae.GetExtMsgFlagFail(num)) flagText += "<abbr title=\"The sender issued invalid command(s)\">FAIL</abbr> ";
-		if (ae.GetExtMsgFlagPErr(num)) flagText += "<abbr title=\"The sender violated the protocol\">PROT</abbr> ";
-		document.getElementById("readmsg_flags").children[0].innerHTML = flagText.trim();
+		clearMsgFlags();
+		if (!ae.GetExtMsgFlagVPad(num)) addMsgFlag("PAD", "Invalid padding");
+		if (!ae.GetExtMsgFlagVSig(num)) addMsgFlag("SIG", "Invalid signature");
+		if (!ae.GetExtMsgFlagPExt(num)) addMsgFlag("SMTP", "The sender did not use the Extended (ESMTP) protocol");
+		if (!ae.GetExtMsgFlagQuit(num)) addMsgFlag("QUIT", "The sender did not issue the required QUIT command");
+		if ( ae.GetExtMsgFlagRare(num)) addMsgFlag("RARE", "The sender issued unusual command(s)");
+		if ( ae.GetExtMsgFlagFail(num)) addMsgFlag("FAIL", "The sender issued invalid command(s)");
+		if ( ae.GetExtMsgFlagPErr(num)) addMsgFlag("PROT", "The sender violated the protocol");
 	}
 }
 
@@ -693,6 +691,21 @@ function getErrorMessage(err) {
 }
 
 // Interface
+function clearMsgFlags() {
+	const parent = document.getElementById("readmsg_flags").children[0].innerHTML = "";
+}
+
+function addMsgFlag(abbr, abbrTitle) {
+	const parent = document.getElementById("readmsg_flags").children[0];
+
+	const el = document.createElement("abbr");
+	el.title = abbrTitle;
+	el.textContent = abbr;
+
+	parent.appendChild(document.createTextNode(" "));
+	parent.appendChild(el);
+}
+
 function errorDialog(err) {
 	if (typeof(err) !== "number" || err < 1) return;
 
@@ -741,6 +754,7 @@ function addMsg(isInt, i) {
 	} else {
 		const from1 = ae.GetExtMsgHdrFrom(i);
 		const from2 = from1.substring(from1.indexOf("@") + 1);
+
 		const cc = ae.GetExtMsgCountry(i);
 		const cellSnd1 = row.insertCell(-1);
 		cellSnd1.textContent = from1.substring(0, from1.indexOf("@"));
@@ -911,11 +925,10 @@ function displayOutMsg(num) {
 		document.getElementById("readmsg_greet").children[0].textContent = ae.GetOutMsgGreet(num);
 	}
 
-	let flagText = "";
-	if (!ae.GetOutMsgFlagVPad(num)) flagText += "<abbr title=\"Invalid padding\">PAD</abbr> ";
-	if (!ae.GetOutMsgFlagVSig(num)) flagText += "<abbr title=\"Invalid signature\">SIG</abbr> ";
-	if (ae.GetOutMsgFlagE2ee(num)) flagText += "<abbr title=\"End-to-end encrypted\">E2EE</abbr> ";
-	document.getElementById("readmsg_flags").children[0].innerHTML = flagText.trim();
+	clearMsgFlags();
+	if (!ae.GetOutMsgFlagVPad(num)) addMsgFlag("PAD", "Invalid padding");
+	if (!ae.GetOutMsgFlagVSig(num)) addMsgFlag("SIG", "Invalid signature");
+	if ( ae.GetOutMsgFlagE2ee(num)) addMsgFlag("E2EE", "End-to-end encrypted");
 }
 
 function addSent() {
