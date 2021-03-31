@@ -82,11 +82,6 @@ noscript {
 	text-align: center;
 }
 
-#div_begin > div * {
-	margin: 0;
-	padding: 0;
-}
-
 #div_begin > div {
 	display: inline-grid;
 	grid-template-columns: auto;
@@ -108,6 +103,11 @@ noscript {
 	margin: 1.25em 0;
 }
 
+#div_begin > div > header * {
+	margin: 0;
+	padding: 0;
+}
+
 #div_begin main {
 	border: 0.2em double #446;
 	box-shadow: 0 0.2em #223;
@@ -115,15 +115,22 @@ noscript {
 	border-radius: 1em;
 }
 
-#div_begin main input {
+#txt_skey {
 	display: block;
-	background: #233;
-	border: 0.25em solid #233;
-	color: #233;
-	border-radius: 1em;
-	text-align: center;
-	transition: background-color 0.5s ease-out;
 	margin: 2em;
+	text-align: center;
+	border: 0.25em solid #233;
+	border-radius: 1em;
+	color: #233;
+	transition: background-color 0.5s ease-out;
+}
+
+#txt_skey:disabled {
+	background-color: #233;
+}
+
+#txt_skey:not(disabled) {
+	background-color: #466;
 }
 
 #div_begin main button {

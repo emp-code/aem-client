@@ -9,7 +9,6 @@ const ae = new AllEars(function(ok) {
 			document.getElementById("txt_pg").value = localStorage.greeting;
 		} else localStorage.greeting = document.getElementById("greeting").textContent;
 
-		document.getElementById("txt_skey").style.background = "#466";
 		document.getElementById("txt_skey").maxLength = "64";
 	} else {
 		console.log("Failed to load All-Ears");
@@ -1644,12 +1643,10 @@ document.getElementById("btn_enter").onclick = function() {
 	btn.disabled = true;
 
 	document.getElementById("txt_skey").disabled = true;
-	document.getElementById("txt_skey").style.background = "#233";
 
 	ae.SetKeys(txtSkey.value, function(successSetKeys) {
 		if (!successSetKeys) {
 			document.getElementById("txt_skey").disabled = false;
-			document.getElementById("txt_skey").style.background = "#466";
 			txtSkey.focus();
 
 			document.getElementById("greeting").textContent = "SetKeys failed";
@@ -1665,7 +1662,6 @@ document.getElementById("btn_enter").onclick = function() {
 			if (statusBrowse !== 0) {
 				document.getElementById("greeting").textContent = getErrorMessage(statusBrowse) + " (0x" + statusBrowse.toString(16).padStart(2, "0").toUpperCase() + ")";
 				document.getElementById("txt_skey").disabled = false;
-				document.getElementById("txt_skey").style.background = "#466";
 				btn.disabled = false;
 				btn.focus();
 				return;
