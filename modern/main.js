@@ -964,31 +964,31 @@ function addUploads() {
 		const row = tbl.insertRow(-1);
 		row.setAttribute("data-msgid", ae.GetUplMsgIdHex(i));
 
-		let cell;
-		cell = row.insertCell(-1); cell.textContent = new Date(ae.GetUplMsgTime(i) * 1000).toISOString().slice(0, 10);
-
-		cell = row.insertCell(-1); cell.textContent = ae.GetUplMsgTitle(i);
-		cell.onclick = function() {displayFile(this.parentElement.rowIndex - 1);};
-
-		cell = row.insertCell(-1); cell.textContent = (ae.GetUplMsgBytes(i) / 1024).toFixed(1);
+		let cell = row.insertCell(-1);
+		cell.textContent = new Date(ae.GetUplMsgTime(i) * 1000).toISOString().slice(0, 10);
 
 		cell = row.insertCell(-1);
-		if (ae.GetUplMsgIdHex(i)) {
-			const btn = document.createElement("button");
-			btn.setAttribute("data-msgid", ae.GetUplMsgIdHex(i));
-			btn.type = "button";
-			btn.textContent = "X";
+		cell.textContent = ae.GetUplMsgTitle(i);
+		cell.onclick = function() {displayFile(this.parentElement.rowIndex - 1);};
 
-			btn.onclick = function() {
-				const tr = this.parentElement.parentElement;
-				ae.Message_Delete(this.getAttribute("data-msgid"), function(error) {
-					if (error === 0) tr.remove();
-					else errorDialog(error);
-				});
-			};
+		cell = row.insertCell(-1);
+		cell.textContent = (ae.GetUplMsgBytes(i) / 1024).toFixed(1);
 
-			cell.appendChild(btn);
-		}
+		const btn = document.createElement("button");
+		btn.setAttribute("data-msgid", ae.GetUplMsgIdHex(i));
+		btn.type = "button";
+		btn.textContent = "X";
+
+		btn.onclick = function() {
+			const tr = this.parentElement.parentElement;
+			ae.Message_Delete(this.getAttribute("data-msgid"), function(error) {
+				if (error === 0) tr.remove();
+				else errorDialog(error);
+			});
+		};
+
+		cell = row.insertCell(-1);
+		cell.appendChild(btn);
 	}
 }
 
