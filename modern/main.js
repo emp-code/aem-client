@@ -993,8 +993,7 @@ function addUploads() {
 }
 
 function addAccountToTable(i) {
-	const tblAccs = document.getElementById("tbd_accs");
-	const row = tblAccs.insertRow(-1);
+	const row = document.getElementById("tbd_accs").insertRow(-1);
 	let cell;
 	cell = row.insertCell(-1); cell.textContent = ae.Admin_GetUserPkHex(i);
 	cell = row.insertCell(-1); cell.textContent = ae.Admin_GetUserSpace(i);
@@ -1051,11 +1050,9 @@ function reloadAccount() {
 		tblLimits.rows[lvl].cells[3].children[0].value = ae.GetLimitShieldA(lvl);
 	}
 
-	// Accounts
-	const tblAccs = document.getElementById("tbd_accs");
+	// Our account details
+	const row = document.getElementById("tbd_accs").insertRow(-1);
 
-	// All: Our account
-	const row = tblAccs.insertRow(-1);
 	let cell;
 	cell = row.insertCell(-1); cell.textContent = ae.GetUserPkHex();
 	cell = row.insertCell(-1); cell.textContent = Math.round(ae.GetTotalMsgBytes() / 1048576); // MiB
