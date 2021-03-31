@@ -940,17 +940,18 @@ function addMessages() {
 		cell.textContent = "Load more (" + Math.round((ae.GetTotalMsgBytes() - ae.GetReadyMsgBytes()) / 1024) + " KiB left)";
 
 		row.onclick = function() {
-			this.onclick = "";
-
 			ae.Message_Browse(false, false, function(errorBrowse) {
 				document.getElementById("tbl_inbox").style.opacity = 1;
 
-				if (errorBrowse === 0) {
-					addMessages();
-					addUploads();
-					addSent();
-					if (tabs[tab].cur < tabs[tab].max) document.getElementById("btn_rght").disabled = false;
-				} // else TODO
+				if (errorBrowse !== 0) {
+					errorDialog(errorBrowse);
+					return;
+				}
+
+				addMessages();
+				addUploads();
+				addSent();
+				if (tabs[tab].cur < tabs[tab].max) document.getElementById("btn_rght").disabled = false;
 			});
 		};
 	}
