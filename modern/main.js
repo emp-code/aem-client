@@ -641,7 +641,14 @@ function getErrorMessage(err) {
 		case 0x26: return ["FIXME",     "Unexpected error encountered"];
 
 		case 0x2A: return ["NOTEXIST",  "Item does not exist"];
-		case 0x2B: return ["EXIST",     "Item already exists"];
+
+		// 0xDA-0xDF	Address/Create|Delete|Update
+		case 0xDA: return ["ADDRESS_CREATE_INUSE",     "Address already taken"];
+		case 0xDB: return ["ADDRESS_CREATE_ATLIMIT",   "Limit reached - unable to register additional addresses"];
+		case 0xDC: return ["ADDRESS_DELETE_SOMEFOUND", "Delete successful, but some addresses were not found"];
+		case 0xDD: return ["ADDRESS_DELETE_NONEFOUND", "No such address(es)"];
+		case 0xDE: return ["ADDRESS_UPDATE_SOMEFOUND", "Partial success - some addresses not found"];
+		case 0xDF: return ["ADDRESS_UPDATE_NONEFOUND", "No update performed - address(es) not found"];
 
 		// 0xE0-0xEF	Message/Create
 		case 0xE0: return ["MESSAGE_CREATE_EXT_MINLEVEL",        "Account level too low"];
