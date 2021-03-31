@@ -20,7 +20,7 @@
 
 The JavaScript library, *all-ears.js*, is made for web clients.
 
-The library loads data from four `<meta>` tags:
+The library loads data from five `<meta>` tags:
 * aem.domain.api (API domain; if blank, uses current domain)
 * aem.domain.eml (Email domain; if blank, uses current domain)
 * aem.pubkey.api (API public key, hex)
