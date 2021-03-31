@@ -93,8 +93,8 @@ echo "$html" | sed \
 -e "s~All-Ears Mail API PublicKey placeholder, replaced automatically.~$apiPubkey~" \
 -e "s~All-Ears Mail Sig PublicKey placeholder, replaced automatically.~$sigPubkey~" \
 -e "s~AEM Normal Addr Salt placeholder~$saltNormal~" \
--e "s~aeapidom=\"\"~aeapidom=\"$apidom\"~" \
 -e "s~AEM placeholder for email domain~$emldom~" \
+-e "s~name=\"aem.domain.api\" content=\"\"~name=\"aem.domain.api\" content=\"$apidom\"~" \
 > "$outname"
 
 chmod 1400 "$outname"
