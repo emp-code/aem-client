@@ -651,10 +651,7 @@ function displayMsg(isInt, num) {
 		else if (ae.GetIntMsgLevel(num) === 0) {symbol.title = "Level 0";  symbol.textContent = "🄌";}
 		else {symbol.title = "Invalid level"; symbol.textContent = "⚠";}
 
-		const elHdrFrom = document.getElementById("readmsg_hdrfrom");
-		elHdrFrom.replaceChildren();
-		elHdrFrom.appendChild(symbol);
-		elHdrFrom.appendChild(document.createTextNode(" " + ae.GetIntMsgFrom(num)));
+		document.getElementById("readmsg_hdrfrom").replaceChildren(symbol, document.createTextNode(" " + ae.GetIntMsgFrom(num)));
 
 		clearMsgFlags();
 		if (!ae.GetIntMsgFlagVPad(num)) addMsgFlag("PAD", "Invalid padding");
