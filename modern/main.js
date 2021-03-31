@@ -1268,7 +1268,6 @@ document.getElementById("btn_mdele").onclick = function() {
 			const tbl = document.getElementById(tbl_name);
 			for (let i = 0; i < tbl.rows.length; i++) {
 				if (tbl.rows[i].getAttribute("data-msgid") === delId) {
-					tbl.deleteRow(i);
 					if (tbl_name === "tbl_inbox") addMessages();
 					else if (tbl_name === "tbl_drbox") addSent();
 					else if (tbl_name === "tbl_uploads") addUploads();
