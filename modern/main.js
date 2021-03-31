@@ -128,11 +128,11 @@ function errorDialog(err) {
 	if (typeof(err) !== "number" || err < 1) return;
 
 	let btnDisable = [];
-	const btn = document.querySelectorAll("nav > button");
-	for (let i = 0; i < btn.length; i++) {
-		btnDisable.push(btn[i].disabled);
-		btn[i].disabled = true;
-	}
+	const buttons = document.querySelectorAll("nav > button");
+	buttons.forEach(function(btn, i) {
+		btnDisable.push(btn.disabled);
+		btn.disabled = true;
+	});
 
 	const errMsg = getErrorMessage(err);
 
@@ -143,10 +143,8 @@ function errorDialog(err) {
 	dlg.show();
 
 	document.querySelector("dialog > div").onclick = function() {
-		for (let i = 0; i < btn.length; i++) {
-			btn[i].disabled = btnDisable[i];
-			dlg.close();
-		}
+		buttons.forEach(function(btn, i) {btn.disabled = btnDisable[i];});
+		dlg.close();
 	};
 }
 
