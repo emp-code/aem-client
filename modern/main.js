@@ -1143,7 +1143,8 @@ function reloadAccount() {
 }
 
 function deleteAddress(addr) {
-	document.querySelectorAll("#tbl_addrs button").forEach(function(btn) {btn.disabled = true;});
+	const buttons = document.querySelectorAll("#tbl_addrs button");
+	buttons.forEach(function(btn) {btn.disabled = true;});
 
 	let addressToDelete = -1;
 	for (let i = 0; i < ae.GetAddressCount(); i++) {
@@ -1157,7 +1158,7 @@ function deleteAddress(addr) {
 
 	ae.Address_Delete(addressToDelete, function(error1) {
 		if (error1 !== 0) {
-			document.querySelectorAll("#tbl_addrs button").forEach(function(btn) {btn.disabled = false;});
+			buttons.forEach(function(btn) {btn.disabled = false;});
 			errorDialog(error1);
 			return;
 		}
@@ -1167,7 +1168,7 @@ function deleteAddress(addr) {
 		updateAddressCounts();
 
 		ae.Private_Update(function(error2) {
-			document.querySelectorAll("#tbl_addrs button").forEach(function(btn) {btn.disabled = false;});
+			buttons.forEach(function(btn) {btn.disabled = false;});
 			if (error2) errorDialog(error2);
 		});
 	});
