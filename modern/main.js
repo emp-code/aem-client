@@ -3,16 +3,17 @@
 sodium.ready.then(function() {
 
 const ae = new AllEars(function(ok) {
-	if (ok) {
-		if (localStorage.greeting) {
-			document.getElementById("greeting").textContent = localStorage.greeting;
-			document.getElementById("txt_pg").value = localStorage.greeting;
-		} else localStorage.greeting = document.getElementById("greeting").textContent;
-
-		document.getElementById("txt_skey").maxLength = "64";
-	} else {
-		console.log("Failed to load All-Ears");
+	if (!ok) {
+		document.getElementById("greeting").textContent = "Failed loading All-Ears";
+		return;
 	}
+
+	if (localStorage.greeting) {
+		document.getElementById("greeting").textContent = localStorage.greeting;
+		document.getElementById("txt_pg").value = localStorage.greeting;
+	} else localStorage.greeting = document.getElementById("greeting").textContent;
+
+	document.getElementById("txt_skey").maxLength = "64";
 });
 
 function TabState(cur, max, btnDele, btnUpdt) {
