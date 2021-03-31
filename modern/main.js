@@ -1181,29 +1181,35 @@ function deleteAddress(addr) {
 function addAddress(num) {
 	const addrTable = document.getElementById("tbl_addrs");
 	const row = addrTable.insertRow(-1);
-	const cellAddr = row.insertCell(-1);
-	const cellChk1 = row.insertCell(-1);
-	const cellChk2 = row.insertCell(-1);
-	const cellBtnD = row.insertCell(-1);
+	const addr = ae.GetAddress(num);
 
-	cellAddr.textContent = ae.GetAddress(num);
-	cellAddr.onclick = function() {
-		if (cellAddr.textContent.length === 16)
-			navigator.clipboard.writeText(shieldMix(cellAddr.textContent) + "@" + ae.GetDomainEml());
-		else
-			navigator.clipboard.writeText(cellAddr.textContent + "@" + ae.GetDomainEml());
-	};
+	let cell = row.insertCell(-1);
+	cell.textContent = addr;
+	cell.onclick = function() {navigator.clipboard.writeText(((this.textContent.length === 16) ? shieldMix(this.textContent) : this.textContent) + "@" + ae.GetDomainEml());};
 
-	cellChk1.innerHTML = ae.GetAddressAccExt(num) ? "<input type=\"checkbox\" checked=\"checked\">" : "<input type=\"checkbox\">";
-	cellChk2.innerHTML = ae.GetAddressAccInt(num) ? "<input type=\"checkbox\" checked=\"checked\">" : "<input type=\"checkbox\">";
+	cell = row.insertCell(-1);
+	let el = document.createElement("input");
+	el.type = "checkbox";
+	el.checked = ae.GetAddressAccExt(num);
+	cell.appendChild(el);
 
-	cellBtnD.innerHTML = "<button type=\"button\">X</button>";
-	cellBtnD.onclick = function() {deleteAddress(cellAddr.textContent);};
+	cell = row.insertCell(-1);
+	el = document.createElement("input");
+	el.type = "checkbox";
+	el.checked = ae.GetAddressAccInt(num);
+	cell.appendChild(el);
 
-	const opt = document.createElement("option");
-	opt.value = cellAddr.textContent;
-	opt.textContent = cellAddr.textContent + "@" + ae.GetDomainEml();
-	document.getElementById("write_from").appendChild(opt);
+	cell = row.insertCell(-1);
+	el = document.createElement("button");
+	el.type = "button";
+	el.textContent = "X";
+	el.onclick = function() {deleteAddress(addr);};
+	cell.appendChild(el);
+
+	el = document.createElement("option");
+	el.value = addr;
+	el.textContent = addr + "@" + ae.GetDomainEml();
+	document.getElementById("write_from").appendChild(el);
 }
 
 // Interface
