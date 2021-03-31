@@ -129,7 +129,7 @@ function errorDialog(err) {
 
 	let btnDisable = [];
 	const buttons = document.querySelectorAll("nav > button");
-	buttons.forEach(function(btn, i) {
+	buttons.forEach(function(btn) {
 		btnDisable.push(btn.disabled);
 		btn.disabled = true;
 	});
