@@ -716,7 +716,7 @@ function errorDialog(err) {
 			btn[i].disabled = btnDisable[i];
 			dlg.close();
 		}
-	}
+	};
 }
 
 function addMsg(isInt, i) {
