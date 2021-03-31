@@ -477,7 +477,7 @@ function clearDisplay() {
 }
 
 function clearMsgFlags() {
-	document.getElementById("readmsg_flags").children[0].innerHTML = "";
+	document.getElementById("readmsg_flags").children[0].replaceChildren();
 }
 
 function addMsgFlag(abbr, abbrTitle) {
@@ -652,7 +652,7 @@ function displayMsg(isInt, num) {
 		else {symbol.title = "Invalid level"; symbol.textContent = "⚠";}
 
 		const elHdrFrom = document.getElementById("readmsg_hdrfrom");
-		elHdrFrom.innerHTML = "";
+		elHdrFrom.replaceChildren();
 		elHdrFrom.appendChild(symbol);
 		elHdrFrom.appendChild(document.createTextNode(" " + ae.GetIntMsgFrom(num)));
 
@@ -661,7 +661,7 @@ function displayMsg(isInt, num) {
 		if (!ae.GetIntMsgFlagVSig(num)) addMsgFlag("SIG", "Invalid signature");
 		if ( ae.GetIntMsgFlagE2ee(num)) addMsgFlag("E2EE", "End-to-end encrypted");
 	} else {
-		document.querySelector("article").children[2].innerHTML = "";
+		document.querySelector("article").children[2].replaceChildren();
 
 		const headers = document.createElement("p");
 		headers.textContent = ae.GetExtMsgHeaders(num);
@@ -812,7 +812,7 @@ function displayOutMsg(num) {
 
 function addSent() {
 	const tbl = document.getElementById("tbl_drbox");
-	tbl.innerHTML = "";
+	tbl.replaceChildren();
 
 	for (let i = 0; i < ae.GetOutMsgCount(); i++) {
 		const row = tbl.insertRow(-1);
@@ -897,13 +897,13 @@ function addMsg(isInt, i) {
 
 function getRowsPerPage() {
 	const tbl = document.getElementById("tbl_inbox");
-	tbl.innerHTML = "";
+	tbl.replaceChildren();
 	const row = tbl.insertRow(-1);
 	const cell = row.insertCell(-1);
 	cell.textContent = "0";
 
 	const rowsPerPage = Math.floor(getComputedStyle(document.getElementById("div_inbox")).height.replace("px", "") / getComputedStyle(document.querySelector("#tbl_inbox > tbody > tr:first-child")).height.replace("px", "")) - 1; // -1 allows space for 'load more'
-	tbl.innerHTML = "";
+	tbl.replaceChildren();
 	return rowsPerPage;
 }
 
@@ -964,7 +964,7 @@ function addMessages() {
 
 function addUploads() {
 	const tbl = document.getElementById("tbd_uploads");
-	tbl.innerHTML = "";
+	tbl.replaceChildren();
 
 	for (let i = 0; i < ae.GetUplMsgCount(); i++) {
 		const row = tbl.insertRow(-1);
@@ -1280,7 +1280,7 @@ document.getElementById("btn_mdele").onclick = function() {
 
 function refreshContactList() {
 	const lst = document.getElementById("contact_emails");
-	lst.innerHTML = "";
+	lst.replaceChildren();
 
 	for (let i = 0; i < ae.GetContactCount(); i++) {
 		const el = document.createElement("option");
