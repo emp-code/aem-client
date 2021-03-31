@@ -1269,9 +1269,9 @@ document.getElementById("btn_mdele").onclick = function() {
 			for (let i = 0; i < tbl.rows.length; i++) {
 				if (tbl.rows[i].getAttribute("data-msgid") === delId) {
 					switch (tbl_name) {
-						case "tbl_inbox": addMessages();
-						case "tbl_drbox": addSent();
-						case "tbl_uploads": addUploads();
+						case "tbl_inbox": addMessages(); break;
+						case "tbl_drbox": addSent(); break;
+						case "tbl_uploads": addUploads(); break;
 					}
 
 					return;
