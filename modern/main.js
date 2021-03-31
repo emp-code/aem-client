@@ -1275,20 +1275,21 @@ document.getElementById("btn_mdele").onclick = function() {
 };
 
 function refreshContactList() {
-	const lst = document.getElementById("contact_emails");
-	lst.replaceChildren();
+	let opts = [];
 
 	for (let i = 0; i < ae.GetContactCount(); i++) {
 		const el = document.createElement("option");
 		el.value = ae.GetContactMail(i);
-		lst.appendChild(el);
+		opts.push(el);
 	}
 
 	if (ae.IsUserAdmin()) {
 		const el = document.createElement("option");
 		el.value = "public";
-		lst.appendChild(el);
+		opts.push(el);
 	}
+
+	document.getElementById("contact_emails").replaceChildren(...opts);
 }
 
 function addContact(mail, name, note) {
