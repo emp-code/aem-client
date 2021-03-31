@@ -821,6 +821,12 @@ function addSent() {
 	}
 }
 
+function updateAddressButtons() {
+	const limitReached = (ae.GetAddressCountNormal() + ae.GetAddressCountShield() >= 31);
+	document.getElementById("btn_address_create_normal").disabled = (limitReached || ae.GetAddressCountNormal() >= ae.GetLimitNormalA(ae.GetUserLevel()));
+	document.getElementById("btn_address_create_shield").disabled = (limitReached || ae.GetAddressCountShield() >= ae.GetLimitShieldA(ae.GetUserLevel()));
+}
+
 function updateAddressCounts() {
 	document.querySelector("#tbd_accs > tr > td:nth-child(3)").textContent = ae.GetAddressCountNormal();
 	document.querySelector("#tbd_accs > tr > td:nth-child(4)").textContent = ae.GetAddressCountShield();
@@ -829,9 +835,7 @@ function updateAddressCounts() {
 	document.getElementById("limit_shield").textContent = (ae.GetAddressCountShield() + "/" + ae.GetLimitShieldA(ae.GetUserLevel())).padStart(ae.GetLimitShieldA(ae.GetUserLevel()) > 9 ? 5 : 1);
 	document.getElementById("limit_total").textContent = ((ae.GetAddressCountNormal() + ae.GetAddressCountShield()) + "/" + ae.GetAddrPerUser()).padStart(5);
 
-	const limitReached = (ae.GetAddressCountNormal() + ae.GetAddressCountShield() >= 31);
-	document.getElementById("btn_address_create_normal").disabled = (limitReached || ae.GetAddressCountNormal() >= ae.GetLimitNormalA(ae.GetUserLevel()));
-	document.getElementById("btn_address_create_shield").disabled = (limitReached || ae.GetAddressCountShield() >= ae.GetLimitShieldA(ae.GetUserLevel()));
+	updateAddressButtons();
 }
 
 function adjustLevel(pubkey, level, c) {
@@ -1452,6 +1456,7 @@ function addressCreate(addr) {
 
 	ae.Address_Create(addr, function(error1) {
 		if (error1 !== 0) {
+			updateAddressButtons();
 			errorDialog(error1);
 			return;
 		}
