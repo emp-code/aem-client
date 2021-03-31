@@ -1264,20 +1264,11 @@ document.getElementById("btn_mdele").onclick = function() {
 			return;
 		}
 
-		["tbl_inbox", "tbl_drbox", "tbd_uploads"].forEach(function(tbl_name) {
-			const tbl = document.getElementById(tbl_name);
-			for (let i = 0; i < tbl.rows.length; i++) {
-				if (tbl.rows[i].getAttribute("data-msgid") === delId) {
-					switch (tbl_name) {
-						case "tbl_inbox": addMessages(); break;
-						case "tbl_drbox": addSent(); break;
-						case "tbl_uploads": addUploads(); break;
-					}
-
-					return;
-				}
-			}
-		});
+		switch (tab) {
+			case TAB_INBOX: addMessages(); break;
+			case TAB_DRBOX: addSent(); break;
+			case TAB_NOTES: addUploads(); break;
+		}
 	});
 };
 
