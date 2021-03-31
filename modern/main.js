@@ -507,17 +507,17 @@ function displayFile(num) {
 
 	document.getElementById("btn_msave").onclick = function() {downloadFile(num);};
 
-	document.querySelector("article").children[0].hidden = true;
-	document.querySelector("article").children[1].textContent = ae.GetUplMsgTitle(num);
+	document.querySelector("article > table").hidden = true;
+	document.querySelector("article > h1").textContent = ae.GetUplMsgTitle(num);
 
 	switch (fileType) {
 		case "text": {
-			document.querySelector("article").children[2].hidden = false;
-			document.querySelector("article").children[2].textContent = sodium.to_string(ae.GetUplMsgBody(num));
+			document.querySelector("article > pre").hidden = false;
+			document.querySelector("article > pre").textContent = sodium.to_string(ae.GetUplMsgBody(num));
 		break;}
 
 		case "image": {
-			document.querySelector("article").children[2].hidden = true;
+			document.querySelector("article > pre").hidden = true;
 			const img = document.createElement("img");
 			img.src = URL.createObjectURL(new Blob([ae.GetUplMsgBody(num).buffer]));
 			document.querySelector("article").appendChild(img);
@@ -532,7 +532,7 @@ function displayFile(num) {
 
 		case "audio":
 		case "video": {
-			document.querySelector("article").children[2].hidden = true;
+			document.querySelector("article > pre").hidden = true;
 			const el = document.createElement(fileType);
 			el.controls = "controls";
 			el.src = URL.createObjectURL(new Blob([ae.GetUplMsgBody(num).buffer]));
@@ -540,7 +540,7 @@ function displayFile(num) {
 		break;}
 
 		case "pdf": {
-			document.querySelector("article").children[2].hidden = true;
+			document.querySelector("article > pre").hidden = true;
 			const el = document.createElement("embed");
 			el.type = "application/pdf";
 			el.src = URL.createObjectURL(new Blob([ae.GetUplMsgBody(num).buffer], {type: "application/pdf"}));
@@ -548,7 +548,7 @@ function displayFile(num) {
 		break;}
 
 		case "html": {
-			document.querySelector("article").children[2].hidden = true;
+			document.querySelector("article > pre").hidden = true;
 			const el = document.createElement("iframe");
 			el.allow = "";
 			el.sandbox = "";
@@ -614,8 +614,8 @@ function displayMsg(isInt, num) {
 		document.getElementById("btn_reply").disabled = true;
 	}
 
-	document.querySelector("article").children[0].hidden = false;
-	document.querySelector("article").children[2].hidden = false;
+	document.querySelector("article > table").hidden = false;
+	document.querySelector("article > pre").hidden = false;
 
 	document.getElementById("readmsg_envto").textContent = isInt ? "" : ae.GetExtMsgEnvTo(num);
 	document.getElementById("readmsg_hdrto").textContent = isInt ? ae.GetIntMsgTo(num) : (ae.GetExtMsgHdrTo(num) + (ae.GetExtMsgDnTo(num) ? " (" + ae.GetExtMsgDnTo(num) + ")" : ""));
@@ -626,8 +626,8 @@ function displayMsg(isInt, num) {
 	document.getElementById("readmsg_date").children[1].dateTime = new Date(ts * 1000).toISOString();
 
 	if (isInt) {
-		document.querySelector("article").children[1].textContent = ae.GetIntMsgTitle(num);
-		document.querySelector("article").children[2].textContent = ae.GetIntMsgBody(num);
+		document.querySelector("article > h1").textContent = ae.GetIntMsgTitle(num);
+		document.querySelector("article > pre").textContent = ae.GetIntMsgBody(num);
 
 		document.getElementById("readmsg_date").children[1].textContent = msgDate.toISOString().slice(0, 19).replace("T", " ");
 
@@ -765,11 +765,11 @@ function displayOutMsg(num) {
 	document.getElementById("btn_msave").disabled = true;
 	document.getElementById("btn_reply").disabled = true;
 
-	document.querySelector("article").children[0].hidden = false;
-	document.querySelector("article").children[2].hidden = false;
+	document.querySelector("article > table").hidden = false;
+	document.querySelector("article > pre").hidden = false;
 
-	document.querySelector("article").children[1].textContent = ae.GetOutMsgSubj(num);
-	document.querySelector("article").children[2].textContent = ae.GetOutMsgBody(num);
+	document.querySelector("article > h1").textContent = ae.GetOutMsgSubj(num);
+	document.querySelector("article > pre").textContent = ae.GetOutMsgBody(num);
 
 	document.getElementById("readmsg_dkim").style.visibility    = "hidden";
 	document.getElementById("readmsg_hdrto").style.visibility   = "visible";
