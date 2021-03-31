@@ -1158,25 +1158,26 @@ function deleteAddress(addr) {
 	if (addressToDelete === -1) return;
 
 	ae.Address_Delete(addressToDelete, function(error1) {
-		if (error1 === 0) {
-			document.getElementById("tbl_addrs").deleteRow(addressToDelete);
-			document.getElementById("write_from").remove(addressToDelete);
-			updateAddressCounts();
-
-			const limitReached = (ae.GetAddressCountNormal() + ae.GetAddressCountShield() >= 31);
-			document.getElementById("btn_address_create_normal").disabled = (limitReached || ae.GetAddressCountNormal() > ae.GetLimitNormalA(ae.GetUserLevel()));
-			document.getElementById("btn_address_create_shield").disabled = (limitReached || ae.GetAddressCountShield() > ae.GetLimitShieldA(ae.GetUserLevel()));
-
-			ae.Private_Update(function(error2) {
-				btns = document.querySelectorAll("#tbl_addrs button");
-				for (let i = 0; i < btns.length; i++) btns[i].disabled = false;
-				if (error2) errorDialog(error2);
-			});
-		} else {
+		if (error1 !== 0) {
 			btns = document.querySelectorAll("#tbl_addrs button");
 			for (let i = 0; i < btns.length; i++) btns[i].disabled = false;
 			errorDialog(error1);
+			return;
 		}
+
+		document.getElementById("tbl_addrs").deleteRow(addressToDelete);
+		document.getElementById("write_from").remove(addressToDelete);
+		updateAddressCounts();
+
+		const limitReached = (ae.GetAddressCountNormal() + ae.GetAddressCountShield() >= 31);
+		document.getElementById("btn_address_create_normal").disabled = (limitReached || ae.GetAddressCountNormal() > ae.GetLimitNormalA(ae.GetUserLevel()));
+		document.getElementById("btn_address_create_shield").disabled = (limitReached || ae.GetAddressCountShield() > ae.GetLimitShieldA(ae.GetUserLevel()));
+
+		ae.Private_Update(function(error2) {
+			btns = document.querySelectorAll("#tbl_addrs button");
+			for (let i = 0; i < btns.length; i++) btns[i].disabled = false;
+			if (error2) errorDialog(error2);
+		});
 	});
 }
 
