@@ -1159,8 +1159,7 @@ function deleteAddress(addr) {
 
 	ae.Address_Delete(addressToDelete, function(error1) {
 		if (error1 !== 0) {
-			btns = document.querySelectorAll("#tbl_addrs button");
-			for (let i = 0; i < btns.length; i++) btns[i].disabled = false;
+			document.querySelectorAll("#tbl_addrs button").forEach(function(btn) {btn.disabled = false;});
 			errorDialog(error1);
 			return;
 		}
@@ -1174,8 +1173,7 @@ function deleteAddress(addr) {
 		document.getElementById("btn_address_create_shield").disabled = (limitReached || ae.GetAddressCountShield() > ae.GetLimitShieldA(ae.GetUserLevel()));
 
 		ae.Private_Update(function(error2) {
-			btns = document.querySelectorAll("#tbl_addrs button");
-			for (let i = 0; i < btns.length; i++) btns[i].disabled = false;
+			document.querySelectorAll("#tbl_addrs button").forEach(function(btn) {btn.disabled = false;});
 			if (error2) errorDialog(error2);
 		});
 	});
