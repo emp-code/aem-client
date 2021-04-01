@@ -569,7 +569,7 @@ function displayMsg(isInt, num) {
 
 			const a = document.createElement("a");
 			a.href = URL.createObjectURL(new Blob([ae.ExportExtMsg(num)]));
-			a.download = ae.GetExtMsgTitle(num);
+			a.download = ae.GetExtMsgTitle(num) + ".eml";
 			a.click();
 
 			URL.revokeObjectURL(a.href);
