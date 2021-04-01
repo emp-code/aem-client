@@ -1579,16 +1579,17 @@ document.querySelector("#write2_send > button").onclick = function() {
 	// Public announcement
 	if (document.getElementById("write2_recv").textContent === "public") {
 		ae.Message_Public(document.getElementById("write_subj").value, document.getElementById("write_body").value, function(error) {
-			if (error === 0) {
-				document.getElementById("write2_btntxt").textContent = "Announced to";
-				document.getElementById("write_recv").value = "";
-				document.getElementById("write_subj").value = "";
-				document.getElementById("write_body").value = "";
-			} else {
-				// TODO display error
+			if (error !== 0) {
 				document.getElementById("write2_btntxt").textContent = "Retry making";
 				btn.disabled = false;
+				errorDialog(error);
+				return;
 			}
+
+			document.getElementById("write2_btntxt").textContent = "Announced to";
+			document.getElementById("write_recv").value = "";
+			document.getElementById("write_subj").value = "";
+			document.getElementById("write_body").value = "";
 		});
 
 		return;
