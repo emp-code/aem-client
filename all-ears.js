@@ -91,11 +91,6 @@ function AllEars(readyCallback) {
 	const _uplMsg = [];
 	const _outMsg = [];
 
-	let _newestMsgId = new Uint8Array(16);
-	let _oldestMsgId = new Uint8Array(16);
-	let _newestMsgTs = -1;
-	let _oldestMsgTs = Math.pow(2, 32);
-
 	let _totalMsgCount = 0;
 	let _totalMsgBytes = 0;
 	let _readyMsgBytes = 0;
@@ -386,6 +381,34 @@ function AllEars(readyCallback) {
 
 		return false;
 	};
+
+	const _GetNewestMsgId = function() {
+		let ts = (_extMsg.length === 0) ? 0 : _extMsg[0].ts; let result = 0;
+		if (_intMsg.length !== 0 && _intMsg[0].ts > ts) {ts = _intMsg[0].ts; result = 1;}
+		if (_uplMsg.length !== 0 && _uplMsg[0].ts > ts) {ts = _uplMsg[0].ts; result = 2;}
+		if (_outMsg.length !== 0 && _outMsg[0].ts > ts) {ts = _outMsg[0].ts; result = 3;}
+
+		switch (result) {
+			case 0: return _extMsg[0].id;
+			case 1: return _intMsg[0].id;
+			case 2: return _uplMsg[0].id;
+			case 3: return _outMsg[0].id;
+		}
+	}
+
+	const _GetOldestMsgId = function() {
+		let ts = (_extMsg.length === 0) ? 0 : _extMsg[_extMsg.length - 1].ts; let result = 0;
+		if (_intMsg.length !== 0 && _intMsg[_intMsg.length - 1].ts < ts) {ts = _intMsg[_intMsg.length - 1].ts; result = 1;}
+		if (_uplMsg.length !== 0 && _uplMsg[_uplMsg.length - 1].ts < ts) {ts = _uplMsg[_uplMsg.length - 1].ts; result = 2;}
+		if (_outMsg.length !== 0 && _outMsg[_outMsg.length - 1].ts < ts) {ts = _outMsg[_outMsg.length - 1].ts; result = 3;}
+
+		switch (result) {
+			case 0: return _extMsg[_extMsg.length - 1].id;
+			case 1: return _intMsg[_intMsg.length - 1].id;
+			case 2: return _uplMsg[_uplMsg.length - 1].id;
+			case 3: return _outMsg[_outMsg.length - 1].id;
+		}
+	}
 
 	const _GetFileType = function(filename) {
 		if (!filename) return null;
@@ -722,11 +745,6 @@ function AllEars(readyCallback) {
 		_totalMsgCount = 0;
 		_totalMsgBytes = 0;
 		_readyMsgBytes = 0;
-
-		_newestMsgId.fill(0);
-		_oldestMsgId.fill(0);
-		_newestMsgTs = -1;
-		_oldestMsgTs = Math.pow(2, 32);
 	};
 
 	this.GetDomainApi = function() {return _AEM_DOMAIN_API;};
@@ -1170,12 +1188,12 @@ function AllEars(readyCallback) {
 		if (typeof(newest) !== "boolean" || typeof(u_info) !== "boolean") {callback(0x01); return;}
 
 		let fetchId;
-		if (_newestMsgTs !== -1) {
+		if (_totalMsgCount !== 0) {
 			fetchId = new Uint8Array(17);
 			fetchId[0] = 0;
 			if (newest) fetchId[0] |= _AEM_FLAG_NEWER;
 			if (u_info) fetchId[0] |= _AEM_FLAG_UINFO;
-			fetchId.set(newest? _newestMsgId : _oldestMsgId, 1);
+			fetchId.set(newest? _GetNewestMsgId() : _GetOldestMsgId(), 1);
 		} else fetchId = new Uint8Array([u_info? _AEM_FLAG_UINFO : 0]);
 
 		_FetchEncrypted(_AEM_API_MESSAGE_BROWSE, fetchId, function(fetchErr, browseData) {
@@ -1226,16 +1244,6 @@ function AllEars(readyCallback) {
 
 				const msgTs = new Uint32Array(msgData.slice(1, 5).buffer)[0];
 				const msgTs_bin = msgData.slice(1, 5);
-
-				if (msgTs > _newestMsgTs) {
-					for (let i = 0; i < 16; i++) _newestMsgId[i] = msgId[i];
-					_newestMsgTs = msgTs;
-				}
-
-				if (msgTs < _oldestMsgTs) {
-					for (let i = 0; i < 16; i++) _oldestMsgId[i] = msgId[i];
-					_oldestMsgTs = msgTs;
-				}
 
 				msgData = msgData.slice(5, msgData.length - padAmount - sodium.crypto_sign_BYTES);
 
