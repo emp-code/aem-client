@@ -546,6 +546,15 @@ function displayFile(num) {
 			el.srcdoc = sodium.to_string(ae.GetUplMsgBody(num).buffer);
 		break;}
 
+		case "svg": {
+			el = document.createElement("iframe");
+			el.allow = "";
+			el.sandbox = "";
+			el.referrerPolicy = "no-referrer";
+			el.csp = "style-src 'unsafe-inline'; base-uri 'none'; child-src 'none'; connect-src 'none'; default-src 'none'; font-src 'none'; form-action 'none'; frame-ancestors 'none'; frame-src 'none'; img-src 'none'; manifest-src 'none'; media-src 'none'; object-src 'none'; script-src 'none'; worker-src 'none';";
+			el.srcdoc = "<!doctype><html><head><style>body,html,svg {margin: 0; padding: 0; border: 0; height: 100%; width: 100%; display: block; background: #080a08;}</style></head><body>" + sodium.to_string(ae.GetUplMsgBody(num).buffer) + "</body></html>";
+		break;}
+
 		default: return;
 	}
 

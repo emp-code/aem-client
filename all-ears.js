@@ -488,6 +488,9 @@ function AllEars(readyCallback) {
 			case "html":
 			case "htm":
 				return "html";
+
+			case "svg":
+				return "svg";
 		}
 
 		return null;
