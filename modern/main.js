@@ -543,17 +543,21 @@ function displayFile(num) {
 			el.sandbox = "";
 			el.referrerPolicy = "no-referrer";
 
-			el.srcdoc =
-				"<html><head><style>html,body {margin: 0; padding: 0;} body {background: #080a08; color: #fff; opacity:0.55} body > *:first-child {margin-top: 0; padding-top: 0;} a {color: #fff;} button, input, select, textarea {background: #000; color: #fff;}</style></head>"
-				+ sodium.to_string(ae.GetUplMsgBody(num).buffer)
-					.replace(/.*<body/s, "<body")
-					.replaceAll(/<head.*\/head>/gs, "")
-					.replaceAll("<head", "<ignore")
-					.replaceAll(/<style.*\/style>/gs, "")
-					.replaceAll("<style", "<ignore")
-					.replaceAll(/style=".[^"]*"/gs, "")
-					.replaceAll(/style='.[^']*'/gs, "")
-					.replaceAll(/style=[^ >]*/gs, "");
+			try {
+				el.srcdoc =
+					"<html><head><style>body {background: #080a08; color: #fff; opacity:0.55;} body > *:first-child {margin-top: 0; padding-top: 0;} a {color: #fff;} button, input, select, textarea {background: #000; color: #fff;}</style></head>"
+					+ sodium.to_string(ae.GetUplMsgBody(num).buffer)
+						.replace(/.*<body/s, "<body")
+						.replaceAll(/<head.*\/head>/gs, "")
+						.replaceAll("<head", "<ignore")
+						.replaceAll(/<style.*\/style>/gs, "")
+						.replaceAll("<style", "<ignore")
+						.replaceAll(/style=".[^"]*"/gs, "")
+						.replaceAll(/style='.[^']*'/gs, "")
+						.replaceAll(/style=[^ >]*/gs, "");
+			} catch(e) {
+				el.srcdoc = "<!doctype html><html><head><style>body {background: #080a08; color: #fff; opacity:0.55;} h1 {margin: 0;}</style><body><h1>Error</h1><p>" + e.message + "</p></body></html>"
+			}
 		break;}
 
 		case "svg": {
