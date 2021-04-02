@@ -73,10 +73,6 @@ button::-moz-focus-inner {
 	border: 0;
 }
 
-noscript {
-	color: #fff;
-}
-
 /* -- Entry Screen -- */
 #div_begin {
 	text-align: center;
