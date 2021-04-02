@@ -1438,7 +1438,7 @@ document.getElementById("btn_rght").onclick = function() {
 	this.blur();
 };
 
-const buttons = document.querySelectorAll("#main1 > .top > button");
+const buttons = document.querySelectorAll("#main1 > nav:first-of-type > button");
 for (let i = 0; i < buttons.length; i++) {
 	buttons[i].onclick = function() {
 		tab = i;
