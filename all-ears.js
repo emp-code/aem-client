@@ -1391,17 +1391,15 @@ function AllEars(readyCallback) {
 							} else {
 								msgBin = msgBox;
 							}
+
+							msgTitle = sodium.to_string(msgBin.slice(0, msgTitleLen));
+							msgBody = sodium.to_string(msgBin.slice(msgTitleLen));
 						} catch(e) {
 							msgTitle = "(error)";
-							msgBody = e;
-						} finally {
-							if (msgBin) {
-								msgTitle = sodium.to_string(msgBin.slice(0, msgTitleLen));
-								msgBody = sodium.to_string(msgBin.slice(msgTitleLen));
-							}
-
-							_intMsg.push(new _NewIntMsg(validPad, validSig, msgId, msgTs, msgEncrypted, msgFromLv, msgFromPk, msgFrom, msgTo, msgTitle, msgBody));
+							msgBody = e.message;
 						}
+
+						_intMsg.push(new _NewIntMsg(validPad, validSig, msgId, msgTs, msgEncrypted, msgFromLv, msgFromPk, msgFrom, msgTo, msgTitle, msgBody));
 					break;}
 
 					case 32: { // UplMsg (Email attachment, or uploaded file)
