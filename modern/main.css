@@ -214,15 +214,11 @@ article {
 	flex-direction: column;
 }
 
-article > iframe {
-	background: #080a08;
-	border: 0;
-}
-
 article > img, article > video, article > embed, article > iframe {
 	flex-grow: 1;
 	object-fit: contain;
 	height: 1px;
+	border: 0;
 }
 
 article > audio {
