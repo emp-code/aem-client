@@ -125,11 +125,11 @@ noscript {
 	transition: background-color 0.5s ease-out;
 }
 
-#txt_skey:disabled {
+#txt_skey:disabled, #txt_skey[maxlength="0"] {
 	background-color: #233;
 }
 
-#txt_skey:not(disabled) {
+#txt_skey:not(:disabled)[maxlength="64"] {
 	background-color: #466;
 }
 
