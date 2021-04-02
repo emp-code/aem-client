@@ -651,13 +651,20 @@ function AllEars(readyCallback) {
 
 		// Private field
 		const privNonce = browseData.slice(offset, offset + sodium.crypto_secretbox_NONCEBYTES);
-		let privData;
+		const privData_enc = browseData.slice(offset + sodium.crypto_secretbox_NONCEBYTES, offset + _AEM_LEN_PRIVATE);
 
-		try {privData = sodium.crypto_secretbox_open_easy(browseData.slice(offset + sodium.crypto_secretbox_NONCEBYTES, offset + _AEM_LEN_PRIVATE), privNonce, _userKeySymmetric);}
-		catch(e) {
-			console.log("Private data field decryption failed:" + e);
-			return offset + _AEM_LEN_PRIVATE;
-		}
+		let privData = "0";
+		privData_enc.forEach(function(n) {
+			if (n !== 0) {
+				privData = null;
+				return;
+			}
+		});
+
+		if (privData === "0") return offset + _AEM_LEN_PRIVATE; // All zeroes = newly created, no data
+
+		try {privData = sodium.crypto_secretbox_open_easy(privData_enc, privNonce, _userKeySymmetric);}
+		catch(e) {return -(offset + _AEM_LEN_PRIVATE);}
 
 		offset += _AEM_LEN_PRIVATE;
 
@@ -1199,13 +1206,15 @@ function AllEars(readyCallback) {
 			fetchId.set(newest? _GetNewestMsgId() : _GetOldestMsgId(), 1);
 		} else fetchId = new Uint8Array([u_info? _AEM_FLAG_UINFO : 0]);
 
+		let privateFail = false;
 		_FetchEncrypted(_AEM_API_MESSAGE_BROWSE, fetchId, function(fetchErr, browseData) {
 			if (fetchErr) {callback(fetchErr); return;}
 
 			if (u_info) {
 				if (browseData.length < 1000) {callback(0x07); return;}
 				const uinfo_bytes = _ParseUinfo(browseData);
-				browseData = browseData.slice(uinfo_bytes);
+				browseData = browseData.slice(Math.abs(uinfo_bytes));
+				if (uinfo_bytes < 0) privateFail = true;
 			}
 
 			if (browseData.length <= 6) {callback(0); return;} // No messages or error getting messages
@@ -1489,7 +1498,7 @@ function AllEars(readyCallback) {
 			_uplMsg.sort((a, b) => (a.ts < b.ts) ? 1 : -1);
 			_outMsg.sort((a, b) => (a.ts < b.ts) ? 1 : -1);
 
-			callback(0);
+			callback(privateFail? 0x09 : 0);
 		});
 	};
 

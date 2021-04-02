@@ -52,6 +52,7 @@ function getErrorMessage(err) {
 		case 0x06: return "Invalid response length";
 		case 0x07: return "Server responded with invalid data";
 		case 0x08: return "Addr32 encoding failed";
+		case 0x09: return "Private data field corrupted";
 
 		case 0x10: return "Message too short";
 		case 0x11: return "Name too long";
@@ -556,7 +557,7 @@ function displayFile(num) {
 						.replaceAll(/style='.[^']*'/gs, "")
 						.replaceAll(/style=[^ >]*/gs, "");
 			} catch(e) {
-				el.srcdoc = "<!doctype html><html><head><style>body {background: #080a08; color: #fff; opacity:0.55;} h1 {margin: 0;}</style><body><h1>Error</h1><p>" + e.message + "</p></body></html>"
+				el.srcdoc = "<!doctype html><html><head><style>body {background: #080a08; color: #fff; opacity:0.55;} h1 {margin: 0;}</style><body><h1>Error</h1><p>" + e.message + "</p></body></html>";
 			}
 		break;}
 
@@ -1686,7 +1687,7 @@ document.getElementById("btn_enter").onclick = function() {
 		ae.Message_Browse(false, true, function(statusBrowse) {
 			document.body.style.cursor = "";
 
-			if (statusBrowse !== 0) {
+			if (statusBrowse !== 0 && statusBrowse !== 0x09) {
 				document.getElementById("greeting").textContent = getErrorMessage(statusBrowse) + " (0x" + statusBrowse.toString(16).padStart(2, "0").toUpperCase() + ")";
 				document.getElementById("txt_skey").disabled = false;
 				btn.disabled = false;
@@ -1699,6 +1700,7 @@ document.getElementById("btn_enter").onclick = function() {
 			document.getElementById("div_main").hidden = false;
 			reloadAccount();
 
+			if (statusBrowse !== 0) errorDialog(statusBrowse);
 			if (!ae.IsUserAdmin()) return;
 
 			ae.Account_Browse(function(statusAcc) {
