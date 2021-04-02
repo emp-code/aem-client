@@ -543,21 +543,17 @@ function displayFile(num) {
 			el.sandbox = "";
 			el.referrerPolicy = "no-referrer";
 
-			const randName = Math.random().toString(36).substr(2, 6).padStart(6, "0");
-			const randRegex = new RegExp(randName, "g");
-
-			el.srcdoc = sodium.to_string(ae.GetUplMsgBody(num).buffer)
-				// Remove inline styles
-				.replaceAll(/<style.*\/style>/gs, "")
-				.replaceAll(/style=".[^"]*"/gs, "")
-				.replaceAll(/style='.[^']*'/gs, "")
-				.replaceAll(/style=[^ >]*/gs, "")
-
-				// Replace all head tags with ours
-				.replaceAll(randRegex, "")
-				.replace(/<head.*<\/head>/s, "<" + randName + "><style>html,body {margin: 0; padding: 0;} body {background: #080a08; color: #fff; opacity:0.55} body > *:first-child {margin-top: 0; padding-top: 0;} a, button, input, select, textarea {color: #fff;} button, input, select, textarea {background: #000;}</style></" + randName + ">")
-				.replaceAll(/<head.*\/head>/gs, "")
-				.replace(randRegex, "head");
+			el.srcdoc =
+				"<html><head><style>html,body {margin: 0; padding: 0;} body {background: #080a08; color: #fff; opacity:0.55} body > *:first-child {margin-top: 0; padding-top: 0;} a, button, input, select, textarea {color: #fff;} button, input, select, textarea {background: #000;}</style></head>"
+				+ sodium.to_string(ae.GetUplMsgBody(num).buffer)
+					.replaceAll(/<head.*\/head>/gs, "")
+					.replaceAll("<head", "<ignore")
+					.replaceAll(/<style.*\/style>/gs, "")
+					.replaceAll("<style", "<ignore")
+					.replaceAll(/style=".[^"]*"/gs, "")
+					.replaceAll(/style='.[^']*'/gs, "")
+					.replaceAll(/style=[^ >]*/gs, "")
+					.replace(/.*<body/s, "<body");
 		break;}
 
 		case "svg": {
