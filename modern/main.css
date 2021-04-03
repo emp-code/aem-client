@@ -283,6 +283,7 @@ nav > button:enabled:focus {
 	transition: color 0.2s ease-out;
 }
 
+.mid,
 .mid a,
 .mid input,
 .mid select,
