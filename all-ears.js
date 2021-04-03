@@ -383,10 +383,12 @@ function AllEars(readyCallback) {
 	};
 
 	const _GetNewestMsgId = function() {
-		let ts = (_extMsg.length === 0) ? 0 : _extMsg[0].ts; let result = 0;
-		if (_intMsg.length !== 0 && _intMsg[0].ts > ts) {ts = _intMsg[0].ts; result = 1;}
-		if (_uplMsg.length !== 0 && _uplMsg[0].ts > ts) {ts = _uplMsg[0].ts; result = 2;}
-		if (_outMsg.length !== 0 && _outMsg[0].ts > ts) {ts = _outMsg[0].ts; result = 3;}
+		let ts = (_extMsg.length === 0) ? 0 : _extMsg[0].ts;
+		let result = 0;
+
+		if (_intMsg.length !== 0 && _intMsg[0].ts > ts) {result = 1; ts = _intMsg[0].ts;}
+		if (_uplMsg.length !== 0 && _uplMsg[0].ts > ts) {result = 2; ts = _uplMsg[0].ts;}
+		if (_outMsg.length !== 0 && _outMsg[0].ts > ts) {result = 3;}
 
 		switch (result) {
 			case 0: return _extMsg[0].id;
@@ -397,10 +399,12 @@ function AllEars(readyCallback) {
 	};
 
 	const _GetOldestMsgId = function() {
-		let ts = (_extMsg.length === 0) ? 0 : _extMsg[_extMsg.length - 1].ts; let result = 0;
-		if (_intMsg.length !== 0 && _intMsg[_intMsg.length - 1].ts < ts) {ts = _intMsg[_intMsg.length - 1].ts; result = 1;}
-		if (_uplMsg.length !== 0 && _uplMsg[_uplMsg.length - 1].ts < ts) {ts = _uplMsg[_uplMsg.length - 1].ts; result = 2;}
-		if (_outMsg.length !== 0 && _outMsg[_outMsg.length - 1].ts < ts) {ts = _outMsg[_outMsg.length - 1].ts; result = 3;}
+		let ts = (_extMsg.length === 0) ? 0 : _extMsg[_extMsg.length - 1].ts;
+		let result = 0;
+
+		if (_intMsg.length !== 0 && _intMsg[_intMsg.length - 1].ts < ts) {result = 1; ts = _intMsg[_intMsg.length - 1].ts;}
+		if (_uplMsg.length !== 0 && _uplMsg[_uplMsg.length - 1].ts < ts) {result = 2; ts = _uplMsg[_uplMsg.length - 1].ts;}
+		if (_outMsg.length !== 0 && _outMsg[_outMsg.length - 1].ts < ts) {result = 3;}
 
 		switch (result) {
 			case 0: return _extMsg[_extMsg.length - 1].id;
