@@ -399,7 +399,7 @@ function AllEars(readyCallback) {
 	};
 
 	const _GetOldestMsgId = function() {
-		let ts = (_extMsg.length === 0) ? 0 : _extMsg[_extMsg.length - 1].ts;
+		let ts = (_extMsg.length === 0) ? 4294967296 : _extMsg[_extMsg.length - 1].ts;
 		let result = 0;
 
 		if (_intMsg.length !== 0 && _intMsg[_intMsg.length - 1].ts < ts) {result = 1; ts = _intMsg[_intMsg.length - 1].ts;}
