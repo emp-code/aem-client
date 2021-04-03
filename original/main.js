@@ -29,10 +29,6 @@ function navMenu(num) {
 	}
 }
 
-function getCountryName(countryCode) {
-	return "Unknown countrycode: " + countryCode;
-}
-
 function getCountryFlag(countryCode) {
 	return sodium.to_string(new Uint8Array([
 		240, 159, 135, 166 + countryCode.codePointAt(0) - 65,
