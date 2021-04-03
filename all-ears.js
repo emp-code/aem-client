@@ -394,7 +394,7 @@ function AllEars(readyCallback) {
 			case 2: return _uplMsg[0].id;
 			case 3: return _outMsg[0].id;
 		}
-	}
+	};
 
 	const _GetOldestMsgId = function() {
 		let ts = (_extMsg.length === 0) ? 0 : _extMsg[_extMsg.length - 1].ts; let result = 0;
@@ -408,7 +408,7 @@ function AllEars(readyCallback) {
 			case 2: return _uplMsg[_uplMsg.length - 1].id;
 			case 3: return _outMsg[_outMsg.length - 1].id;
 		}
-	}
+	};
 
 	const _GetFileType = function(filename) {
 		if (!filename) return null;

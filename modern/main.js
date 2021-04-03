@@ -1496,7 +1496,7 @@ document.getElementById("txt_address_create_normal").onkeyup = function() {
 		event.preventDefault();
 		document.getElementById("btn_address_create_normal").click();
 	}
-}
+};
 
 document.getElementById("btn_address_create_shield").onclick = function() {
 	if (ae.GetAddressCountShield() >= ae.GetLimitShieldA(ae.GetUserLevel()) || ae.GetAddressCountNormal() + ae.GetAddressCountShield() >= 31) return;
