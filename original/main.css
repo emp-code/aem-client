@@ -105,12 +105,18 @@ textarea {
 }
 
 @media (prefers-color-scheme: dark) {
-	body, input, textarea, select, button, a {
+	body,
+	input,
+	textarea,
+	select,
+	button,
+	a {
 		background: #090909;
 		color: #ddd;
 	}
 
-	#list_inbox > div, #list_sent > div {
+	#list_inbox > div,
+	#list_sent > div {
 		border-bottom: 1px solid #333;
 	}
 }
