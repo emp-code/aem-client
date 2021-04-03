@@ -335,7 +335,7 @@ function deleteAddress(addr) {
 		if (ae.GetAddressCountShield() < ae.GetLimitShieldA(ae.GetUserLevel())) document.getElementById("btn_newshieldaddress").disabled = false;
 
 		ae.Private_Update(function(error2) {
-			if (!error2 !== 0) console.log("Failed to update the Private field");
+			if (error2 !== 0) console.log("Failed to update the Private field");
 
 			btns = document.getElementById("tbody_opt_addr").getElementsByTagName("button");
 			for (let i = 0; i < btns.length; i++) btns[i].disabled = false;
