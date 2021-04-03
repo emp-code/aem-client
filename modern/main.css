@@ -515,8 +515,13 @@ nav > button:enabled:focus {
 	text-rendering: optimizeLegibility;
 }
 
+#main2 article > pre > p:first-child {
+	margin-top: 0;
+}
+
 #main2 article > pre > p:nth-child(2) {
-	margin: 0;
+	margin-top: 0;
+	margin-bottom: 0.5em;
 }
 
 #main2 article > img,
