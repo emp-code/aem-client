@@ -1972,5 +1972,89 @@ function AllEars(readyCallback) {
 		_FetchEncrypted(_AEM_API_PRIVATE_UPDATE, final, function(fetchErr) {callback(fetchErr);});
 	};
 
+	this.GetErrorMessage = function(err) {
+		switch (err) {
+			// 0x01-0x20	Client-side error codes
+			case 0x01: return "Invalid input";
+			case 0x02: return "Only administrators can perform this action";
+			case 0x03: return "Failed connecting to server";
+			case 0x04: return "Invalid input to _FetchEncrypted";
+			case 0x05: return "Failed decrypting response from server";
+			case 0x06: return "Invalid response length";
+			case 0x07: return "Server responded with invalid data";
+			case 0x08: return "Addr32 encoding failed";
+			case 0x09: return "Private data field corrupted";
+
+			case 0x10: return "Message too short";
+			case 0x11: return "Name too long";
+			case 0x12: return "File too large";
+
+			case 0x17: return "Server failed decrypting the request"; // 400
+			case 0x18: return "Account does not exist"; // 403
+			case 0x19: return "Server failed checking account data"; // 500
+			case 0x20: return "Invalid status code in response";
+
+			// 0x21-0x2F	Generic
+			case 0x21: return ["FORMAT",    "Invalid format"];
+			case 0x22: return ["ADMINONLY", "Only administrators can perform this action"];
+			case 0x23: return ["MISC",      "Unknown error"];
+			case 0x24: return ["INTERNAL",  "Internal server error"];
+			case 0x25: return ["TODO",      "Functionality missing - in development"];
+			case 0x26: return ["FIXME",     "Unexpected error encountered"];
+			case 0x2A: return ["NOTEXIST",  "Item does not exist"];
+
+			// 0x30-0x3F	Misc
+			case 0x30: return ["ACCOUNT_DELETE_NOSTORAGE", "Account data was deleted, but deleting message data failed due to an internal error."];
+
+			// 0xDA-0xDF	Address/Create|Delete|Update
+			case 0xDA: return ["ADDRESS_CREATE_INUSE",     "Address already taken"];
+			case 0xDB: return ["ADDRESS_CREATE_ATLIMIT",   "Limit reached - unable to register additional addresses"];
+			case 0xDC: return ["ADDRESS_DELETE_SOMEFOUND", "Delete successful, but some addresses were not found"];
+			case 0xDD: return ["ADDRESS_DELETE_NONEFOUND", "No such address(es)"];
+			case 0xDE: return ["ADDRESS_UPDATE_SOMEFOUND", "Partial success - some addresses not found"];
+			case 0xDF: return ["ADDRESS_UPDATE_NONEFOUND", "No update performed - address(es) not found"];
+
+			// 0xE0-0xEF	Message/Create
+			case 0xE0: return ["MESSAGE_CREATE_EXT_MINLEVEL",        "Account level too low"];
+			case 0xE1: return ["MESSAGE_CREATE_EXT_FORMAT_FROM",     "Malformed from-address"];
+			case 0xE2: return ["MESSAGE_CREATE_EXT_FORMAT_TO",       "Malformed to-address"];
+			case 0xE3: return ["MESSAGE_CREATE_EXT_FORMAT_REPLYID",  "Malformed reply-id"];
+			case 0xE4: return ["MESSAGE_CREATE_EXT_FORMAT_SUBJECT",  "Malformed subject"];
+			case 0xE5: return ["MESSAGE_CREATE_EXT_INVALID_REPLYID", "Invalid reply-id"];
+			case 0xE6: return ["MESSAGE_CREATE_EXT_INVALID_FROM",    "Invalid from-address"];
+			case 0xE7: return ["MESSAGE_CREATE_EXT_INVALID_TO",      "Invalid to-address"];
+			case 0xE8: return ["MESSAGE_CREATE_EXT_BODY_SIZE",       "Body too long or short"];
+			case 0xE9: return ["MESSAGE_CREATE_EXT_BODY_UTF8",       "Body not UTF-8"];
+			case 0xEA: return ["MESSAGE_CREATE_EXT_BODY_CONTROL",    "Body contains control characters"];
+			case 0xEB: return ["MESSAGE_CREATE_EXT_LINE_TOOLONG",    "Body exceeds line-length limit"];
+			case 0xEC: return ["MESSAGE_CREATE_EXT_BODY_FORMAT",     "Malformed body"];
+			case 0xED: return ["MESSAGE_CREATE_EXT_BODY_TOOSHORT",   "Body too short"];
+			case 0xEE: return ["MESSAGE_CREATE_EXT_TODOMAIN",        "Invalid to-address domain"];
+	//		case 0xEF: return ["", ""];
+
+			// 0xF0-0xF9	Message/Create sendMail()
+			case 0xF0: return ["MESSAGE_CREATE_SENDMAIL_GREET", "Failed greeting receiver server"];
+			case 0xF1: return ["MESSAGE_CREATE_SENDMAIL_EHLO",  "EHLO command failed"];
+			case 0xF2: return ["MESSAGE_CREATE_SENDMAIL_STLS",  "STARTTLS command failed"];
+			case 0xF3: return ["MESSAGE_CREATE_SENDMAIL_SHAKE", "TLS handshake failed"];
+			case 0xF4: return ["MESSAGE_CREATE_SENDMAIL_NOTLS", "TLS not available"];
+			case 0xF5: return ["MESSAGE_CREATE_SENDMAIL_MAIL",  "MAIL command failed"];
+			case 0xF6: return ["MESSAGE_CREATE_SENDMAIL_RCPT",  "RCPT command failed"];
+			case 0xF7: return ["MESSAGE_CREATE_SENDMAIL_DATA",  "DATA command failed"];
+			case 0xF8: return ["MESSAGE_CREATE_SENDMAIL_BODY",  "Sending body failed"];
+	//		case 0xF9: return ["", ""];
+
+			// 0xFA-0xFF	Message/Create Int
+			case 0xFA: return ["MESSAGE_CREATE_INT_TOOSHORT",     "Message too short"];
+			case 0xFB: return ["MESSAGE_CREATE_INT_TS_INVALID",   "Invalid timestamp"];
+			case 0xFC: return ["MESSAGE_CREATE_INT_SUBJECT_SIZE", "Subject too long or short"];
+			case 0xFD: return ["MESSAGE_CREATE_INT_ADDR_NOTOWN",  "Sender address not owned"];
+			case 0xFE: return ["MESSAGE_CREATE_INT_TO_NOTACCEPT", "Receiver address does not accept messages"];
+			case 0xFF: return ["MESSAGE_CREATE_INT_TO_SELF",      "Sending to own account not allowed"];
+
+			default: return ["???", "Unknown error"];
+		}
+	};
+
 	readyCallback(true);
 }
