@@ -546,7 +546,7 @@ function displayFile(num) {
 
 			try {
 				el.srcdoc =
-					"<html><head><style>body {background: #080a08; color: #fff; opacity:0.55;} body > *:first-child {margin-top: 0; padding-top: 0;} a {color: #fff;} button, input, select, textarea {background: #000; color: #fff;}</style></head>"
+					"<html><head><style>html, body {background: #080a08; color: #fff; scrollbar-color: #222 #333;} body {opacity:0.55;} body > *:first-child {margin-top: 0; padding-top: 0;} a {color: #fff;} button, input, select, textarea {background: #000; color: #fff;}</style></head>"
 					+ sodium.to_string(ae.GetUplMsgBody(num).buffer)
 						.replace(/.*<body/s, "<body")
 						.replaceAll(/<head.*\/head>/gs, "")
