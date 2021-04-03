@@ -327,9 +327,9 @@ function AllEars(readyCallback) {
 			if (c === _AEM_ADDR32_CHARS[i]) return i;
 		}
 
-		if (c === 'o') return 0; // '0'
-		if (c === 'i' || c === 'l') return 1; // '1'
-		if (c === 'v') return 28; // 'w'
+		if (c === "o") return 0; // 0
+		if (c === "i" || c === "l") return 1; // 1
+		if (c === "v") return 28; // w
 
 		return -1;
 	};
