@@ -40,38 +40,69 @@ function getCountryFlag(countryCode) {
 	]));
 }
 
-function addMessages() {
-	const maxExt = ae.GetExtMsgCount();
-	const maxInt = ae.GetIntMsgCount();
+function addIntMessage(i) {
+	const tbl = document.getElementById("tbd_inbox");
 
-	let numExt = 0;
-	let numInt = 0;
+	const row = tbl.insertRow(-1);
+	const cellTime  = row.insertCell(-1);
+	const cellSubj  = row.insertCell(-1);
+	row.insertCell(-1); // cellFrom1: empty
+	const cellFrom2 = row.insertCell(-1);
+	const cellTo    = row.insertCell(-1);
+	const cellDel   = row.insertCell(-1);
 
-	//TODO handle sent messages separately
+	const ts = ae.GetIntMsgTime(i);
+	cellTime.setAttribute("data-ts", ts);
+	cellTime.textContent = new Date(ts * 1000).toISOString().slice(0, 16).replace("T", " ");
+	cellTime.className = "mono";
 
-	for (let i = 0; i < (page * 20) + 20; i++) {
-		const tsInt = (numInt < maxInt) ? ae.GetIntMsgTime(numInt) : 0;
-		const tsExt = (numExt < maxExt) ? ae.GetExtMsgTime(numExt) : 0;
-		if (tsInt === 0 && tsExt === 0) break;
+	cellSubj.textContent = ae.GetIntMsgTitle(i);
 
-		if (tsInt !== 0 && (tsExt === 0 || tsInt > tsExt)) {
-			if (i < (page * 20)) {
-				numInt++;
-				continue;
+	cellFrom2.textContent = ae.GetIntMsgFrom(i);
+	cellTo.textContent = ae.GetIntMsgTo(i);
+
+	cellTo.className = (ae.GetIntMsgTo(i).length === 16) ? "mono" : "";
+	cellFrom2.className = (ae.GetIntMsgFrom(i).length === 16) ? "mono" : "";
+
+	cellDel.innerHTML = "<input class=\"delMsg\" type=\"checkbox\" data-id=\"" + ae.GetIntMsgIdHex(i) + "\">";
+
+	cellSubj.onclick = function() {
+		navMenu(-1);
+		document.getElementById("div_readmsg").hidden = false;
+		document.getElementById("readmsg_head").hidden = false;
+		document.getElementById("readmsg_levelinfo").hidden = false;
+		document.getElementById("readmsg_extmsg").hidden = true;
+
+		document.getElementById("readmsg_title").textContent = ae.GetIntMsgTitle(i);
+		document.getElementById("readmsg_from").textContent  = ae.GetIntMsgFrom(i);
+		document.getElementById("readmsg_to").textContent    = ae.GetIntMsgTo(i);
+		document.getElementById("readmsg_body").textContent  = ae.GetIntMsgBody(i);
+		document.getElementById("readmsg_level").textContent = ae.GetIntMsgLevel(i);
+
+		document.getElementById("readmsg_from").className = (ae.GetIntMsgFrom(i).length === 16) ? "mono" : "";
+		document.getElementById("readmsg_to").className = (ae.GetIntMsgTo(i).length === 16) ? "mono" : "";
+	};
+
+	cellDel.children[0].onchange = function() {
+		if (!cellDel.children[0].checked) {
+			const checkboxes = tbl.getElementsByTagName("input");
+			let checked = false;
+
+			for (let j = 0; j < checkboxes.length; j++) {
+				if (checkboxes[j].checked) {
+					checked = true;
+					break;
+				}
 			}
 
-			addIntMessage(numInt);
-			numInt++;
-		} else if (tsExt !== 0) {
-			if (i < (page * 20)) {
-				numExt++;
-				continue;
+			if (!checked) {
+				document.getElementById("btn_msgdel").hidden = true;
+				return;
 			}
-
-			addExtMessage(numExt);
-			numExt++;
 		}
-	}
+
+		document.getElementById("btn_msgdel").hidden = false;
+	};
 }
 
 function addExtMessage(i) {
@@ -164,69 +195,38 @@ function addExtMessage(i) {
 	};
 }
 
-function addIntMessage(i) {
-	const tbl = document.getElementById("tbd_inbox");
+function addMessages() {
+	const maxExt = ae.GetExtMsgCount();
+	const maxInt = ae.GetIntMsgCount();
 
-	const row = tbl.insertRow(-1);
-	const cellTime  = row.insertCell(-1);
-	const cellSubj  = row.insertCell(-1);
-	row.insertCell(-1); // cellFrom1: empty
-	const cellFrom2 = row.insertCell(-1);
-	const cellTo    = row.insertCell(-1);
-	const cellDel   = row.insertCell(-1);
+	let numExt = 0;
+	let numInt = 0;
 
-	const ts = ae.GetIntMsgTime(i);
-	cellTime.setAttribute("data-ts", ts);
-	cellTime.textContent = new Date(ts * 1000).toISOString().slice(0, 16).replace("T", " ");
-	cellTime.className = "mono";
+	//TODO handle sent messages separately
 
-	cellSubj.textContent = ae.GetIntMsgTitle(i);
+	for (let i = 0; i < (page * 20) + 20; i++) {
+		const tsInt = (numInt < maxInt) ? ae.GetIntMsgTime(numInt) : 0;
+		const tsExt = (numExt < maxExt) ? ae.GetExtMsgTime(numExt) : 0;
+		if (tsInt === 0 && tsExt === 0) break;
 
-	cellFrom2.textContent = ae.GetIntMsgFrom(i);
-	cellTo.textContent = ae.GetIntMsgTo(i);
-
-	cellTo.className = (ae.GetIntMsgTo(i).length === 16) ? "mono" : "";
-	cellFrom2.className = (ae.GetIntMsgFrom(i).length === 16) ? "mono" : "";
-
-	cellDel.innerHTML = "<input class=\"delMsg\" type=\"checkbox\" data-id=\"" + ae.GetIntMsgIdHex(i) + "\">";
-
-	cellSubj.onclick = function() {
-		navMenu(-1);
-		document.getElementById("div_readmsg").hidden = false;
-		document.getElementById("readmsg_head").hidden = false;
-		document.getElementById("readmsg_levelinfo").hidden = false;
-		document.getElementById("readmsg_extmsg").hidden = true;
-
-		document.getElementById("readmsg_title").textContent = ae.GetIntMsgTitle(i);
-		document.getElementById("readmsg_from").textContent  = ae.GetIntMsgFrom(i);
-		document.getElementById("readmsg_to").textContent    = ae.GetIntMsgTo(i);
-		document.getElementById("readmsg_body").textContent  = ae.GetIntMsgBody(i);
-		document.getElementById("readmsg_level").textContent = ae.GetIntMsgLevel(i);
-
-		document.getElementById("readmsg_from").className = (ae.GetIntMsgFrom(i).length === 16) ? "mono" : "";
-		document.getElementById("readmsg_to").className = (ae.GetIntMsgTo(i).length === 16) ? "mono" : "";
-	};
-
-	cellDel.children[0].onchange = function() {
-		if (!cellDel.children[0].checked) {
-			const checkboxes = tbl.getElementsByTagName("input");
-			let checked = false;
-
-			for (let j = 0; j < checkboxes.length; j++) {
-				if (checkboxes[j].checked) {
-					checked = true;
-					break;
-				}
+		if (tsInt !== 0 && (tsExt === 0 || tsInt > tsExt)) {
+			if (i < (page * 20)) {
+				numInt++;
+				continue;
 			}
 
-			if (!checked) {
-				document.getElementById("btn_msgdel").hidden = true;
-				return;
+			addIntMessage(numInt);
+			numInt++;
+		} else if (tsExt !== 0) {
+			if (i < (page * 20)) {
+				numExt++;
+				continue;
 			}
+
+			addExtMessage(numExt);
+			numExt++;
 		}
-
-		document.getElementById("btn_msgdel").hidden = false;
-	};
+	}
 }
 
 function addFile(num) {
