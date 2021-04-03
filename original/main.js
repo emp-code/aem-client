@@ -40,6 +40,25 @@ function getCountryFlag(countryCode) {
 	]));
 }
 
+function deleteButtonShow(show) {
+	if (show) {
+		document.getElementById("btn_msgdel").hidden = false;
+		return;
+	}
+
+	const checkboxes = document.getElementById("tbd_inbox").getElementsByTagName("input");
+	let checked = false;
+
+	for (let j = 0; j < checkboxes.length; j++) {
+		if (checkboxes[j].checked) {
+			checked = true;
+			break;
+		}
+	}
+
+	document.getElementById("btn_msgdel").hidden = !checked;
+}
+
 function addIntMessage(i) {
 	const tbl = document.getElementById("tbd_inbox");
 	const row = tbl.insertRow(-1);
@@ -82,64 +101,22 @@ function addIntMessage(i) {
 
 	cell = row.insertCell(-1);
 	cell.innerHTML = "<input class=\"delMsg\" type=\"checkbox\" data-id=\"" + ae.GetIntMsgIdHex(i) + "\">";
-	cell.children[0].onchange = function() {
-		if (this.checked) {
-			document.getElementById("btn_msgdel").hidden = false;
-			return;
-		}
-		const checkboxes = tbl.getElementsByTagName("input");
-		let checked = false;
-
-		for (let j = 0; j < checkboxes.length; j++) {
-			if (checkboxes[j].checked) {
-				checked = true;
-				break;
-			}
-		}
-
-		document.getElementById("btn_msgdel").hidden = !checked;
-	};
+	cell.children[0].onchange = function() {deleteButtonShow(this.checked);};
 }
 
 function addExtMessage(i) {
 	const tbl = document.getElementById("tbd_inbox");
-
 	const row = tbl.insertRow(-1);
-	const cellTime  = row.insertCell(-1);
-	const cellSubj  = row.insertCell(-1);
-	const cellFrom1 = row.insertCell(-1);
-	const cellFrom2 = row.insertCell(-1);
-	const cellTo    = row.insertCell(-1);
-	const cellDel   = row.insertCell(-1);
 
 	const ts = ae.GetExtMsgTime(i);
-	cellTime.setAttribute("data-ts", ts);
-	cellTime.textContent = new Date(ts * 1000).toISOString().slice(0, 16).replace("T", " ");
-	cellTime.className = "mono";
+	let cell = row.insertCell(-1);
+	cell.setAttribute("data-ts", ts);
+	cell.textContent = new Date(ts * 1000).toISOString().slice(0, 16).replace("T", " ");
+	cell.className = "mono";
 
-	cellSubj.textContent = ae.GetExtMsgTitle(i);
-
-	const from = ae.GetExtMsgHdrFrom(i);
-	const from2 = from.substring(from.indexOf("@") + 1);
-	const cc = ae.GetExtMsgCountry(i);
-
-	cellFrom1.textContent = from.substring(0, from.indexOf("@"));
-
-	const flag = document.createElement("abbr");
-	flag.textContent = getCountryFlag(cc);
-	flag.title = getCountryName(cc);
-	cellFrom2.appendChild(flag);
-
-	const fromText = document.createElement("span");
-	fromText.textContent = " " + from2;
-	cellFrom2.appendChild(fromText);
-
-	cellTo.textContent = ae.GetExtMsgEnvTo(i);
-	cellTo.className = (ae.GetExtMsgEnvTo(i).length === 16) ? "mono" : "";
-
-	cellDel.innerHTML = "<input class=\"delMsg\" type=\"checkbox\" data-id=\"" + ae.GetExtMsgIdHex(i) + "\">";
-
-	cellSubj.onclick = function() {
+	cell = row.insertCell(-1);
+	cell.textContent = ae.GetExtMsgTitle(i);
+	cell.onclick = function() {
 		navMenu(-1);
 		document.getElementById("div_readmsg").hidden = false;
 		document.getElementById("readmsg_head").hidden = false;
@@ -169,26 +146,31 @@ function addExtMessage(i) {
 		document.getElementById("readmsg_to").className = (ae.GetExtMsgEnvTo(i).length === 16) ? "mono" : "";
 	};
 
-	cellDel.children[0].onchange = function() {
-		if (!cellDel.children[0].checked) {
-			const checkboxes = tbl.getElementsByTagName("input");
-			let checked = false;
+	const from = ae.GetExtMsgHdrFrom(i);
+	const from2 = from.substring(from.indexOf("@") + 1);
+	const cc = ae.GetExtMsgCountry(i);
 
-			for (let j = 0; j < checkboxes.length; j++) {
-				if (checkboxes[j].checked) {
-					checked = true;
-					break;
-				}
-			}
+	cell = row.insertCell(-1);
+	cell.textContent = from.substring(0, from.indexOf("@"));
 
-			if (!checked) {
-				document.getElementById("btn_msgdel").hidden = true;
-				return;
-			}
-		}
+	const flag = document.createElement("abbr");
+	flag.textContent = getCountryFlag(cc);
+	flag.title = getCountryName(cc);
 
-		document.getElementById("btn_msgdel").hidden = false;
-	};
+	const fromText = document.createElement("span");
+	fromText.textContent = " " + from2;
+
+	cell = row.insertCell(-1);
+	cell.appendChild(flag);
+	cell.appendChild(fromText);
+
+	cell = row.insertCell(-1);
+	cell.textContent = ae.GetExtMsgEnvTo(i);
+	cell.className = (ae.GetExtMsgEnvTo(i).length === 16) ? "mono" : "";
+
+	cell = row.insertCell(-1);
+	cell.innerHTML = "<input class=\"delMsg\" type=\"checkbox\" data-id=\"" + ae.GetExtMsgIdHex(i) + "\">";
+	cell.children[0].onchange = function() {deleteButtonShow(this.checked);};
 }
 
 function addMessages() {
