@@ -42,31 +42,17 @@ function getCountryFlag(countryCode) {
 
 function addIntMessage(i) {
 	const tbl = document.getElementById("tbd_inbox");
-
 	const row = tbl.insertRow(-1);
-	const cellTime  = row.insertCell(-1);
-	const cellSubj  = row.insertCell(-1);
-	row.insertCell(-1); // cellFrom1: empty
-	const cellFrom2 = row.insertCell(-1);
-	const cellTo    = row.insertCell(-1);
-	const cellDel   = row.insertCell(-1);
 
 	const ts = ae.GetIntMsgTime(i);
-	cellTime.setAttribute("data-ts", ts);
-	cellTime.textContent = new Date(ts * 1000).toISOString().slice(0, 16).replace("T", " ");
-	cellTime.className = "mono";
+	let cell = row.insertCell(-1);
+	cell.setAttribute("data-ts", ts);
+	cell.textContent = new Date(ts * 1000).toISOString().slice(0, 16).replace("T", " ");
+	cell.className = "mono";
 
-	cellSubj.textContent = ae.GetIntMsgTitle(i);
-
-	cellFrom2.textContent = ae.GetIntMsgFrom(i);
-	cellTo.textContent = ae.GetIntMsgTo(i);
-
-	cellTo.className = (ae.GetIntMsgTo(i).length === 16) ? "mono" : "";
-	cellFrom2.className = (ae.GetIntMsgFrom(i).length === 16) ? "mono" : "";
-
-	cellDel.innerHTML = "<input class=\"delMsg\" type=\"checkbox\" data-id=\"" + ae.GetIntMsgIdHex(i) + "\">";
-
-	cellSubj.onclick = function() {
+	cell = row.insertCell(-1);
+	cell.textContent = ae.GetIntMsgTitle(i);
+	cell.onclick = function() {
 		navMenu(-1);
 		document.getElementById("div_readmsg").hidden = false;
 		document.getElementById("readmsg_head").hidden = false;
@@ -83,7 +69,20 @@ function addIntMessage(i) {
 		document.getElementById("readmsg_to").className = (ae.GetIntMsgTo(i).length === 16) ? "mono" : "";
 	};
 
-	cellDel.children[0].onchange = function() {
+	// empty From1 cell
+	row.insertCell(-1);
+
+	cell = row.insertCell(-1);
+	cell.textContent = ae.GetIntMsgFrom(i);
+	cell.className = (ae.GetIntMsgFrom(i).length === 16) ? "mono" : "";
+
+	cell = row.insertCell(-1);
+	cell.textContent = ae.GetIntMsgTo(i);
+	cell.className = (ae.GetIntMsgTo(i).length === 16) ? "mono" : "";
+
+	cell = row.insertCell(-1);
+	cell.innerHTML = "<input class=\"delMsg\" type=\"checkbox\" data-id=\"" + ae.GetIntMsgIdHex(i) + "\">";
+	cell.children[0].onchange = function() {
 		if (!cellDel.children[0].checked) {
 			const checkboxes = tbl.getElementsByTagName("input");
 			let checked = false;
