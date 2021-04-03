@@ -114,6 +114,8 @@ function addExtMessage(i) {
 	cell.textContent = new Date(ts * 1000).toISOString().slice(0, 16).replace("T", " ");
 	cell.className = "mono";
 
+	const cc = ae.GetExtMsgCountry(i);
+
 	cell = row.insertCell(-1);
 	cell.textContent = ae.GetExtMsgTitle(i);
 	cell.onclick = function() {
@@ -148,7 +150,6 @@ function addExtMessage(i) {
 
 	const from = ae.GetExtMsgHdrFrom(i);
 	const from2 = from.substring(from.indexOf("@") + 1);
-	const cc = ae.GetExtMsgCountry(i);
 
 	cell = row.insertCell(-1);
 	cell.textContent = from.substring(0, from.indexOf("@"));
