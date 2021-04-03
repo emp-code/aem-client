@@ -207,7 +207,7 @@ function addFile(num) {
 	const row = table.insertRow(-1);
 
 	let cell = row.insertCell(-1);
-	cell.textContent = new Date(ae.GetUplMsgTime(num) * 1000).toISOString().slice(0, 10)
+	cell.textContent = new Date(ae.GetUplMsgTime(num) * 1000).toISOString().slice(0, 10);
 
 	cell = row.insertCell(-1);
 	cell.textContent = ae.GetUplMsgBytes(num) / 1024;
