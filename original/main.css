@@ -1,20 +1,13 @@
-header, nav {
+header,
+nav {
 	margin-bottom: 1em;
 	text-align: center;
 }
 
-footer, .maindiv {
+footer,
+.maindiv {
 	margin-top: 1em;
 	text-align: center;
-}
-
-td, th {
-	min-width: 3em;
-}
-
-textarea {
-	height: 10em;
-	width: 50em;
 }
 
 table {
@@ -22,6 +15,21 @@ table {
 	margin-right: auto;
 	white-space: nowrap;
 	table-layout: fixed;
+}
+
+td,
+th {
+	min-width: 3em;
+}
+
+td {
+	margin: 0.1vh 0.4vw;
+	overflow: hidden;
+}
+
+textarea {
+	height: 10em;
+	width: 50em;
 }
 
 #div_inbox table {
@@ -34,11 +42,6 @@ table {
 	border-bottom: 1px solid #ddd;
 }
 
-td {
-	margin: 0.1vh 0.4vw;
-	overflow: hidden;
-}
-
 #div_inbox td:not(:nth-child(3)):not(:last-child) {
 	text-align: left;
 }
@@ -49,10 +52,6 @@ td {
 
 #div_inbox td:last-child {
 	text-align: center;
-}
-
-.bold {
-	font-weight: bold;
 }
 
 .mono {
@@ -71,15 +70,8 @@ td {
 	text-align: left;
 }
 
-.flex {
-	display: flex;
-}
-
-.flex input {
-	flex: 1;
-}
-
-#readmsg_title, #readmsg_body {
+#readmsg_title,
+#readmsg_body {
 	white-space: pre-wrap;
 }
 
@@ -99,10 +91,6 @@ td {
 	width: 3em;
 }
 
-#gatekeeper_domain, #gatekeeper_addr {
-	width: 100%;
-}
-
 #tbody_opt_addr {
 	text-align: left;
 }
@@ -111,12 +99,9 @@ td {
 	width: 3em;
 }
 
-#tbl_limits th, #tbl_limits td {
+#tbl_limits th,
+#tbl_limits td {
 	text-align: center;
-}
-
-#div_prefs_gatekeeper {
-	margin: 0 auto;
 }
 
 @media (prefers-color-scheme: dark) {

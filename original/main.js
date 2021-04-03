@@ -30,14 +30,6 @@ function navMenu(num) {
 }
 
 function getCountryName(countryCode) {
-	const opts = document.getElementById("gatekeeper_country");
-
-	for (let i = 0; i < opts.length; i++) {
-		if (opts[i].value === countryCode) {
-			return opts[i].textContent;
-		}
-	}
-
 	return "Unknown countrycode: " + countryCode;
 }
 
@@ -83,11 +75,7 @@ function addMessages() {
 }
 
 function addExtMessage(i) {
-	const inbox = document.getElementById("tbd_inbox");
-	const snbox = document.getElementById("tbd_snbox");
-
-	const isSent = false;//ae.GetExtMsgIsSent(i);
-	const tbl = isSent ? snbox : inbox;
+	const tbl = document.getElementById("tbd_inbox");
 
 	const row = tbl.insertRow(-1);
 	const cellTime  = row.insertCell(-1);
@@ -104,7 +92,7 @@ function addExtMessage(i) {
 
 	cellSubj.textContent = ae.GetExtMsgTitle(i);
 
-	const from = ae.GetExtMsgFrom(i);
+	const from = ae.GetExtMsgHdrFrom(i);
 	const from2 = from.substring(from.indexOf("@") + 1);
 	const cc = ae.GetExtMsgCountry(i);
 
@@ -119,8 +107,8 @@ function addExtMessage(i) {
 	fromText.textContent = " " + from2;
 	cellFrom2.appendChild(fromText);
 
-	cellTo.textContent = ae.GetExtMsgTo(i);
-	cellTo.className = (ae.GetExtMsgTo(i).length === 24) ? "mono" : "";
+	cellTo.textContent = ae.GetExtMsgEnvTo(i);
+	cellTo.className = (ae.GetExtMsgEnvTo(i).length === 16) ? "mono" : "";
 
 	cellDel.innerHTML = "<input class=\"delMsg\" type=\"checkbox\" data-id=\"" + ae.GetExtMsgIdHex(i) + "\">";
 
@@ -145,13 +133,13 @@ function addExtMessage(i) {
 		document.getElementById("readmsg_flags").innerHTML = flagText.trim();
 
 		document.getElementById("readmsg_title").textContent = ae.GetExtMsgTitle(i);
-		document.getElementById("readmsg_from").textContent = ae.GetExtMsgFrom(i);
-		document.getElementById("readmsg_to").textContent = ae.GetExtMsgTo(i);
-		document.getElementById("readmsg_body").textContent = ae.GetExtMsgBody(i);
+		document.getElementById("readmsg_from").textContent = ae.GetExtMsgEnvFrom(i);
+		document.getElementById("readmsg_to").textContent = ae.GetExtMsgEnvTo(i);
+		document.getElementById("readmsg_body").innerHTML = ae.GetExtMsgBody(i);
 		document.getElementById("readmsg_headers").textContent = ae.GetExtMsgHeaders(i);
 
 		document.getElementById("readmsg_from").className = "";
-		document.getElementById("readmsg_to").className = (ae.GetExtMsgTo(i).length === 24) ? "mono" : "";
+		document.getElementById("readmsg_to").className = (ae.GetExtMsgEnvTo(i).length === 16) ? "mono" : "";
 	};
 
 	cellDel.children[0].onchange = function() {
@@ -167,21 +155,17 @@ function addExtMessage(i) {
 			}
 
 			if (!checked) {
-				document.getElementById(isSent ? "btn_sentdel" : "btn_msgdel").hidden = true;
+				document.getElementById("btn_msgdel").hidden = true;
 				return;
 			}
 		}
 
-		document.getElementById(isSent ? "btn_sentdel" : "btn_msgdel").hidden = false;
+		document.getElementById("btn_msgdel").hidden = false;
 	};
 }
 
 function addIntMessage(i) {
-	const inbox = document.getElementById("tbd_inbox");
-	const snbox = document.getElementById("tbd_snbox");
-
-	const isSent = ae.GetIntMsgIsSent(i);
-	const tbl = isSent ? snbox : inbox;
+	const tbl = document.getElementById("tbd_inbox");
 
 	const row = tbl.insertRow(-1);
 	const cellTime  = row.insertCell(-1);
@@ -201,8 +185,8 @@ function addIntMessage(i) {
 	cellFrom2.textContent = ae.GetIntMsgFrom(i);
 	cellTo.textContent = ae.GetIntMsgTo(i);
 
-	cellTo.className = (ae.GetIntMsgTo(i).length === 24) ? "mono" : "";
-	cellFrom2.className = (ae.GetIntMsgFrom(i).length === 24) ? "mono" : "";
+	cellTo.className = (ae.GetIntMsgTo(i).length === 16) ? "mono" : "";
+	cellFrom2.className = (ae.GetIntMsgFrom(i).length === 16) ? "mono" : "";
 
 	cellDel.innerHTML = "<input class=\"delMsg\" type=\"checkbox\" data-id=\"" + ae.GetIntMsgIdHex(i) + "\">";
 
@@ -219,8 +203,8 @@ function addIntMessage(i) {
 		document.getElementById("readmsg_body").textContent  = ae.GetIntMsgBody(i);
 		document.getElementById("readmsg_level").textContent = ae.GetIntMsgLevel(i);
 
-		document.getElementById("readmsg_from").className = (ae.GetIntMsgFrom(i).length === 24) ? "mono" : "";
-		document.getElementById("readmsg_to").className = (ae.GetIntMsgTo(i).length === 24) ? "mono" : "";
+		document.getElementById("readmsg_from").className = (ae.GetIntMsgFrom(i).length === 16) ? "mono" : "";
+		document.getElementById("readmsg_to").className = (ae.GetIntMsgTo(i).length === 16) ? "mono" : "";
 	};
 
 	cellDel.children[0].onchange = function() {
@@ -236,93 +220,51 @@ function addIntMessage(i) {
 			}
 
 			if (!checked) {
-				document.getElementById(isSent ? "btn_sentdel" : "btn_msgdel").hidden = true;
+				document.getElementById("btn_msgdel").hidden = true;
 				return;
 			}
 		}
 
-		document.getElementById(isSent? "btn_sentdel" : "btn_msgdel").hidden = false;
+		document.getElementById("btn_msgdel").hidden = false;
 	};
 }
 
 function addFile(num) {
-	const table = document.getElementById("tbody_filenotes");
-
+	const table = document.getElementById("tbody_files");
 	const row = table.insertRow(-1);
-	const cellTime = row.insertCell(-1);
-	const cellSize = row.insertCell(-1);
-	const cellName = row.insertCell(-1);
-	const cellBtnD = row.insertCell(-1);
-	const cellBtnX = row.insertCell(-1);
 
-	let kib = ae.GetFileSize(num);
-	if (kib > 1023) kib = Math.round(kib / 1024); else kib = 1;
+	let cell = row.insertCell(-1);
+	cell.textContent = new Date(ae.GetUplMsgTime(num) * 1000).toISOString().slice(0, 10)
 
-	cellTime.textContent = new Date(ae.GetFileTime(num) * 1000).toISOString().slice(0, 16).replace("T", " ");
+	cell = row.insertCell(-1);
+	cell.textContent = ae.GetUplMsgBytes(num) / 1024;
 
-	cellSize.textContent = kib;
-	cellName.textContent = ae.GetFileName(num);
-	cellBtnD.innerHTML = "<button type=\"button\">D</button>";
-	cellBtnX.innerHTML = "<button type=\"button\">X</button>";
+	cell = row.insertCell(-1);
+	cell.textContent = ae.GetUplMsgTitle(num);
 
-	cellBtnD.children[0].onclick = function() {
-		const parentRow = this.parentElement.parentElement;
-		const fileBlob = ae.GetFileBlob(parentRow.rowIndex - 1);
-
-		const a = document.getElementById("a_filedl");
-		const objectUrl = URL.createObjectURL(fileBlob);
-		a.href = objectUrl;
-		a.download = ae.GetFileName(parentRow.rowIndex - 1);
+	cell = row.insertCell(-1);
+	cell.innerHTML = "<button type=\"button\">D</button>";
+	cell.children[0].onclick = function() {
+		const a = document.createElement("a");
+		a.href = URL.createObjectURL(new Blob([ae.GetUplMsgBody(num).buffer]));
+		a.download = ae.GetUplMsgTitle(num);
 		a.click();
 
+		URL.revokeObjectURL(a.href);
 		a.href = "";
 		a.download = "";
-		URL.revokeObjectURL(objectUrl);
 	};
 
-	cellBtnX.children[0].onclick = function() {
-		const parentRow = this.parentElement.parentElement;
-		ae.Message_Delete([ae.GetFileIdHex(parentRow.rowIndex - 1)], function(success) {
-			if (success) {
-				table.deleteRow(parentRow.rowIndex - 1);
+	cell = row.insertCell(-1);
+	cell.innerHTML = "<button type=\"button\">X</button>";
+	cell.children[0].onclick = function() {
+		ae.Message_Delete([ae.GetUplMsgIdHex(num)], function(error) {
+			if (error === 0) {
+				tr.remove();
 			} else {
-				console.log("Failed to delete note");
+				console.log("Failed deleting file");
 			}
 		});
-	};
-}
-
-function addNote(num) {
-	const table = document.getElementById("tbody_textnotes");
-
-	const row = table.insertRow(-1);
-	const cellTime = row.insertCell(-1);
-	const cellTitle = row.insertCell(-1);
-	const cellBtnDe = row.insertCell(-1);
-
-	cellTime.textContent = new Date(ae.GetNoteTime(num) * 1000).toISOString().slice(0, 16).replace("T", " ");
-	cellTitle.textContent = ae.GetNoteTitle(num);
-	cellBtnDe.innerHTML = "<button type=\"button\">X</button>";
-
-	cellBtnDe.children[0].onclick = function() {
-		const parentRow = this.parentElement.parentElement;
-
-		ae.Message_Delete([ae.GetNoteIdHex(parentRow.rowIndex - 1)], function(success) {
-			if (success) {
-				table.deleteRow(parentRow.rowIndex - 1);
-			} else {
-				console.log("Failed to delete note");
-			}
-		});
-	};
-
-	cellTitle.onclick = function() {
-		navMenu(-1);
-		document.getElementById("div_readmsg").hidden = false;
-		document.getElementById("readmsg_head").hidden = true;
-
-		document.getElementById("readmsg_title").textContent = ae.GetNoteTitle(num);
-		document.getElementById("readmsg_body").textContent = ae.GetNoteBody(num);
 	};
 }
 
@@ -404,33 +346,34 @@ function deleteAddress(addr) {
 
 	if (addressToDelete === -1) return;
 
-	ae.Address_Delete(addressToDelete, function(success) {
-		if (success) {
-			document.getElementById("tbody_opt_addr").deleteRow(addressToDelete);
-			document.getElementById("send_from").remove(addressToDelete);
-
-			document.getElementById("addr_use_normal").textContent = ae.GetAddressCountNormal();
-			document.getElementById("addr_use_shield").textContent = ae.GetAddressCountShield();
-
-			if (ae.GetAddressCountNormal() < ae.GetAddressLimitNormal(ae.GetUserLevel())) document.getElementById("btn_newaddress").disabled = false;
-			if (ae.GetAddressCountShield() < ae.GetAddressLimitShield(ae.GetUserLevel())) document.getElementById("btn_newshieldaddress").disabled = false;
-
-			ae.Private_Update(function(success2) {
-				if (!success2) console.log("Failed to update the Private field");
-			});
-		} else {
+	ae.Address_Delete(addressToDelete, function(error) {
+		if (error !== 0) {
 			console.log("Failed to delete address");
+			return;
 		}
 
-		btns = document.getElementById("tbody_opt_addr").getElementsByTagName("button");
-		for (let i = 0; i < btns.length; i++) btns[i].disabled = false;
+		document.getElementById("tbody_opt_addr").deleteRow(addressToDelete);
+		document.getElementById("send_from").remove(addressToDelete);
+
+		document.getElementById("addr_use_normal").textContent = ae.GetAddressCountNormal();
+		document.getElementById("addr_use_shield").textContent = ae.GetAddressCountShield();
+
+		if (ae.GetAddressCountNormal() < ae.GetLimitNormalA(ae.GetUserLevel())) document.getElementById("btn_newaddress").disabled = false;
+		if (ae.GetAddressCountShield() < ae.GetLimitShieldA(ae.GetUserLevel())) document.getElementById("btn_newshieldaddress").disabled = false;
+
+		ae.Private_Update(function(error2) {
+			if (!error2 !== 0) console.log("Failed to update the Private field");
+
+			btns = document.getElementById("tbody_opt_addr").getElementsByTagName("button");
+			for (let i = 0; i < btns.length; i++) btns[i].disabled = false;
+		});
 	});
 }
 
 function shieldMix(addr) {
 	let newAddr = "";
 
-	for (let i = 0; i < 24; i++) {
+	for (let i = 0; i < 16; i++) {
 		switch (addr.charAt(i)) {
 			case '1':
 				newAddr += "1iIlL".charAt(Math.floor(Math.random() * 5));
@@ -452,43 +395,37 @@ function shieldMix(addr) {
 function addAddress(num) {
 	const addrTable = document.getElementById("tbody_opt_addr");
 	const row = addrTable.insertRow(-1);
-	const cellAddr = row.insertCell(-1);
-	const cellChk1 = row.insertCell(-1);
-	const cellChk2 = row.insertCell(-1);
-	const cellChk3 = row.insertCell(-1);
-	const cellBtnD = row.insertCell(-1);
 
-	cellAddr.textContent = ae.GetAddress(num);
-	if (cellAddr.textContent.length === 24) cellAddr.className = "mono";
-	cellAddr.onclick = function() {
-		if (cellAddr.textContent.length === 24)
-			navigator.clipboard.writeText(shieldMix(cellAddr.textContent) + "@" + ae.GetDomainEml());
+	let cell = row.insertCell(-1);
+	cell.textContent = ae.GetAddress(num);
+	if (cell.textContent.length === 16) cell.className = "mono";
+	cell.onclick = function() {
+		if (cell.textContent.length === 16)
+			navigator.clipboard.writeText(shieldMix(cell.textContent) + "@" + ae.GetDomainEml());
 		else
-			navigator.clipboard.writeText(cellAddr.textContent + "@" + ae.GetDomainEml());
+			navigator.clipboard.writeText(cell.textContent + "@" + ae.GetDomainEml());
 	};
 
-	cellChk1.innerHTML = ae.GetAddressAccExt(num) ? "<input type=\"checkbox\" checked=\"checked\">" : "<input type=\"checkbox\">";
-	cellChk2.innerHTML = ae.GetAddressAccInt(num) ? "<input type=\"checkbox\" checked=\"checked\">" : "<input type=\"checkbox\">";
-	cellChk3.innerHTML = ae.GetAddressUse_Gk(num) ? "<input type=\"checkbox\" checked=\"checked\">" : "<input type=\"checkbox\">";
+	cell = row.insertCell(-1);
+	cell.innerHTML = ae.GetAddressAccExt(num) ? "<input type=\"checkbox\" checked=\"checked\">" : "<input type=\"checkbox\">";
 
-	cellChk1.onchange = function() {document.getElementById("btn_saveaddrdata").hidden = false;};
-	cellChk2.onchange = function() {document.getElementById("btn_saveaddrdata").hidden = false;};
-	cellChk3.onchange = function() {document.getElementById("btn_saveaddrdata").hidden = false;};
+	cell = row.insertCell(-1);
+	cell.innerHTML = ae.GetAddressAccInt(num) ? "<input type=\"checkbox\" checked=\"checked\">" : "<input type=\"checkbox\">";
 
-	cellBtnD.innerHTML = "<button type=\"button\">X</button>";
-	cellBtnD.onclick = function() {deleteAddress(cellAddr.textContent);};
+	cell = row.insertCell(-1);
+	cell.innerHTML = "<button type=\"button\">X</button>";
+	cell.children[0].onclick = function() {deleteAddress(ae.GetAddress(num));};
 
 	const opt = document.createElement("option");
-	opt.value = cellAddr.textContent;
-	opt.textContent = cellAddr.textContent + "@" + ae.GetDomainEml();
+	opt.value = ae.GetAddress(num);
+	opt.textContent = ae.GetAddress(num) + "@" + ae.GetDomainEml();
 	document.getElementById("send_from").appendChild(opt);
 }
 
 function clearMessages() {
 	document.getElementById("tbd_inbox").innerHTML = "";
 	document.getElementById("tbd_snbox").innerHTML = "";
-	document.getElementById("tbody_textnotes").innerHTML = "";
-	document.getElementById("tbody_filenotes").innerHTML = "";
+	document.getElementById("tbody_files").innerHTML = "";
 }
 
 function delMsgs(tblName, btnName) {
@@ -592,10 +529,9 @@ function reloadInterface() {
 
 	clearMessages();
 	document.getElementById("tbody_admin").innerHTML = "";
-	document.getElementById("tbody_filenotes").innerHTML = "";
+	document.getElementById("tbody_files").innerHTML = "";
 	document.getElementById("tbody_notes_contact").innerHTML = "";
 	document.getElementById("tbody_opt_addr").innerHTML = "";
-	document.getElementById("tbody_textnotes").innerHTML = "";
 
 	// Contacts
 	for (let i = 0; i < ae.GetContactCount(); i++) {
@@ -613,41 +549,18 @@ function reloadInterface() {
 
 	document.getElementById("addr_use_normal").textContent = ae.GetAddressCountNormal();
 	document.getElementById("addr_use_shield").textContent = ae.GetAddressCountShield();
-	document.getElementById("addr_max_normal").textContent = ae.GetAddressLimitNormal(ae.GetUserLevel());
-	document.getElementById("addr_max_shield").textContent = ae.GetAddressLimitShield(ae.GetUserLevel());
+	document.getElementById("addr_max_normal").textContent = ae.GetLimitNormalA(ae.GetUserLevel());
+	document.getElementById("addr_max_shield").textContent = ae.GetLimitShieldA(ae.GetUserLevel());
 
-	if (ae.GetAddressCountNormal() >= ae.GetAddressLimitNormal(ae.GetUserLevel())) document.getElementById("btn_newaddress").disabled = true;
-	if (ae.GetAddressCountShield() >= ae.GetAddressLimitShield(ae.GetUserLevel())) document.getElementById("btn_newshieldaddress").disabled = true;
-
-	// Gatekeeper data
-	let gkList = ae.GetGatekeeperAddress();
-	for (let i = 0; i < gkList.length; i++) addOpt(document.getElementById("gatekeeper_addr"), gkList[i]);
-
-	gkList = ae.GetGatekeeperDomain();
-	for (let i = 0; i < gkList.length; i++) addOpt(document.getElementById("gatekeeper_domain"), gkList[i]);
-
-	let gkCountryCount = 0;
-	gkList = ae.GetGatekeeperCountry();
-	for (let i = 0; i < gkList.length; i++) {
-		const opts = document.getElementById("gatekeeper_country");
-
-		for (let j = 0; j < opts.length; j++) {
-			if (opts[j].value === gkList[i]) {
-				opts[j].selected = "selected";
-				gkCountryCount++;
-				break;
-			}
-		}
-	}
-
-	document.getElementById("gk_countrycount").textContent = gkCountryCount;
+	if (ae.GetAddressCountNormal() >= ae.GetLimitNormalA(ae.GetUserLevel())) document.getElementById("btn_newaddress").disabled = true;
+	if (ae.GetAddressCountShield() >= ae.GetLimitShieldA(ae.GetUserLevel())) document.getElementById("btn_newshieldaddress").disabled = true;
 
 	if (ae.IsUserAdmin()) {
 		const tblLimits = document.getElementById("tbl_limits");
 		for (let i = 0; i < 4; i++) {
 			tblLimits.rows[i].cells[1].children[0].value = ae.GetStorageLimit(i);
-			tblLimits.rows[i].cells[2].children[0].value = ae.GetAddressLimitNormal(i);
-			tblLimits.rows[i].cells[3].children[0].value = ae.GetAddressLimitShield(i);
+			tblLimits.rows[i].cells[2].children[0].value = ae.GetLimitNormalA(i);
+			tblLimits.rows[i].cells[3].children[0].value = ae.GetLimitShieldA(i);
 		}
 
 		document.getElementById("btn_admin_savelimits").onclick = function() {
@@ -701,21 +614,23 @@ document.getElementById("btn_enter").onclick = function() {
 	btn.disabled = true;
 
 	ae.SetKeys(txtSkey.value, function(successSetKeys) {
-		if (successSetKeys) {
-			ae.Account_Browse(0, function(successBrowse) {
-				if (successBrowse) {
-					txtSkey.value = "";
-					reloadInterface();
-					document.getElementById("btn_refresh").click();
-				} else {
-					console.log("Failed to enter");
-					btn.disabled = false;
-				}
-			});
-		} else {
+		if (!successSetKeys) {
 			console.log("Invalid format for key");
 			btn.disabled = false;
+			return;
 		}
+
+		ae.Message_Browse(false, true, function(statusBrowse) {
+			if (statusBrowse !== 0) {
+				console.log("Failed to enter");
+				btn.disabled = false;
+				return;
+			}
+
+			txtSkey.value = "";
+			reloadInterface();
+			document.getElementById("btn_refresh").click();
+		});
 	});
 };
 
@@ -723,20 +638,16 @@ document.getElementById("btn_refresh").onclick = function() {
 	const btn = this;
 	btn.disabled = true;
 
-	ae.Message_Browse(true, function(successBrowse) {
-		if (successBrowse) {
+	ae.Message_Browse(true, false, function(successBrowse) {
+		if (successBrowse === 0) {
 			clearMessages();
 			addMessages();
-			for (let i = ae.GetNoteCount() - 1; i >= 0; i--) {addNote(i);}
-			for (let i = ae.GetFileCount() - 1; i >= 0; i--) {addFile(i);}
-			btn.disabled = false;
+			for (let i = ae.GetUplMsgCount() - 1; i >= 0; i--) {addFile(i);}
 		} else {
 			console.log("Failed to refresh");
-			document.getElementById("div_begin").hidden = false;
-			document.getElementById("div_allears").hidden = true;
-			document.getElementById("btn_enter").disabled = false;
-			btn.disabled = false;
 		}
+
+		btn.disabled = false;
 	});
 };
 
@@ -806,40 +717,8 @@ document.getElementById("btn_send").onclick = function() {
 	});
 };
 
-document.getElementById("btn_notenew").onclick = function() {
-	document.getElementById("div_notes_texts").hidden = true;
-	document.getElementById("div_newtextnote").hidden = false;
-};
-
-document.getElementById("btn_newnote_cancel").onclick = function() {
-	document.getElementById("txt_newnote_title").value = "";
-	document.getElementById("txt_newnote_body").value = "";
-	document.getElementById("div_notes_texts").hidden = false;
-	document.getElementById("div_newtextnote").hidden = true;
-};
-
-document.getElementById("btn_newnote_save").onclick = function() {
-	const txtTitle = document.getElementById("txt_newnote_title");
-	const txtBody = document.getElementById("txt_newnote_body");
-
-	if (!txtTitle.reportValidity() || !txtBody.reportValidity()) return;
-
-	ae.Message_Assign(false, txtTitle.value, sodium.from_string(txtBody.value), function(success) {
-		if (success) {
-			addNote(ae.GetNoteCount() - 1);
-
-			document.getElementById("txt_newnote_title").value = "";
-			document.getElementById("txt_newnote_body").value = "";
-			document.getElementById("div_notes_texts").hidden = false;
-			document.getElementById("div_newtextnote").hidden = true;
-		} else {
-			console.log("Failed to save note");
-		}
-	});
-};
-
 document.getElementById("btn_newaddress").onclick = function() {
-	if (ae.GetAddressCountNormal() >= ae.GetAddressLimitNormal(ae.GetUserLevel())) return;
+	if (ae.GetAddressCountNormal() >= ae.GetLimitNormalA(ae.GetUserLevel())) return;
 
 	const txtNewAddr = document.getElementById("txt_newaddress");
 	if (!txtNewAddr.reportValidity()) return;
@@ -849,52 +728,49 @@ document.getElementById("btn_newaddress").onclick = function() {
 	btnN.disabled = true;
 	btnS.disabled = true;
 
-	ae.Address_Create(txtNewAddr.value, function(success1) {
-		if (success1) {
-			ae.Private_Update(function(success2) {
+	ae.Address_Create(txtNewAddr.value, function(error1) {
+		if (error1 === 0) {
+			ae.Private_Update(function(error2) {
 				document.getElementById("addr_use_normal").textContent = ae.GetAddressCountNormal();
 				addAddress(ae.GetAddressCount() - 1);
 				txtNewAddr.value = "";
 
-				if (!success2) console.log("Failed to update the Private field");
-
-				if (ae.GetAddressCountNormal() < ae.GetAddressLimitNormal(ae.GetUserLevel())) btnN.disabled = false;
-				if (ae.GetAddressCountShield() < ae.GetAddressLimitShield(ae.GetUserLevel())) btnS.disabled = false;
+				if (error2 !== 0) console.log("Failed to update the Private field");
+				if (ae.GetAddressCountNormal() < ae.GetLimitNormalA(ae.GetUserLevel())) btnN.disabled = false;
+				if (ae.GetAddressCountShield() < ae.GetLimitShieldA(ae.GetUserLevel())) btnS.disabled = false;
 			});
 		} else {
 			console.log("Failed to add address");
-
-			if (ae.GetAddressCountNormal() < ae.GetAddressLimitNormal(ae.GetUserLevel())) btnN.disabled = false;
-			if (ae.GetAddressCountShield() < ae.GetAddressLimitShield(ae.GetUserLevel())) btnS.disabled = false;
+			if (ae.GetAddressCountNormal() < ae.GetLimitNormalA(ae.GetUserLevel())) btnN.disabled = false;
+			if (ae.GetAddressCountShield() < ae.GetLimitShieldA(ae.GetUserLevel())) btnS.disabled = false;
 		}
 	});
 };
 
 document.getElementById("btn_newshieldaddress").onclick = function() {
-	if (ae.GetAddressCountShield() >= ae.GetAddressLimitShield(ae.GetUserLevel())) return;
+	if (ae.GetLimitShieldA() >= ae.GetLimitShieldA(ae.GetUserLevel())) return;
 
 	const btnN = document.getElementById("btn_newaddress");
 	const btnS = document.getElementById("btn_newshieldaddress");
 	btnN.disabled = true;
 	btnS.disabled = true;
 
-	ae.Address_Create("SHIELD", function(success1) {
-		if (success1) {
-			ae.Private_Update(function(success2) {
-				document.getElementById("addr_use_shield").textContent = ae.GetAddressCountShield();
-				addAddress(ae.GetAddressCount() - 1);
-
-				if (!success2) console.log("Failed to update the Private field");
-
-				if (ae.GetAddressCountNormal() < ae.GetAddressLimitNormal(ae.GetUserLevel())) btnN.disabled = false;
-				if (ae.GetAddressCountShield() < ae.GetAddressLimitShield(ae.GetUserLevel())) btnS.disabled = false;
-			});
-		} else {
+	ae.Address_Create("SHIELD", function(error1) {
+		if (error1 !== 0) {
 			console.log("Failed to add Shield address");
-
-			if (ae.GetAddressCountNormal() < ae.GetAddressLimitNormal(ae.GetUserLevel())) btnN.disabled = false;
-			if (ae.GetAddressCountShield() < ae.GetAddressLimitShield(ae.GetUserLevel())) btnS.disabled = false;
+			if (ae.GetAddressCountNormal() < ae.GetLimitNormalA(ae.GetUserLevel())) btnN.disabled = false;
+			if (ae.GetAddressCountShield() < ae.GetLimitShieldA(ae.GetUserLevel())) btnS.disabled = false;
+			return;
 		}
+
+		ae.Private_Update(function(error2) {
+			document.getElementById("addr_use_shield").textContent = ae.GetAddressCountShield();
+			addAddress(ae.GetAddressCount() - 1);
+
+			if (error2 !== 0) console.log("Failed to update the Private field");
+			if (ae.GetAddressCountNormal() < ae.GetLimitNormalA(ae.GetUserLevel())) btnN.disabled = false;
+			if (ae.GetAddressCountShield() < ae.GetLimitShieldA(ae.GetUserLevel())) btnS.disabled = false;
+		});
 	});
 };
 
@@ -904,7 +780,6 @@ document.getElementById("btn_saveaddrdata").onclick = function() {
 	for (let i = 0; i < tbl.rows.length; i++) {
 		ae.SetAddressAccExt(i, tbl.rows[i].cells[1].firstChild.checked);
 		ae.SetAddressAccInt(i, tbl.rows[i].cells[2].firstChild.checked);
-		ae.SetAddressUse_Gk(i, tbl.rows[i].cells[3].firstChild.checked);
 	}
 
 	ae.Address_Update(function(success) {
@@ -912,61 +787,6 @@ document.getElementById("btn_saveaddrdata").onclick = function() {
 			document.getElementById("btn_saveaddrdata").hidden = true;
 		} else {
 			console.log("Failed to save address data");
-		}
-	});
-};
-
-document.getElementById("btn_gkdomain_add").onclick = function() {
-	const select = document.getElementById("gatekeeper_domain");
-	const txt = document.getElementById("txt_gkdomain");
-
-	if (!txt.reportValidity()) return;
-
-	addOpt(select, txt.value);
-	txt.value = "";
-	document.getElementById("btn_savegkdata").hidden = false;
-};
-
-document.getElementById("btn_gkaddr_add").onclick = function() {
-	const select = document.getElementById("gatekeeper_addr");
-	const txt = document.getElementById("txt_gkaddr");
-
-	if (!txt.reportValidity()) return;
-
-	addOpt(select, txt.value);
-	txt.value = "";
-	document.getElementById("btn_savegkdata").hidden = false;
-};
-
-document.getElementById("btn_gkdomain_del").onclick = function() {
-	const select = document.getElementById("gatekeeper_domain");
-	if (select.selectedIndex >= 0) select.remove(select.selectedIndex);
-	document.getElementById("btn_savegkdata").hidden = false;
-};
-
-document.getElementById("btn_gkaddr_del").onclick = function() {
-	const select = document.getElementById("gatekeeper_addr");
-	if (select.selectedIndex >= 0) select.remove(select.selectedIndex);
-	document.getElementById("btn_savegkdata").hidden = false;
-};
-
-document.getElementById("btn_savegkdata").onclick = function() {
-	const blocklist = [];
-
-	let opts = document.getElementById("gatekeeper_country").selectedOptions;
-	for (let i = 0; i < opts.length; i++) blocklist.push(opts[i].value);
-
-	opts = document.getElementById("gatekeeper_domain").options;
-	for (let i = 0; i < opts.length; i++) blocklist.push(opts[i].value);
-
-	opts = document.getElementById("gatekeeper_addr").options;
-	for (let i = 0; i < opts.length; i++) blocklist.push(opts[i].value);
-
-	ae.SaveGatekeeperData(blocklist, function(success) {
-		if (success) {
-			document.getElementById("btn_savegkdata").hidden = true;
-		} else {
-			console.log("Failed to update Gatekeeper data");
 		}
 	});
 };
@@ -1024,9 +844,7 @@ document.getElementById("btn_uploadfile").onclick = function() {
 };
 
 function navNotesMenu(num) {
-	document.getElementById("div_newtextnote").hidden = true;
-
-	for (let i = 0; i < 4; i++) {
+	for (let i = 0; i < 3; i++) {
 		if (i === num) {
 			document.getElementById("div_notes").children[0].children[i].disabled = true;
 			document.getElementById("div_notes").children[1 + i].hidden = false;
@@ -1036,22 +854,6 @@ function navNotesMenu(num) {
 		}
 	}
 }
-
-document.getElementById("btn_prefs_gatekeeper").onclick = function() {
-	document.getElementById("btn_prefs_addresses").disabled = false;
-	document.getElementById("btn_prefs_gatekeeper").disabled = true;
-	document.getElementById("div_prefs_gatekeeper").hidden = false;
-	document.getElementById("div_prefs_addresses").hidden = true;
-
-	document.getElementById("div_prefs_gatekeeper").style.width = getComputedStyle(document.getElementById("gatekeeper_country")).width;
-};
-
-document.getElementById("btn_prefs_addresses").onclick = function() {
-	document.getElementById("btn_prefs_addresses").disabled = true;
-	document.getElementById("btn_prefs_gatekeeper").disabled = false;
-	document.getElementById("div_prefs_gatekeeper").hidden = true;
-	document.getElementById("div_prefs_addresses").hidden = false;
-};
 
 let btns = document.getElementsByTagName("nav")[0].getElementsByTagName("button");
 btns[0].onclick = function() {navMenu(0);};
@@ -1065,10 +867,6 @@ btns[0].onclick = function() {navNotesMenu(0);};
 btns[1].onclick = function() {navNotesMenu(1);};
 btns[2].onclick = function() {navNotesMenu(2);};
 btns[3].onclick = function() {navNotesMenu(3);};
-
-document.getElementById("gatekeeper_country").onchange = function() {
-	document.getElementById("btn_savegkdata").hidden = false;
-};
 
 document.getElementById("txt_skey").onkeyup = function(e) {
 	if (e.key === "Enter") document.getElementById("btn_enter").click();

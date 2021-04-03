@@ -55,9 +55,7 @@ The APIs can now be used.
 
 ---
 
-*Modern* and *Original* are web clients using the library. As single-page web apps, each has three files: main.js, main.css, and index.html.
-
-*Original* is not currently maintained.
+*Modern* and *Original* are web clients using the library, with the former being in more active development. As single-page web apps, each has three files: main.js, main.css, and index.html.
 
 *Local.sh* can be used to create a single-file standalone web app that can be run locally.
 
