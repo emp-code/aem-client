@@ -211,7 +211,6 @@ textarea {
 /* Main */
 
 #div_main {
-	scrollbar-color: #222 #333;
 	padding: 2em;
 	height: 100%;
 	display: grid;
@@ -221,6 +220,7 @@ textarea {
 }
 
 .main {
+	scrollbar-color: #222 #333;
 	background: #001;
 	border-radius: 3em;
 	overflow: hidden;
