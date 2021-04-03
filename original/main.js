@@ -667,7 +667,7 @@ document.getElementById("btn_send").onclick = function() {
 
 	if (!stitle.reportValidity() || !sto.reportValidity() || !sbody.reportValidity()) return;
 
-	ae.Message_Create(stitle.value, sbody.value, sfrom.value, sto.value, to_pubkey, function(error) {
+	ae.Message_Create(stitle.value, sbody.value, sfrom.value, sto.value, null, function(error) {
 		if (error === 0) {
 			stitle.value = "";
 			sto.value = "";
