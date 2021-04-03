@@ -437,13 +437,13 @@ function shieldMix(addr) {
 
 	for (let i = 0; i < 16; i++) {
 		switch (addr.charAt(i)) {
-			case '1':
+			case "1":
 				newAddr += "1iIlL".charAt(Math.floor(Math.random() * 5));
 				break;
-			case '0':
+			case "0":
 				newAddr += "0oO".charAt(Math.floor(Math.random() * 3));
 				break;
-			case 'w':
+			case "w":
 				newAddr += "VvWw".charAt(Math.floor(Math.random() * 4));
 				break;
 			default:
