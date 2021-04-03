@@ -83,24 +83,21 @@ function addIntMessage(i) {
 	cell = row.insertCell(-1);
 	cell.innerHTML = "<input class=\"delMsg\" type=\"checkbox\" data-id=\"" + ae.GetIntMsgIdHex(i) + "\">";
 	cell.children[0].onchange = function() {
-		if (!cellDel.children[0].checked) {
-			const checkboxes = tbl.getElementsByTagName("input");
-			let checked = false;
+		if (this.checked) {
+			document.getElementById("btn_msgdel").hidden = false;
+			return;
+		}
+		const checkboxes = tbl.getElementsByTagName("input");
+		let checked = false;
 
-			for (let j = 0; j < checkboxes.length; j++) {
-				if (checkboxes[j].checked) {
-					checked = true;
-					break;
-				}
-			}
-
-			if (!checked) {
-				document.getElementById("btn_msgdel").hidden = true;
-				return;
+		for (let j = 0; j < checkboxes.length; j++) {
+			if (checkboxes[j].checked) {
+				checked = true;
+				break;
 			}
 		}
 
-		document.getElementById("btn_msgdel").hidden = false;
+		document.getElementById("btn_msgdel").hidden = !checked;
 	};
 }
 
