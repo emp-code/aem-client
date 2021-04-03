@@ -114,8 +114,6 @@ function addExtMessage(i) {
 	cell.textContent = new Date(ts * 1000).toISOString().slice(0, 16).replace("T", " ");
 	cell.className = "mono";
 
-	const cc = ae.GetExtMsgCountry(i);
-
 	cell = row.insertCell(-1);
 	cell.textContent = ae.GetExtMsgTitle(i);
 	cell.onclick = function() {
@@ -128,7 +126,7 @@ function addExtMessage(i) {
 		document.getElementById("readmsg_tls").textContent = ae.GetExtMsgTLS(i);
 		document.getElementById("readmsg_ip").textContent = ae.GetExtMsgIp(i);
 
-		document.getElementById("readmsg_country").textContent = getCountryName(cc) + " " + getCountryFlag(cc);
+		document.getElementById("readmsg_country").textContent = ae.GetExtMsgCname(i) + " " + getCountryFlag(ae.GetExtMsgCcode(i));
 
 		let flagText = "";
 		if (!ae.GetExtMsgFlagPExt(i)) flagText += "<abbr title=\"The sender did not use the Extended (ESMTP) protocol\">SMTP</abbr> ";
@@ -155,8 +153,8 @@ function addExtMessage(i) {
 	cell.textContent = from.substring(0, from.indexOf("@"));
 
 	const flag = document.createElement("abbr");
-	flag.textContent = getCountryFlag(cc);
-	flag.title = getCountryName(cc);
+	flag.textContent = getCountryFlag(ae.GetExtMsgCcode(i));
+	flag.title = ae.GetExtMsgCname(i);
 
 	const fromText = document.createElement("span");
 	fromText.textContent = " " + from2;
@@ -585,8 +583,8 @@ document.getElementById("btn_enter").onclick = function() {
 	const btn = this;
 	btn.disabled = true;
 
-	ae.SetKeys(txtSkey.value, function(errorKeys) {
-		if (errorKeys !== 0) {
+	ae.SetKeys(txtSkey.value, function(success) {
+		if (!success) {
 			console.log("Invalid format for key");
 			btn.disabled = false;
 			return;
