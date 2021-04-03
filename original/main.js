@@ -260,7 +260,7 @@ function addFile(num) {
 	cell.children[0].onclick = function() {
 		ae.Message_Delete([ae.GetUplMsgIdHex(num)], function(error) {
 			if (error === 0) {
-				tr.remove();
+				row.remove();
 			} else {
 				console.log("Failed deleting file");
 			}
