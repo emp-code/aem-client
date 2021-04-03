@@ -515,13 +515,6 @@ function addRowAdmin(num) {
 	cellBtnDe.children[0].onclick = function() {destroyAccount(pkHex);};
 }
 
-function addOpt(select, val) {
-	const opt = document.createElement("option");
-	opt.value = val;
-	opt.textContent = val;
-	select.appendChild(opt);
-}
-
 function reloadInterface() {
 	if (!ae.IsUserAdmin()) document.getElementById("btn_toadmin").hidden = true;
 	document.getElementById("div_begin").hidden = true;
