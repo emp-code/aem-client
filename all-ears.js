@@ -50,7 +50,7 @@ function AllEars(readyCallback) {
 	const _AEM_ADDRESSES_PER_USER = 31;
 	const _AEM_LEN_PRIVATE = 4096 - sodium.crypto_box_PUBLICKEYBYTES - 1 - (_AEM_ADDRESSES_PER_USER * 9);
 	const _AEM_MSG_MINBLOCKS = 12;
-	const _AEM_API_BOX_SIZE_MAX = (Math.pow(2, 16) + _AEM_MSG_MINBLOCKS) * 16;
+	const _AEM_API_BOX_SIZE_MAX = 1048635; // (((2^16 - 1) + 12) * 16) - 117
 	const _AEM_USER_MAXLEVEL = 3;
 
 	const _AEM_ARGON2_MEMLIMIT = 67108864;
