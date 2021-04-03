@@ -261,8 +261,8 @@ function destroyAccount(upk_hex) {
 
 	if (rowid === -1) return;
 
-	ae.Account_Delete(upk_hex, function(success) {
-		if (success) {
+	ae.Account_Delete(upk_hex, function(error) {
+		if (error === 0) {
 			tbl.deleteRow(rowid);
 		} else {
 			console.log("Failed to destroy account");
@@ -284,8 +284,8 @@ function setAccountLevel(upk_hex, level) {
 
 	if (rowid === -1) return;
 
-	ae.Account_Update(upk_hex, level, function(success) {
-		if (!success) {
+	ae.Account_Update(upk_hex, level, function(error) {
+		if (error !== 0) {
 			console.log("Failed to set account level");
 			return;
 		}
@@ -415,8 +415,8 @@ function delMsgs(tblName, btnName) {
 		if (cbs[i].checked) ids.push(cbs[i].getAttribute("data-id"));
 	}
 
-	if (ids.length > 0) ae.Message_Delete(ids, function(success) {
-		if (success) {
+	if (ids.length > 0) ae.Message_Delete(ids, function(error) {
+		if (error === 0) {
 			clearMessages();
 			addMessages();
 			document.getElementById(btnName).hidden = true;
@@ -546,8 +546,8 @@ function reloadInterface() {
 				addrShdLimit[i] = tblLimits.rows[i].cells[3].children[0].value;
 			}
 
-			ae.SetLimits(storageLimit, addrNrmLimit, addrShdLimit, function(success) {
-				if (!success) {
+			ae.SetLimits(storageLimit, addrNrmLimit, addrShdLimit, function(error) {
+				if (error !== 0) {
 					console.log("Failed to update limits");
 				}
 			});
@@ -585,8 +585,8 @@ document.getElementById("btn_enter").onclick = function() {
 	const btn = this;
 	btn.disabled = true;
 
-	ae.SetKeys(txtSkey.value, function(successSetKeys) {
-		if (!successSetKeys) {
+	ae.SetKeys(txtSkey.value, function(errorKeys) {
+		if (errorKeys !== 0) {
 			console.log("Invalid format for key");
 			btn.disabled = false;
 			return;
@@ -610,8 +610,8 @@ document.getElementById("btn_refresh").onclick = function() {
 	const btn = this;
 	btn.disabled = true;
 
-	ae.Message_Browse(true, false, function(successBrowse) {
-		if (successBrowse === 0) {
+	ae.Message_Browse(true, false, function(error) {
+		if (error === 0) {
 			clearMessages();
 			addMessages();
 			for (let i = ae.GetUplMsgCount() - 1; i >= 0; i--) {addFile(i);}
@@ -639,8 +639,8 @@ document.getElementById("btn_contact_add").onclick = function() {
 };
 
 document.getElementById("btn_savenotes").onclick = function() {
-	ae.Private_Update(function(success) {
-		if (success) {
+	ae.Private_Update(function(error) {
+		if (error === 0) {
 			document.getElementById("btn_savenotes").hidden = true;
 		} else {
 			console.log("Failed to save note data");
@@ -667,25 +667,16 @@ document.getElementById("btn_send").onclick = function() {
 
 	if (!stitle.reportValidity() || !sto.reportValidity() || !sbody.reportValidity()) return;
 
-	ae.Address_Lookup(sto.value, function(to_pubkey) {
-		if (to_pubkey) {
-			console.log("Lookup ok, trying to send");
-
-			ae.Message_Create(stitle.value, sbody.value, sfrom.value, sto.value, to_pubkey, function(success) {
-				if (success) {
-					stitle.value = "";
-					sto.value = "";
-					sbody.value = "";
-				} else {
-					console.log("Failed sending message");
-				}
-
-				btn.disabled = false;
-			});
+	ae.Message_Create(stitle.value, sbody.value, sfrom.value, sto.value, to_pubkey, function(error) {
+		if (error === 0) {
+			stitle.value = "";
+			sto.value = "";
+			sbody.value = "";
 		} else {
-			console.log("Failed looking up address");
-			btn.disabled = false;
+			console.log("Failed sending message");
 		}
+
+		btn.disabled = false;
 	});
 };
 
@@ -754,8 +745,8 @@ document.getElementById("btn_saveaddrdata").onclick = function() {
 		ae.SetAddressAccInt(i, tbl.rows[i].cells[2].firstChild.checked);
 	}
 
-	ae.Address_Update(function(success) {
-		if (success) {
+	ae.Address_Update(function(error) {
+		if (error === 0) {
 			document.getElementById("btn_saveaddrdata").hidden = true;
 		} else {
 			console.log("Failed to save address data");
@@ -771,8 +762,8 @@ document.getElementById("btn_admin_addaccount").onclick = function() {
 	const btn = document.getElementById("btn_admin_addaccount");
 	btn.disabled = true;
 
-	ae.Account_Create(txtPkey.value, function(success) {
-		if (success) {
+	ae.Account_Create(txtPkey.value, function(error) {
+		if (error === 0) {
 			addRowAdmin(ae.Admin_GetUserCount() - 1);
 			txtPkey.value = "";
 		} else {
@@ -800,8 +791,8 @@ document.getElementById("btn_uploadfile").onclick = function() {
 	reader.onload = function(e) {
 		const u8data = new Uint8Array(reader.result);
 
-		ae.Message_Assign(true, f.name, u8data, function(success) {
-			if (success) {
+		ae.Message_Upload(true, f.name, u8data, function(error) {
+			if (error === 0) {
 				addFile(ae.GetFileCount() - 1);
 				fileSelector.value = null;
 			} else {
