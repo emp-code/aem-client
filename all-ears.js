@@ -1461,7 +1461,7 @@ function AllEars(readyCallback) {
 		if (typeof(newest) !== "boolean" || typeof(u_info) !== "boolean") {callback(0x01); return;}
 
 		let fetchId;
-		if (_extMsg.length + _intMsg.length + _uplMsg.length + _outMsg.length !== 0) {
+		if (_extMsg.length > 0 || _intMsg.length > 0 || _uplMsg.length > 0 || _outMsg.length > 0) {
 			fetchId = new Uint8Array(17);
 			fetchId[0] = 0;
 			if (newest) fetchId[0] |= _AEM_FLAG_NEWER;
