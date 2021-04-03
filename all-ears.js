@@ -1471,7 +1471,7 @@ function AllEars(readyCallback) {
 
 		let privateFail = false;
 		_FetchEncrypted(_AEM_API_MESSAGE_BROWSE, fetchId, function(fetchErr, browseData) {
-			if (fetchErr) {callback(fetchErr); return;}
+			if (fetchErr !== 0) {callback(fetchErr); return;}
 
 			if (u_info) {
 				if (browseData.length < 1000) {callback(0x07); return;}
