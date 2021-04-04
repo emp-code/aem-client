@@ -90,28 +90,6 @@ function getClockIcon(d) {
 	return String.fromCodePoint((128335 + h12) + m30);
 }
 
-function shieldMix(addr) {
-	let newAddr = "";
-
-	for (let i = 0; i < 16; i++) {
-		switch (addr.charAt(i)) {
-			case "1":
-				newAddr += "1iIlL".charAt(Math.floor(Math.random() * 5));
-				break;
-			case "0":
-				newAddr += "0oO".charAt(Math.floor(Math.random() * 3));
-				break;
-			case "w":
-				newAddr += "VvWw".charAt(Math.floor(Math.random() * 4));
-				break;
-			default:
-				newAddr += (Math.random() > 0.5) ? addr.charAt(i) : addr.charAt(i).toUpperCase();
-		}
-	}
-
-	return newAddr;
-}
-
 function downloadFile(num) {
 	const a = document.createElement("a");
 	a.href = URL.createObjectURL(new Blob([ae.GetUplMsgBody(num).buffer]));
@@ -848,7 +826,7 @@ function addAddress(num) {
 
 	let cell = row.insertCell(-1);
 	cell.textContent = addr;
-	cell.onclick = function() {navigator.clipboard.writeText(((this.textContent.length === 16) ? shieldMix(this.textContent) : this.textContent) + "@" + ae.GetDomainEml());};
+	cell.onclick = function() {navigator.clipboard.writeText(((this.textContent.length === 16) ? ae.ShieldMix(this.textContent) : this.textContent) + "@" + ae.GetDomainEml());};
 
 	cell = row.insertCell(-1);
 	let el = document.createElement("input");

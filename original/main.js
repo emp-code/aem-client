@@ -343,28 +343,6 @@ function deleteAddress(addr) {
 	});
 }
 
-function shieldMix(addr) {
-	let newAddr = "";
-
-	for (let i = 0; i < 16; i++) {
-		switch (addr.charAt(i)) {
-			case '1':
-				newAddr += "1iIlL".charAt(Math.floor(Math.random() * 5));
-				break;
-			case '0':
-				newAddr += "0oO".charAt(Math.floor(Math.random() * 3));
-				break;
-			case 'w':
-				newAddr += "VvWw".charAt(Math.floor(Math.random() * 4));
-				break;
-			default:
-				newAddr += (Math.random() > 0.5) ? addr.charAt(i) : addr.charAt(i).toUpperCase();
-		}
-	}
-
-	return newAddr;
-}
-
 function addAddress(num) {
 	const addrTable = document.getElementById("tbody_opt_addr");
 	const row = addrTable.insertRow(-1);
@@ -374,7 +352,7 @@ function addAddress(num) {
 	if (cell.textContent.length === 16) cell.className = "mono";
 	cell.onclick = function() {
 		if (cell.textContent.length === 16)
-			navigator.clipboard.writeText(shieldMix(cell.textContent) + "@" + ae.GetDomainEml());
+			navigator.clipboard.writeText(ae.ShieldMix(cell.textContent) + "@" + ae.GetDomainEml());
 		else
 			navigator.clipboard.writeText(cell.textContent + "@" + ae.GetDomainEml());
 	};

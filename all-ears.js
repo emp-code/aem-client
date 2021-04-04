@@ -1972,6 +1972,29 @@ function AllEars(readyCallback) {
 		_FetchEncrypted(_AEM_API_PRIVATE_UPDATE, final, function(fetchErr) {callback(fetchErr);});
 	};
 
+	// Extras
+	this.ShieldMix = function(addr) {
+		let newAddr = "";
+
+		for (let i = 0; i < 16; i++) {
+			switch (addr.charAt(i)) {
+				case "1":
+					newAddr += "1iIlL".charAt(Math.floor(Math.random() * 5));
+					break;
+				case "0":
+					newAddr += "0oO".charAt(Math.floor(Math.random() * 3));
+					break;
+				case "w":
+					newAddr += "VvWw".charAt(Math.floor(Math.random() * 4));
+					break;
+				default:
+					newAddr += (Math.random() > 0.5) ? addr.charAt(i).toLowerCase() : addr.charAt(i).toUpperCase();
+			}
+		}
+
+		return newAddr;
+	}
+
 	this.GetErrorMessage = function(err) {
 		switch (err) {
 			// 0x01-0x20	Client-side error codes
