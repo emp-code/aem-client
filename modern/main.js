@@ -585,9 +585,7 @@ function addMessages() {
 	let skipMsgs = rowsPerPage * tabs[TAB_INBOX].cur;
 
 	const loadMore = ae.GetReadyMsgBytes() < ae.GetTotalMsgBytes();
-
 	tabs[TAB_INBOX].max = Math.floor((maxExt + maxInt - (loadMore? 0 : 1)) / rowsPerPage);
-	document.getElementById("btn_rght").disabled = (tabs[TAB_INBOX].cur >= tabs[TAB_INBOX].max);
 
 	if (maxExt + maxInt > 0) {
 		let numExt = 0;
@@ -610,6 +608,8 @@ function addMessages() {
 	} else {
 		tabs[TAB_INBOX].max = 0;
 	}
+
+	document.getElementById("btn_rght").disabled = (tabs[TAB_INBOX].cur >= tabs[TAB_INBOX].max);
 
 	if (loadMore && tabs[TAB_INBOX].cur >= tabs[TAB_INBOX].max) {
 		const inbox = document.getElementById("tbl_inbox");
