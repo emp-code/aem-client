@@ -619,22 +619,22 @@ function addUploads() {
 	for (let i = 0; i < ae.GetUplMsgCount(); i++) {
 		const row = tbl.insertRow(-1);
 		row.setAttribute("data-msgid", ae.GetUplMsgIdHex(i));
+		row.onclick = function() {displayFile(this.rowIndex - 1);};
 
 		let cell = row.insertCell(-1);
 		cell.textContent = new Date(ae.GetUplMsgTime(i) * 1000).toISOString().slice(0, 10);
 
 		cell = row.insertCell(-1);
 		cell.textContent = ae.GetUplMsgTitle(i);
-		cell.onclick = function() {displayFile(this.parentElement.rowIndex - 1);};
 
 		cell = row.insertCell(-1);
 		cell.textContent = (ae.GetUplMsgBytes(i) / 1024).toFixed(1);
 
+		cell = row.insertCell(-1);
 		const btn = document.createElement("button");
 		btn.setAttribute("data-msgid", ae.GetUplMsgIdHex(i));
 		btn.type = "button";
 		btn.textContent = "X";
-
 		btn.onclick = function() {
 			const tr = this.parentElement.parentElement;
 			ae.Message_Delete(this.getAttribute("data-msgid"), function(error) {
@@ -642,8 +642,6 @@ function addUploads() {
 				else errorDialog(error);
 			});
 		};
-
-		cell = row.insertCell(-1);
 		cell.appendChild(btn);
 	}
 }
