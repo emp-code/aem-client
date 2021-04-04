@@ -572,7 +572,7 @@ function getRowsPerPage() {
 	const cell = row.insertCell(-1);
 	cell.textContent = "0";
 
-	const rowsPerPage = Math.floor(getComputedStyle(document.getElementById("div_inbox")).height.replace("px", "") / getComputedStyle(document.querySelector("#tbl_inbox > tbody > tr:first-child")).height.replace("px", "")) - 1; // -1 allows space for 'load more'
+	const rowsPerPage = Math.floor(getComputedStyle(document.getElementById("div_inbox")).height.replace("px", "") / getComputedStyle(document.querySelector("#tbl_inbox > tbody > tr:first-child")).height.replace("px", ""));
 	tbl.replaceChildren();
 	return rowsPerPage;
 }
@@ -581,36 +581,37 @@ function addMessages() {
 	const maxExt = ae.GetExtMsgCount();
 	const maxInt = ae.GetIntMsgCount();
 
-	if (maxExt + maxInt < 1) {
-		tabs[TAB_INBOX].max = 0;
-		return;
-	}
-
 	const rowsPerPage = getRowsPerPage();
 	let skipMsgs = rowsPerPage * tabs[TAB_INBOX].cur;
 
-	tabs[TAB_INBOX].max = Math.floor((maxExt + maxInt - 1) / rowsPerPage);
+	const loadMore = tabs[TAB_INBOX].cur >= tabs[TAB_INBOX].max && ae.GetReadyMsgBytes() < ae.GetTotalMsgBytes();
+
+	tabs[TAB_INBOX].max = Math.floor((maxExt + maxInt - (loadMore? 0 : 1)) / rowsPerPage);
 	document.getElementById("btn_rght").disabled = (tabs[TAB_INBOX].cur >= tabs[TAB_INBOX].max);
 
-	let numExt = 0;
-	let numInt = 0;
-	let numAdd = 0;
+	if (maxExt + maxInt > 0) {
+		let numExt = 0;
+		let numInt = 0;
+		let numAdd = 0;
 
-	while (numAdd < rowsPerPage) {
-		const tsInt = (numInt < maxInt) ? ae.GetIntMsgTime(numInt) : -1;
-		const tsExt = (numExt < maxExt) ? ae.GetExtMsgTime(numExt) : -1;
-		if (tsInt === -1 && tsExt === -1) break;
+		while (numAdd < rowsPerPage) {
+			const tsInt = (numInt < maxInt) ? ae.GetIntMsgTime(numInt) : -1;
+			const tsExt = (numExt < maxExt) ? ae.GetExtMsgTime(numExt) : -1;
+			if (tsInt === -1 && tsExt === -1) break;
 
-		if (tsInt !== -1 && (tsExt === -1 || tsInt > tsExt)) {
-			if (skipMsgs > 0) skipMsgs--; else {addMsg(true, numInt); numAdd++;}
-			numInt++;
-		} else if (tsExt !== -1) {
-			if (skipMsgs > 0) skipMsgs--; else {addMsg(false, numExt); numAdd++;}
-			numExt++;
+			if (tsInt !== -1 && (tsExt === -1 || tsInt > tsExt)) {
+				if (skipMsgs > 0) skipMsgs--; else {addMsg(true, numInt); numAdd++;}
+				numInt++;
+			} else if (tsExt !== -1) {
+				if (skipMsgs > 0) skipMsgs--; else {addMsg(false, numExt); numAdd++;}
+				numExt++;
+			}
 		}
+	} else {
+		tabs[TAB_INBOX].max = 0;
 	}
 
-	if (ae.GetReadyMsgBytes() < ae.GetTotalMsgBytes()) {
+	if (loadMore) {
 		const inbox = document.getElementById("tbl_inbox");
 		const row = inbox.insertRow(-1);
 		const cell = row.insertCell(-1);
@@ -626,6 +627,8 @@ function addMessages() {
 				}
 
 				addMessages();
+				addSent();
+				addUploads();
 			});
 		};
 	}
