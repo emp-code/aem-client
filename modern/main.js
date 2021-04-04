@@ -584,7 +584,7 @@ function addMessages() {
 	const rowsPerPage = getRowsPerPage();
 	let skipMsgs = rowsPerPage * tabs[TAB_INBOX].cur;
 
-	const loadMore = tabs[TAB_INBOX].cur >= tabs[TAB_INBOX].max && ae.GetReadyMsgBytes() < ae.GetTotalMsgBytes();
+	const loadMore = ae.GetReadyMsgBytes() < ae.GetTotalMsgBytes();
 
 	tabs[TAB_INBOX].max = Math.floor((maxExt + maxInt - (loadMore? 0 : 1)) / rowsPerPage);
 	document.getElementById("btn_rght").disabled = (tabs[TAB_INBOX].cur >= tabs[TAB_INBOX].max);
@@ -611,7 +611,7 @@ function addMessages() {
 		tabs[TAB_INBOX].max = 0;
 	}
 
-	if (loadMore) {
+	if (loadMore && tabs[TAB_INBOX].cur >= tabs[TAB_INBOX].max) {
 		const inbox = document.getElementById("tbl_inbox");
 		const row = inbox.insertRow(-1);
 		const cell = row.insertCell(-1);
