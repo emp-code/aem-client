@@ -1177,7 +1177,8 @@ function AllEars(readyCallback) {
 		+ "\r\nSubject: " + _extMsg[num].subj
 		+ "\r\nTo: " + (_extMsg[num].dnTo ? ("\"" + _extMsg[num].dnTo + "\" <" + _extMsg[num].hdrTo + ">") : _extMsg[num].hdrTo)
 		+ "\r\n" + _extMsg[num].headers.replaceAll("\n", "\r\n")
-		+ "\r\n\r\n" + _extMsg[num].body.replaceAll("\n", "\r\n");
+		+ "\r\n\r\n" + _extMsg[num].body.replaceAll("\n", "\r\n")
+		+ "\r\n";
 	};
 
 	this.ExportIntMsg = function(num) {
