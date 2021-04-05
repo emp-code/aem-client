@@ -213,29 +213,26 @@ function displayFile(num) {
 
 function displayMsg(isInt, num) {
 	clearDisplay();
-
 	document.getElementById("btn_mdele").disabled = false;
-	document.getElementById("btn_msave").disabled = isInt;
 
 	document.querySelector("article").scroll(0, 0);
 	document.querySelector("article").setAttribute("data-msgid", isInt? ae.GetIntMsgIdHex(num) : ae.GetExtMsgIdHex(num));
 
+	document.getElementById("btn_msave").disabled = false;
+	document.getElementById("btn_msave").onclick = function() {
+		this.blur();
+
+		const a = document.createElement("a");
+		a.href = URL.createObjectURL(new Blob([isInt? ae.ExportIntMsg(num) : ae.ExportExtMsg(num)]));
+		a.download = (isInt? ae.GetIntMsgTitle(num) : ae.GetExtMsgTitle(num)) + ".eml";
+		a.click();
+
+		URL.revokeObjectURL(a.href);
+		a.href = "";
+		a.download = "";
+	};
+
 	const ts = isInt? ae.GetIntMsgTime(num) : ae.GetExtMsgTime(num);
-
-	if (!isInt) {
-		document.getElementById("btn_msave").onclick = function() {
-			this.blur();
-
-			const a = document.createElement("a");
-			a.href = URL.createObjectURL(new Blob([ae.ExportExtMsg(num)]));
-			a.download = ae.GetExtMsgTitle(num) + ".eml";
-			a.click();
-
-			URL.revokeObjectURL(a.href);
-			a.href = "";
-			a.download = "";
-		};
-	}
 
 	if (!isInt || (ae.GetIntMsgFrom(num) !== "public" && ae.GetIntMsgFrom(num) !== "system")) {
 		document.getElementById("btn_reply").disabled = false;
