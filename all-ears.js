@@ -2007,7 +2007,7 @@ function AllEars(readyCallback) {
 		}
 
 		return newAddr;
-	}
+	};
 
 	this.GetErrorMessage = function(err) {
 		switch (err) {
