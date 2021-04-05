@@ -1188,7 +1188,6 @@ function AllEars(readyCallback) {
 		+ "\r\nFrom: " + _intMsg[num].from + "@" + _AEM_DOMAIN_EML
 		+ "\r\nMIME-Version: 1.0"
 		+ "\r\nMessage-ID: <" + sodium.to_hex(_intMsg[num].id) + "@int." + _AEM_DOMAIN_EML + ">"
-		+ "\r\nReturn-Path: <" + _intMsg[num].from + "@" + _AEM_DOMAIN_EML + ">"
 		+ "\r\nSubject: " + _intMsg[num].title
 		+ (_intMsg[num].to? ("\r\nTo: " + _intMsg[num].to + "@" + _AEM_DOMAIN_EML) : "")
 		+ "\r\n\r\n" + _intMsg[num].body.replaceAll("\n", "\r\n")
