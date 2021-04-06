@@ -593,6 +593,8 @@ function addMessages() {
 		cell.textContent = "Load more (" + Math.round((ae.GetTotalMsgBytes() - ae.GetReadyMsgBytes()) / 1024) + " KiB left)";
 
 		row.onclick = function() {
+			inbox.style.opacity = 0.5;
+
 			ae.Message_Browse(false, false, function(errorBrowse) {
 				inbox.style.opacity = 1;
 
