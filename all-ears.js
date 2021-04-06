@@ -34,9 +34,10 @@ function AllEars(readyCallback) {
 	const _AEM_API_MESSAGE_CREATE = 9;
 	const _AEM_API_MESSAGE_DELETE = 10;
 	const _AEM_API_MESSAGE_PUBLIC = 11;
-	const _AEM_API_MESSAGE_UPLOAD = 12;
-	const _AEM_API_PRIVATE_UPDATE = 13;
-	const _AEM_API_SETTING_LIMITS = 14;
+	const _AEM_API_MESSAGE_SENDER = 12;
+	const _AEM_API_MESSAGE_UPLOAD = 13;
+	const _AEM_API_PRIVATE_UPDATE = 14;
+	const _AEM_API_SETTING_LIMITS = 15;
 
 	const _AEM_ADDR_FLAG_SHIELD = 128;
 	// 64/32/16/8/4 unused
@@ -1902,6 +1903,23 @@ function AllEars(readyCallback) {
 			_readyMsgBytes += x;
 
 			callback(0);
+		});
+	};
+
+	this.Message_Sender = function(hash, ts, callback) {
+		if (typeof(hash) !== "string" || hash.length !== 64 || typeof(ts) !== "number" || ts < 1577836800 || ts > 4294967295) {callback(0x01); return;}
+
+		const u8data = new Uint8Array(52);
+		u8data.set(sodium.from_base64(hash, sodium.base64_variants.URLSAFE));
+		u8data.set(new Uint8Array([
+			(ts & 0x000000FF),
+			(ts & 0x0000FF00) >>  8,
+			(ts & 0x00FF0000) >> 16,
+			(ts & 0xFF000000) >> 24
+		]), 48);
+
+		_FetchEncrypted(_AEM_API_MESSAGE_SENDER, u8data, function(fetchErr, result) {
+			callback(fetchErr, result);
 		});
 	};
 
