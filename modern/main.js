@@ -594,7 +594,7 @@ function addMessages() {
 
 		row.onclick = function() {
 			ae.Message_Browse(false, false, function(errorBrowse) {
-				document.getElementById("tbl_inbox").style.opacity = 1;
+				inbox.style.opacity = 1;
 
 				if (errorBrowse !== 0) {
 					errorDialog(errorBrowse);
