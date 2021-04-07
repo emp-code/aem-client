@@ -266,7 +266,13 @@ function displayMsg(isInt, num) {
 	document.querySelector("article > pre").hidden = false;
 
 	document.getElementById("readmsg_envto").textContent = isInt ? "" : ae.GetExtMsgEnvTo(num);
-	document.getElementById("readmsg_hdrto").textContent = isInt ? ae.GetIntMsgTo(num) : (ae.GetExtMsgHdrTo(num) + (ae.GetExtMsgDnTo(num) ? " (" + ae.GetExtMsgDnTo(num) + ")" : ""));
+	document.getElementById("readmsg_hdrto").textContent = isInt ? ae.GetIntMsgTo(num) : (ae.GetExtMsgHdrTo(num));
+	if(!isInt && ae.GetExtMsgDnTo(num)) {
+		const span = document.createElement("span");
+		span.className = "sans";
+		span.textContent = " • " + ae.GetExtMsgDnTo(num);
+		document.getElementById("readmsg_hdrto").appendChild(span);
+	}
 
 	const tzOs = new Date().getTimezoneOffset();
 	const msgDate = new Date((ts * 1000) + (tzOs * -60000));
@@ -389,7 +395,13 @@ function displayMsg(isInt, num) {
 		document.getElementById("readmsg_cert").children[0].textContent = ae.GetExtMsgTlsDomain(num) ? (ae.GetExtMsgTlsDomain(num) + " ✓") : "";
 		document.getElementById("readmsg_dkim").children[0].textContent = dkim;
 		document.getElementById("readmsg_envfrom").textContent = ae.GetExtMsgEnvFrom(num);
-		document.getElementById("readmsg_hdrfrom").textContent = ae.GetExtMsgHdrFrom(num) + (ae.GetExtMsgDnFrom(num) ? " (" + ae.GetExtMsgDnFrom(num) + ")" : "");
+		document.getElementById("readmsg_hdrfrom").textContent = ae.GetExtMsgHdrFrom(num);
+		if (ae.GetExtMsgDnFrom(num)) {
+			const span = document.createElement("span");
+			span.className = "sans";
+			span.textContent = " • " + ae.GetExtMsgDnFrom(num);
+			document.getElementById("readmsg_hdrfrom").appendChild(span);
+		}
 
 		clearMsgFlags();
 		if (!ae.GetExtMsgFlagVPad(num)) addMsgFlag("PAD", "Invalid padding");

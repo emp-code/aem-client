@@ -144,6 +144,10 @@ textarea {
 	text-align: center;
 }
 
+.sans {
+	font-family: sans-serif;
+}
+
 /* Begin */
 
 #div_begin,
