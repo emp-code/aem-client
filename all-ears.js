@@ -2056,6 +2056,7 @@ function AllEars(readyCallback) {
 			case 0x24: return ["INTERNAL",  "Internal server error"];
 			case 0x25: return ["TODO",      "Functionality missing - in development"];
 			case 0x26: return ["FIXME",     "Unexpected error encountered"];
+			case 0x27: return ["CMD",       "No such API command"];
 			case 0x2A: return ["NOTEXIST",  "Item does not exist"];
 
 			// 0x30-0x3F	Misc
