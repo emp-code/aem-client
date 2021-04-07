@@ -2057,10 +2057,10 @@ function AllEars(readyCallback) {
 			case 0x25: return ["TODO",      "Functionality missing - in development"];
 			case 0x26: return ["FIXME",     "Unexpected error encountered"];
 			case 0x27: return ["CMD",       "No such API command"];
-			case 0x2A: return ["NOTEXIST",  "Item does not exist"];
 
 			// 0x30-0x3F	Misc
-			case 0x30: return ["ACCOUNT_DELETE_NOSTORAGE", "Account data was deleted, but deleting message data failed due to an internal error."];
+			case 0x30: return ["ACCOUNT_CREATE_EXIST",     "Account already exists"];
+			case 0x31: return ["ACCOUNT_DELETE_NOSTORAGE", "Account data was deleted, but deleting message data failed due to an internal error."];
 
 			// 0xDA-0xDF	Address/Create|Delete|Update
 			case 0xDA: return ["ADDRESS_CREATE_INUSE",     "Address already taken"];
