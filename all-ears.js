@@ -2072,6 +2072,7 @@ function AllEars(readyCallback) {
 			case 0x25: return ["TODO",      "Functionality missing - in development"];
 			case 0x26: return ["FIXME",     "Unexpected error encountered"];
 			case 0x27: return ["CMD",       "No such API command"];
+			case 0x28: return ["ENC_RESP",  "Server failed encrypting response"];
 
 			// 0x30-0x3F	Misc
 			case 0x30: return ["ACCOUNT_CREATE_EXIST",     "Account already exists"];
