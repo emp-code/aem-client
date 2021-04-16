@@ -465,21 +465,6 @@ function displayOutMsg(num) {
 	if ( ae.GetOutMsgFlagE2ee(num)) addMsgFlag("E2EE", "End-to-end encrypted");
 }
 
-function addSent() {
-	const tbl = document.getElementById("tbl_drbox");
-	tbl.replaceChildren();
-
-	for (let i = 0; i < ae.GetOutMsgCount(); i++) {
-		const row = tbl.insertRow(-1);
-		row.setAttribute("data-msgid", ae.GetOutMsgIdHex(i));
-
-		let cell;
-		cell = row.insertCell(-1); cell.textContent = new Date(ae.GetOutMsgTime(i) * 1000).toISOString().slice(0, 10);
-		cell = row.insertCell(-1); cell.textContent = ae.GetOutMsgSubj(i);
-		row.onclick = function() {displayOutMsg(i);};
-	}
-}
-
 function updateAddressButtons() {
 	const limitReached = (ae.GetAddressCountNormal() + ae.GetAddressCountShield() >= 31);
 	document.getElementById("btn_address_create_normal").disabled = (limitReached || ae.GetAddressCountNormal() >= ae.GetLimitNormalA(ae.GetUserLevel()));
@@ -553,18 +538,7 @@ function addMsg(isInt, i) {
 	};
 }
 
-function getRowsPerPage() {
-	const tbl = document.getElementById("tbl_inbox");
-	tbl.replaceChildren();
-	const row = tbl.insertRow(-1);
-	const cell = row.insertCell(-1);
-	cell.textContent = "0";
-
-	rowsPerPage = Math.floor(getComputedStyle(document.getElementById("div_inbox")).height.replace("px", "") / getComputedStyle(document.querySelector("#tbl_inbox > tbody > tr:first-child")).height.replace("px", ""));
-	tbl.replaceChildren();
-}
-
-function addMessages() {
+function showInbox() {
 	const maxExt = ae.GetExtMsgCount();
 	const maxInt = ae.GetIntMsgCount();
 	const loadMore = ae.GetReadyMsgBytes() < ae.GetTotalMsgBytes();
@@ -613,16 +587,29 @@ function addMessages() {
 					return;
 				}
 
-				addMessages();
-				addSent();
-				addUploads();
+				showInbox();
 			});
 		};
 	}
 }
 
-function addUploads() {
-	const tbl = document.getElementById("tbd_uploads");
+function showDrbox() {
+	const tbl = document.getElementById("tbl_drbox");
+	tbl.replaceChildren();
+
+	for (let i = 0; i < ae.GetOutMsgCount(); i++) {
+		const row = tbl.insertRow(-1);
+		row.setAttribute("data-msgid", ae.GetOutMsgIdHex(i));
+
+		let cell;
+		cell = row.insertCell(-1); cell.textContent = new Date(ae.GetOutMsgTime(i) * 1000).toISOString().slice(0, 10);
+		cell = row.insertCell(-1); cell.textContent = ae.GetOutMsgSubj(i);
+		row.onclick = function() {displayOutMsg(i);};
+	}
+}
+
+function showFiles() {
+	const tbl = document.getElementById("tbd_files");
 	tbl.replaceChildren();
 
 	for (let i = 0; i < ae.GetUplMsgCount(); i++) {
@@ -691,6 +678,21 @@ function addAccountToTable(i) {
 		});
 	};
 	cell.appendChild(btn);
+}
+
+function getRowsPerPage() {
+	const btnInbox = document.getElementById("btn_inbox");
+	btnInbox.click();
+
+	const tbl = document.getElementById("tbl_inbox");
+	tbl.replaceChildren();
+	const row = tbl.insertRow(-1);
+	const cell = row.insertCell(-1);
+	cell.textContent = "0";
+
+	rowsPerPage = Math.floor(getComputedStyle(document.getElementById("div_inbox")).height.replace("px", "") / getComputedStyle(document.querySelector("#tbl_inbox > tbody > tr:first-child")).height.replace("px", ""));
+	tbl.replaceChildren();
+	showInbox();
 }
 
 function reloadAccount() {
@@ -787,11 +789,8 @@ function reloadAccount() {
 	}
 
 	updateAddressCounts();
-	document.getElementById("btn_inbox").click();
 	getRowsPerPage();
-	addMessages();
-	addUploads();
-	addSent();
+	document.getElementById("btn_inbox").click();
 
 	document.getElementById("btn_rght").disabled = (tabs[tab].cur === tabs[tab].max);
 }
@@ -893,7 +892,7 @@ document.getElementById("btn_updt").onclick = function() {
 
 		ae.Message_Browse(true, false, function(error) {
 			if (error === 0) {
-				addMessages();
+				showInbox();
 			} else {
 				errorDialog(error);
 			}
@@ -920,9 +919,9 @@ document.getElementById("btn_mdele").onclick = function() {
 		}
 
 		switch (tab) {
-			case TAB_INBOX: addMessages(); break;
-			case TAB_DRBOX: addSent(); break;
-			case TAB_NOTES: addUploads(); break;
+			case TAB_INBOX: showInbox(); break;
+			case TAB_DRBOX: showDrbox(); break;
+			case TAB_NOTES: showFiles(); break;
 		}
 	});
 };
@@ -1030,11 +1029,11 @@ function writeVerify() {
 function updateTab() {
 	switch (tab) {
 		case TAB_INBOX:
-			addMessages();
+			showInbox();
 		break;
 
 		case TAB_DRBOX:
-			addSent();
+			showDrbox();
 		break;
 
 		case TAB_WRITE:
@@ -1051,6 +1050,8 @@ function updateTab() {
 			for (let i = 0; i <= tabs[tab].max; i++) {
 				document.getElementById("div_notes").children[i].hidden = (i !== tabs[tab].cur);
 			}
+
+			if (tabs[tab].cur > 1) showFiles();
 		break;
 
 		case TAB_TOOLS:
@@ -1198,7 +1199,7 @@ document.getElementById("btn_notepad_saveupl").onclick = function() {
 	ae.Message_Upload(fname, np.value, function(error) {
 		if (error === 0) {
 			np.value = "";
-			addUploads();
+			showFiles();
 			document.getElementById("tbd_accs").children[0].children[1].textContent = Math.round(ae.GetTotalMsgBytes() / 1024 / 1024);
 		} else errorDialog(error);
 
@@ -1219,7 +1220,7 @@ document.getElementById("btn_upload").onclick = function() {
 		reader.onload = function() {
 			ae.Message_Upload(fileSelector.files[0].name, new Uint8Array(reader.result), function(error) {
 				if (error === 0) {
-					addUploads();
+					showFiles();
 					document.getElementById("tbd_accs").children[0].children[1].textContent = Math.round(ae.GetTotalMsgBytes() / 1024 / 1024);
 				} else errorDialog(error);
 
@@ -1274,7 +1275,7 @@ document.querySelector("#write2_send > button").onclick = function() {
 				return;
 			}
 
-			addSent();
+			showDrbox();
 			clearWrite();
 			displayOutMsg(0);
 		}
