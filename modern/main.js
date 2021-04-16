@@ -31,6 +31,7 @@ const tabs = [
 	new TabState(0, 2, false, true) // Tools
 ];
 
+let rowsPerPage = 0;
 let showHeaders = false;
 
 let tab = 0;
@@ -559,22 +560,21 @@ function getRowsPerPage() {
 	const cell = row.insertCell(-1);
 	cell.textContent = "0";
 
-	const rowsPerPage = Math.floor(getComputedStyle(document.getElementById("div_inbox")).height.replace("px", "") / getComputedStyle(document.querySelector("#tbl_inbox > tbody > tr:first-child")).height.replace("px", ""));
+	rowsPerPage = Math.floor(getComputedStyle(document.getElementById("div_inbox")).height.replace("px", "") / getComputedStyle(document.querySelector("#tbl_inbox > tbody > tr:first-child")).height.replace("px", ""));
 	tbl.replaceChildren();
-	return rowsPerPage;
 }
 
 function addMessages() {
 	const maxExt = ae.GetExtMsgCount();
 	const maxInt = ae.GetIntMsgCount();
-
-	const rowsPerPage = getRowsPerPage();
-	let skipMsgs = rowsPerPage * tabs[TAB_INBOX].cur;
-
 	const loadMore = ae.GetReadyMsgBytes() < ae.GetTotalMsgBytes();
-	tabs[TAB_INBOX].max = Math.floor((maxExt + maxInt - (loadMore? 0 : 1)) / rowsPerPage);
 
 	if (maxExt + maxInt > 0) {
+		tabs[TAB_INBOX].max = Math.floor((maxExt + maxInt - (loadMore? 0 : 1)) / rowsPerPage);
+		document.getElementById("btn_rght").disabled = (tabs[TAB_INBOX].cur >= tabs[TAB_INBOX].max);
+		document.getElementById("tbl_inbox").replaceChildren();
+
+		let skipMsgs = rowsPerPage * tabs[TAB_INBOX].cur;
 		let numExt = 0;
 		let numInt = 0;
 		let numAdd = 0;
@@ -595,8 +595,6 @@ function addMessages() {
 	} else {
 		tabs[TAB_INBOX].max = 0;
 	}
-
-	document.getElementById("btn_rght").disabled = (tabs[TAB_INBOX].cur >= tabs[TAB_INBOX].max);
 
 	if (loadMore && tabs[TAB_INBOX].cur >= tabs[TAB_INBOX].max) {
 		const inbox = document.getElementById("tbl_inbox");
@@ -789,6 +787,8 @@ function reloadAccount() {
 	}
 
 	updateAddressCounts();
+	document.getElementById("btn_inbox").click();
+	getRowsPerPage();
 	addMessages();
 	addUploads();
 	addSent();
