@@ -862,26 +862,25 @@ function addAddress(num) {
 	document.getElementById("write_from").appendChild(el);
 }
 
+function clearWrite() {
+	tabs[tab].cur = 0;
+	updateTab();
+
+	document.querySelector("#write2_pkey > input").value = "";
+	document.getElementById("write_body").value = "";
+	document.getElementById("write_subj").value = "";
+	document.getElementById("write_subj").readOnly = false;
+	document.getElementById("write_subj").setAttribute("data-replyid", "");
+	document.getElementById("write_recv").value = "";
+	document.getElementById("write_recv").readOnly = false;
+	document.getElementById("write_recv").focus();
+}
+
 // Interface
 document.getElementById("btn_dele").onclick = function() {
 	this.blur();
 
-	if (tab === TAB_WRITE) {
-		tabs[tab].cur = 0;
-		updateTab();
-
-		document.querySelector("#write2_pkey > input").value = "";
-
-		document.getElementById("write_recv").value = "";
-		document.getElementById("write_subj").value = "";
-		document.getElementById("write_body").value = "";
-
-		document.getElementById("write_recv").readOnly = false;
-		document.getElementById("write_subj").readOnly = false;
-		document.getElementById("write_subj").setAttribute("data-replyid", "");
-
-		document.getElementById("write_recv").focus();
-	}
+	if (tab === TAB_WRITE) clearWrite();
 };
 
 document.getElementById("btn_updt").onclick = function() {
@@ -1272,18 +1271,16 @@ document.querySelector("#write2_send > button").onclick = function() {
 		document.getElementById("write_subj").getAttribute("data-replyid"),
 		(document.getElementById("write2_recv").textContent.indexOf("@") > 0) ? null : sodium.from_base64(document.querySelector("#write2_pkey > input").value, sodium.base64_variants.ORIGINAL_NO_PADDING),
 		function(error) {
-			if (error === 0) {
-				document.getElementById("write2_btntxt").textContent = "Delivered to";
-				document.getElementById("write_recv").value = "";
-				document.getElementById("write_subj").value = "";
-				document.getElementById("write_body").value = "";
-				addSent();
-			} else {
+			if (error !== 0) {
 				errorDialog(error);
-
 				document.getElementById("write2_btntxt").textContent = "Retry sending to";
 				btn.disabled = false;
+				return;
 			}
+
+			addSent();
+			clearWrite();
+			displayOutMsg(0);
 		}
 	);
 };
