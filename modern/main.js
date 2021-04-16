@@ -595,16 +595,56 @@ function showInbox() {
 
 function showDrbox() {
 	const tbl = document.getElementById("tbl_drbox");
-	tbl.replaceChildren();
+	const drCount = ae.GetOutMsgCount();
+	const loadMore = ae.GetReadyMsgBytes() < ae.GetTotalMsgBytes();
 
-	for (let i = 0; i < ae.GetOutMsgCount(); i++) {
+	if (drCount > 0) {
+		tabs[TAB_DRBOX].max = Math.floor((drCount - (loadMore? 0 : 1)) / rowsPerPage);
+		document.getElementById("btn_rght").disabled = (tabs[TAB_DRBOX].cur >= tabs[TAB_DRBOX].max);
+		tbl.replaceChildren();
+
+		let skipMsgs = rowsPerPage * tabs[TAB_DRBOX].cur;
+		let numAdd = 0;
+
+		for (let i = 0; numAdd < rowsPerPage && i < drCount; i++) {
+			if (skipMsgs > 0) {
+				skipMsgs--;
+				continue;
+			}
+
+			const row = tbl.insertRow(-1);
+			row.setAttribute("data-msgid", ae.GetOutMsgIdHex(i));
+
+			let cell;
+			cell = row.insertCell(-1); cell.textContent = new Date(ae.GetOutMsgTime(i) * 1000).toISOString().slice(0, 10);
+			cell = row.insertCell(-1); cell.textContent = ae.GetOutMsgSubj(i);
+			row.onclick = function() {displayOutMsg(i);};
+
+			numAdd++;
+		}
+	} else {
+		tabs[TAB_DRBOX].max = 0;
+	}
+
+	if (loadMore && tabs[TAB_DRBOX].cur >= tabs[TAB_DRBOX].max) {
 		const row = tbl.insertRow(-1);
-		row.setAttribute("data-msgid", ae.GetOutMsgIdHex(i));
+		const cell = row.insertCell(-1);
+		cell.textContent = "Load more (" + Math.round((ae.GetTotalMsgBytes() - ae.GetReadyMsgBytes()) / 1024) + " KiB left)";
 
-		let cell;
-		cell = row.insertCell(-1); cell.textContent = new Date(ae.GetOutMsgTime(i) * 1000).toISOString().slice(0, 10);
-		cell = row.insertCell(-1); cell.textContent = ae.GetOutMsgSubj(i);
-		row.onclick = function() {displayOutMsg(i);};
+		row.onclick = function() {
+			tbl.style.opacity = 0.5;
+
+			ae.Message_Browse(false, false, function(errorBrowse) {
+				tbl.style.opacity = 1;
+
+				if (errorBrowse !== 0) {
+					errorDialog(errorBrowse);
+					return;
+				}
+
+				showDrbox();
+			});
+		};
 	}
 }
 
@@ -791,8 +831,6 @@ function reloadAccount() {
 	updateAddressCounts();
 	getRowsPerPage();
 	document.getElementById("btn_inbox").click();
-
-	document.getElementById("btn_rght").disabled = (tabs[tab].cur === tabs[tab].max);
 }
 
 function deleteAddress(addr) {
@@ -1028,13 +1066,8 @@ function writeVerify() {
 
 function updateTab() {
 	switch (tab) {
-		case TAB_INBOX:
-			showInbox();
-		break;
-
-		case TAB_DRBOX:
-			showDrbox();
-		break;
+		case TAB_INBOX: showInbox(); break;
+		case TAB_DRBOX: showDrbox(); break;
 
 		case TAB_WRITE:
 			if (tabs[tab].cur === 0) {
