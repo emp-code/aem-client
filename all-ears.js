@@ -1808,7 +1808,7 @@ function AllEars(readyCallback) {
 			bin[0] = 0xFF;
 
 			_FetchEncrypted(_AEM_API_MESSAGE_CREATE, bin, function(fetchErr, msgReport) {
-				if (fetchErr === 0) _AddOutMsg(msgReport.slice(21), true, true, msgReport.slice(0, 16), new Uint32Array(msgReport.slice(17, 21).buffer)[0], null, true);
+				if (fetchErr === 0 && (msgReport[16] & 48) === 48) _AddOutMsg(msgReport.slice(21), true, true, msgReport.slice(0, 16), new Uint32Array(msgReport.slice(17, 21).buffer)[0], null, true);
 				callback(fetchErr);
 			});
 			return;
