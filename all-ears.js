@@ -982,6 +982,72 @@ function AllEars(readyCallback) {
 		return offset;
 	};
 
+	const _AddOutMsg = function(msgData, validPad, validSig, msgId, msgTs, msgTs_bin, newest) {
+		const lenSb = msgData[0] & 127;
+
+		let newMsg;
+
+		if ((msgData[0] & 128) === 0) { // Email
+			const msgIp = msgData.slice(1, 5);
+			const msgCs = new Uint16Array(msgData.slice(5, 7).buffer)[0];
+			const msgTlsVer = msgData[7] >> 5;
+			const msgAttach = msgData[7] & 31;
+			// msgData[8]: TLS_InfoByte
+
+			const lenTo = msgData[9];
+			const lenFr = msgData[10];
+			const lenMx = msgData[11];
+			const lenGr = msgData[12];
+
+			let os = 13;
+			const msgTo = sodium.to_string(msgData.slice(os, os + lenTo)); os += lenTo;
+			const msgFr = sodium.to_string(msgData.slice(os, os + lenFr)); os += lenFr;
+			const msgMx = sodium.to_string(msgData.slice(os, os + lenMx)); os += lenMx;
+			const msgGr = sodium.to_string(msgData.slice(os, os + lenGr)); os += lenGr;
+			const msgSb = sodium.to_string(msgData.slice(os, os + lenSb)); os += lenSb;
+			const msgBd = sodium.to_string(msgData.slice(os));
+
+			newMsg = new _NewOutMsg_Ext(validPad, validSig, msgId, msgTs, msgIp, msgTo, msgFr, msgSb, msgBd, msgMx, msgGr, msgCs, msgTlsVer, msgAttach);
+		} else { // Internal message
+			const isE2ee       = (msgData[1] & 64) !== 0;
+			const isFromShield = (msgData[1] &  8) !== 0;
+			const isToShield   = (msgData[1] &  4) !== 0;
+
+			const msgFr = _addr32_decode(msgData.slice(2, 12), isFromShield);
+			const msgTo = _addr32_decode(msgData.slice(12, 22), isToShield);
+
+			let msgBin;
+			if (isE2ee) {
+				const nonce = new Uint8Array(sodium.crypto_secretbox_NONCEBYTES);
+				nonce.fill(0);
+				nonce.set(msgTs_bin);
+
+				const addr32_from = msgData.slice(2, 12);
+				const recv_pubkey = msgData.slice(22, 22 + sodium.crypto_kx_PUBLICKEYBYTES);
+
+				const kxKeys = sodium.crypto_kx_seed_keypair(sodium.crypto_generichash(sodium.crypto_kx_SEEDBYTES, addr32_from, _userKeyKxHash));
+				const sessionKeys = sodium.crypto_kx_client_session_keys(kxKeys.publicKey, kxKeys.privateKey, recv_pubkey);
+
+				msgBin = msgData.slice(22 + sodium.crypto_kx_PUBLICKEYBYTES);
+				msgBin = sodium.crypto_secretbox_open_easy(msgBin, nonce, sessionKeys.sharedTx);
+			} else {
+				msgBin = msgData.slice(22);
+			}
+
+			msgBin = sodium.to_string(msgBin);
+			const msgSb = msgBin.slice(0, lenSb);
+			const msgBd = msgBin.slice(lenSb);
+
+			newMsg = new _NewOutMsg_Int(validPad, validSig, msgId, msgTs, isE2ee, msgTo, msgFr, msgSb, msgBd);
+		}
+
+		if (newest) {
+			_outMsg.unshift(newMsg);
+		} else {
+			_outMsg.push(newMsg);
+		}
+	};
+
 // Public
 	this.Reset = function() {
 		_maxStorage.splice(0);
@@ -1709,63 +1775,9 @@ function AllEars(readyCallback) {
 						_uplMsg.push(new _NewUplMsg(msgId, msgTs, msgTitle, msgBody, msgParent, msgBytes / 16));
 					break;}
 
-					case 48: { // OutMsg (Delivery report for sent message)
-						const lenSb = msgData[0] & 127;
-
-						if ((msgData[0] & 128) !== 0) { // Internal message
-							const isE2ee       = (msgData[1] & 64) !== 0;
-							const isFromShield = (msgData[1] &  8) !== 0;
-							const isToShield   = (msgData[1] &  4) !== 0;
-
-							const msgFr = _addr32_decode(msgData.slice(2, 12), isFromShield);
-							const msgTo = _addr32_decode(msgData.slice(12, 22), isToShield);
-
-							let msgBin;
-							if (isE2ee) {
-								const nonce = new Uint8Array(sodium.crypto_secretbox_NONCEBYTES);
-								nonce.fill(0);
-								nonce.set(msgTs_bin);
-
-								const addr32_from = msgData.slice(2, 12);
-								const recv_pubkey = msgData.slice(22, 22 + sodium.crypto_kx_PUBLICKEYBYTES);
-
-								const kxKeys = sodium.crypto_kx_seed_keypair(sodium.crypto_generichash(sodium.crypto_kx_SEEDBYTES, addr32_from, _userKeyKxHash));
-								const sessionKeys = sodium.crypto_kx_client_session_keys(kxKeys.publicKey, kxKeys.privateKey, recv_pubkey);
-
-								msgBin = msgData.slice(22 + sodium.crypto_kx_PUBLICKEYBYTES);
-								msgBin = sodium.crypto_secretbox_open_easy(msgBin, nonce, sessionKeys.sharedTx);
-							} else {
-								msgBin = msgData.slice(22);
-							}
-
-							msgBin = sodium.to_string(msgBin);
-							const msgSb = msgBin.slice(0, lenSb);
-							const msgBd = msgBin.slice(lenSb);
-
-							_outMsg.push(new _NewOutMsg_Int(validPad, validSig, msgId, msgTs, isE2ee, msgTo, msgFr, msgSb, msgBd));
-						} else { // Email
-							const msgIp = msgData.slice(1, 5);
-							const msgCs = new Uint16Array(msgData.slice(5, 7).buffer)[0];
-							const msgTlsVer = msgData[7] >> 5;
-							const msgAttach = msgData[7] & 31;
-							// msgData[8]: TLS_InfoByte
-
-							const lenTo = msgData[9];
-							const lenFr = msgData[10];
-							const lenMx = msgData[11];
-							const lenGr = msgData[12];
-
-							let os = 13;
-							const msgTo = sodium.to_string(msgData.slice(os, os + lenTo)); os += lenTo;
-							const msgFr = sodium.to_string(msgData.slice(os, os + lenFr)); os += lenFr;
-							const msgMx = sodium.to_string(msgData.slice(os, os + lenMx)); os += lenMx;
-							const msgGr = sodium.to_string(msgData.slice(os, os + lenGr)); os += lenGr;
-							const msgSb = sodium.to_string(msgData.slice(os, os + lenSb)); os += lenSb;
-							const msgBd = sodium.to_string(msgData.slice(os));
-
-							_outMsg.push(new _NewOutMsg_Ext(validPad, validSig, msgId, msgTs, msgIp, msgTo, msgFr, msgSb, msgBd, msgMx, msgGr, msgCs, msgTlsVer, msgAttach));
-						}
-					break;}
+					case 48: // OutMsg (Delivery report for sent message)
+						_AddOutMsg(msgData, validPad, validSig, msgId, msgTs, msgTs_bin, false);
+					break;
 				}
 
 				offset += msgBytes;
@@ -1795,7 +1807,10 @@ function AllEars(readyCallback) {
 			const bin = sodium.from_string("x" + addr_from + "\n" + addr_to + "\n" + replyId + "\n" + title + "\n" + body);
 			bin[0] = 0xFF;
 
-			_FetchEncrypted(_AEM_API_MESSAGE_CREATE, bin, function(fetchErr) {callback(fetchErr);});
+			_FetchEncrypted(_AEM_API_MESSAGE_CREATE, bin, function(fetchErr, msgReport) {
+				if (fetchErr === 0) _AddOutMsg(msgReport.slice(21), true, true, msgReport.slice(0, 16), new Uint32Array(msgReport.slice(17, 21).buffer)[0], null, true);
+				callback(fetchErr);
+			});
 			return;
 		}
 
