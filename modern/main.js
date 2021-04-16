@@ -1300,10 +1300,9 @@ document.getElementById("txt_skey").onfocus = function() {
 };
 
 document.getElementById("txt_skey").onkeyup = function(event) {
-	if (event.key === "Enter") {
-		event.preventDefault();
-		document.getElementById("btn_enter").click();
-	}
+	if (event.key !== "Enter") return;
+	event.preventDefault();
+	document.getElementById("btn_enter").click();
 };
 
 document.getElementById("btn_enter").onclick = function() {
