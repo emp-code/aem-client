@@ -229,6 +229,14 @@
 								<input type="text" id="txt_reg" size="64" maxlength="64" pattern="[0-9a-f]{64}" autocomplete="off" required>
 								<button type="button" id="btn_reg" autocomplete="off">Register</button>
 							</p>
+
+							<p>
+								<input type="text" id="txt_sender_hash" autocomplete="off" required size="64" maxlength="64" pattern="[0-9A-Za-z_-]{64}" placeholder="Message-ID">
+								<input type="text" id="txt_sender_date" autocomplete="off" required placeholder="Date">
+								<button type="button" id="btn_sender" autocomplete="off">Identify</button>
+								<br>
+								<input type="text" id="txt_sender_res" autocomplete="off" size="64" placeholder="Result" readonly>
+							</p>
 						</div>
 
 						<table id="tbl_accs" hidden>

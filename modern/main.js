@@ -1283,6 +1283,18 @@ document.querySelector("#write2_send > button").onclick = function() {
 	);
 };
 
+
+document.getElementById("btn_sender").onclick = function() {
+	ae.Message_Sender(document.getElementById("txt_sender_hash").value, Date.parse(document.getElementById("txt_sender_date").value) / 1000, function(error, result) {
+		if (error !== 0) {
+			errorDialog(error);
+			return;
+		}
+
+		document.getElementById("txt_sender_res").value = result;
+	});
+};
+
 document.getElementById("txt_skey").onfocus = function() {
 	document.getElementById("greeting").textContent = localStorage.greeting;
 };

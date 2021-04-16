@@ -1934,7 +1934,7 @@ function AllEars(readyCallback) {
 		]), 48);
 
 		_FetchEncrypted(_AEM_API_MESSAGE_SENDER, u8data, function(fetchErr, result) {
-			callback(fetchErr, result);
+			callback(fetchErr, (fetchErr === 0 && result) ? sodium.to_hex(result) : null);
 		});
 	};
 
