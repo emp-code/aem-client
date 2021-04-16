@@ -1134,10 +1134,9 @@ document.getElementById("btn_address_create_normal").onclick = function() {
 };
 
 document.getElementById("txt_address_create_normal").onkeyup = function() {
-	if (event.key === "Enter") {
-		event.preventDefault();
-		document.getElementById("btn_address_create_normal").click();
-	}
+	if (event.key !== "Enter") return;
+	event.preventDefault();
+	document.getElementById("btn_address_create_normal").click();
 };
 
 document.getElementById("btn_address_create_shield").onclick = function() {
@@ -1165,10 +1164,9 @@ document.getElementById("btn_address_update").onclick = function() {
 
 
 document.getElementById("txt_reg").onkeyup = function(event) {
-	if (event.key === "Enter") {
-		event.preventDefault();
-		document.getElementById("btn_reg").click();
-	}
+	if (event.key !== "Enter") return;
+	event.preventDefault();
+	document.getElementById("btn_reg").click();
 };
 
 document.getElementById("btn_reg").onclick = function() {
