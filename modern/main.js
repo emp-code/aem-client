@@ -1251,10 +1251,9 @@ document.querySelector("#write2_send > button").onclick = function() {
 				return;
 			}
 
-			document.getElementById("write2_btntxt").textContent = "Announced to";
-			document.getElementById("write_recv").value = "";
-			document.getElementById("write_subj").value = "";
-			document.getElementById("write_body").value = "";
+			addSent();
+			clearWrite();
+			displayMsg(true, 0);
 		});
 
 		return;
