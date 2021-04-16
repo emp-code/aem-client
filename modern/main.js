@@ -1251,7 +1251,6 @@ document.querySelector("#write2_send > button").onclick = function() {
 				return;
 			}
 
-			addSent();
 			clearWrite();
 			displayMsg(true, 0);
 		});
