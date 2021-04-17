@@ -127,9 +127,9 @@ textarea {
 
 .mono,
 #div_write_1 select,
-#tbd_uploads td:first-child,
-#tbl_drbox td:first-child,
 #tbl_inbox td:first-child,
+#tbl_drbox td:first-child,
+#tbl_files td:first-child,
 #txt_reg,
 #write_recv {
 	font-family: monospace, monospace;
@@ -309,30 +309,38 @@ nav > button:enabled:focus {
 	font-size: 1em;
 }
 
-.mid button,
+.mid button:not([data-msgid]),
 .mid input,
 .mid select {
 	opacity: 0.5;
 }
 
-/* Main1 - Tabs 1&2/5: Inbox&Drbox */
-#div_inbox,
-#tbl_drbox {
+.mid > div {
 	height: 100%;
 }
 
 #tbl_inbox,
-#tbl_drbox {
+#tbl_drbox,
+#tbl_files {
 	table-layout: fixed;
+	height: 100%;
 	width: 100%;
 	transition: opacity 0.2s;
 }
 
 #tbl_inbox tr,
-#tbl_drbox tr {
+#tbl_drbox tr,
+#tbl_files tr {
 	display: grid;
 	grid-template-columns: auto 3fr 1fr 2fr;
 	opacity: 0.5;
+}
+
+#tbl_inbox tr:hover,
+#tbl_drbox tr:hover,
+#tbl_files tr:hover {
+	background: #1a1a1a;
+	cursor: pointer;
 }
 
 #tbl_inbox tr > td:nth-child(2n) {
@@ -341,19 +349,19 @@ nav > button:enabled:focus {
 	overflow: hidden;
 }
 
-#tbl_inbox tr:hover,
-#tbl_drbox tr:hover,
-#tbd_uploads tr:hover {
-	background: #1a1a1a;
-	cursor: pointer;
-}
-
 #tbl_inbox tr > td:nth-child(3n) {
 	text-align: right;
 	direction: rtl;
 }
 
-/* Tab 3/5: Write */
+#tbl_files td:nth-child(3) {
+	text-align: center;
+}
+
+#tbl_files td:nth-child(4) {
+	text-align: right;
+}
+
 #div_write,
 #div_write_1,
 #div_notepad {
@@ -401,17 +409,16 @@ nav > button:enabled:focus {
 	height: 100%;
 }
 
-#div_notes table {
+#div_notes > div:first-of-type > table {
 	border-bottom: 1px solid #333;
-	padding-bottom: 0.25em;
 	width: 100%;
 }
 
-#div_notes tbody tr td:not(:last-of-type) {
+#div_notes > div:first-of-type > table thead,
+#div_notes > div:first-of-type > table tbody td:not(:last-of-type) {
 	opacity: 0.55;
 }
 
-#div_notes table tr td:last-of-type,
 #table_addrs td:not(:first-of-type) {
 	text-align: center;
 	width: 3em;

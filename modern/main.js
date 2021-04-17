@@ -31,7 +31,6 @@ const tabs = [
 	new TabState(0, 2, false, true) // Tools
 ];
 
-let rowsPerPage = 0;
 let showHeaders = false;
 
 let tab = 0;
@@ -538,7 +537,20 @@ function addMsg(isInt, i) {
 	};
 }
 
+function getRowsPerPage(tbl) {
+	tbl.replaceChildren();
+	const row = tbl.insertRow(-1);
+	const cell = row.insertCell(-1);
+	cell.textContent = "0";
+	const rowsPerPage = Math.floor(getComputedStyle(tbl).height.replace("px", "") / getComputedStyle(tbl.getElementsByTagName("tr")[0]).height.replace("px", ""));
+	tbl.replaceChildren();
+	return rowsPerPage;
+}
+
 function showInbox() {
+	const tbl = document.getElementById("tbl_inbox");
+	const rowsPerPage = getRowsPerPage(tbl);
+
 	const maxExt = ae.GetExtMsgCount();
 	const maxInt = ae.GetIntMsgCount();
 	const loadMore = ae.GetReadyMsgBytes() < ae.GetTotalMsgBytes();
@@ -546,7 +558,7 @@ function showInbox() {
 	if (maxExt + maxInt > 0) {
 		tabs[TAB_INBOX].max = Math.floor((maxExt + maxInt - (loadMore? 0 : 1)) / rowsPerPage);
 		document.getElementById("btn_rght").disabled = (tabs[TAB_INBOX].cur >= tabs[TAB_INBOX].max);
-		document.getElementById("tbl_inbox").replaceChildren();
+		tbl.replaceChildren();
 
 		let skipMsgs = rowsPerPage * tabs[TAB_INBOX].cur;
 		let numExt = 0;
@@ -571,16 +583,15 @@ function showInbox() {
 	}
 
 	if (loadMore && tabs[TAB_INBOX].cur >= tabs[TAB_INBOX].max) {
-		const inbox = document.getElementById("tbl_inbox");
-		const row = inbox.insertRow(-1);
+		const row = tbl.insertRow(-1);
 		const cell = row.insertCell(-1);
 		cell.textContent = "Load more (" + Math.round((ae.GetTotalMsgBytes() - ae.GetReadyMsgBytes()) / 1024) + " KiB left)";
 
 		row.onclick = function() {
-			inbox.style.opacity = 0.5;
+			tbl.style.opacity = 0.5;
 
 			ae.Message_Browse(false, false, function(errorBrowse) {
-				inbox.style.opacity = 1;
+				tbl.style.opacity = 1;
 
 				if (errorBrowse !== 0) {
 					errorDialog(errorBrowse);
@@ -595,6 +606,8 @@ function showInbox() {
 
 function showDrbox() {
 	const tbl = document.getElementById("tbl_drbox");
+	const rowsPerPage = getRowsPerPage(tbl);
+
 	const drCount = ae.GetOutMsgCount();
 	const loadMore = ae.GetReadyMsgBytes() < ae.GetTotalMsgBytes();
 
@@ -649,36 +662,78 @@ function showDrbox() {
 }
 
 function showFiles() {
-	const tbl = document.getElementById("tbd_files");
-	tbl.replaceChildren();
+	const tbl = document.getElementById("tbl_files");
+	const rowsPerPage = getRowsPerPage(tbl);
 
-	for (let i = 0; i < ae.GetUplMsgCount(); i++) {
+	const msgCount = ae.GetUplMsgCount();
+	const loadMore = ae.GetReadyMsgBytes() < ae.GetTotalMsgBytes();
+
+	if (msgCount > 0) {
+		tabs[TAB_NOTES].max = 2 + Math.floor((msgCount - (loadMore? 0 : 1)) / rowsPerPage);
+		document.getElementById("btn_rght").disabled = (tabs[TAB_NOTES].cur >= tabs[TAB_NOTES].max);
+		tbl.replaceChildren();
+
+		let skipMsgs = rowsPerPage * (tabs[TAB_NOTES].cur - 2);
+		let numAdd = 0;
+
+		for (let i = 0; numAdd < rowsPerPage && i < msgCount; i++) {
+			if (skipMsgs > 0) {
+				skipMsgs--;
+				continue;
+			}
+
+			const row = tbl.insertRow(-1);
+			row.setAttribute("data-msgid", ae.GetUplMsgIdHex(i));
+			row.onclick = function() {displayFile(i);};
+
+			let cell = row.insertCell(-1);
+			cell.textContent = new Date(ae.GetUplMsgTime(i) * 1000).toISOString().slice(0, 10);
+
+			cell = row.insertCell(-1);
+			cell.textContent = ae.GetUplMsgTitle(i);
+
+			cell = row.insertCell(-1);
+			cell.textContent = (ae.GetUplMsgBytes(i) / 1024).toFixed(1);
+
+			cell = row.insertCell(-1);
+			const btn = document.createElement("button");
+			btn.setAttribute("data-msgid", ae.GetUplMsgIdHex(i));
+			btn.type = "button";
+			btn.textContent = "X";
+			btn.onclick = function() {
+				const tr = this.parentElement.parentElement;
+				ae.Message_Delete(this.getAttribute("data-msgid"), function(error) {
+					if (error === 0) tr.remove();
+					else errorDialog(error);
+				});
+			};
+			cell.appendChild(btn);
+
+			numAdd++;
+		}
+	} else {
+		tabs[TAB_NOTES].max = 2;
+	}
+
+	if (loadMore && tabs[TAB_NOTES].cur >= tabs[TAB_NOTES].max) {
 		const row = tbl.insertRow(-1);
-		row.setAttribute("data-msgid", ae.GetUplMsgIdHex(i));
-		row.onclick = function() {displayFile(this.rowIndex - 1);};
+		const cell = row.insertCell(-1);
+		cell.textContent = "Load more (" + Math.round((ae.GetTotalMsgBytes() - ae.GetReadyMsgBytes()) / 1024) + " KiB left)";
 
-		let cell = row.insertCell(-1);
-		cell.textContent = new Date(ae.GetUplMsgTime(i) * 1000).toISOString().slice(0, 10);
+		row.onclick = function() {
+			tbl.style.opacity = 0.5;
 
-		cell = row.insertCell(-1);
-		cell.textContent = ae.GetUplMsgTitle(i);
+			ae.Message_Browse(false, false, function(errorBrowse) {
+				tbl.style.opacity = 1;
 
-		cell = row.insertCell(-1);
-		cell.textContent = (ae.GetUplMsgBytes(i) / 1024).toFixed(1);
+				if (errorBrowse !== 0) {
+					errorDialog(errorBrowse);
+					return;
+				}
 
-		cell = row.insertCell(-1);
-		const btn = document.createElement("button");
-		btn.setAttribute("data-msgid", ae.GetUplMsgIdHex(i));
-		btn.type = "button";
-		btn.textContent = "X";
-		btn.onclick = function() {
-			const tr = this.parentElement.parentElement;
-			ae.Message_Delete(this.getAttribute("data-msgid"), function(error) {
-				if (error === 0) tr.remove();
-				else errorDialog(error);
+				showFiles();
 			});
 		};
-		cell.appendChild(btn);
 	}
 }
 
@@ -718,21 +773,6 @@ function addAccountToTable(i) {
 		});
 	};
 	cell.appendChild(btn);
-}
-
-function getRowsPerPage() {
-	const btnInbox = document.getElementById("btn_inbox");
-	btnInbox.click();
-
-	const tbl = document.getElementById("tbl_inbox");
-	tbl.replaceChildren();
-	const row = tbl.insertRow(-1);
-	const cell = row.insertCell(-1);
-	cell.textContent = "0";
-
-	rowsPerPage = Math.floor(getComputedStyle(document.getElementById("div_inbox")).height.replace("px", "") / getComputedStyle(document.querySelector("#tbl_inbox > tbody > tr:first-child")).height.replace("px", ""));
-	tbl.replaceChildren();
-	showInbox();
 }
 
 function reloadAccount() {
@@ -829,8 +869,7 @@ function reloadAccount() {
 	}
 
 	updateAddressCounts();
-	getRowsPerPage();
-	document.getElementById("btn_inbox").click();
+	showInbox();
 }
 
 function deleteAddress(addr) {
@@ -1080,11 +1119,27 @@ function updateTab() {
 		break;
 
 		case TAB_NOTES:
-			for (let i = 0; i <= tabs[tab].max; i++) {
-				document.getElementById("div_notes").children[i].hidden = (i !== tabs[tab].cur);
-			}
+			switch (tabs[tab].cur) {
+				case 0:
+					document.getElementById("div_notes").children[0].hidden = false;
+					document.getElementById("div_notes").children[1].hidden = true;
+					document.getElementById("div_notes").children[2].hidden = true;
+				break;
 
-			if (tabs[tab].cur > 1) showFiles();
+				case 1:
+					document.getElementById("div_notes").children[0].hidden = true;
+					document.getElementById("div_notes").children[1].hidden = false;
+					document.getElementById("div_notes").children[2].hidden = true;
+				break;
+
+				case 2:
+					document.getElementById("div_notes").children[0].hidden = true;
+					document.getElementById("div_notes").children[1].hidden = true;
+					document.getElementById("div_notes").children[2].hidden = false;
+
+				default:
+					showFiles();
+			}
 		break;
 
 		case TAB_TOOLS:
