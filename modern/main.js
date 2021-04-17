@@ -868,6 +868,7 @@ function reloadAccount() {
 		addAddress(i);
 	}
 
+	document.getElementById("txt_notepad").value = ae.GetPrivateExtra(true);
 	updateAddressCounts();
 	showInbox();
 }
@@ -1276,6 +1277,27 @@ document.getElementById("btn_reg").onclick = function() {
 
 document.getElementById("chk_delme").onclick = function() {document.getElementById("btn_delme").disabled = !this.checked;};
 document.getElementById("chk_lowme").onclick = function() {document.getElementById("btn_lowme").disabled = !this.checked;};
+
+document.getElementById("btn_notepad_restore").onclick = function() {
+	document.getElementById("txt_notepad").value = ae.GetPrivateExtra(true);
+};
+
+document.getElementById("btn_notepad_savepad").onclick = function() {
+	const btn = this;
+	btn.disabled = true;
+
+	const error = ae.SetPrivateExtra(document.getElementById("txt_notepad").value);
+	if (error !== 0) {
+		btn.disabled = false;
+		errorDialog(error);
+		return;
+	}
+
+	ae.Private_Update(function(error2) {
+		btn.disabled = false;
+		if (error2) errorDialog(error2);
+	});
+};
 
 document.getElementById("btn_notepad_saveupl").onclick = function() {
 	const np = document.getElementById("txt_notepad");

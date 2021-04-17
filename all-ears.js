@@ -99,6 +99,7 @@ function AllEars(readyCallback) {
 	const _contactMail = [];
 	const _contactName = [];
 	const _contactNote = [];
+	let _privateExtra;
 
 	const _admin_userPkHex = [];
 	const _admin_userSpace = [];
@@ -979,6 +980,8 @@ function AllEars(readyCallback) {
 			privOffset += end + 1;
 		}
 
+		_privateExtra = privData.slice(privOffset);
+
 		return offset;
 	};
 
@@ -1339,6 +1342,44 @@ function AllEars(readyCallback) {
 		_contactMail.splice(index, 1);
 		_contactName.splice(index, 1);
 		_contactNote.splice(index, 1);
+	};
+
+	this.PrivateExtraSpace = function() {
+		let lenPriv = 2 + _userAddress.length * 18;
+
+		for (let i = 0; i < _contactMail.length; i++) {
+			lenPriv += 3
+				+ sodium.from_string(_contactMail[i]).length
+				+ sodium.from_string(_contactName[i]).length
+				+ sodium.from_string(_contactNote[i]).length;
+		}
+
+		return _AEM_LEN_PRIVATE - sodium.crypto_secretbox_NONCEBYTES - sodium.crypto_secretbox_MACBYTES - lenPriv;
+	};
+
+	this.GetPrivateExtra = function(asString) {
+		if (!asString) return _privateExtra;
+
+		const zeroIndex = _privateExtra.indexOf(0);
+		return (zeroIndex === -1) ? sodium.to_string(_privateExtra) : sodium.to_string(_privateExtra.slice(0, zeroIndex));
+	}
+
+	this.SetPrivateExtra = function(newData) {
+		if (!newData) return 0x01;
+
+		let newExtra;
+		if (typeof(newData) === "object") {
+			newExtra = newData;
+		} else if (typeof(newData) === "string") {
+			newExtra = sodium.from_string(newData);
+		} else {
+			return 0x01;
+		}
+
+		if (newExtra.length > this.PrivateExtraSpace()) return 0x13;
+
+		_privateExtra = newExtra;
+		return 0;
 	};
 
 	this.SetKeys = function(skey_hex, callback) {
@@ -1979,6 +2020,7 @@ function AllEars(readyCallback) {
 
 	this.Private_Update = function(callback) {
 		const privData = new Uint8Array(_AEM_LEN_PRIVATE - sodium.crypto_secretbox_NONCEBYTES - sodium.crypto_secretbox_MACBYTES);
+		privData.fill(0);
 		privData[0] = _userAddress.length;
 
 		let offset = 1;
@@ -2006,6 +2048,8 @@ function AllEars(readyCallback) {
 			privData.set(cNote, offset);
 			offset += cNote.length;
 		}
+
+		privData.set(_privateExtra, offset);
 
 		const nonce = new Uint8Array(sodium.crypto_secretbox_NONCEBYTES);
 		window.crypto.getRandomValues(nonce);
@@ -2058,6 +2102,7 @@ function AllEars(readyCallback) {
 			case 0x10: return "Message too short";
 			case 0x11: return "Name too long";
 			case 0x12: return "File too large";
+			case 0x13: return "Private-field extra content too long";
 
 			case 0x17: return "Server failed decrypting the request"; // 400
 			case 0x18: return "Account does not exist"; // 403
