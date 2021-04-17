@@ -255,7 +255,7 @@ function AllEars(readyCallback) {
 
 		// postBox: clearU8 encrypted
 		const nonce = new Uint8Array(sodium.crypto_box_NONCEBYTES);
-		window.crypto.getRandomValues(nonce);
+		crypto.getRandomValues(nonce);
 		const postBox = sodium.crypto_box_easy(clearU8, nonce, _AEM_API_PUBKEY, _userKeySecret);
 
 		// sealBox: apiCmd + UPK + Nonce for postBox
@@ -1996,7 +1996,7 @@ function AllEars(readyCallback) {
 		u8data.set(u8body, 1 + u8title.length);
 
 		const nonce = new Uint8Array(sodium.crypto_secretbox_NONCEBYTES);
-		window.crypto.getRandomValues(nonce);
+		crypto.getRandomValues(nonce);
 
 		const sbox = sodium.crypto_secretbox_easy(u8data, nonce, _userKeySymmetric);
 
@@ -2052,7 +2052,7 @@ function AllEars(readyCallback) {
 		privData.set(_privateExtra, offset);
 
 		const nonce = new Uint8Array(sodium.crypto_secretbox_NONCEBYTES);
-		window.crypto.getRandomValues(nonce);
+		crypto.getRandomValues(nonce);
 
 		const sbox = sodium.crypto_secretbox_easy(privData, nonce, _userKeySymmetric);
 
