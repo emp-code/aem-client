@@ -868,7 +868,6 @@ function reloadAccount() {
 		addAddress(i);
 	}
 
-	document.querySelector("#div_notepad meter").value = ae.GetPrivateExtraSpace() / ae.GetPrivateExtraSpaceMax();
 	document.getElementById("txt_notepad").value = ae.GetPrivateExtra(true);
 	updateAddressCounts();
 	showInbox();
@@ -1132,6 +1131,8 @@ function updateTab() {
 					document.getElementById("div_notes").children[0].hidden = true;
 					document.getElementById("div_notes").children[1].hidden = false;
 					document.getElementById("div_notes").children[2].hidden = true;
+
+					document.querySelector("#div_notepad meter").value = ae.GetPrivateExtraSpace() / ae.GetPrivateExtraSpaceMax();
 				break;
 
 				case 2:
