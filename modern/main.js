@@ -868,7 +868,7 @@ function reloadAccount() {
 		addAddress(i);
 	}
 
-	document.getElementById("txt_notepad").value = ae.GetPrivateExtra(true);
+	document.getElementById("txt_notepad").value = ae.GetPrivateExtra();
 	updateAddressCounts();
 	showInbox();
 }
@@ -1281,7 +1281,7 @@ document.getElementById("chk_delme").onclick = function() {document.getElementBy
 document.getElementById("chk_lowme").onclick = function() {document.getElementById("btn_lowme").disabled = !this.checked;};
 
 document.getElementById("btn_notepad_restore").onclick = function() {
-	document.getElementById("txt_notepad").value = ae.GetPrivateExtra(true);
+	document.getElementById("txt_notepad").value = ae.GetPrivateExtra();
 };
 
 document.getElementById("btn_notepad_savepad").onclick = function() {

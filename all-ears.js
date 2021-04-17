@@ -99,7 +99,7 @@ function AllEars(readyCallback) {
 	const _contactMail = [];
 	const _contactName = [];
 	const _contactNote = [];
-	let _privateExtra;
+	let _privateExtra = "";
 
 	const _admin_userPkHex = [];
 	const _admin_userSpace = [];
@@ -980,7 +980,9 @@ function AllEars(readyCallback) {
 			privOffset += end + 1;
 		}
 
-		_privateExtra = privData.slice(privOffset);
+		const extra = privData.slice(privOffset);
+		const zeroIndex = extra.indexOf(0);
+		_privateExtra = sodium.to_string((zeroIndex === -1) ? extra : extra.slice(0, zeroIndex));
 
 		return offset;
 	};
@@ -1357,33 +1359,18 @@ function AllEars(readyCallback) {
 		return _AEM_LEN_PRIVATE - sodium.crypto_secretbox_NONCEBYTES - sodium.crypto_secretbox_MACBYTES - lenPriv;
 	};
 
-	this.GetPrivateExtraSpace = function() { // Only for strings
-		const zeroIndex = _privateExtra.indexOf(0);
-		return (zeroIndex === -1) ? _privateExtra.length : _privateExtra.slice(0, zeroIndex).length;
+	this.GetPrivateExtraSpace = function() {
+		return sodium.from_string(_privateExtra).length;
 	}
 
-	this.GetPrivateExtra = function(asString) {
-		if (!asString) return _privateExtra;
-
-		const zeroIndex = _privateExtra.indexOf(0);
-		return (zeroIndex === -1) ? sodium.to_string(_privateExtra) : sodium.to_string(_privateExtra.slice(0, zeroIndex));
+	this.GetPrivateExtra = function() {
+		return _privateExtra;
 	}
 
 	this.SetPrivateExtra = function(newData) {
-		if (!newData) return 0x01;
-
-		let newExtra;
-		if (typeof(newData) === "object") {
-			newExtra = newData;
-		} else if (typeof(newData) === "string") {
-			newExtra = sodium.from_string(newData);
-		} else {
-			return 0x01;
-		}
-
-		if (newExtra.length > this.GetPrivateExtraSpaceMax()) return 0x13;
-
-		_privateExtra = newExtra;
+		if (!newData || typeof(newData) !== "string") return 0x01;
+		if (sodium.from_string(newData).length > this.GetPrivateExtraSpaceMax()) return 0x13;
+		_privateExtra = newData;
 		return 0;
 	};
 
@@ -2054,7 +2041,7 @@ function AllEars(readyCallback) {
 			offset += cNote.length;
 		}
 
-		privData.set(_privateExtra, offset);
+		privData.set(sodium.from_string(_privateExtra), offset);
 
 		const nonce = new Uint8Array(sodium.crypto_secretbox_NONCEBYTES);
 		window.crypto.getRandomValues(nonce);
