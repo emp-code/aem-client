@@ -1359,7 +1359,6 @@ function AllEars(readyCallback) {
 
 	this.GetPrivateExtraSpace = function() { // Only for strings
 		const zeroIndex = _privateExtra.indexOf(0);
-		console.log((zeroIndex === -1) ? _privateExtra.length : _privateExtra.slice(0, zeroIndex).length);
 		return (zeroIndex === -1) ? _privateExtra.length : _privateExtra.slice(0, zeroIndex).length;
 	}
 
