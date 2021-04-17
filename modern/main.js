@@ -868,6 +868,7 @@ function reloadAccount() {
 		addAddress(i);
 	}
 
+	document.querySelector("#div_notepad meter").value = ae.GetPrivateExtraSpace() / ae.GetPrivateExtraSpaceMax();
 	document.getElementById("txt_notepad").value = ae.GetPrivateExtra(true);
 	updateAddressCounts();
 	showInbox();
@@ -1295,7 +1296,11 @@ document.getElementById("btn_notepad_savepad").onclick = function() {
 
 	ae.Private_Update(function(error2) {
 		btn.disabled = false;
-		if (error2) errorDialog(error2);
+		if (error2 !== 0) {
+			errorDialog(error2);
+		} else {
+			document.querySelector("#div_notepad meter").value = ae.GetPrivateExtraSpace() / ae.GetPrivateExtraSpaceMax();
+		}
 	});
 };
 

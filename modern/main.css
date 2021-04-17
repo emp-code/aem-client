@@ -80,6 +80,10 @@ dialog p {
 	margin-bottom: 0;
 }
 
+meter {
+	width: 100%;
+}
+
 hr {
 	opacity: 0.25;
 }

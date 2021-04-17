@@ -255,7 +255,7 @@ function AllEars(readyCallback) {
 
 		// postBox: clearU8 encrypted
 		const nonce = new Uint8Array(sodium.crypto_box_NONCEBYTES);
-		crypto.getRandomValues(nonce);
+		window.crypto.getRandomValues(nonce);
 		const postBox = sodium.crypto_box_easy(clearU8, nonce, _AEM_API_PUBKEY, _userKeySecret);
 
 		// sealBox: apiCmd + UPK + Nonce for postBox
@@ -1344,7 +1344,7 @@ function AllEars(readyCallback) {
 		_contactNote.splice(index, 1);
 	};
 
-	this.PrivateExtraSpace = function() {
+	this.GetPrivateExtraSpaceMax = function() {
 		let lenPriv = 2 + _userAddress.length * 18;
 
 		for (let i = 0; i < _contactMail.length; i++) {
@@ -1356,6 +1356,12 @@ function AllEars(readyCallback) {
 
 		return _AEM_LEN_PRIVATE - sodium.crypto_secretbox_NONCEBYTES - sodium.crypto_secretbox_MACBYTES - lenPriv;
 	};
+
+	this.GetPrivateExtraSpace = function() { // Only for strings
+		const zeroIndex = _privateExtra.indexOf(0);
+		console.log((zeroIndex === -1) ? _privateExtra.length : _privateExtra.slice(0, zeroIndex).length);
+		return (zeroIndex === -1) ? _privateExtra.length : _privateExtra.slice(0, zeroIndex).length;
+	}
 
 	this.GetPrivateExtra = function(asString) {
 		if (!asString) return _privateExtra;
@@ -1376,7 +1382,7 @@ function AllEars(readyCallback) {
 			return 0x01;
 		}
 
-		if (newExtra.length > this.PrivateExtraSpace()) return 0x13;
+		if (newExtra.length > this.GetPrivateExtraSpaceMax()) return 0x13;
 
 		_privateExtra = newExtra;
 		return 0;
@@ -1996,7 +2002,7 @@ function AllEars(readyCallback) {
 		u8data.set(u8body, 1 + u8title.length);
 
 		const nonce = new Uint8Array(sodium.crypto_secretbox_NONCEBYTES);
-		crypto.getRandomValues(nonce);
+		window.crypto.getRandomValues(nonce);
 
 		const sbox = sodium.crypto_secretbox_easy(u8data, nonce, _userKeySymmetric);
 
@@ -2052,7 +2058,7 @@ function AllEars(readyCallback) {
 		privData.set(_privateExtra, offset);
 
 		const nonce = new Uint8Array(sodium.crypto_secretbox_NONCEBYTES);
-		crypto.getRandomValues(nonce);
+		window.crypto.getRandomValues(nonce);
 
 		const sbox = sodium.crypto_secretbox_easy(privData, nonce, _userKeySymmetric);
 
