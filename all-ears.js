@@ -1361,11 +1361,11 @@ function AllEars(readyCallback) {
 
 	this.GetPrivateExtraSpace = function() {
 		return sodium.from_string(_privateExtra).length;
-	}
+	};
 
 	this.GetPrivateExtra = function() {
 		return _privateExtra;
-	}
+	};
 
 	this.SetPrivateExtra = function(newData) {
 		if (!newData || typeof(newData) !== "string") return 0x01;
