@@ -425,6 +425,7 @@ nav > button:enabled:focus {
 
 #div_notes > div:first-of-type > table thead,
 #div_notes > div:first-of-type > table td:not(:last-of-type) {
+	text-align: left;
 	opacity: 0.55;
 }
 
