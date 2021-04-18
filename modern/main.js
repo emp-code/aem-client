@@ -796,10 +796,7 @@ function updateLimits() {
 	}
 }
 
-function reloadAccount() {
-	updateLimits();
-
-	// Our account details
+function addOwnAccount() {
 	const row = document.getElementById("tbd_accs").insertRow(-1);
 
 	let cell;
@@ -851,30 +848,6 @@ function reloadAccount() {
 		});
 	};
 	cell.appendChild(btn);
-
-	document.getElementById("txt_reg").disabled = !ae.IsUserAdmin();
-	document.getElementById("btn_reg").disabled = !ae.IsUserAdmin();
-	document.getElementById("chk_lowme").disabled = (ae.GetUserLevel() === 0);
-
-	// Contacts
-	for (let i = 0; i < ae.GetContactCount(); i++) {
-		addContact(
-			ae.GetContactMail(i),
-			ae.GetContactName(i),
-			ae.GetContactNote(i)
-		);
-	}
-
-	refreshContactList();
-
-	// Addresses
-	for (let i = 0; i < ae.GetAddressCount(); i++) {
-		addAddress(i);
-	}
-
-	document.getElementById("txt_notepad").value = ae.GetPrivateExtra();
-	updateAddressCounts();
-	showInbox();
 }
 
 function deleteAddress(addr) {
@@ -1055,6 +1028,37 @@ function addContact(mail, name, note) {
 	el.textContent = "X";
 	el.onclick = function() {row.remove();};
 	cell.appendChild(el);
+}
+
+function addContacts() {
+	for (let i = 0; i < ae.GetContactCount(); i++) {
+		addContact(
+			ae.GetContactMail(i),
+			ae.GetContactName(i),
+			ae.GetContactNote(i)
+		);
+	}
+
+	refreshContactList();
+}
+
+function addAddresses() {
+	for (let i = 0; i < ae.GetAddressCount(); i++) {
+		addAddress(i);
+	}
+}
+
+function reloadAccount() {
+	updateLimits();
+	addOwnAccount();
+	addContacts();
+	addAddresses();
+	updateAddressCounts();
+
+	document.getElementById("txt_reg").disabled = !ae.IsUserAdmin();
+	document.getElementById("btn_reg").disabled = !ae.IsUserAdmin();
+	document.getElementById("chk_lowme").disabled = (ae.GetUserLevel() === 0);
+	document.getElementById("txt_notepad").value = ae.GetPrivateExtra();
 }
 
 document.getElementById("btn_newcontact").onclick = function() {
@@ -1467,6 +1471,7 @@ document.getElementById("btn_enter").onclick = function() {
 			document.getElementById("div_begin").hidden = true;
 			document.getElementById("div_main").hidden = false;
 			reloadAccount();
+			showInbox();
 
 			if (statusBrowse !== 0) errorDialog(statusBrowse);
 			if (!ae.IsUserAdmin()) return;
