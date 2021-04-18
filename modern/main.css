@@ -345,10 +345,16 @@ nav > button:enabled:focus {
 	opacity: 0.5;
 }
 
+#tbl_ctact tr:hover,
 #tbl_inbox tr:hover,
 #tbl_drbox tr:hover,
 #tbl_files tr:hover {
 	background: #1a1a1a;
+}
+
+#tbl_inbox tr:hover,
+#tbl_drbox tr:hover,
+#tbl_files tr:hover {
 	cursor: pointer;
 }
 
