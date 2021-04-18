@@ -72,6 +72,11 @@ dialog > div {
 	z-index: 1;
 }
 
+dialog h1,
+dialog p {
+	opacity: 0.55;
+}
+
 dialog h1 {
 	margin-top: 0;
 }
