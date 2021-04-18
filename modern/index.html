@@ -164,7 +164,20 @@
 						</table>
 
 						<div id="div_acc" hidden>
-							<table>
+							<p>
+								<input type="text" id="txt_pg" autocomplete="off">
+								<button type="button" id="btn_pg" autocomplete="off">Set greeting</button>
+							</p>
+
+							<hr>
+
+							<p class="half">Check to enable dangerous operations on the next page</p>
+							<p><input type="checkbox" id="chk_lowme"> <span class="half">I want to <b>lower my level</b></span></p>
+							<p><input type="checkbox" id="chk_delme"> <span class="half">I want to <b>delete my account</b></span></p>
+
+							<hr>
+
+							<table id="tbl_limits" class="center">
 								<thead>
 									<tr>
 										<th><abbr title="Level">Lvl</abbr></th>
@@ -173,7 +186,7 @@
 										<th><abbr title="Shield addresses">Shd</abbr></th>
 									</tr>
 								</thead>
-								<tbody id="tbl_limits">
+								<tbody>
 									<tr>
 										<td class="half">0</td>
 										<td><input type="number" min="1" max="256" autocomplete="off" disabled required></td>
@@ -199,22 +212,12 @@
 										<td><input type="number" min="0" max="31" autocomplete="off" disabled required></td>
 									</tr>
 								</tbody>
+								<tfoot>
+									<tr>
+										<td colspan="4"><button type="button" autocomplete="off">Update limits</button></td>
+									</tr>
+								</tfoot>
 							</table>
-
-							<hr>
-
-							<p class="half">Check to enable dangerous operations on the next page</p>
-							<p><input type="checkbox" id="chk_lowme"> <span class="half">I want to <b>lower my level</b></span></p>
-							<p><input type="checkbox" id="chk_delme"> <span class="half">I want to <b>delete my account</b></span></p>
-
-							<hr>
-
-							<p>
-								<input type="text" id="txt_pg" autocomplete="off" placeholder="Personal greeting">
-								<button type="button" id="btn_pg" autocomplete="off">Set</button>
-							</p>
-
-							<hr>
 
 							<p>
 								<input type="text" id="txt_reg" size="64" maxlength="64" pattern="[0-9a-f]{64}" autocomplete="off" required>

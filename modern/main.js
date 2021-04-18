@@ -775,25 +775,29 @@ function addAccountToTable(i) {
 	cell.appendChild(btn);
 }
 
-function reloadAccount() {
-	// Limits
-	const tblLimits = document.getElementById("tbl_limits");
+function updateLimits() {
+	const tbl = document.querySelector("#tbl_limits > tbody");
+
 	if (ae.IsUserAdmin()) {
 		for (let i = 0; i < 4; i++) {
-			tblLimits.rows[i].cells[1].children[0].disabled = false;
-			tblLimits.rows[i].cells[2].children[0].disabled = false;
-			tblLimits.rows[i].cells[3].children[0].disabled = false;
+			tbl.rows[i].cells[1].children[0].disabled = false;
+			tbl.rows[i].cells[2].children[0].disabled = false;
+			tbl.rows[i].cells[3].children[0].disabled = false;
 
-			tblLimits.rows[i].cells[1].children[0].value = ae.GetLimitStorage(i) + 1;
-			tblLimits.rows[i].cells[2].children[0].value = ae.GetLimitNormalA(i);
-			tblLimits.rows[i].cells[3].children[0].value = ae.GetLimitShieldA(i);
+			tbl.rows[i].cells[1].children[0].value = ae.GetLimitStorage(i) + 1;
+			tbl.rows[i].cells[2].children[0].value = ae.GetLimitNormalA(i);
+			tbl.rows[i].cells[3].children[0].value = ae.GetLimitShieldA(i);
 		}
 	} else {
 		const lvl = ae.GetUserLevel();
-		tblLimits.rows[lvl].cells[1].children[0].value = ae.GetLimitStorage(lvl) + 1;
-		tblLimits.rows[lvl].cells[2].children[0].value = ae.GetLimitNormalA(lvl);
-		tblLimits.rows[lvl].cells[3].children[0].value = ae.GetLimitShieldA(lvl);
+		tbl.rows[lvl].cells[1].children[0].value = ae.GetLimitStorage(lvl) + 1;
+		tbl.rows[lvl].cells[2].children[0].value = ae.GetLimitNormalA(lvl);
+		tbl.rows[lvl].cells[3].children[0].value = ae.GetLimitShieldA(lvl);
 	}
+}
+
+function reloadAccount() {
+	updateLimits();
 
 	// Our account details
 	const row = document.getElementById("tbd_accs").insertRow(-1);
