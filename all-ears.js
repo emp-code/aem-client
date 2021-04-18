@@ -1891,7 +1891,10 @@ function AllEars(readyCallback) {
 		final[(sodium.crypto_kx_PUBLICKEYBYTES * 2) + 25] = title.length;
 		final.set(msgBox, (sodium.crypto_kx_PUBLICKEYBYTES * 2) + 26);
 
-		_FetchEncrypted(_AEM_API_MESSAGE_CREATE, final, function(fetchErr) {callback(fetchErr);});
+		_FetchEncrypted(_AEM_API_MESSAGE_CREATE, final, function(fetchErr, msgReport) {
+			if (fetchErr === 0 && (msgReport[16] & 48) === 48) _AddOutMsg(msgReport.slice(21), true, true, msgReport.slice(0, 16), new Uint32Array(msgReport.slice(17, 21).buffer)[0], null, true);
+			callback(fetchErr);
+		});
 	};
 
 	this.Message_Delete = function(hexIds, callback) {
