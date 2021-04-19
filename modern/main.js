@@ -1417,6 +1417,24 @@ document.getElementById("btn_sender").onclick = function() {
 	});
 };
 
+document.getElementById("btn_limits").onclick = function() {
+	const btn = this;
+	btn.disabled = true;
+
+	const mib = [document.getElementById("lim_mib0").value, document.getElementById("lim_mib1").value, document.getElementById("lim_mib2").value, document.getElementById("lim_mib3").value];
+	const nrm = [document.getElementById("lim_nrm0").value, document.getElementById("lim_nrm1").value, document.getElementById("lim_nrm2").value, document.getElementById("lim_nrm3").value];
+	const shd = [document.getElementById("lim_shd0").value, document.getElementById("lim_shd1").value, document.getElementById("lim_shd2").value, document.getElementById("lim_shd3").value];
+
+	ae.Setting_Update(mib, nrm, shd, function(error) {
+		btn.disabled = false;
+
+		if (error !== 0) {
+			errorDialog(error);
+			return;
+		}
+	});
+};
+
 document.getElementById("txt_skey").onfocus = function() {
 	document.getElementById("greeting").textContent = localStorage.greeting;
 };
