@@ -784,13 +784,13 @@ function updateLimits() {
 			tbl.rows[i].cells[2].children[0].disabled = false;
 			tbl.rows[i].cells[3].children[0].disabled = false;
 
-			tbl.rows[i].cells[1].children[0].value = ae.GetLimitStorage(i) + 1;
+			tbl.rows[i].cells[1].children[0].value = ae.GetLimitStorage(i);
 			tbl.rows[i].cells[2].children[0].value = ae.GetLimitNormalA(i);
 			tbl.rows[i].cells[3].children[0].value = ae.GetLimitShieldA(i);
 		}
 	} else {
 		const lvl = ae.GetUserLevel();
-		tbl.rows[lvl].cells[1].children[0].value = ae.GetLimitStorage(lvl) + 1;
+		tbl.rows[lvl].cells[1].children[0].value = ae.GetLimitStorage(lvl);
 		tbl.rows[lvl].cells[2].children[0].value = ae.GetLimitNormalA(lvl);
 		tbl.rows[lvl].cells[3].children[0].value = ae.GetLimitShieldA(lvl);
 	}
@@ -1421,9 +1421,9 @@ document.getElementById("btn_limits").onclick = function() {
 	const btn = this;
 	btn.disabled = true;
 
-	const mib = [document.getElementById("lim_mib0").value, document.getElementById("lim_mib1").value, document.getElementById("lim_mib2").value, document.getElementById("lim_mib3").value];
-	const nrm = [document.getElementById("lim_nrm0").value, document.getElementById("lim_nrm1").value, document.getElementById("lim_nrm2").value, document.getElementById("lim_nrm3").value];
-	const shd = [document.getElementById("lim_shd0").value, document.getElementById("lim_shd1").value, document.getElementById("lim_shd2").value, document.getElementById("lim_shd3").value];
+	const mib = [parseInt(document.getElementById("lim_mib0").value), parseInt(document.getElementById("lim_mib1").value), parseInt(document.getElementById("lim_mib2").value), parseInt(document.getElementById("lim_mib3").value)];
+	const nrm = [parseInt(document.getElementById("lim_nrm0").value), parseInt(document.getElementById("lim_nrm1").value), parseInt(document.getElementById("lim_nrm2").value), parseInt(document.getElementById("lim_nrm3").value)];
+	const shd = [parseInt(document.getElementById("lim_shd0").value), parseInt(document.getElementById("lim_shd1").value), parseInt(document.getElementById("lim_shd2").value), parseInt(document.getElementById("lim_shd3").value)];
 
 	ae.Setting_Update(mib, nrm, shd, function(error) {
 		btn.disabled = false;

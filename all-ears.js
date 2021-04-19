@@ -2064,10 +2064,10 @@ function AllEars(readyCallback) {
 		if (typeof(mib) !== "object" || typeof(nrm) !== "object" || typeof(shd) !== "object") {callback(0x01); return;}
 
 		const data = new Uint8Array([
-			mib[0] - 1, nrm[0], shd[0],
-			mib[1] - 1, nrm[1], shd[1],
-			mib[2] - 1, nrm[2], shd[2],
-			mib[3] - 1, nrm[3], shd[3]
+			mib[0], nrm[0], shd[0],
+			mib[1], nrm[1], shd[1],
+			mib[2], nrm[2], shd[2],
+			mib[3], nrm[3], shd[3]
 		]);
 
 		_FetchEncrypted(_AEM_API_SETTING_LIMITS, data, function(fetchErr) {callback(fetchErr);});
