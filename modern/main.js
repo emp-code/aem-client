@@ -1497,6 +1497,7 @@ document.getElementById("btn_enter").onclick = function() {
 			ae.Account_Browse(function(statusAcc) {
 				if (statusAcc === 0) {
 					for (let i = 0; i < ae.Admin_GetUserCount(); i++) {addAccountToTable(i);}
+					updateLimits();
 				} else {
 					errorDialog(statusAcc);
 				}
