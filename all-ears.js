@@ -1508,6 +1508,8 @@ function AllEars(readyCallback) {
 	};
 
 	this.Address_Create = function(addr, callback) {
+		if (this.GetPrivateExtraSpaceMax() - this.GetPrivateExtraSpace() < 18) {callback(0x14); return;}
+
 		if (addr == "SHIELD") {
 			_FetchEncrypted(_AEM_API_ADDRESS_CREATE, sodium.from_string("SHIELD"), function(fetchErr, byteArray) {
 				if (fetchErr) {callback(fetchErr); return;}
@@ -2111,6 +2113,7 @@ function AllEars(readyCallback) {
 			case 0x11: return "Name too long";
 			case 0x12: return "File too large";
 			case 0x13: return "Private-field extra content too long";
+			case 0x14: return "Private-field out of space";
 
 			case 0x17: return "Server failed decrypting the request"; // 400
 			case 0x18: return "Account does not exist"; // 403
