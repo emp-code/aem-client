@@ -489,8 +489,8 @@ function adjustLevel(pubkey, level, c) {
 		fs.disabled = false;
 
 		if (error === 0) {
-			c[4].textContent = level;
-			c[5].children[0].disabled = (level === 3);
+			c[4].children[0].disabled = (level === 3);
+			c[5].textContent = level;
 			c[6].children[0].disabled = (level === 0);
 		} else errorDialog(error);
 	});
@@ -744,22 +744,23 @@ function addAccountToTable(i) {
 	cell = row.insertCell(-1); cell.textContent = ae.Admin_GetUserSpace(i);
 	cell = row.insertCell(-1); cell.textContent = ae.Admin_GetUserNAddr(i);
 	cell = row.insertCell(-1); cell.textContent = ae.Admin_GetUserSAddr(i);
-	cell = row.insertCell(-1); cell.textContent = ae.Admin_GetUserLevel(i);
 
 	cell = row.insertCell(-1);
 	let btn = document.createElement("button");
 	btn.type = "button";
 	btn.textContent = "+";
 	btn.disabled = (ae.Admin_GetUserLevel(i) === 3);
-	btn.onclick = function() {const c = this.parentElement.parentElement.cells; adjustLevel(c[0].textContent, parseInt(c[4].textContent, 10) + 1, c);};
+	btn.onclick = function() {const c = this.parentElement.parentElement.cells; adjustLevel(c[0].textContent, parseInt(c[5].textContent, 10) + 1, c);};
 	cell.appendChild(btn);
+
+	cell = row.insertCell(-1); cell.textContent = ae.Admin_GetUserLevel(i);
 
 	cell = row.insertCell(-1);
 	btn = document.createElement("button");
 	btn.type = "button";
 	btn.textContent = "−";
 	btn.disabled = (ae.Admin_GetUserLevel(i) === 0);
-	btn.onclick = function() {const c = this.parentElement.parentElement.cells; adjustLevel(c[0].textContent, parseInt(c[4].textContent, 10) - 1, c);};
+	btn.onclick = function() {const c = this.parentElement.parentElement.cells; adjustLevel(c[0].textContent, parseInt(c[5].textContent, 10) - 1, c);};
 	cell.appendChild(btn);
 
 	cell = row.insertCell(-1);
@@ -804,7 +805,6 @@ function addOwnAccount() {
 	cell = row.insertCell(-1); cell.textContent = Math.round(ae.GetTotalMsgBytes() / 1048576); // MiB
 	cell = row.insertCell(-1); cell.textContent = ae.GetAddressCountNormal();
 	cell = row.insertCell(-1); cell.textContent = ae.GetAddressCountShield();
-	cell = row.insertCell(-1); cell.textContent = ae.GetUserLevel();
 
 	cell = row.insertCell(-1);
 	let btn = document.createElement("button");
@@ -813,6 +813,8 @@ function addOwnAccount() {
 	btn.disabled = true;
 	cell.appendChild(btn);
 
+	cell = row.insertCell(-1); cell.textContent = ae.GetUserLevel();
+
 	cell = row.insertCell(-1);
 	btn = document.createElement("button");
 	btn.type = "button";
@@ -820,10 +822,10 @@ function addOwnAccount() {
 	btn.disabled = true;
 	btn.id = "btn_lowme";
 	btn.onclick = function() {
-		const newLevel = parseInt(row.cells[4].textContent, 10) - 1;
+		const newLevel = parseInt(row.cells[5].textContent, 10) - 1;
 		ae.Account_Update(ae.GetUserPkHex(), newLevel, function(error) {
 			if (error === 0) {
-				row.cells[4].textContent = newLevel;
+				row.cells[5].textContent = newLevel;
 				if (newLevel === 0) {
 					document.getElementById("btn_lowme").disabled = true;
 					document.getElementById("chk_lowme").disabled = true;
