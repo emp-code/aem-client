@@ -453,7 +453,8 @@ function displayOutMsg(num) {
 
 	if (!isInt) {
 		document.getElementById("readmsg_ip").children[1].textContent = ae.GetOutMsgIp(num);
-//		document.getElementById("readmsg_country").textContent = getCountryFlag(cc) + " " + getCountryName(cc);
+		document.getElementById("readmsg_country").textContent = getCountryFlag(ae.GetOutMsgCcode(num));
+		document.getElementById("readmsg_country").title = ae.GetOutMsgCname(num);
 //		document.getElementById("readmsg_tls").children[0].textContent = ae.GetOutMsgTLS(num);
 		document.getElementById("readmsg_greet").children[0].textContent = ae.GetOutMsgGreet(num);
 	}

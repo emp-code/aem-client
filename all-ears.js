@@ -171,13 +171,14 @@ function AllEars(readyCallback) {
 		this.body = body;
 	}
 
-	function _NewOutMsg_Ext(validPad, validSig, id, ts, ip, to, from, subj, body, mxDom, greet, tlsCs, tlsVer, attach) {
+	function _NewOutMsg_Ext(validPad, validSig, id, ts, ip, cc, to, from, subj, body, mxDom, greet, tlsCs, tlsVer, attach) {
 		this.isInt = false;
 		this.validPad = validPad;
 		this.validSig = validSig;
 		this.id = id;
 		this.ts = ts;
 		this.ip = ip;
+		this.countryCode = cc;
 		this.to = to;
 		this.from = from;
 		this.subj = subj;
@@ -999,12 +1000,13 @@ function AllEars(readyCallback) {
 			const msgAttach = msgData[7] & 31;
 			// msgData[8]: TLS_InfoByte
 
-			const lenTo = msgData[9];
-			const lenFr = msgData[10];
-			const lenMx = msgData[11];
-			const lenGr = msgData[12];
+			const msgCc = ((msgData[8] & 31) <= 26 && (msgData[9] & 31) <= 26) ? String.fromCharCode("A".charCodeAt(0) + (msgData[8] & 31)) + String.fromCharCode("A".charCodeAt(0) + (msgData[9] & 31)) : "??";
+			const lenTo = msgData[10];
+			const lenFr = msgData[11];
+			const lenMx = msgData[12];
+			const lenGr = msgData[13];
 
-			let os = 13;
+			let os = 14;
 			const msgTo = sodium.to_string(msgData.slice(os, os + lenTo)); os += lenTo;
 			const msgFr = sodium.to_string(msgData.slice(os, os + lenFr)); os += lenFr;
 			const msgMx = sodium.to_string(msgData.slice(os, os + lenMx)); os += lenMx;
@@ -1012,7 +1014,7 @@ function AllEars(readyCallback) {
 			const msgSb = sodium.to_string(msgData.slice(os, os + lenSb)); os += lenSb;
 			const msgBd = sodium.to_string(msgData.slice(os));
 
-			newMsg = new _NewOutMsg_Ext(validPad, validSig, msgId, msgTs, msgIp, msgTo, msgFr, msgSb, msgBd, msgMx, msgGr, msgCs, msgTlsVer, msgAttach);
+			newMsg = new _NewOutMsg_Ext(validPad, validSig, msgId, msgTs, msgIp, msgCc, msgTo, msgFr, msgSb, msgBd, msgMx, msgGr, msgCs, msgTlsVer, msgAttach);
 		} else { // Internal message
 			const isE2ee       = (msgData[1] & 64) !== 0;
 			const isFromShield = (msgData[1] &  8) !== 0;
@@ -1307,12 +1309,14 @@ function AllEars(readyCallback) {
 	this.GetOutMsgCount = function() {return _outMsg.length;};
 	this.GetOutMsgIdHex = function(num) {return sodium.to_hex(_outMsg[num].id);};
 	this.GetOutMsgIsInt = function(num) {return _outMsg[num].isInt;};
-	this.GetOutMsgTime = function(num) {return _outMsg[num].ts;};
-	this.GetOutMsgIp   = function(num) {return String(_outMsg[num].ip[0] + "." + _outMsg[num].ip[1] + "." + _outMsg[num].ip[2] + "." + _outMsg[num].ip[3]);};
-	this.GetOutMsgTo   = function(num) {return _outMsg[num].to;};
-	this.GetOutMsgFrom = function(num) {return _outMsg[num].from;};
-	this.GetOutMsgSubj = function(num) {return _outMsg[num].subj;};
-	this.GetOutMsgBody = function(num) {return _outMsg[num].body;};
+	this.GetOutMsgTime  = function(num) {return _outMsg[num].ts;};
+	this.GetOutMsgIp    = function(num) {return String(_outMsg[num].ip[0] + "." + _outMsg[num].ip[1] + "." + _outMsg[num].ip[2] + "." + _outMsg[num].ip[3]);};
+	this.GetOutMsgCcode = function(num) {return _outMsg[num].countryCode;};
+	this.GetOutMsgCname = function(num) {return _GetCountryName(_outMsg[num].countryCode);};
+	this.GetOutMsgTo    = function(num) {return _outMsg[num].to;};
+	this.GetOutMsgFrom  = function(num) {return _outMsg[num].from;};
+	this.GetOutMsgSubj  = function(num) {return _outMsg[num].subj;};
+	this.GetOutMsgBody  = function(num) {return _outMsg[num].body;};
 	this.GetOutMsgMxDom = function(num) {return _outMsg[num].mxDom;};
 	this.GetOutMsgGreet = function(num) {return _outMsg[num].greet;};
 	this.GetOutMsgTLS   = function(num) {return (_outMsg[num].tlsCs === 0) ? "" : "TLS v1." + _outMsg[num].tlsVer + " " + _GetCiphersuite(_outMsg[num].tlsCs);};
