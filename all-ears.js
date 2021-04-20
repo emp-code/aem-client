@@ -2075,7 +2075,7 @@ function AllEars(readyCallback) {
 		]);
 
 		_FetchEncrypted(_AEM_API_SETTING_LIMITS, data, function(fetchErr) {callback(fetchErr);});
-	}
+	};
 
 	// Extras
 	this.ShieldMix = function(addr) {
