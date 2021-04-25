@@ -1060,6 +1060,10 @@ function reloadAccount() {
 
 	document.getElementById("txt_reg").disabled = !ae.IsUserAdmin();
 	document.getElementById("btn_reg").disabled = !ae.IsUserAdmin();
+	document.getElementById("txt_sender_hash").disabled = !ae.IsUserAdmin();
+	document.getElementById("txt_sender_date").disabled = !ae.IsUserAdmin();
+	document.getElementById("btn_sender").disabled = !ae.IsUserAdmin();
+
 	document.getElementById("chk_lowme").disabled = (ae.GetUserLevel() === 0);
 	document.getElementById("txt_notepad").value = ae.GetPrivateExtra();
 }
