@@ -17,7 +17,7 @@ function AllEars(readyCallback) {
 	const docSltNrm = document.head.querySelector("meta[name='aem.adrslt.nrm']").content;
 
 	if (docDomApi !== "" || docDomEml !== "") {
-		const domainRegex = new RegExp(/(?=^.{4,253}$)(^((?!-)[a-zA-Z0-9-]{1,63}(?<!-)\.)+[a-zA-Z]{2,63}$)/);
+		const domainRegex = new RegExp(/(?=^.{4,253}$)(^((?!-)[a-z0-9-]{1,63}(?<!-)\.)+[a-z]{2,63}$)/);
 		if ((docDomApi !== "" && !domainRegex.test(docDomApi)) || (docDomEml !== "" && !domainRegex.test(docDomEml))) {
 			readyCallback(false);
 			return;
