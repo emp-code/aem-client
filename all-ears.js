@@ -24,7 +24,11 @@ function AllEars(readyCallback) {
 		}
 	}
 
-	if (!docPubApi || !docPubSig || !docSltNrm || docPubApi.length !== sodium.crypto_box_SECRETKEYBYTES * 2 || docPubSig.length !== sodium.crypto_sign_PUBLICKEYBYTES * 2 || docSltNrm.length !== sodium.crypto_pwhash_SALTBYTES * 2) {
+	if (
+	   !docPubApi || !(new RegExp("^[0-9A-f]{" + (sodium.crypto_box_PUBLICKEYBYTES * 2).toString() + "}$").test(docPubApi))
+	|| !docPubSig || !(new RegExp("^[0-9A-f]{" + (sodium.crypto_sign_PUBLICKEYBYTES * 2).toString() + "}$").test(docPubSig))
+	|| !docSltNrm || !(new RegExp("^[0-9A-f]{" + (sodium.crypto_pwhash_SALTBYTES * 2).toString() + "}$").test(docSltNrm))
+	) {
 		readyCallback(false);
 		return;
 	}
