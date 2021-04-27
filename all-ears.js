@@ -2,7 +2,7 @@
 
 function AllEars(readyCallback) {
 	try {
-		if ((!window.isSecureContext && !document.domain.endsWith(".onion"))
+		if ((!window.isSecureContext && !(/^[2-7a-z]{56}\.onion$/.test(document.domain)))
 		|| window.self !== window.top
 		|| window.opener !== null
 		|| document.compatMode == "BackCompat"
