@@ -16,6 +16,14 @@ function AllEars(readyCallback) {
 	const docPubSig = document.head.querySelector("meta[name='aem.pubkey.sig']").content;
 	const docSltNrm = document.head.querySelector("meta[name='aem.adrslt.nrm']").content;
 
+	if (docDomApi !== "" || docDomEml !== "") {
+		const domainRegex = new RegExp(/(?=^.{4,253}$)(^((?!-)[a-zA-Z0-9-]{1,63}(?<!-)\.)+[a-zA-Z]{2,63}$)/);
+		if ((docDomApi !== "" && !domainRegex.test(docDomApi)) || (docDomEml !== "" && !domainRegex.test(docDomEml))) {
+			readyCallback(false);
+			return;
+		}
+	}
+
 	if (!docPubApi || !docPubSig || !docSltNrm || docPubApi.length !== sodium.crypto_box_SECRETKEYBYTES * 2 || docPubSig.length !== sodium.crypto_sign_PUBLICKEYBYTES * 2 || docSltNrm.length !== sodium.crypto_pwhash_SALTBYTES * 2) {
 		readyCallback(false);
 		return;
