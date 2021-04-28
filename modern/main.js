@@ -742,7 +742,7 @@ function addAccountToTable(i) {
 	const row = document.getElementById("tbd_accs").insertRow(-1);
 	let cell;
 	cell = row.insertCell(-1); cell.textContent = ae.Admin_GetUserPkHex(i);
-	cell = row.insertCell(-1); cell.textContent = ae.Admin_GetUserSpace(i);
+	cell = row.insertCell(-1); cell.textContent = Math.round(ae.Admin_GetUserSpace(i) / 1024);
 	cell = row.insertCell(-1); cell.textContent = ae.Admin_GetUserNAddr(i);
 	cell = row.insertCell(-1); cell.textContent = ae.Admin_GetUserSAddr(i);
 

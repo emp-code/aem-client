@@ -1441,7 +1441,7 @@ function AllEars(readyCallback) {
 
 				const u16 = new Uint16Array(s.slice(0, 2).buffer)[0];
 
-				const newSpace = s[2] | ((u16 >> 4) & 3840);
+				const newSpace = (s[2] | ((u16 >> 4) & 3840)) * 64; // in KiB
 				const newLevel = u16 & 3;
 				const newAddrN = (u16 >> 2) & 31;
 				const newAddrS = (u16 >> 7) & 31;
