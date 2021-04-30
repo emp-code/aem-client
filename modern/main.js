@@ -407,7 +407,6 @@ function displayMsg(isInt, num) {
 		if (!ae.GetExtMsgFlagVPad(num)) addMsgFlag("PAD", "Invalid padding");
 		if (!ae.GetExtMsgFlagVSig(num)) addMsgFlag("SIG", "Invalid signature");
 		if (!ae.GetExtMsgFlagPExt(num)) addMsgFlag("SMTP", "The sender did not use the Extended (ESMTP) protocol");
-		if (!ae.GetExtMsgFlagQuit(num)) addMsgFlag("QUIT", "The sender did not issue the required QUIT command");
 		if ( ae.GetExtMsgFlagRare(num)) addMsgFlag("RARE", "The sender issued unusual command(s)");
 		if ( ae.GetExtMsgFlagFail(num)) addMsgFlag("FAIL", "The sender issued invalid command(s)");
 		if ( ae.GetExtMsgFlagPErr(num)) addMsgFlag("PROT", "The sender violated the protocol");
