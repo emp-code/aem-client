@@ -387,6 +387,7 @@ function displayMsg(isInt, num) {
 		document.getElementById("readmsg_country").textContent = getCountryFlag(ae.GetExtMsgCcode(num));
 		document.getElementById("readmsg_country").title = ae.GetExtMsgCname(num);
 		document.getElementById("readmsg_ip").children[1].textContent = ae.GetExtMsgIp(num) + (ae.GetExtMsgFlagIpBl(num) ? " ❗" : "");
+		document.getElementById("readmsg_ip").children[2].textContent = " • " + ae.GetExtMsgAuSys(num);
 		document.getElementById("readmsg_tls").children[0].textContent = ae.GetExtMsgTLS(num);
 
 		// Right side

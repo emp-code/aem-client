@@ -132,7 +132,7 @@ function AllEars(readyCallback) {
 		this.sgnTo = [];
 	}
 
-	function _NewExtMsg(validPad, validSig, id, ts, hdrTs, hdrTz, ip, cc, cs, tls, esmtp, protV, inval, rares, attach, greetDomainIp, ipBlacklisted, dkimFail, dkim, greet, rdns, envFrom, hdrFrom, dnFrom, envTo, hdrTo, dnTo, hdrRt, dnRt, hdrId, headers, subj, body) {
+	function _NewExtMsg(validPad, validSig, id, ts, hdrTs, hdrTz, ip, cc, cs, tls, esmtp, protV, inval, rares, attach, greetDomainIp, ipBlacklisted, dkimFail, dkim, greet, rdns, auSys, envFrom, hdrFrom, dnFrom, envTo, hdrTo, dnTo, hdrRt, dnRt, hdrId, headers, subj, body) {
 		this.validPad = validPad;
 		this.validSig = validSig;
 		this.id = id;
@@ -154,6 +154,7 @@ function AllEars(readyCallback) {
 		this.dkim = dkim;
 		this.greet = greet;
 		this.rdns = rdns;
+		this.auSys = auSys;
 		this.envFrom = envFrom;
 		this.hdrFrom = hdrFrom;
 		this.dnFrom = dnFrom;
@@ -1141,6 +1142,7 @@ function AllEars(readyCallback) {
 	this.GetExtMsgDkim    = function(num) {return _extMsg[num].dkim;};
 	this.GetExtMsgGreet   = function(num) {return _extMsg[num].greet;};
 	this.GetExtMsgRdns    = function(num) {return _extMsg[num].rdns;};
+	this.GetExtMsgAuSys   = function(num) {return _extMsg[num].auSys;};
 	this.GetExtMsgCcode   = function(num) {return _extMsg[num].countryCode;};
 	this.GetExtMsgCname   = function(num) {return _GetCountryName(_extMsg[num].countryCode);};
 	this.GetExtMsgEnvFrom = function(num) {return _extMsg[num].envFrom;};
@@ -1661,31 +1663,32 @@ function AllEars(readyCallback) {
 						const dkimCount = msgData[7] >> 5;
 						const msgAttach = msgData[7] & 31;
 
-						const msgEsmtp = (msgData[8]  & 128) !== 0;
-						// [8] & 64 unused
-						const msgProtV = (msgData[8]  &  32) !== 0;
+						const msgIpBlk = (msgData[8] & 128) !== 0;
+						const msgGrDom = (msgData[8] &  64) !== 0;
+						const msgEsmtp = (msgData[8] &  32) !== 0;
 						const msgInval = (msgData[9] & 128) !== 0;
-						const msgRares = (msgData[9] &  64) !== 0;
-						const msgGrDom = (msgData[9] &  32) !== 0;
-						const msgSpf   = (msgData[10] & 192);
-						const dkimFail = (msgData[10] &  32) !== 0;
-						const lenEnvTo =  msgData[10] &  31;
-						const msgDmarc = (msgData[11] & 192);
-						const lenHdrTo =  msgData[11] &  63;
-						const msgDnSec = (msgData[12] & 128) !== 0;
-						const lenGreet =  msgData[12] & 127;
-						const msgDane  = (msgData[13] & 128) !== 0;
-						const lenRvDns =  msgData[13] & 127;
-						const msgIpBlk = (msgData[14] & 128) !== 0;
-						const msgHdrTz = (msgData[14] & 127) * 15 - 900; // Timezone offset in minutes; -900m..900m (-15h..+15h)
+						const msgProtV = (msgData[9] &  64) !== 0;
+						const msgRares = (msgData[9] &  32);
+						// [10] & 32 unused
+						const lenEnvTo = msgData[10] &  31;
+						const msgDmarc = msgData[11] & 192;
+						const lenHdrTo = msgData[11] &  63;
+						const msgDnSec = msgData[12] & 192;
+						const lenGreet = msgData[12] &  63;
+						const msgDane  = msgData[13] & 192;
+						const lenRvDns = msgData[13] &  63;
+						// [14] & 192 unused
+						const lenAuSys = msgData[14] & 63;
+						const dkimFail = (msgData[15] & 128) !== 0;
+						const msgHdrTz = (msgData[15] & 127) * 15 - 900; // Timezone offset in minutes; -900m..900m (-15h..+15h)
 
-						const msgHdrTs = new Uint16Array(msgData.slice(15, 17).buffer)[0] - 736;
+						const msgHdrTs = new Uint16Array(msgData.slice(16, 18).buffer)[0] - 736;
 						const msgCc = ((msgData[8] & 31) <= 26 && (msgData[9] & 31) <= 26) ? String.fromCharCode("A".charCodeAt(0) + (msgData[8] & 31)) + String.fromCharCode("A".charCodeAt(0) + (msgData[9] & 31)) : "??";
 
 						let msgDkim = null;
 						let lenDkimDomain = [];
 
-						let extOffset = 17;
+						let extOffset = 18;
 
 						if (dkimCount !== 0) {
 							msgDkim = new _NewDkim();
@@ -1722,6 +1725,7 @@ function AllEars(readyCallback) {
 							const hdrTo    = d.decode(msgBodyU8.slice(o, o + lenHdrTo)); o+= lenHdrTo;
 							const msgGreet = d.decode(msgBodyU8.slice(o, o + lenGreet)); o+= lenGreet;
 							const msgRvDns = d.decode(msgBodyU8.slice(o, o + lenRvDns)); o+= lenRvDns;
+							const msgAuSys = d.decode(msgBodyU8.slice(o, o + lenAuSys)); o+= lenAuSys;
 
 							const msgParts = d.decode(msgBodyU8.slice(o)).split("\n");
 							const msgEnvFr = msgParts[0];
@@ -1743,7 +1747,7 @@ function AllEars(readyCallback) {
 							const msgHeaders = (headersEnd > 0) ? body.slice(0, headersEnd) : "";
 							const msgBody = body.slice(headersEnd + 1);
 
-							_extMsg.push(new _NewExtMsg(validPad, validSig, msgId, msgTs, msgHdrTs, msgHdrTz, msgIp, msgCc, msgCs, msgTls, msgEsmtp, msgProtV, msgInval, msgRares, msgAttach, msgGrDom, msgIpBlk, dkimFail, msgDkim, msgGreet, msgRvDns, msgEnvFr, msgHdrFr, msgDnFr, msgEnvTo, msgHdrTo, msgDnTo, msgHdrRt, msgDnRt, msgHdrId, msgHeaders, msgSbjct, msgBody));
+							_extMsg.push(new _NewExtMsg(validPad, validSig, msgId, msgTs, msgHdrTs, msgHdrTz, msgIp, msgCc, msgCs, msgTls, msgEsmtp, msgProtV, msgInval, msgRares, msgAttach, msgGrDom, msgIpBlk, dkimFail, msgDkim, msgGreet, msgRvDns, msgAuSys, msgEnvFr, msgHdrFr, msgDnFr, msgEnvTo, msgHdrTo, msgDnTo, msgHdrRt, msgDnRt, msgHdrId, msgHeaders, msgSbjct, msgBody));
 						} catch(e) {
 							_extMsg.push(new _NewExtMsg(validPad, validSig, msgId, msgTs, msgHdrTs, msgHdrTz, msgIp, msgCc, msgCs, msgTls, msgEsmtp, msgProtV, msgInval, msgRares, msgAttach, msgGrDom, msgIpBlk, dkimFail, null, "", "", "", "", "", "", "", "", "", "", "", "", "Failed decompression", "Size: " + msgData.length));
 						}
