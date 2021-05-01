@@ -348,7 +348,14 @@ function displayMsg(isInt, num) {
 		hdrTime += hdrSecs + "s";
 
 		const hdrTz = (ae.GetExtMsgHdrTz(num) >= 0 ? "+" : "-") + Math.floor(Math.abs(ae.GetExtMsgHdrTz(num)) / 60).toString().padStart(2, "0") + (Math.abs(ae.GetExtMsgHdrTz(num)) % 60).toString().padStart(2, "0");
-		document.getElementById("readmsg_date").children[1].textContent = msgDate.toISOString().slice(0, 19).replace("T", " ") + "; " + hdrTz + " " + ((ae.GetExtMsgHdrTime(num) >= 0) ? "+" : "-") + hdrTime;
+
+		let spans = [document.createElement("span"), document.createElement("span"), document.createElement("span")];
+		spans[0].textContent = msgDate.toISOString().slice(0, 19).replace("T", " ");
+		spans[1].className = "sans";
+		spans[1].textContent = " • ";
+		spans[2] = document.createElement("span");
+		spans[2].textContent = hdrTz + " " + ((ae.GetExtMsgHdrTime(num) >= 0) ? "+" : "-") + hdrTime;
+		document.getElementById("readmsg_date").children[1].replaceChildren(...spans);
 
 		document.getElementById("readmsg_ip").style.visibility = "visible";
 		document.getElementById("readmsg_rdns").style.visibility = "visible";
