@@ -353,7 +353,6 @@ function displayMsg(isInt, num) {
 		spans[0].textContent = msgDate.toISOString().slice(0, 19).replace("T", " ");
 		spans[1].className = "sans";
 		spans[1].textContent = " • ";
-		spans[2] = document.createElement("span");
 		spans[2].textContent = hdrTz + " " + ((ae.GetExtMsgHdrTime(num) >= 0) ? "+" : "-") + hdrTime;
 		document.getElementById("readmsg_date").children[1].replaceChildren(...spans);
 
