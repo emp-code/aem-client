@@ -1420,7 +1420,8 @@ function AllEars(readyCallback) {
 		if (_userLevel !== _AEM_USER_MAXLEVEL) {callback(0x02); return;}
 
 		_FetchEncrypted(_AEM_API_ACCOUNT_BROWSE, new Uint8Array([0]), function(fetchErr, browseData) {
-			if (fetchErr) {callback(fetchErr); return;}
+			if (fetchErr !== 0 || browseData === null) {callback(fetchErr); return;}
+			if (!browseData || browseData.length < 35) {callback(0x07); return;}
 
 			_maxStorage.splice(0);
 			_maxNormalA.splice(0);
