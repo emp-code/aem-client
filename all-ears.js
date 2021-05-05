@@ -444,6 +444,7 @@ function AllEars(readyCallback) {
 			case "css":
 			case "csv":
 			case "cxx":
+			case "eml":
 			case "h":
 			case "h++":
 			case "hh":
