@@ -55,6 +55,7 @@ function AllEars(readyCallback) {
 	// 64/32/16/8/4 unused
 	const _AEM_ADDR_FLAG_ACCINT = 2;
 	const _AEM_ADDR_FLAG_ACCEXT = 1;
+	const _AEM_ADDR_FLAGS_DEFAULT = _AEM_ADDR_FLAG_ACCEXT;
 
 	const _AEM_FLAG_UINFO = 2;
 	const _AEM_FLAG_NEWER = 1;
@@ -224,12 +225,10 @@ function AllEars(readyCallback) {
 		this.blocks = blocks;
 	}
 
-	function _NewAddress(hash, addr32, is_shd, accExt, accInt) {
+	function _NewAddress(hash, addr32, flags) {
 		this.hash = hash;
 		this.addr32 = addr32;
-		this.is_shd = is_shd;
-		this.accExt = accExt;
-		this.accInt = accInt;
+		this.flags = flags;
 	}
 
 	const _FetchBinary = function(postData, callback) {
@@ -375,7 +374,7 @@ function AllEars(readyCallback) {
 		let count = 0;
 
 		for (let i = 0; i < _userAddress.length; i++) {
-			if (_userAddress[i].is_shd === isShield) count++;
+			if ((_userAddress[i].flags & _AEM_ADDR_FLAG_SHIELD) !== 0) count++;
 		}
 
 		return count;
@@ -918,11 +917,7 @@ function AllEars(readyCallback) {
 		let offset = 4;
 		for (let i = 0; i < (browseData[0] >> 3); i++) {
 			const hash = browseData.slice(offset, offset + 8);
-			const accExt = (browseData[offset + 8] & _AEM_ADDR_FLAG_ACCEXT) !== 0;
-			const accInt = (browseData[offset + 8] & _AEM_ADDR_FLAG_ACCINT) !== 0;
-			const is_shd = (browseData[offset + 8] & _AEM_ADDR_FLAG_SHIELD) !== 0;
-
-			_userAddress.push(new _NewAddress(hash, null, is_shd, accExt, accInt));
+			_userAddress.push(new _NewAddress(hash, null, browseData[offset + 8]));
 			offset += 9;
 		}
 
@@ -1110,12 +1105,12 @@ function AllEars(readyCallback) {
 	this.GetLevelMax = function() {return _AEM_USER_MAXLEVEL;};
 	this.GetAddrPerUser = function() {return _AEM_ADDRESSES_PER_USER;};
 
-	this.GetAddress = function(num) {return _addr32_decode(_userAddress[num].addr32, _userAddress[num].is_shd);};
-	this.GetAddressAccExt = function(num) {return _userAddress[num].accExt;};
-	this.GetAddressAccInt = function(num) {return _userAddress[num].accInt;};
+	this.GetAddress = function(num) {return _addr32_decode(_userAddress[num].addr32, (_userAddress[num].flags & _AEM_ADDR_FLAG_SHIELD) !== 0);};
+	this.GetAddressAccInt = function(num) {return (_userAddress[num].flags & _AEM_ADDR_FLAG_ACCINT) !== 0;};
+	this.GetAddressAccExt = function(num) {return (_userAddress[num].flags & _AEM_ADDR_FLAG_ACCEXT) !== 0;};
 
-	this.SetAddressAccExt = function(num, val) {_userAddress[num].accExt = val;};
-	this.SetAddressAccInt = function(num, val) {_userAddress[num].accInt = val;};
+	this.SetAddressAccInt = function(num, val) {if (val) {_userAddress[num].flags |= _AEM_ADDR_FLAG_ACCINT;} else {_userAddress[num].flags &= (0xFF & ~_AEM_ADDR_FLAG_ACCINT)}};
+	this.SetAddressAccExt = function(num, val) {if (val) {_userAddress[num].flags |= _AEM_ADDR_FLAG_ACCEXT;} else {_userAddress[num].flags &= (0xFF & ~_AEM_ADDR_FLAG_ACCEXT)}};
 
 	this.GetAddressCount = function() {return _userAddress.length;};
 	this.GetAddressCountNormal = function() {return _GetAddressCount(false);};
@@ -1530,8 +1525,7 @@ function AllEars(readyCallback) {
 		if (addr == "SHIELD") {
 			_FetchEncrypted(_AEM_API_ADDRESS_CREATE, sodium.from_string("SHIELD"), function(fetchErr, byteArray) {
 				if (fetchErr) {callback(fetchErr); return;}
-
-				_userAddress.push(new _NewAddress(byteArray.slice(0, 8), byteArray.slice(8, 18), true, true, false));
+				_userAddress.push(new _NewAddress(byteArray.slice(0, 8), byteArray.slice(8, 18), _AEM_ADDR_FLAG_SHIELD | _AEM_ADDR_FLAGS_DEFAULT));
 				callback(0);
 			});
 		} else {
@@ -1553,7 +1547,7 @@ function AllEars(readyCallback) {
 			_FetchEncrypted(_AEM_API_ADDRESS_CREATE, hash, function(fetchErr) {
 				if (fetchErr) {callback(fetchErr); return;}
 
-				_userAddress.push(new _NewAddress(hash, addr32, false, true, false));
+				_userAddress.push(new _NewAddress(hash, addr32, _AEM_ADDR_FLAGS_DEFAULT));
 				callback(0);
 			});
 		}
@@ -1579,12 +1573,7 @@ function AllEars(readyCallback) {
 
 		for (let i = 0; i < _userAddress.length; i++) {
 			data.set(_userAddress[i].hash, (i * 9));
-
-			let flags = 0;
-			if (_userAddress[i].accExt) flags |= _AEM_ADDR_FLAG_ACCEXT;
-			if (_userAddress[i].accInt) flags |= _AEM_ADDR_FLAG_ACCINT;
-
-			data[(i * 9) + 8] = flags;
+			data[(i * 9) + 8] = _userAddress[i].flags;
 		}
 
 		_FetchEncrypted(_AEM_API_ADDRESS_UPDATE, data, function(fetchErr) {callback(fetchErr);});
