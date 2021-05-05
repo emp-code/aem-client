@@ -913,6 +913,12 @@ function addAddress(num) {
 	cell.appendChild(el);
 
 	cell = row.insertCell(-1);
+	el = document.createElement("input");
+	el.type = "checkbox";
+	el.checked = ae.GetAddressOrigin(num);
+	cell.appendChild(el);
+
+	cell = row.insertCell(-1);
 	el = document.createElement("button");
 	el.type = "button";
 	el.textContent = "X";
@@ -1268,6 +1274,7 @@ document.getElementById("btn_address_update").onclick = function() {
 	for (let i = 0; i < rows.length; i++) {
 		ae.SetAddressAccExt(i, rows[i].getElementsByTagName("input")[0].checked);
 		ae.SetAddressAccInt(i, rows[i].getElementsByTagName("input")[1].checked);
+		ae.SetAddressOrigin(i, rows[i].getElementsByTagName("input")[2].checked);
 	}
 
 	ae.Address_Update(function(error) {

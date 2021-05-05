@@ -52,7 +52,8 @@ function AllEars(readyCallback) {
 	const _AEM_API_SETTING_LIMITS = 15;
 
 	const _AEM_ADDR_FLAG_SHIELD = 128;
-	// 64/32/16/8/4 unused
+	// 64/32/16/8 unused
+	const _AEM_ADDR_FLAG_ORIGIN = 4;
 	const _AEM_ADDR_FLAG_ACCINT = 2;
 	const _AEM_ADDR_FLAG_ACCEXT = 1;
 	const _AEM_ADDR_FLAGS_DEFAULT = _AEM_ADDR_FLAG_ACCEXT;
@@ -1106,9 +1107,11 @@ function AllEars(readyCallback) {
 	this.GetAddrPerUser = function() {return _AEM_ADDRESSES_PER_USER;};
 
 	this.GetAddress = function(num) {return _addr32_decode(_userAddress[num].addr32, (_userAddress[num].flags & _AEM_ADDR_FLAG_SHIELD) !== 0);};
+	this.GetAddressOrigin = function(num) {return (_userAddress[num].flags & _AEM_ADDR_FLAG_ORIGIN) !== 0;};
 	this.GetAddressAccInt = function(num) {return (_userAddress[num].flags & _AEM_ADDR_FLAG_ACCINT) !== 0;};
 	this.GetAddressAccExt = function(num) {return (_userAddress[num].flags & _AEM_ADDR_FLAG_ACCEXT) !== 0;};
 
+	this.SetAddressOrigin = function(num, val) {if (val) {_userAddress[num].flags |= _AEM_ADDR_FLAG_ORIGIN;} else {_userAddress[num].flags &= (0xFF & ~_AEM_ADDR_FLAG_ORIGIN)}};
 	this.SetAddressAccInt = function(num, val) {if (val) {_userAddress[num].flags |= _AEM_ADDR_FLAG_ACCINT;} else {_userAddress[num].flags &= (0xFF & ~_AEM_ADDR_FLAG_ACCINT)}};
 	this.SetAddressAccExt = function(num, val) {if (val) {_userAddress[num].flags |= _AEM_ADDR_FLAG_ACCEXT;} else {_userAddress[num].flags &= (0xFF & ~_AEM_ADDR_FLAG_ACCEXT)}};
 
