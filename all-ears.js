@@ -375,7 +375,10 @@ function AllEars(readyCallback) {
 		let count = 0;
 
 		for (let i = 0; i < _userAddress.length; i++) {
-			if ((_userAddress[i].flags & _AEM_ADDR_FLAG_SHIELD) !== 0) count++;
+			if (
+			   ( isShield && (_userAddress[i].flags & _AEM_ADDR_FLAG_SHIELD) !== 0)
+			|| (!isShield && (_userAddress[i].flags & _AEM_ADDR_FLAG_SHIELD) === 0)
+			) count++;
 		}
 
 		return count;
