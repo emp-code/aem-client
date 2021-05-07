@@ -1472,7 +1472,8 @@ document.getElementById("btn_limits").onclick = function() {
 
 		if (error !== 0) {
 			errorDialog(error);
-			return;
+		} else {
+			updateAddressCounts();
 		}
 	});
 };

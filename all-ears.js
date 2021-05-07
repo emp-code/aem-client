@@ -2094,7 +2094,17 @@ function AllEars(readyCallback) {
 			mib[3], nrm[3], shd[3]
 		]);
 
-		_FetchEncrypted(_AEM_API_SETTING_LIMITS, data, function(fetchErr) {callback(fetchErr);});
+		_FetchEncrypted(_AEM_API_SETTING_LIMITS, data, function(fetchErr) {
+			if (fetchErr === 0) {
+				for (let i = 0; i < 4; i++) {
+					_maxStorage[i] = mib[i];
+					_maxNormalA[i] = nrm[i];
+					_maxShieldA[i] = shd[i];
+				}
+			}
+
+			callback(fetchErr);
+		});
 	};
 
 	// Extras
