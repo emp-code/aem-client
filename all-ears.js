@@ -52,11 +52,14 @@ function AllEars(readyCallback) {
 	const _AEM_API_SETTING_LIMITS = 15;
 
 	const _AEM_ADDR_FLAG_SHIELD = 128;
-	// 64/32/16/8 unused
-	const _AEM_ADDR_FLAG_ORIGIN = 4;
-	const _AEM_ADDR_FLAG_ACCINT = 2;
-	const _AEM_ADDR_FLAG_ACCEXT = 1;
-	const _AEM_ADDR_FLAGS_DEFAULT = _AEM_ADDR_FLAG_ACCEXT;
+	// 64 unused
+	const _AEM_ADDR_FLAG_ORIGIN =  32;
+	const _AEM_ADDR_FLAG_SECURE =  16;
+	const _AEM_ADDR_FLAG_ATTACH =   8;
+	const _AEM_ADDR_FLAG_ALLVER =   4;
+	const _AEM_ADDR_FLAG_ACCEXT =   2;
+	const _AEM_ADDR_FLAG_ACCINT =   1;
+	const _AEM_ADDR_FLAGS_DEFAULT = (_AEM_ADDR_FLAG_ACCEXT | _AEM_ADDR_FLAG_ALLVER | _AEM_ADDR_FLAG_ATTACH);
 
 	const _AEM_FLAG_UINFO = 2;
 	const _AEM_FLAG_NEWER = 1;
@@ -1112,12 +1115,18 @@ function AllEars(readyCallback) {
 
 	this.GetAddress = function(num) {return _addr32_decode(_userAddress[num].addr32, (_userAddress[num].flags & _AEM_ADDR_FLAG_SHIELD) !== 0);};
 	this.GetAddressOrigin = function(num) {return (_userAddress[num].flags & _AEM_ADDR_FLAG_ORIGIN) !== 0;};
-	this.GetAddressAccInt = function(num) {return (_userAddress[num].flags & _AEM_ADDR_FLAG_ACCINT) !== 0;};
+	this.GetAddressSecure = function(num) {return (_userAddress[num].flags & _AEM_ADDR_FLAG_SECURE) !== 0;};
+	this.GetAddressAttach = function(num) {return (_userAddress[num].flags & _AEM_ADDR_FLAG_ATTACH) !== 0;};
+	this.GetAddressAllVer = function(num) {return (_userAddress[num].flags & _AEM_ADDR_FLAG_ALLVER) !== 0;};
 	this.GetAddressAccExt = function(num) {return (_userAddress[num].flags & _AEM_ADDR_FLAG_ACCEXT) !== 0;};
+	this.GetAddressAccInt = function(num) {return (_userAddress[num].flags & _AEM_ADDR_FLAG_ACCINT) !== 0;};
 
 	this.SetAddressOrigin = function(num, val) {if (val) {_userAddress[num].flags |= _AEM_ADDR_FLAG_ORIGIN;} else {_userAddress[num].flags &= (0xFF & ~_AEM_ADDR_FLAG_ORIGIN)}};
-	this.SetAddressAccInt = function(num, val) {if (val) {_userAddress[num].flags |= _AEM_ADDR_FLAG_ACCINT;} else {_userAddress[num].flags &= (0xFF & ~_AEM_ADDR_FLAG_ACCINT)}};
+	this.SetAddressSecure = function(num, val) {if (val) {_userAddress[num].flags |= _AEM_ADDR_FLAG_SECURE;} else {_userAddress[num].flags &= (0xFF & ~_AEM_ADDR_FLAG_SECURE)}};
+	this.SetAddressAttach = function(num, val) {if (val) {_userAddress[num].flags |= _AEM_ADDR_FLAG_ATTACH;} else {_userAddress[num].flags &= (0xFF & ~_AEM_ADDR_FLAG_ATTACH)}};
+	this.SetAddressAllVer = function(num, val) {if (val) {_userAddress[num].flags |= _AEM_ADDR_FLAG_ALLVER;} else {_userAddress[num].flags &= (0xFF & ~_AEM_ADDR_FLAG_ALLVER)}};
 	this.SetAddressAccExt = function(num, val) {if (val) {_userAddress[num].flags |= _AEM_ADDR_FLAG_ACCEXT;} else {_userAddress[num].flags &= (0xFF & ~_AEM_ADDR_FLAG_ACCEXT)}};
+	this.SetAddressAccInt = function(num, val) {if (val) {_userAddress[num].flags |= _AEM_ADDR_FLAG_ACCINT;} else {_userAddress[num].flags &= (0xFF & ~_AEM_ADDR_FLAG_ACCINT)}};
 
 	this.GetAddressCount = function() {return _userAddress.length;};
 	this.GetAddressCountNormal = function() {return _GetAddressCount(false);};

@@ -903,13 +903,31 @@ function addAddress(num) {
 	cell = row.insertCell(-1);
 	let el = document.createElement("input");
 	el.type = "checkbox";
+	el.checked = ae.GetAddressAccInt(num);
+	cell.appendChild(el);
+
+	cell = row.insertCell(-1);
+	el = document.createElement("input");
+	el.type = "checkbox";
 	el.checked = ae.GetAddressAccExt(num);
 	cell.appendChild(el);
 
 	cell = row.insertCell(-1);
 	el = document.createElement("input");
 	el.type = "checkbox";
-	el.checked = ae.GetAddressAccInt(num);
+	el.checked = ae.GetAddressAllVer(num);
+	cell.appendChild(el);
+
+	cell = row.insertCell(-1);
+	el = document.createElement("input");
+	el.type = "checkbox";
+	el.checked = ae.GetAddressAttach(num);
+	cell.appendChild(el);
+
+	cell = row.insertCell(-1);
+	el = document.createElement("input");
+	el.type = "checkbox";
+	el.checked = ae.GetAddressSecure(num);
 	cell.appendChild(el);
 
 	cell = row.insertCell(-1);
@@ -1272,9 +1290,12 @@ document.getElementById("btn_address_update").onclick = function() {
 	const rows = document.getElementById("tbl_addrs").rows;
 
 	for (let i = 0; i < rows.length; i++) {
-		ae.SetAddressAccExt(i, rows[i].getElementsByTagName("input")[0].checked);
-		ae.SetAddressAccInt(i, rows[i].getElementsByTagName("input")[1].checked);
-		ae.SetAddressOrigin(i, rows[i].getElementsByTagName("input")[2].checked);
+		ae.SetAddressAccInt(i, rows[i].getElementsByTagName("input")[0].checked);
+		ae.SetAddressAccExt(i, rows[i].getElementsByTagName("input")[1].checked);
+		ae.SetAddressAllVer(i, rows[i].getElementsByTagName("input")[2].checked);
+		ae.SetAddressAttach(i, rows[i].getElementsByTagName("input")[3].checked);
+		ae.SetAddressSecure(i, rows[i].getElementsByTagName("input")[4].checked);
+		ae.SetAddressOrigin(i, rows[i].getElementsByTagName("input")[5].checked);
 	}
 
 	ae.Address_Update(function(error) {
