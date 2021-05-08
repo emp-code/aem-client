@@ -701,16 +701,18 @@ function showFiles() {
 
 			const row = tbl.insertRow(-1);
 			row.setAttribute("data-msgid", ae.GetUplMsgIdHex(i));
-			row.onclick = function() {displayFile(this.rowIndex);};
 
 			let cell = row.insertCell(-1);
 			cell.textContent = new Date(ae.GetUplMsgTime(i) * 1000).toISOString().slice(0, 10);
+			cell.onclick = function() {displayFile(this.parentElement.rowIndex);};
+
+			cell = row.insertCell(-1);
+			cell.textContent = (ae.GetUplMsgBytes(i) / 1024).toFixed(0).padStart(4, " ");
+			cell.onclick = function() {displayFile(this.parentElement.rowIndex);};
 
 			cell = row.insertCell(-1);
 			cell.textContent = ae.GetUplMsgTitle(i);
-
-			cell = row.insertCell(-1);
-			cell.textContent = (ae.GetUplMsgBytes(i) / 1024).toFixed(1);
+			cell.onclick = function() {displayFile(this.parentElement.rowIndex);};
 
 			cell = row.insertCell(-1);
 			const btn = document.createElement("button");

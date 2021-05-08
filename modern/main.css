@@ -342,8 +342,16 @@ nav > button:enabled:focus {
 #tbl_drbox tr,
 #tbl_files tr {
 	display: grid;
-	grid-template-columns: auto 3fr 1fr 2fr;
 	opacity: 0.5;
+}
+
+#tbl_inbox tr,
+#tbl_drbox tr {
+	grid-template-columns: auto 3fr 1fr 2fr;
+}
+
+#tbl_files tr {
+	grid-template-columns: auto auto 1fr auto;
 }
 
 #tbl_ctact tr:hover,
@@ -359,6 +367,13 @@ nav > button:enabled:focus {
 	cursor: pointer;
 }
 
+#tbl_files td:nth-child(2) {
+	font-family: monospace, monospace;
+	margin: 0 1em 0 1em;
+	text-align: right;
+	white-space: pre;
+}
+
 #tbl_inbox tr > td:nth-child(2n) {
 	white-space: nowrap;
 	text-overflow: ellipsis;
@@ -368,14 +383,6 @@ nav > button:enabled:focus {
 #tbl_inbox tr > td:nth-child(3n) {
 	text-align: right;
 	direction: rtl;
-}
-
-#tbl_files td:nth-child(3) {
-	text-align: center;
-}
-
-#tbl_files td:nth-child(4) {
-	text-align: right;
 }
 
 #div_write,
