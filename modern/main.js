@@ -28,7 +28,7 @@ const tabs = [
 	new TabState(0, 0, false, false), // Outbx
 	new TabState(0, 1, true,  false), // Write
 	new TabState(0, 2, false, false), // Notes
-	new TabState(0, 2, false, true) // Tools
+	new TabState(0, 2, false, false) // Tools
 ];
 
 let showHeaders = false;
