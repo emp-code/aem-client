@@ -64,6 +64,15 @@ function errorDialog(err, focusAfter) {
 		dlg.close();
 		if (focusAfter) focusAfter.focus();
 	};
+
+	document.onkeyup = function(event) {
+		document.onkeyup = null;
+		event.preventDefault();
+
+		buttons.forEach(function(btn, i) {btn.disabled = btnDisable[i];});
+		dlg.close();
+		if (focusAfter) focusAfter.focus();
+	};
 }
 
 function getCountryFlag(countryCode) {
