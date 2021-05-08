@@ -691,7 +691,7 @@ function showFiles() {
 
 			const row = tbl.insertRow(-1);
 			row.setAttribute("data-msgid", ae.GetUplMsgIdHex(i));
-			row.onclick = function() {displayFile(i);};
+			row.onclick = function() {displayFile(this.rowIndex);};
 
 			let cell = row.insertCell(-1);
 			cell.textContent = new Date(ae.GetUplMsgTime(i) * 1000).toISOString().slice(0, 10);
