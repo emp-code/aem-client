@@ -41,7 +41,7 @@ const TAB_NOTES = 3;
 const TAB_TOOLS = 4;
 
 // Helper functions
-function errorDialog(err) {
+function errorDialog(err, focusAfter) {
 	if (typeof(err) !== "number" || err < 1) return;
 
 	let btnDisable = [];
@@ -62,6 +62,7 @@ function errorDialog(err) {
 	document.querySelector("dialog > div").onclick = function() {
 		buttons.forEach(function(btn, i) {btn.disabled = btnDisable[i];});
 		dlg.close();
+		if (focusAfter) focusAfter.focus();
 	};
 }
 
@@ -1244,7 +1245,7 @@ function addressCreate(addr) {
 	ae.Address_Create(addr, function(error1) {
 		if (error1 !== 0) {
 			updateAddressButtons();
-			errorDialog(error1);
+			errorDialog(error1, (addr !== "SHIELD") ? document.getElementById("txt_address_create_normal") : null);
 			return;
 		}
 
@@ -1257,7 +1258,7 @@ function addressCreate(addr) {
 				document.getElementById("txt_address_create_normal").focus();
 			}
 
-			if (error2 !== 0) errorDialog(error2);
+			if (error2 !== 0) errorDialog(error2, (addr !== "SHIELD") ? document.getElementById("txt_address_create_normal") : null);
 		});
 	});
 }
