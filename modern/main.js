@@ -722,7 +722,7 @@ function showFiles() {
 			btn.onclick = function() {
 				const tr = this.parentElement.parentElement;
 				ae.Message_Delete(this.getAttribute("data-msgid"), function(error) {
-					if (error === 0) tr.remove();
+					if (error === 0) updateTab();
 					else errorDialog(error);
 				});
 			};
