@@ -748,25 +748,15 @@ document.getElementById("btn_admin_addaccount").onclick = function() {
 
 document.getElementById("btn_uploadfile").onclick = function() {
 	const fileSelector = document.getElementById("upfile");
-	const f = fileSelector.files[0];
-
-	if (f.name.length + f.size > 8138) {
-		console.log("Too large");
-		fileSelector.value = null;
-		return;
-	}
 
 	const btn = this;
 	btn.disabled = true;
 
 	const reader = new FileReader();
-	reader.onload = function(e) {
-		const u8data = new Uint8Array(reader.result);
-
-		ae.Message_Upload(true, f.name, u8data, function(error) {
+	reader.onload = function() {
+		ae.Message_Upload(true, fileSelector.files[0].name, new Uint8Array(reader.result), function(error) {
 			if (error === 0) {
 				addFile(ae.GetFileCount() - 1);
-				fileSelector.value = null;
 			} else {
 				console.log("Failed to upload file");
 			}
