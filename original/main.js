@@ -59,14 +59,14 @@ function addIntMessage(i) {
 	const tbl = document.getElementById("tbd_inbox");
 	const row = tbl.insertRow(-1);
 
-	const ts = ae.GetIntMsgTime(i);
+	const ts = ae.getIntMsgTime(i);
 	let cell = row.insertCell(-1);
 	cell.setAttribute("data-ts", ts);
 	cell.textContent = new Date(ts * 1000).toISOString().slice(0, 16).replace("T", " ");
 	cell.className = "mono";
 
 	cell = row.insertCell(-1);
-	cell.textContent = ae.GetIntMsgTitle(i);
+	cell.textContent = ae.getIntMsgTitle(i);
 	cell.onclick = function() {
 		navMenu(-1);
 		document.getElementById("div_readmsg").hidden = false;
@@ -74,29 +74,29 @@ function addIntMessage(i) {
 		document.getElementById("readmsg_levelinfo").hidden = false;
 		document.getElementById("readmsg_extmsg").hidden = true;
 
-		document.getElementById("readmsg_title").textContent = ae.GetIntMsgTitle(i);
-		document.getElementById("readmsg_from").textContent  = ae.GetIntMsgFrom(i);
-		document.getElementById("readmsg_to").textContent    = ae.GetIntMsgTo(i);
-		document.getElementById("readmsg_body").textContent  = ae.GetIntMsgBody(i);
-		document.getElementById("readmsg_level").textContent = ae.GetIntMsgLevel(i);
+		document.getElementById("readmsg_title").textContent = ae.getIntMsgTitle(i);
+		document.getElementById("readmsg_from").textContent  = ae.getIntMsgFrom(i);
+		document.getElementById("readmsg_to").textContent    = ae.getIntMsgTo(i);
+		document.getElementById("readmsg_body").textContent  = ae.getIntMsgBody(i);
+		document.getElementById("readmsg_level").textContent = ae.getIntMsgLevel(i);
 
-		document.getElementById("readmsg_from").className = (ae.GetIntMsgFrom(i).length === 16) ? "mono" : "";
-		document.getElementById("readmsg_to").className = (ae.GetIntMsgTo(i).length === 16) ? "mono" : "";
+		document.getElementById("readmsg_from").className = (ae.getIntMsgFrom(i).length === 16) ? "mono" : "";
+		document.getElementById("readmsg_to").className = (ae.getIntMsgTo(i).length === 16) ? "mono" : "";
 	};
 
 	// empty From1 cell
 	row.insertCell(-1);
 
 	cell = row.insertCell(-1);
-	cell.textContent = ae.GetIntMsgFrom(i);
-	cell.className = (ae.GetIntMsgFrom(i).length === 16) ? "mono" : "";
+	cell.textContent = ae.getIntMsgFrom(i);
+	cell.className = (ae.getIntMsgFrom(i).length === 16) ? "mono" : "";
 
 	cell = row.insertCell(-1);
-	cell.textContent = ae.GetIntMsgTo(i);
-	cell.className = (ae.GetIntMsgTo(i).length === 16) ? "mono" : "";
+	cell.textContent = ae.getIntMsgTo(i);
+	cell.className = (ae.getIntMsgTo(i).length === 16) ? "mono" : "";
 
 	cell = row.insertCell(-1);
-	cell.innerHTML = "<input class=\"delMsg\" type=\"checkbox\" data-id=\"" + ae.GetIntMsgIdHex(i) + "\">";
+	cell.innerHTML = "<input class=\"delMsg\" type=\"checkbox\" data-id=\"" + ae.getIntMsgIdHex(i) + "\">";
 	cell.children[0].onchange = function() {deleteButtonShow(this.checked);};
 }
 
@@ -104,53 +104,53 @@ function addExtMessage(i) {
 	const tbl = document.getElementById("tbd_inbox");
 	const row = tbl.insertRow(-1);
 
-	const ts = ae.GetExtMsgTime(i);
+	const ts = ae.getExtMsgTime(i);
 	let cell = row.insertCell(-1);
 	cell.setAttribute("data-ts", ts);
 	cell.textContent = new Date(ts * 1000).toISOString().slice(0, 16).replace("T", " ");
 	cell.className = "mono";
 
 	cell = row.insertCell(-1);
-	cell.textContent = ae.GetExtMsgTitle(i);
+	cell.textContent = ae.getExtMsgTitle(i);
 	cell.onclick = function() {
 		navMenu(-1);
 		document.getElementById("div_readmsg").hidden = false;
 		document.getElementById("readmsg_head").hidden = false;
 		document.getElementById("readmsg_levelinfo").hidden = true;
 		document.getElementById("readmsg_extmsg").hidden = false;
-		document.getElementById("readmsg_greet").textContent = ae.GetExtMsgGreet(i);
-		document.getElementById("readmsg_tls").textContent = ae.GetExtMsgTLS(i);
-		document.getElementById("readmsg_ip").textContent = ae.GetExtMsgIp(i);
+		document.getElementById("readmsg_greet").textContent = ae.getExtMsgGreet(i);
+		document.getElementById("readmsg_tls").textContent = ae.getExtMsgTLS(i);
+		document.getElementById("readmsg_ip").textContent = ae.getExtMsgIp(i);
 
-		document.getElementById("readmsg_country").textContent = ae.GetExtMsgCname(i) + " " + getCountryFlag(ae.GetExtMsgCcode(i));
+		document.getElementById("readmsg_country").textContent = ae.getExtMsgCname(i) + " " + getCountryFlag(ae.getExtMsgCcode(i));
 
 		let flagText = "";
-		if (!ae.GetExtMsgFlagPExt(i)) flagText += "<abbr title=\"The sender did not use the Extended (ESMTP) protocol\">SMTP</abbr> ";
-		if (!ae.GetExtMsgFlagQuit(i)) flagText += "<abbr title=\"The sender did not issue the required QUIT command\">QUIT</abbr> ";
-		if (ae.GetExtMsgFlagRare(i)) flagText += "<abbr title=\"The sender issued unusual command(s)\">RARE</abbr> ";
-		if (ae.GetExtMsgFlagFail(i)) flagText += "<abbr title=\"The sender issued invalid command(s)\">FAIL</abbr> ";
-		if (ae.GetExtMsgFlagPErr(i)) flagText += "<abbr title=\"The sender violated the protocol\">PROT</abbr> ";
+		if (!ae.getExtMsgFlagPExt(i)) flagText += "<abbr title=\"The sender did not use the Extended (ESMTP) protocol\">SMTP</abbr> ";
+		if (!ae.getExtMsgFlagQuit(i)) flagText += "<abbr title=\"The sender did not issue the required QUIT command\">QUIT</abbr> ";
+		if (ae.getExtMsgFlagRare(i)) flagText += "<abbr title=\"The sender issued unusual command(s)\">RARE</abbr> ";
+		if (ae.getExtMsgFlagFail(i)) flagText += "<abbr title=\"The sender issued invalid command(s)\">FAIL</abbr> ";
+		if (ae.getExtMsgFlagPErr(i)) flagText += "<abbr title=\"The sender violated the protocol\">PROT</abbr> ";
 		document.getElementById("readmsg_flags").innerHTML = flagText.trim();
 
-		document.getElementById("readmsg_title").textContent = ae.GetExtMsgTitle(i);
-		document.getElementById("readmsg_from").textContent = ae.GetExtMsgEnvFrom(i);
-		document.getElementById("readmsg_to").textContent = ae.GetExtMsgEnvTo(i);
-		document.getElementById("readmsg_body").innerHTML = ae.GetExtMsgBody(i);
-		document.getElementById("readmsg_headers").textContent = ae.GetExtMsgHeaders(i);
+		document.getElementById("readmsg_title").textContent = ae.getExtMsgTitle(i);
+		document.getElementById("readmsg_from").textContent = ae.getExtMsgEnvFrom(i);
+		document.getElementById("readmsg_to").textContent = ae.getExtMsgEnvTo(i);
+		document.getElementById("readmsg_body").innerHTML = ae.getExtMsgBody(i);
+		document.getElementById("readmsg_headers").textContent = ae.getExtMsgHeaders(i);
 
 		document.getElementById("readmsg_from").className = "";
-		document.getElementById("readmsg_to").className = (ae.GetExtMsgEnvTo(i).length === 16) ? "mono" : "";
+		document.getElementById("readmsg_to").className = (ae.getExtMsgEnvTo(i).length === 16) ? "mono" : "";
 	};
 
-	const from = ae.GetExtMsgHdrFrom(i);
+	const from = ae.getExtMsgHdrFrom(i);
 	const from2 = from.substring(from.indexOf("@") + 1);
 
 	cell = row.insertCell(-1);
 	cell.textContent = from.substring(0, from.indexOf("@"));
 
 	const flag = document.createElement("abbr");
-	flag.textContent = getCountryFlag(ae.GetExtMsgCcode(i));
-	flag.title = ae.GetExtMsgCname(i);
+	flag.textContent = getCountryFlag(ae.getExtMsgCcode(i));
+	flag.title = ae.getExtMsgCname(i);
 
 	const fromText = document.createElement("span");
 	fromText.textContent = " " + from2;
@@ -160,17 +160,17 @@ function addExtMessage(i) {
 	cell.appendChild(fromText);
 
 	cell = row.insertCell(-1);
-	cell.textContent = ae.GetExtMsgEnvTo(i);
-	cell.className = (ae.GetExtMsgEnvTo(i).length === 16) ? "mono" : "";
+	cell.textContent = ae.getExtMsgEnvTo(i);
+	cell.className = (ae.getExtMsgEnvTo(i).length === 16) ? "mono" : "";
 
 	cell = row.insertCell(-1);
-	cell.innerHTML = "<input class=\"delMsg\" type=\"checkbox\" data-id=\"" + ae.GetExtMsgIdHex(i) + "\">";
+	cell.innerHTML = "<input class=\"delMsg\" type=\"checkbox\" data-id=\"" + ae.getExtMsgIdHex(i) + "\">";
 	cell.children[0].onchange = function() {deleteButtonShow(this.checked);};
 }
 
 function addMessages() {
-	const maxExt = ae.GetExtMsgCount();
-	const maxInt = ae.GetIntMsgCount();
+	const maxExt = ae.getExtMsgCount();
+	const maxInt = ae.getIntMsgCount();
 
 	let numExt = 0;
 	let numInt = 0;
@@ -178,8 +178,8 @@ function addMessages() {
 	//TODO handle sent messages separately
 
 	for (let i = 0; i < (page * 20) + 20; i++) {
-		const tsInt = (numInt < maxInt) ? ae.GetIntMsgTime(numInt) : 0;
-		const tsExt = (numExt < maxExt) ? ae.GetExtMsgTime(numExt) : 0;
+		const tsInt = (numInt < maxInt) ? ae.getIntMsgTime(numInt) : 0;
+		const tsExt = (numExt < maxExt) ? ae.getExtMsgTime(numExt) : 0;
 		if (tsInt === 0 && tsExt === 0) break;
 
 		if (tsInt !== 0 && (tsExt === 0 || tsInt > tsExt)) {
@@ -207,22 +207,22 @@ function addFile(num) {
 	const row = table.insertRow(-1);
 
 	let cell = row.insertCell(-1);
-	cell.textContent = new Date(ae.GetUplMsgTime(num) * 1000).toISOString().slice(0, 10);
+	cell.textContent = new Date(ae.getUplMsgTime(num) * 1000).toISOString().slice(0, 10);
 
 	cell = row.insertCell(-1);
-	cell.textContent = ae.GetUplMsgBytes(num) / 1024;
+	cell.textContent = ae.getUplMsgBytes(num) / 1024;
 
 	cell = row.insertCell(-1);
-	cell.textContent = ae.GetUplMsgTitle(num);
+	cell.textContent = ae.getUplMsgTitle(num);
 
 	cell = row.insertCell(-1);
 	cell.innerHTML = "<button type=\"button\">D</button>";
-	cell.children[0].onclick = function() {ae.DownloadUplMsg(num);};
+	cell.children[0].onclick = function() {ae.downloadUplMsg(num);};
 
 	cell = row.insertCell(-1);
 	cell.innerHTML = "<button type=\"button\">X</button>";
 	cell.children[0].onclick = function() {
-		ae.Message_Delete([ae.GetUplMsgIdHex(num)], function(error) {
+		ae.Message_Delete([ae.getUplMsgIdHex(num)], function(error) {
 			if (error === 0) {
 				row.remove();
 			} else {
@@ -280,7 +280,7 @@ function setAccountLevel(upk_hex, level) {
 		if (level === 0) {
 			tbl.rows[rowid].cells[5].children[0].disabled = false;
 			tbl.rows[rowid].cells[6].children[0].disabled = true;
-		} else if (level === ae.GetLevelMax()) {
+		} else if (level === ae.getLevelMax()) {
 			tbl.rows[rowid].cells[5].children[0].disabled = true;
 			tbl.rows[rowid].cells[6].children[0].disabled = false;
 		} else {
@@ -288,8 +288,8 @@ function setAccountLevel(upk_hex, level) {
 			tbl.rows[rowid].cells[6].children[0].disabled = false;
 		}
 
-		const pkHex = ae.Admin_GetUserPkHex(rowid);
-		const currentLevel = ae.Admin_GetUserLevel(rowid);
+		const pkHex = ae.admin_getUserPkHex(rowid);
+		const currentLevel = ae.admin_getUserLevel(rowid);
 		tbl.rows[rowid].cells[5].children[0].onclick = function() {setAccountLevel(pkHex, currentLevel + 1);};
 		tbl.rows[rowid].cells[6].children[0].onclick = function() {setAccountLevel(pkHex, currentLevel - 1);};
 	});
@@ -301,8 +301,8 @@ function deleteAddress(addr) {
 
 	let addressToDelete = -1;
 
-	for (let i = 0; i < ae.GetAddressCount(); i++) {
-		if (addr === ae.GetAddress(i)) {
+	for (let i = 0; i < ae.getAddressCount(); i++) {
+		if (addr === ae.getAddress(i)) {
 			addressToDelete = i;
 			break;
 		}
@@ -319,11 +319,11 @@ function deleteAddress(addr) {
 		document.getElementById("tbody_opt_addr").deleteRow(addressToDelete);
 		document.getElementById("send_from").remove(addressToDelete);
 
-		document.getElementById("addr_use_normal").textContent = ae.GetAddressCountNormal();
-		document.getElementById("addr_use_shield").textContent = ae.GetAddressCountShield();
+		document.getElementById("addr_use_normal").textContent = ae.getAddressCountNormal();
+		document.getElementById("addr_use_shield").textContent = ae.getAddressCountShield();
 
-		if (ae.GetAddressCountNormal() < ae.GetLimitNormalA(ae.GetUserLevel())) document.getElementById("btn_newaddress").disabled = false;
-		if (ae.GetAddressCountShield() < ae.GetLimitShieldA(ae.GetUserLevel())) document.getElementById("btn_newshieldaddress").disabled = false;
+		if (ae.getAddressCountNormal() < ae.getLimitNormalA(ae.getUserLevel())) document.getElementById("btn_newaddress").disabled = false;
+		if (ae.getAddressCountShield() < ae.getLimitShieldA(ae.getUserLevel())) document.getElementById("btn_newshieldaddress").disabled = false;
 
 		ae.Private_Update(function(error2) {
 			if (error2 !== 0) console.log("Failed to update the Private field");
@@ -339,28 +339,28 @@ function addAddress(num) {
 	const row = addrTable.insertRow(-1);
 
 	let cell = row.insertCell(-1);
-	cell.textContent = ae.GetAddress(num);
+	cell.textContent = ae.getAddress(num);
 	if (cell.textContent.length === 16) cell.className = "mono";
 	cell.onclick = function() {
 		if (cell.textContent.length === 16)
-			navigator.clipboard.writeText(ae.ShieldMix(cell.textContent) + "@" + ae.GetDomainEml());
+			navigator.clipboard.writeText(ae.shieldMix(cell.textContent) + "@" + ae.getDomainEml());
 		else
-			navigator.clipboard.writeText(cell.textContent + "@" + ae.GetDomainEml());
+			navigator.clipboard.writeText(cell.textContent + "@" + ae.getDomainEml());
 	};
 
 	cell = row.insertCell(-1);
-	cell.innerHTML = ae.GetAddressAccExt(num) ? "<input type=\"checkbox\" checked=\"checked\">" : "<input type=\"checkbox\">";
+	cell.innerHTML = ae.getAddressAccExt(num) ? "<input type=\"checkbox\" checked=\"checked\">" : "<input type=\"checkbox\">";
 
 	cell = row.insertCell(-1);
-	cell.innerHTML = ae.GetAddressAccInt(num) ? "<input type=\"checkbox\" checked=\"checked\">" : "<input type=\"checkbox\">";
+	cell.innerHTML = ae.getAddressAccInt(num) ? "<input type=\"checkbox\" checked=\"checked\">" : "<input type=\"checkbox\">";
 
 	cell = row.insertCell(-1);
 	cell.innerHTML = "<button type=\"button\">X</button>";
-	cell.children[0].onclick = function() {deleteAddress(ae.GetAddress(num));};
+	cell.children[0].onclick = function() {deleteAddress(ae.getAddress(num));};
 
 	const opt = document.createElement("option");
-	opt.value = ae.GetAddress(num);
-	opt.textContent = ae.GetAddress(num) + "@" + ae.GetDomainEml();
+	opt.value = ae.getAddress(num);
+	opt.textContent = ae.getAddress(num) + "@" + ae.getDomainEml();
 	document.getElementById("send_from").appendChild(opt);
 }
 
@@ -395,7 +395,7 @@ function deleteContact(email) {
 
 	for (let i = 0; i < rows.length; i++) {
 		if (email === rows[i].cells[0].textContent) {
-			ae.DeleteContact(i);
+			ae.deleteContact(i);
 			tbl.deleteRow(i);
 			break;
 		}
@@ -437,28 +437,28 @@ function addRowAdmin(num) {
 	const cellBtnMn = row.insertCell(-1);
 	const cellBtnDe = row.insertCell(-1);
 
-	cellPk.textContent = ae.Admin_GetUserPkHex(num);
-	cellMb.textContent = ae.Admin_GetUserSpace(num);
-	cellNa.textContent = ae.Admin_GetUserNAddr(num);
-	cellSa.textContent = ae.Admin_GetUserSAddr(num);
-	cellLv.textContent = ae.Admin_GetUserLevel(num);
+	cellPk.textContent = ae.admin_getUserPkHex(num);
+	cellMb.textContent = ae.admin_getUserSpace(num);
+	cellNa.textContent = ae.admin_getUserNAddr(num);
+	cellSa.textContent = ae.admin_getUserSAddr(num);
+	cellLv.textContent = ae.admin_getUserLevel(num);
 	cellBtnPl.innerHTML = "<button type=\"button\">+</button>";
 	cellBtnMn.innerHTML = "<button type=\"button\">-</button>";
 	cellBtnDe.innerHTML = "<button type=\"button\">X</button>";
 
 	cellPk.className = "mono";
-	if (ae.Admin_GetUserLevel(num) === ae.GetLevelMax()) cellBtnPl.children[0].disabled = true;
-	if (ae.Admin_GetUserLevel(num) === 0) cellBtnMn.children[0].disabled = true;
+	if (ae.admin_getUserLevel(num) === ae.getLevelMax()) cellBtnPl.children[0].disabled = true;
+	if (ae.admin_getUserLevel(num) === 0) cellBtnMn.children[0].disabled = true;
 
-	const pkHex = ae.Admin_GetUserPkHex(num);
-	const currentLevel = ae.Admin_GetUserLevel(num);
+	const pkHex = ae.admin_getUserPkHex(num);
+	const currentLevel = ae.admin_getUserLevel(num);
 	cellBtnPl.children[0].onclick = function() {setAccountLevel(pkHex, currentLevel + 1);};
 	cellBtnMn.children[0].onclick = function() {setAccountLevel(pkHex, currentLevel - 1);};
 	cellBtnDe.children[0].onclick = function() {destroyAccount(pkHex);};
 }
 
 function reloadInterface() {
-	if (!ae.IsUserAdmin()) document.getElementById("btn_toadmin").hidden = true;
+	if (!ae.isUserAdmin()) document.getElementById("btn_toadmin").hidden = true;
 	document.getElementById("div_begin").hidden = true;
 	document.getElementById("div_allears").hidden = false;
 
@@ -469,33 +469,33 @@ function reloadInterface() {
 	document.getElementById("tbody_opt_addr").innerHTML = "";
 
 	// Contacts
-	for (let i = 0; i < ae.GetContactCount(); i++) {
+	for (let i = 0; i < ae.getContactCount(); i++) {
 		addContactToTable(
-			ae.GetContactMail(i),
-			ae.GetContactName(i),
-			ae.GetContactNote(i)
+			ae.getContactMail(i),
+			ae.getContactName(i),
+			ae.getContactNote(i)
 		);
 	}
 
 	// Addresses
-	for (let i = 0; i < ae.GetAddressCount(); i++) {
+	for (let i = 0; i < ae.getAddressCount(); i++) {
 		addAddress(i);
 	}
 
-	document.getElementById("addr_use_normal").textContent = ae.GetAddressCountNormal();
-	document.getElementById("addr_use_shield").textContent = ae.GetAddressCountShield();
-	document.getElementById("addr_max_normal").textContent = ae.GetLimitNormalA(ae.GetUserLevel());
-	document.getElementById("addr_max_shield").textContent = ae.GetLimitShieldA(ae.GetUserLevel());
+	document.getElementById("addr_use_normal").textContent = ae.getAddressCountNormal();
+	document.getElementById("addr_use_shield").textContent = ae.getAddressCountShield();
+	document.getElementById("addr_max_normal").textContent = ae.getLimitNormalA(ae.getUserLevel());
+	document.getElementById("addr_max_shield").textContent = ae.getLimitShieldA(ae.getUserLevel());
 
-	if (ae.GetAddressCountNormal() >= ae.GetLimitNormalA(ae.GetUserLevel())) document.getElementById("btn_newaddress").disabled = true;
-	if (ae.GetAddressCountShield() >= ae.GetLimitShieldA(ae.GetUserLevel())) document.getElementById("btn_newshieldaddress").disabled = true;
+	if (ae.getAddressCountNormal() >= ae.getLimitNormalA(ae.getUserLevel())) document.getElementById("btn_newaddress").disabled = true;
+	if (ae.getAddressCountShield() >= ae.getLimitShieldA(ae.getUserLevel())) document.getElementById("btn_newshieldaddress").disabled = true;
 
-	if (ae.IsUserAdmin()) {
+	if (ae.isUserAdmin()) {
 		const tblLimits = document.getElementById("tbl_limits");
 		for (let i = 0; i < 4; i++) {
-			tblLimits.rows[i].cells[1].children[0].value = ae.GetStorageLimit(i);
-			tblLimits.rows[i].cells[2].children[0].value = ae.GetLimitNormalA(i);
-			tblLimits.rows[i].cells[3].children[0].value = ae.GetLimitShieldA(i);
+			tblLimits.rows[i].cells[1].children[0].value = ae.getStorageLimit(i);
+			tblLimits.rows[i].cells[2].children[0].value = ae.getLimitNormalA(i);
+			tblLimits.rows[i].cells[3].children[0].value = ae.getLimitShieldA(i);
 		}
 
 		document.getElementById("btn_admin_savelimits").onclick = function() {
@@ -509,14 +509,14 @@ function reloadInterface() {
 				addrShdLimit[i] = tblLimits.rows[i].cells[3].children[0].value;
 			}
 
-			ae.SetLimits(storageLimit, addrNrmLimit, addrShdLimit, function(error) {
+			ae.setLimits(storageLimit, addrNrmLimit, addrShdLimit, function(error) {
 				if (error !== 0) {
 					console.log("Failed to update limits");
 				}
 			});
 		};
 
-		for (let i = 0; i < ae.Admin_GetUserCount(); i++) {
+		for (let i = 0; i < ae.admin_getUserCount(); i++) {
 			addRowAdmin(i);
 		}
 	}
@@ -548,7 +548,7 @@ document.getElementById("btn_enter").onclick = function() {
 	const btn = this;
 	btn.disabled = true;
 
-	ae.SetKeys(txtSkey.value, function(success) {
+	ae.setKeys(txtSkey.value, function(success) {
 		if (!success) {
 			console.log("Invalid format for key");
 			btn.disabled = false;
@@ -577,7 +577,7 @@ document.getElementById("btn_refresh").onclick = function() {
 		if (error === 0) {
 			clearMessages();
 			addMessages();
-			for (let i = ae.GetUplMsgCount() - 1; i >= 0; i--) {addFile(i);}
+			for (let i = ae.getUplMsgCount() - 1; i >= 0; i--) {addFile(i);}
 		} else {
 			console.log("Failed to refresh");
 		}
@@ -592,7 +592,7 @@ document.getElementById("btn_contact_add").onclick = function() {
 	const txtNote = document.getElementById("txt_newcontact_note");
 
 	addContactToTable(txtMail.value, txtName.value, txtNote.value);
-	ae.AddContact(txtMail.value, txtName.value, txtNote.value);
+	ae.addContact(txtMail.value, txtName.value, txtNote.value);
 
 	txtMail.value = "";
 	txtName.value = "";
@@ -644,7 +644,7 @@ document.getElementById("btn_send").onclick = function() {
 };
 
 document.getElementById("btn_newaddress").onclick = function() {
-	if (ae.GetAddressCountNormal() >= ae.GetLimitNormalA(ae.GetUserLevel())) return;
+	if (ae.getAddressCountNormal() >= ae.getLimitNormalA(ae.getUserLevel())) return;
 
 	const txtNewAddr = document.getElementById("txt_newaddress");
 	if (!txtNewAddr.reportValidity()) return;
@@ -657,24 +657,24 @@ document.getElementById("btn_newaddress").onclick = function() {
 	ae.Address_Create(txtNewAddr.value, function(error1) {
 		if (error1 === 0) {
 			ae.Private_Update(function(error2) {
-				document.getElementById("addr_use_normal").textContent = ae.GetAddressCountNormal();
-				addAddress(ae.GetAddressCount() - 1);
+				document.getElementById("addr_use_normal").textContent = ae.getAddressCountNormal();
+				addAddress(ae.getAddressCount() - 1);
 				txtNewAddr.value = "";
 
 				if (error2 !== 0) console.log("Failed to update the Private field");
-				if (ae.GetAddressCountNormal() < ae.GetLimitNormalA(ae.GetUserLevel())) btnN.disabled = false;
-				if (ae.GetAddressCountShield() < ae.GetLimitShieldA(ae.GetUserLevel())) btnS.disabled = false;
+				if (ae.getAddressCountNormal() < ae.getLimitNormalA(ae.getUserLevel())) btnN.disabled = false;
+				if (ae.getAddressCountShield() < ae.getLimitShieldA(ae.getUserLevel())) btnS.disabled = false;
 			});
 		} else {
 			console.log("Failed to add address");
-			if (ae.GetAddressCountNormal() < ae.GetLimitNormalA(ae.GetUserLevel())) btnN.disabled = false;
-			if (ae.GetAddressCountShield() < ae.GetLimitShieldA(ae.GetUserLevel())) btnS.disabled = false;
+			if (ae.getAddressCountNormal() < ae.getLimitNormalA(ae.getUserLevel())) btnN.disabled = false;
+			if (ae.getAddressCountShield() < ae.getLimitShieldA(ae.getUserLevel())) btnS.disabled = false;
 		}
 	});
 };
 
 document.getElementById("btn_newshieldaddress").onclick = function() {
-	if (ae.GetLimitShieldA() >= ae.GetLimitShieldA(ae.GetUserLevel())) return;
+	if (ae.getLimitShieldA() >= ae.getLimitShieldA(ae.getUserLevel())) return;
 
 	const btnN = document.getElementById("btn_newaddress");
 	const btnS = document.getElementById("btn_newshieldaddress");
@@ -684,18 +684,18 @@ document.getElementById("btn_newshieldaddress").onclick = function() {
 	ae.Address_Create("SHIELD", function(error1) {
 		if (error1 !== 0) {
 			console.log("Failed to add Shield address");
-			if (ae.GetAddressCountNormal() < ae.GetLimitNormalA(ae.GetUserLevel())) btnN.disabled = false;
-			if (ae.GetAddressCountShield() < ae.GetLimitShieldA(ae.GetUserLevel())) btnS.disabled = false;
+			if (ae.getAddressCountNormal() < ae.getLimitNormalA(ae.getUserLevel())) btnN.disabled = false;
+			if (ae.getAddressCountShield() < ae.getLimitShieldA(ae.getUserLevel())) btnS.disabled = false;
 			return;
 		}
 
 		ae.Private_Update(function(error2) {
-			document.getElementById("addr_use_shield").textContent = ae.GetAddressCountShield();
-			addAddress(ae.GetAddressCount() - 1);
+			document.getElementById("addr_use_shield").textContent = ae.getAddressCountShield();
+			addAddress(ae.getAddressCount() - 1);
 
 			if (error2 !== 0) console.log("Failed to update the Private field");
-			if (ae.GetAddressCountNormal() < ae.GetLimitNormalA(ae.GetUserLevel())) btnN.disabled = false;
-			if (ae.GetAddressCountShield() < ae.GetLimitShieldA(ae.GetUserLevel())) btnS.disabled = false;
+			if (ae.getAddressCountNormal() < ae.getLimitNormalA(ae.getUserLevel())) btnN.disabled = false;
+			if (ae.getAddressCountShield() < ae.getLimitShieldA(ae.getUserLevel())) btnS.disabled = false;
 		});
 	});
 };
@@ -704,8 +704,8 @@ document.getElementById("btn_saveaddrdata").onclick = function() {
 	const tbl = document.getElementById("tbody_opt_addr");
 
 	for (let i = 0; i < tbl.rows.length; i++) {
-		ae.SetAddressAccExt(i, tbl.rows[i].cells[1].firstChild.checked);
-		ae.SetAddressAccInt(i, tbl.rows[i].cells[2].firstChild.checked);
+		ae.setAddressAccExt(i, tbl.rows[i].cells[1].firstChild.checked);
+		ae.setAddressAccInt(i, tbl.rows[i].cells[2].firstChild.checked);
 	}
 
 	ae.Address_Update(function(error) {
@@ -727,7 +727,7 @@ document.getElementById("btn_admin_addaccount").onclick = function() {
 
 	ae.Account_Create(txtPkey.value, function(error) {
 		if (error === 0) {
-			addRowAdmin(ae.Admin_GetUserCount() - 1);
+			addRowAdmin(ae.admin_getUserCount() - 1);
 			txtPkey.value = "";
 		} else {
 			console.log("Failed to add account");
@@ -747,7 +747,7 @@ document.getElementById("btn_uploadfile").onclick = function() {
 	reader.onload = function() {
 		ae.Message_Upload(true, fileSelector.files[0].name, new Uint8Array(reader.result), function(error) {
 			if (error === 0) {
-				addFile(ae.GetFileCount() - 1);
+				addFile(ae.getFileCount() - 1);
 			} else {
 				console.log("Failed to upload file");
 			}

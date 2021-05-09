@@ -51,7 +51,7 @@ function errorDialog(err, focusAfter) {
 		btn.disabled = true;
 	});
 
-	const errMsg = ae.GetErrorMessage(err);
+	const errMsg = ae.getErrorMessage(err);
 
 	const dlg = document.querySelector("dialog");
 	dlg.children[0].style.height = getComputedStyle(document.querySelector("#main1 > div[class='mid']")).height;
@@ -123,25 +123,25 @@ function addMsgFlag(abbr, abbrTitle) {
 }
 
 function displayFile(num) {
-	const fileType = ae.GetUplMsgType(num);
-	if (!fileType) {ae.DownloadUplMsg(num); return;}
+	const fileType = ae.getUplMsgType(num);
+	if (!fileType) {ae.downloadUplMsg(num); return;}
 
 	clearDisplay();
 	document.querySelector("article").scroll(0, 0);
-	document.querySelector("article").setAttribute("data-msgid", ae.GetUplMsgIdHex(num));
+	document.querySelector("article").setAttribute("data-msgid", ae.getUplMsgIdHex(num));
 
 	document.getElementById("btn_mdele").disabled = false;
 	document.getElementById("btn_msave").disabled = false;
 	document.getElementById("btn_reply").disabled = true;
 
-	document.getElementById("btn_msave").onclick = function() {ae.DownloadUplMsg(num);};
+	document.getElementById("btn_msave").onclick = function() {ae.downloadUplMsg(num);};
 
 	document.querySelector("article > table").hidden = true;
-	document.querySelector("article > h1").textContent = ae.GetUplMsgTitle(num);
+	document.querySelector("article > h1").textContent = ae.getUplMsgTitle(num);
 
 	if (fileType === "text") {
 		document.querySelector("article > pre").hidden = false;
-		document.querySelector("article > pre").textContent = sodium.to_string(ae.GetUplMsgBody(num));
+		document.querySelector("article > pre").textContent = sodium.to_string(ae.getUplMsgBody(num));
 		return;
 	}
 
@@ -151,7 +151,7 @@ function displayFile(num) {
 	switch (fileType) {
 		case "image": {
 			el = document.createElement("img");
-			el.src = URL.createObjectURL(new Blob([ae.GetUplMsgBody(num).buffer]));
+			el.src = URL.createObjectURL(new Blob([ae.getUplMsgBody(num).buffer]));
 			el.onclick = function() {
 				if (!document.fullscreen)
 					this.requestFullscreen();
@@ -164,13 +164,13 @@ function displayFile(num) {
 		case "video": {
 			el = document.createElement(fileType);
 			el.controls = "controls";
-			el.src = URL.createObjectURL(new Blob([ae.GetUplMsgBody(num).buffer]));
+			el.src = URL.createObjectURL(new Blob([ae.getUplMsgBody(num).buffer]));
 		break;}
 
 		case "pdf": {
 			el = document.createElement("embed");
 			el.type = "application/pdf";
-			el.src = URL.createObjectURL(new Blob([ae.GetUplMsgBody(num).buffer], {type: "application/pdf"}));
+			el.src = URL.createObjectURL(new Blob([ae.getUplMsgBody(num).buffer], {type: "application/pdf"}));
 		break;}
 
 		case "html": {
@@ -182,7 +182,7 @@ function displayFile(num) {
 			try {
 				el.srcdoc =
 					"<html><head><style>html, body {background: #080a08; color: #fff; scrollbar-color: #222 #333;} body {opacity:0.55;} body > *:first-child {margin-top: 0; padding-top: 0;} a {color: #fff;} button, input, select, textarea {background: #000; color: #fff;}</style></head>"
-					+ sodium.to_string(ae.GetUplMsgBody(num).buffer)
+					+ sodium.to_string(ae.getUplMsgBody(num).buffer)
 						.replace(/.*<body/s, "<body")
 						.replaceAll(/<head.*\/head>/gs, "")
 						.replaceAll("<head", "<ignore")
@@ -201,7 +201,7 @@ function displayFile(num) {
 			el.allow = "";
 			el.sandbox = "";
 			el.referrerPolicy = "no-referrer";
-			el.srcdoc = "<!doctype><html><head><style>body,html,svg {margin: 0; padding: 0; border: 0; height: 100%; width: 100%; display: block; background: #080a08;}</style></head><body>" + sodium.to_string(ae.GetUplMsgBody(num).buffer) + "</body></html>";
+			el.srcdoc = "<!doctype><html><head><style>body,html,svg {margin: 0; padding: 0; border: 0; height: 100%; width: 100%; display: block; background: #080a08;}</style></head><body>" + sodium.to_string(ae.getUplMsgBody(num).buffer) + "</body></html>";
 		break;}
 
 		default: return;
@@ -215,33 +215,33 @@ function displayMsg(isInt, num) {
 	document.getElementById("btn_mdele").disabled = false;
 
 	document.querySelector("article").scroll(0, 0);
-	document.querySelector("article").setAttribute("data-msgid", isInt? ae.GetIntMsgIdHex(num) : ae.GetExtMsgIdHex(num));
+	document.querySelector("article").setAttribute("data-msgid", isInt? ae.getIntMsgIdHex(num) : ae.getExtMsgIdHex(num));
 
 	document.getElementById("btn_msave").disabled = false;
 	document.getElementById("btn_msave").onclick = function() {
 		if (isInt) {
-			ae.DownloadIntMsg(num);
+			ae.downloadIntMsg(num);
 		} else {
-			ae.DownloadExtMsg(num);
+			ae.downloadExtMsg(num);
 		}
 
 		this.blur();
 	}
 
-	const ts = isInt? ae.GetIntMsgTime(num) : ae.GetExtMsgTime(num);
+	const ts = isInt? ae.getIntMsgTime(num) : ae.getExtMsgTime(num);
 
-	if (!isInt || (ae.GetIntMsgFrom(num) !== "public" && ae.GetIntMsgFrom(num) !== "system")) {
+	if (!isInt || (ae.getIntMsgFrom(num) !== "public" && ae.getIntMsgFrom(num) !== "system")) {
 		document.getElementById("btn_reply").disabled = false;
 
 		document.getElementById("btn_reply").onclick = function() {
-			document.getElementById("write_recv").value = isInt? ae.GetIntMsgFrom(num) : ae.GetExtMsgReplyAddress(num);
-			document.getElementById("write_subj").value = isInt? ae.GetIntMsgTitle(num) : ae.GetExtMsgTitle(num);
+			document.getElementById("write_recv").value = isInt? ae.getIntMsgFrom(num) : ae.getExtMsgReplyAddress(num);
+			document.getElementById("write_subj").value = isInt? ae.getIntMsgTitle(num) : ae.getExtMsgTitle(num);
 			if (!document.getElementById("write_subj").value.startsWith("Re:")) document.getElementById("write_subj").value = "Re: " + document.getElementById("write_subj").value;
-			document.querySelector("#write2_pkey > input").value = isInt? ae.GetIntMsgFromPk(num) : "";
+			document.querySelector("#write2_pkey > input").value = isInt? ae.getIntMsgFromPk(num) : "";
 
 			document.getElementById("write_recv").readOnly = !isInt;
 			document.getElementById("write_subj").readOnly = !isInt;
-			document.getElementById("write_subj").setAttribute("data-replyid", isInt? "" : ae.GetExtMsgHdrId(num));
+			document.getElementById("write_subj").setAttribute("data-replyid", isInt? "" : ae.getExtMsgHdrId(num));
 
 			tabs[TAB_WRITE].cur = 0;
 			document.getElementById("btn_write").disabled = false;
@@ -249,7 +249,7 @@ function displayMsg(isInt, num) {
 			document.getElementById("write_body").focus();
 
 			for (const opt of document.getElementById("write_from").options) {
-				if (opt.value === (isInt ? ae.GetIntMsgTo(num) : ae.GetExtMsgEnvTo(num).split("@")[0].toLowerCase())) {
+				if (opt.value === (isInt ? ae.getIntMsgTo(num) : ae.getExtMsgEnvTo(num).split("@")[0].toLowerCase())) {
 					opt.selected = true;
 				}
 			}
@@ -261,12 +261,12 @@ function displayMsg(isInt, num) {
 	document.querySelector("article > table").hidden = false;
 	document.querySelector("article > pre").hidden = false;
 
-	document.getElementById("readmsg_envto").textContent = isInt ? "" : ae.GetExtMsgEnvTo(num);
-	document.getElementById("readmsg_hdrto").textContent = isInt ? ae.GetIntMsgTo(num) : (ae.GetExtMsgHdrTo(num));
-	if(!isInt && ae.GetExtMsgDnTo(num)) {
+	document.getElementById("readmsg_envto").textContent = isInt ? "" : ae.getExtMsgEnvTo(num);
+	document.getElementById("readmsg_hdrto").textContent = isInt ? ae.getIntMsgTo(num) : (ae.getExtMsgHdrTo(num));
+	if(!isInt && ae.getExtMsgDnTo(num)) {
 		const span = document.createElement("span");
 		span.className = "sans";
-		span.textContent = " • " + ae.GetExtMsgDnTo(num);
+		span.textContent = " • " + ae.getExtMsgDnTo(num);
 		document.getElementById("readmsg_hdrto").appendChild(span);
 	}
 
@@ -276,8 +276,8 @@ function displayMsg(isInt, num) {
 	document.getElementById("readmsg_date").children[1].dateTime = new Date(ts * 1000).toISOString();
 
 	if (isInt) {
-		document.querySelector("article > h1").textContent = ae.GetIntMsgTitle(num);
-		document.querySelector("article > pre").textContent = ae.GetIntMsgBody(num);
+		document.querySelector("article > h1").textContent = ae.getIntMsgTitle(num);
+		document.querySelector("article > pre").textContent = ae.getIntMsgBody(num);
 
 		document.getElementById("readmsg_date").children[1].textContent = msgDate.toISOString().slice(0, 19).replace("T", " ");
 
@@ -289,39 +289,39 @@ function displayMsg(isInt, num) {
 		document.getElementById("readmsg_envfrom").style.visibility = "hidden";
 		document.getElementById("readmsg_envto").style.visibility = "hidden";
 
-		if (ae.GetIntMsgFrom(num) !== "system" && ae.GetIntMsgFrom(num) !== "public") {
+		if (ae.getIntMsgFrom(num) !== "system" && ae.getIntMsgFrom(num) !== "public") {
 			document.getElementById("readmsg_tls").style.visibility = "visible";
-			document.getElementById("readmsg_tls").children[0].textContent = ae.GetIntMsgFromPk(num);
+			document.getElementById("readmsg_tls").children[0].textContent = ae.getIntMsgFromPk(num);
 		} else document.getElementById("readmsg_tls").style.visibility = "hidden";
 
 		let symbol = document.createElement("span");
-		if      (ae.GetIntMsgLevel(num) === 3 && ae.GetIntMsgFrom(num) === "system") {symbol.title = "System message"; symbol.textContent = "🅢";}
-		else if (ae.GetIntMsgLevel(num) === 3 && ae.GetIntMsgFrom(num) === "public") {symbol.title = "Public announcement"; symbol.textContent = "🅟";}
-		else if (ae.GetIntMsgLevel(num) === 3) {symbol.title = "Administrator"; symbol.textContent = "🅐";}
-		else if (ae.GetIntMsgLevel(num) === 2) {symbol.title = "Level 2";  symbol.textContent = "➋";}
-		else if (ae.GetIntMsgLevel(num) === 1) {symbol.title = "Level 1";  symbol.textContent = "➊";}
-		else if (ae.GetIntMsgLevel(num) === 0) {symbol.title = "Level 0";  symbol.textContent = "🄌";}
+		if      (ae.getIntMsgLevel(num) === 3 && ae.getIntMsgFrom(num) === "system") {symbol.title = "System message"; symbol.textContent = "🅢";}
+		else if (ae.getIntMsgLevel(num) === 3 && ae.getIntMsgFrom(num) === "public") {symbol.title = "Public announcement"; symbol.textContent = "🅟";}
+		else if (ae.getIntMsgLevel(num) === 3) {symbol.title = "Administrator"; symbol.textContent = "🅐";}
+		else if (ae.getIntMsgLevel(num) === 2) {symbol.title = "Level 2";  symbol.textContent = "➋";}
+		else if (ae.getIntMsgLevel(num) === 1) {symbol.title = "Level 1";  symbol.textContent = "➊";}
+		else if (ae.getIntMsgLevel(num) === 0) {symbol.title = "Level 0";  symbol.textContent = "🄌";}
 		else {symbol.title = "Invalid level"; symbol.textContent = "⚠";}
 
-		document.getElementById("readmsg_hdrfrom").replaceChildren(symbol, document.createTextNode(" " + ae.GetIntMsgFrom(num)));
+		document.getElementById("readmsg_hdrfrom").replaceChildren(symbol, document.createTextNode(" " + ae.getIntMsgFrom(num)));
 
 		clearMsgFlags();
-		if (!ae.GetIntMsgFlagVPad(num)) addMsgFlag("PAD", "Invalid padding");
-		if (!ae.GetIntMsgFlagVSig(num)) addMsgFlag("SIG", "Invalid signature");
-		if ( ae.GetIntMsgFlagE2ee(num)) addMsgFlag("E2EE", "End-to-end encrypted");
+		if (!ae.getIntMsgFlagVPad(num)) addMsgFlag("PAD", "Invalid padding");
+		if (!ae.getIntMsgFlagVSig(num)) addMsgFlag("SIG", "Invalid signature");
+		if ( ae.getIntMsgFlagE2ee(num)) addMsgFlag("E2EE", "End-to-end encrypted");
 	} else {
 		const headers = document.createElement("p");
-		headers.textContent = ae.GetExtMsgHeaders(num);
+		headers.textContent = ae.getExtMsgHeaders(num);
 		headers.className = "mono";
 		headers.hidden = !showHeaders;
 
 		const body = document.createElement("p");
-		body.innerHTML = ae.GetExtMsgBody(num);
+		body.innerHTML = ae.getExtMsgBody(num);
 
 		document.querySelector("article > pre").replaceChildren(headers, body);
 
 		const h1 = document.querySelector("article > h1");
-		h1.textContent = ae.GetExtMsgTitle(num);
+		h1.textContent = ae.getExtMsgTitle(num);
 		h1.style.cursor = headers.textContent? "pointer" : "";
 		h1.onclick = function() {
 			if (!headers.textContent) return;
@@ -329,7 +329,7 @@ function displayMsg(isInt, num) {
 			headers.hidden = !showHeaders;
 		};
 
-		let hdrSecs = Math.abs(ae.GetExtMsgHdrTime(num));
+		let hdrSecs = Math.abs(ae.getExtMsgHdrTime(num));
 		let hdrTime = "";
 		if (hdrSecs >= 3600) {
 			const hdrHours = Math.floor(hdrSecs / 3600);
@@ -343,13 +343,13 @@ function displayMsg(isInt, num) {
 		}
 		hdrTime += hdrSecs + "s";
 
-		const hdrTz = (ae.GetExtMsgHdrTz(num) >= 0 ? "+" : "-") + Math.floor(Math.abs(ae.GetExtMsgHdrTz(num)) / 60).toString().padStart(2, "0") + (Math.abs(ae.GetExtMsgHdrTz(num)) % 60).toString().padStart(2, "0");
+		const hdrTz = (ae.getExtMsgHdrTz(num) >= 0 ? "+" : "-") + Math.floor(Math.abs(ae.getExtMsgHdrTz(num)) / 60).toString().padStart(2, "0") + (Math.abs(ae.getExtMsgHdrTz(num)) % 60).toString().padStart(2, "0");
 
 		let spans = [document.createElement("span"), document.createElement("span"), document.createElement("span")];
 		spans[0].textContent = msgDate.toISOString().slice(0, 19).replace("T", " ");
 		spans[1].className = "sans";
 		spans[1].textContent = " • ";
-		spans[2].textContent = hdrTz + " " + ((ae.GetExtMsgHdrTime(num) >= 0) ? "+" : "-") + hdrTime;
+		spans[2].textContent = hdrTz + " " + ((ae.getExtMsgHdrTime(num) >= 0) ? "+" : "-") + hdrTime;
 		document.getElementById("readmsg_date").children[1].replaceChildren(...spans);
 
 		document.getElementById("readmsg_ip").style.visibility = "visible";
@@ -363,63 +363,63 @@ function displayMsg(isInt, num) {
 
 		// DKIM
 		let dkim = "";
-		if (ae.GetExtMsgDkim(num)) {
+		if (ae.getExtMsgDkim(num)) {
 			[ // Look for a matching domain in this order
-				ae.GetExtMsgHdrFrom(num).split("@")[1],
-				ae.GetExtMsgEnvFrom(num).split("@")[1],
-				ae.GetExtMsgRdns(num),
-				ae.GetExtMsgGreet(num),
-				ae.GetExtMsgTlsDomain(num)
+				ae.getExtMsgHdrFrom(num).split("@")[1],
+				ae.getExtMsgEnvFrom(num).split("@")[1],
+				ae.getExtMsgRdns(num),
+				ae.getExtMsgGreet(num),
+				ae.getExtMsgTlsDomain(num)
 			].forEach(function(dom) {
 				if (dkim) return;
-				for (let i = 0; i < ae.GetExtMsgDkim(num).domain.length; i++) {
-					if (ae.GetExtMsgDkim(num).domain[i] === dom) {
+				for (let i = 0; i < ae.getExtMsgDkim(num).domain.length; i++) {
+					if (ae.getExtMsgDkim(num).domain[i] === dom) {
 						dkim = dom + " ✓";
 						return;
 					}
 				}
 			});
 
-			if (!dkim) dkim = ae.GetExtMsgDkim(num).domain[0]; // Default to first signature domain
+			if (!dkim) dkim = ae.getExtMsgDkim(num).domain[0]; // Default to first signature domain
 		}
 
-		if (ae.GetExtMsgFlagDkFl(num)) dkim += " (fail)";
+		if (ae.getExtMsgFlagDkFl(num)) dkim += " (fail)";
 
 		// Left side
-		document.getElementById("readmsg_country").textContent = getCountryFlag(ae.GetExtMsgCcode(num));
-		document.getElementById("readmsg_country").title = ae.GetExtMsgCname(num);
-		document.getElementById("readmsg_ip").children[1].textContent = ae.GetExtMsgIp(num) + (ae.GetExtMsgFlagIpBl(num) ? " ❗" : "");
-		document.getElementById("readmsg_ip").children[2].textContent = " • " + ae.GetExtMsgAuSys(num);
-		document.getElementById("readmsg_tls").children[0].textContent = ae.GetExtMsgTLS(num);
+		document.getElementById("readmsg_country").textContent = getCountryFlag(ae.getExtMsgCcode(num));
+		document.getElementById("readmsg_country").title = ae.getExtMsgCname(num);
+		document.getElementById("readmsg_ip").children[1].textContent = ae.getExtMsgIp(num) + (ae.getExtMsgFlagIpBl(num) ? " ❗" : "");
+		document.getElementById("readmsg_ip").children[2].textContent = " • " + ae.getExtMsgAuSys(num);
+		document.getElementById("readmsg_tls").children[0].textContent = ae.getExtMsgTLS(num);
 
 		// Right side
-		document.getElementById("readmsg_greet").children[0].textContent = ae.GetExtMsgGreet(num) + (ae.GetExtMsgFlagGrDm(num) ? " ✓" : "");
-		document.getElementById("readmsg_rdns").children[0].textContent = ae.GetExtMsgRdns(num) + (ae.GetExtMsgGreet(num) === ae.GetExtMsgRdns(num) ? " ✓" : "");
-		document.getElementById("readmsg_cert").children[0].textContent = ae.GetExtMsgTlsDomain(num) ? (ae.GetExtMsgTlsDomain(num) + " ✓") : "";
+		document.getElementById("readmsg_greet").children[0].textContent = ae.getExtMsgGreet(num) + (ae.getExtMsgFlagGrDm(num) ? " ✓" : "");
+		document.getElementById("readmsg_rdns").children[0].textContent = ae.getExtMsgRdns(num) + (ae.getExtMsgGreet(num) === ae.getExtMsgRdns(num) ? " ✓" : "");
+		document.getElementById("readmsg_cert").children[0].textContent = ae.getExtMsgTlsDomain(num) ? (ae.getExtMsgTlsDomain(num) + " ✓") : "";
 		document.getElementById("readmsg_dkim").children[0].textContent = dkim;
-		document.getElementById("readmsg_envfrom").textContent = ae.GetExtMsgEnvFrom(num);
-		document.getElementById("readmsg_hdrfrom").textContent = ae.GetExtMsgHdrFrom(num);
-		if (ae.GetExtMsgDnFrom(num)) {
+		document.getElementById("readmsg_envfrom").textContent = ae.getExtMsgEnvFrom(num);
+		document.getElementById("readmsg_hdrfrom").textContent = ae.getExtMsgHdrFrom(num);
+		if (ae.getExtMsgDnFrom(num)) {
 			const span = document.createElement("span");
 			span.className = "sans";
-			span.textContent = " • " + ae.GetExtMsgDnFrom(num);
+			span.textContent = " • " + ae.getExtMsgDnFrom(num);
 			document.getElementById("readmsg_hdrfrom").appendChild(span);
 		}
 
 		clearMsgFlags();
-		if (!ae.GetExtMsgFlagVPad(num)) addMsgFlag("PAD", "Invalid padding");
-		if (!ae.GetExtMsgFlagVSig(num)) addMsgFlag("SIG", "Invalid signature");
-		if (!ae.GetExtMsgFlagPExt(num)) addMsgFlag("SMTP", "The sender did not use the Extended (ESMTP) protocol");
-		if ( ae.GetExtMsgFlagRare(num)) addMsgFlag("RARE", "The sender issued unusual command(s)");
-		if ( ae.GetExtMsgFlagFail(num)) addMsgFlag("FAIL", "The sender issued invalid command(s)");
-		if ( ae.GetExtMsgFlagPErr(num)) addMsgFlag("PROT", "The sender violated the protocol");
+		if (!ae.getExtMsgFlagVPad(num)) addMsgFlag("PAD", "Invalid padding");
+		if (!ae.getExtMsgFlagVSig(num)) addMsgFlag("SIG", "Invalid signature");
+		if (!ae.getExtMsgFlagPExt(num)) addMsgFlag("SMTP", "The sender did not use the Extended (ESMTP) protocol");
+		if ( ae.getExtMsgFlagRare(num)) addMsgFlag("RARE", "The sender issued unusual command(s)");
+		if ( ae.getExtMsgFlagFail(num)) addMsgFlag("FAIL", "The sender issued invalid command(s)");
+		if ( ae.getExtMsgFlagPErr(num)) addMsgFlag("PROT", "The sender violated the protocol");
 	}
 }
 
 function displayOutMsg(num) {
 	clearDisplay();
 	document.querySelector("article").scroll(0, 0);
-	document.querySelector("article").setAttribute("data-msgid", ae.GetOutMsgIdHex(num));
+	document.querySelector("article").setAttribute("data-msgid", ae.getOutMsgIdHex(num));
 
 	document.getElementById("btn_mdele").disabled = false;
 	document.getElementById("btn_msave").disabled = true;
@@ -428,8 +428,8 @@ function displayOutMsg(num) {
 	document.querySelector("article > table").hidden = false;
 	document.querySelector("article > pre").hidden = false;
 
-	document.querySelector("article > h1").textContent = ae.GetOutMsgSubj(num);
-	document.querySelector("article > pre").textContent = ae.GetOutMsgBody(num);
+	document.querySelector("article > h1").textContent = ae.getOutMsgSubj(num);
+	document.querySelector("article > pre").textContent = ae.getOutMsgBody(num);
 
 	document.getElementById("readmsg_dkim").style.visibility    = "hidden";
 	document.getElementById("readmsg_hdrto").style.visibility   = "visible";
@@ -437,16 +437,16 @@ function displayOutMsg(num) {
 	document.getElementById("readmsg_envto").style.visibility   = "visible";
 	document.getElementById("readmsg_envfrom").style.visibility = "hidden";
 
-	document.getElementById("readmsg_hdrfrom").textContent = ae.GetOutMsgFrom(num);
+	document.getElementById("readmsg_hdrfrom").textContent = ae.getOutMsgFrom(num);
 
-	document.getElementById("readmsg_envto").textContent = ae.GetOutMsgMxDom(num);
-	document.getElementById("readmsg_hdrto").textContent = ae.GetOutMsgTo(num);
+	document.getElementById("readmsg_envto").textContent = ae.getOutMsgMxDom(num);
+	document.getElementById("readmsg_hdrto").textContent = ae.getOutMsgTo(num);
 
-	const ts = ae.GetOutMsgTime(num);
+	const ts = ae.getOutMsgTime(num);
 	const tzOs = new Date().getTimezoneOffset();
 	document.getElementById("readmsg_date").children[1].textContent = new Date((ts * 1000) + (tzOs * -60000)).toISOString().slice(0, 19).replace("T", " ");
 
-	const isInt = ae.GetOutMsgIsInt(num);
+	const isInt = ae.getOutMsgIsInt(num);
 	document.getElementById("readmsg_ip").style.visibility    = isInt? "hidden" : "visible";
 	document.getElementById("readmsg_rdns").style.visibility  = /*isInt?*/ "hidden" /*: "visible"*/; // TODO
 	document.getElementById("readmsg_tls").style.visibility   = /*isInt?*/ "hidden" /*: "visible"*/; // TODO
@@ -454,32 +454,32 @@ function displayOutMsg(num) {
 	document.getElementById("readmsg_greet").style.visibility = isInt? "hidden" : "visible";
 
 	if (!isInt) {
-		document.getElementById("readmsg_ip").children[1].textContent = ae.GetOutMsgIp(num);
-		document.getElementById("readmsg_country").textContent = getCountryFlag(ae.GetOutMsgCcode(num));
-		document.getElementById("readmsg_country").title = ae.GetOutMsgCname(num);
-//		document.getElementById("readmsg_tls").children[0].textContent = ae.GetOutMsgTLS(num);
-		document.getElementById("readmsg_greet").children[0].textContent = ae.GetOutMsgGreet(num);
+		document.getElementById("readmsg_ip").children[1].textContent = ae.getOutMsgIp(num);
+		document.getElementById("readmsg_country").textContent = getCountryFlag(ae.getOutMsgCcode(num));
+		document.getElementById("readmsg_country").title = ae.getOutMsgCname(num);
+//		document.getElementById("readmsg_tls").children[0].textContent = ae.getOutMsgTLS(num);
+		document.getElementById("readmsg_greet").children[0].textContent = ae.getOutMsgGreet(num);
 	}
 
 	clearMsgFlags();
-	if (!ae.GetOutMsgFlagVPad(num)) addMsgFlag("PAD", "Invalid padding");
-	if (!ae.GetOutMsgFlagVSig(num)) addMsgFlag("SIG", "Invalid signature");
-	if ( ae.GetOutMsgFlagE2ee(num)) addMsgFlag("E2EE", "End-to-end encrypted");
+	if (!ae.getOutMsgFlagVPad(num)) addMsgFlag("PAD", "Invalid padding");
+	if (!ae.getOutMsgFlagVSig(num)) addMsgFlag("SIG", "Invalid signature");
+	if ( ae.getOutMsgFlagE2ee(num)) addMsgFlag("E2EE", "End-to-end encrypted");
 }
 
 function updateAddressButtons() {
-	const limitReached = (ae.GetAddressCountNormal() + ae.GetAddressCountShield() >= 31);
-	document.getElementById("btn_address_create_normal").disabled = (limitReached || ae.GetAddressCountNormal() >= ae.GetLimitNormalA(ae.GetUserLevel()));
-	document.getElementById("btn_address_create_shield").disabled = (limitReached || ae.GetAddressCountShield() >= ae.GetLimitShieldA(ae.GetUserLevel()));
+	const limitReached = (ae.getAddressCountNormal() + ae.getAddressCountShield() >= 31);
+	document.getElementById("btn_address_create_normal").disabled = (limitReached || ae.getAddressCountNormal() >= ae.getLimitNormalA(ae.getUserLevel()));
+	document.getElementById("btn_address_create_shield").disabled = (limitReached || ae.getAddressCountShield() >= ae.getLimitShieldA(ae.getUserLevel()));
 }
 
 function updateAddressCounts() {
-	document.querySelector("#tbd_accs > tr > td:nth-child(3)").textContent = ae.GetAddressCountNormal();
-	document.querySelector("#tbd_accs > tr > td:nth-child(4)").textContent = ae.GetAddressCountShield();
+	document.querySelector("#tbd_accs > tr > td:nth-child(3)").textContent = ae.getAddressCountNormal();
+	document.querySelector("#tbd_accs > tr > td:nth-child(4)").textContent = ae.getAddressCountShield();
 
-	document.getElementById("limit_normal").textContent = (ae.GetAddressCountNormal() + "/" + ae.GetLimitNormalA(ae.GetUserLevel())).padStart(ae.GetLimitNormalA(ae.GetUserLevel()) > 9 ? 5 : 1);
-	document.getElementById("limit_shield").textContent = (ae.GetAddressCountShield() + "/" + ae.GetLimitShieldA(ae.GetUserLevel())).padStart(ae.GetLimitShieldA(ae.GetUserLevel()) > 9 ? 5 : 1);
-	document.getElementById("limit_total").textContent = ((ae.GetAddressCountNormal() + ae.GetAddressCountShield()) + "/" + ae.GetAddrPerUser()).padStart(5);
+	document.getElementById("limit_normal").textContent = (ae.getAddressCountNormal() + "/" + ae.getLimitNormalA(ae.getUserLevel())).padStart(ae.getLimitNormalA(ae.getUserLevel()) > 9 ? 5 : 1);
+	document.getElementById("limit_shield").textContent = (ae.getAddressCountShield() + "/" + ae.getLimitShieldA(ae.getUserLevel())).padStart(ae.getLimitShieldA(ae.getUserLevel()) > 9 ? 5 : 1);
+	document.getElementById("limit_total").textContent = ((ae.getAddressCountNormal() + ae.getAddressCountShield()) + "/" + ae.getAddrPerUser()).padStart(5);
 
 	updateAddressButtons();
 }
@@ -501,9 +501,9 @@ function adjustLevel(pubkey, level, c) {
 
 function addMsg(isInt, i) {
 	const row = document.getElementById("tbl_inbox").insertRow(-1);
-	row.setAttribute("data-msgid", isInt? ae.GetIntMsgIdHex(i) : ae.GetExtMsgIdHex(i));
+	row.setAttribute("data-msgid", isInt? ae.getIntMsgIdHex(i) : ae.getExtMsgIdHex(i));
 
-	const ts = isInt? ae.GetIntMsgTime(i) : ae.GetExtMsgTime(i);
+	const ts = isInt? ae.getIntMsgTime(i) : ae.getExtMsgTime(i);
 	const el = document.createElement("time");
 	el.dateTime = new Date(ts * 1000).toISOString();
 	el.textContent = new Date((ts * 1000) + (new Date().getTimezoneOffset() * -60000)).toISOString().slice(0, 10);
@@ -511,21 +511,21 @@ function addMsg(isInt, i) {
 	cell.appendChild(el);
 
 	cell = row.insertCell(-1);
-	cell.textContent = isInt? ae.GetIntMsgTitle(i) : ae.GetExtMsgTitle(i);
+	cell.textContent = isInt? ae.getIntMsgTitle(i) : ae.getExtMsgTitle(i);
 
 	if (isInt) {
 		cell = row.insertCell(-1);
-		cell.textContent = ae.GetIntMsgFrom(i);
-		cell.className = (ae.GetIntMsgFrom(i).length === 16) ? "mono" : "";
+		cell.textContent = ae.getIntMsgFrom(i);
+		cell.className = (ae.getIntMsgFrom(i).length === 16) ? "mono" : "";
 	} else {
-		const from1 = ae.GetExtMsgHdrFrom(i);
+		const from1 = ae.getExtMsgHdrFrom(i);
 		const from2 = from1.substring(from1.indexOf("@") + 1);
 		cell = row.insertCell(-1);
 		cell.textContent = from1.substring(0, from1.indexOf("@"));
 
 		const flag = document.createElement("abbr");
-		flag.textContent = getCountryFlag(ae.GetExtMsgCcode(i));
-		flag.title = ae.GetExtMsgCname(i);
+		flag.textContent = getCountryFlag(ae.getExtMsgCcode(i));
+		flag.title = ae.getExtMsgCname(i);
 
 		const fromText = document.createElement("span");
 		fromText.textContent = " " + from2;
@@ -554,9 +554,9 @@ function showInbox() {
 	const tbl = document.getElementById("tbl_inbox");
 	const rowsPerPage = getRowsPerPage(tbl);
 
-	const maxExt = ae.GetExtMsgCount();
-	const maxInt = ae.GetIntMsgCount();
-	const loadMore = ae.GetReadyMsgBytes() < ae.GetTotalMsgBytes();
+	const maxExt = ae.getExtMsgCount();
+	const maxInt = ae.getIntMsgCount();
+	const loadMore = ae.getReadyMsgBytes() < ae.getTotalMsgBytes();
 
 	if (maxExt + maxInt > 0) {
 		tabs[TAB_INBOX].max = Math.floor((maxExt + maxInt - (loadMore? 0 : 1)) / rowsPerPage);
@@ -569,8 +569,8 @@ function showInbox() {
 		let numAdd = 0;
 
 		while (numAdd < rowsPerPage) {
-			const tsInt = (numInt < maxInt) ? ae.GetIntMsgTime(numInt) : -1;
-			const tsExt = (numExt < maxExt) ? ae.GetExtMsgTime(numExt) : -1;
+			const tsInt = (numInt < maxInt) ? ae.getIntMsgTime(numInt) : -1;
+			const tsExt = (numExt < maxExt) ? ae.getExtMsgTime(numExt) : -1;
 			if (tsInt === -1 && tsExt === -1) break;
 
 			if (tsInt !== -1 && (tsExt === -1 || tsInt > tsExt)) {
@@ -588,7 +588,7 @@ function showInbox() {
 	if (loadMore && tabs[TAB_INBOX].cur >= tabs[TAB_INBOX].max) {
 		const row = tbl.insertRow(-1);
 		const cell = row.insertCell(-1);
-		cell.textContent = "Load more (" + Math.round((ae.GetTotalMsgBytes() - ae.GetReadyMsgBytes()) / 1024) + " KiB left)";
+		cell.textContent = "Load more (" + Math.round((ae.getTotalMsgBytes() - ae.getReadyMsgBytes()) / 1024) + " KiB left)";
 
 		row.onclick = function() {
 			tbl.style.opacity = 0.5;
@@ -611,8 +611,8 @@ function showDrbox() {
 	const tbl = document.getElementById("tbl_drbox");
 	const rowsPerPage = getRowsPerPage(tbl);
 
-	const drCount = ae.GetOutMsgCount();
-	const loadMore = ae.GetReadyMsgBytes() < ae.GetTotalMsgBytes();
+	const drCount = ae.getOutMsgCount();
+	const loadMore = ae.getReadyMsgBytes() < ae.getTotalMsgBytes();
 
 	if (drCount > 0) {
 		tabs[TAB_DRBOX].max = Math.floor((drCount - (loadMore? 0 : 1)) / rowsPerPage);
@@ -629,11 +629,11 @@ function showDrbox() {
 			}
 
 			const row = tbl.insertRow(-1);
-			row.setAttribute("data-msgid", ae.GetOutMsgIdHex(i));
+			row.setAttribute("data-msgid", ae.getOutMsgIdHex(i));
 
 			let cell;
-			cell = row.insertCell(-1); cell.textContent = new Date(ae.GetOutMsgTime(i) * 1000).toISOString().slice(0, 10);
-			cell = row.insertCell(-1); cell.textContent = ae.GetOutMsgSubj(i);
+			cell = row.insertCell(-1); cell.textContent = new Date(ae.getOutMsgTime(i) * 1000).toISOString().slice(0, 10);
+			cell = row.insertCell(-1); cell.textContent = ae.getOutMsgSubj(i);
 			row.onclick = function() {displayOutMsg(i);};
 
 			numAdd++;
@@ -645,7 +645,7 @@ function showDrbox() {
 	if (loadMore && tabs[TAB_DRBOX].cur >= tabs[TAB_DRBOX].max) {
 		const row = tbl.insertRow(-1);
 		const cell = row.insertCell(-1);
-		cell.textContent = "Load more (" + Math.round((ae.GetTotalMsgBytes() - ae.GetReadyMsgBytes()) / 1024) + " KiB left)";
+		cell.textContent = "Load more (" + Math.round((ae.getTotalMsgBytes() - ae.getReadyMsgBytes()) / 1024) + " KiB left)";
 
 		row.onclick = function() {
 			tbl.style.opacity = 0.5;
@@ -668,8 +668,8 @@ function showFiles() {
 	const tbl = document.getElementById("tbl_files");
 	const rowsPerPage = getRowsPerPage(tbl);
 
-	const msgCount = ae.GetUplMsgCount();
-	const loadMore = ae.GetReadyMsgBytes() < ae.GetTotalMsgBytes();
+	const msgCount = ae.getUplMsgCount();
+	const loadMore = ae.getReadyMsgBytes() < ae.getTotalMsgBytes();
 
 	if (msgCount > 0) {
 		tabs[TAB_NOTES].max = 2 + Math.floor((msgCount - (loadMore? 0 : 1)) / rowsPerPage);
@@ -686,23 +686,23 @@ function showFiles() {
 			}
 
 			const row = tbl.insertRow(-1);
-			row.setAttribute("data-msgid", ae.GetUplMsgIdHex(i));
+			row.setAttribute("data-msgid", ae.getUplMsgIdHex(i));
 
 			let cell = row.insertCell(-1);
-			cell.textContent = new Date(ae.GetUplMsgTime(i) * 1000).toISOString().slice(0, 10);
+			cell.textContent = new Date(ae.getUplMsgTime(i) * 1000).toISOString().slice(0, 10);
 			cell.onclick = function() {displayFile(this.parentElement.rowIndex);};
 
 			cell = row.insertCell(-1);
-			cell.textContent = (ae.GetUplMsgBytes(i) / 1024).toFixed(0).padStart(4, " ");
+			cell.textContent = (ae.getUplMsgBytes(i) / 1024).toFixed(0).padStart(4, " ");
 			cell.onclick = function() {displayFile(this.parentElement.rowIndex);};
 
 			cell = row.insertCell(-1);
-			cell.textContent = ae.GetUplMsgTitle(i);
+			cell.textContent = ae.getUplMsgTitle(i);
 			cell.onclick = function() {displayFile(this.parentElement.rowIndex);};
 
 			cell = row.insertCell(-1);
 			const btn = document.createElement("button");
-			btn.setAttribute("data-msgid", ae.GetUplMsgIdHex(i));
+			btn.setAttribute("data-msgid", ae.getUplMsgIdHex(i));
 			btn.type = "button";
 			btn.textContent = "X";
 			btn.onclick = function() {
@@ -723,7 +723,7 @@ function showFiles() {
 	if (loadMore && tabs[TAB_NOTES].cur >= tabs[TAB_NOTES].max) {
 		const row = tbl.insertRow(-1);
 		const cell = row.insertCell(-1);
-		cell.textContent = "Load more (" + Math.round((ae.GetTotalMsgBytes() - ae.GetReadyMsgBytes()) / 1024) + " KiB left)";
+		cell.textContent = "Load more (" + Math.round((ae.getTotalMsgBytes() - ae.getReadyMsgBytes()) / 1024) + " KiB left)";
 
 		row.onclick = function() {
 			tbl.style.opacity = 0.5;
@@ -745,26 +745,26 @@ function showFiles() {
 function addAccountToTable(i) {
 	const row = document.getElementById("tbd_accs").insertRow(-1);
 	let cell;
-	cell = row.insertCell(-1); cell.textContent = ae.Admin_GetUserPkHex(i);
-	cell = row.insertCell(-1); cell.textContent = Math.round(ae.Admin_GetUserSpace(i) / 1024);
-	cell = row.insertCell(-1); cell.textContent = ae.Admin_GetUserNAddr(i);
-	cell = row.insertCell(-1); cell.textContent = ae.Admin_GetUserSAddr(i);
+	cell = row.insertCell(-1); cell.textContent = ae.admin_getUserPkHex(i);
+	cell = row.insertCell(-1); cell.textContent = Math.round(ae.admin_getUserSpace(i) / 1024);
+	cell = row.insertCell(-1); cell.textContent = ae.admin_getUserNAddr(i);
+	cell = row.insertCell(-1); cell.textContent = ae.admin_getUserSAddr(i);
 
 	cell = row.insertCell(-1);
 	let btn = document.createElement("button");
 	btn.type = "button";
 	btn.textContent = "+";
-	btn.disabled = (ae.Admin_GetUserLevel(i) === 3);
+	btn.disabled = (ae.admin_getUserLevel(i) === 3);
 	btn.onclick = function() {const c = this.parentElement.parentElement.cells; adjustLevel(c[0].textContent, parseInt(c[5].textContent, 10) + 1, c);};
 	cell.appendChild(btn);
 
-	cell = row.insertCell(-1); cell.textContent = ae.Admin_GetUserLevel(i);
+	cell = row.insertCell(-1); cell.textContent = ae.admin_getUserLevel(i);
 
 	cell = row.insertCell(-1);
 	btn = document.createElement("button");
 	btn.type = "button";
 	btn.textContent = "−";
-	btn.disabled = (ae.Admin_GetUserLevel(i) === 0);
+	btn.disabled = (ae.admin_getUserLevel(i) === 0);
 	btn.onclick = function() {const c = this.parentElement.parentElement.cells; adjustLevel(c[0].textContent, parseInt(c[5].textContent, 10) - 1, c);};
 	cell.appendChild(btn);
 
@@ -784,21 +784,21 @@ function addAccountToTable(i) {
 function updateLimits() {
 	const tbl = document.querySelector("#tbl_limits > tbody");
 
-	if (ae.IsUserAdmin()) {
+	if (ae.isUserAdmin()) {
 		for (let i = 0; i < 4; i++) {
 			tbl.rows[i].cells[1].children[0].disabled = false;
 			tbl.rows[i].cells[2].children[0].disabled = false;
 			tbl.rows[i].cells[3].children[0].disabled = false;
 
-			tbl.rows[i].cells[1].children[0].value = ae.GetLimitStorage(i);
-			tbl.rows[i].cells[2].children[0].value = ae.GetLimitNormalA(i);
-			tbl.rows[i].cells[3].children[0].value = ae.GetLimitShieldA(i);
+			tbl.rows[i].cells[1].children[0].value = ae.getLimitStorage(i);
+			tbl.rows[i].cells[2].children[0].value = ae.getLimitNormalA(i);
+			tbl.rows[i].cells[3].children[0].value = ae.getLimitShieldA(i);
 		}
 	} else {
-		const lvl = ae.GetUserLevel();
-		tbl.rows[lvl].cells[1].children[0].value = ae.GetLimitStorage(lvl);
-		tbl.rows[lvl].cells[2].children[0].value = ae.GetLimitNormalA(lvl);
-		tbl.rows[lvl].cells[3].children[0].value = ae.GetLimitShieldA(lvl);
+		const lvl = ae.getUserLevel();
+		tbl.rows[lvl].cells[1].children[0].value = ae.getLimitStorage(lvl);
+		tbl.rows[lvl].cells[2].children[0].value = ae.getLimitNormalA(lvl);
+		tbl.rows[lvl].cells[3].children[0].value = ae.getLimitShieldA(lvl);
 	}
 }
 
@@ -806,10 +806,10 @@ function addOwnAccount() {
 	const row = document.getElementById("tbd_accs").insertRow(-1);
 
 	let cell;
-	cell = row.insertCell(-1); cell.textContent = ae.GetUserPkHex();
-	cell = row.insertCell(-1); cell.textContent = Math.round(ae.GetTotalMsgBytes() / 1048576); // MiB
-	cell = row.insertCell(-1); cell.textContent = ae.GetAddressCountNormal();
-	cell = row.insertCell(-1); cell.textContent = ae.GetAddressCountShield();
+	cell = row.insertCell(-1); cell.textContent = ae.getUserPkHex();
+	cell = row.insertCell(-1); cell.textContent = Math.round(ae.getTotalMsgBytes() / 1048576); // MiB
+	cell = row.insertCell(-1); cell.textContent = ae.getAddressCountNormal();
+	cell = row.insertCell(-1); cell.textContent = ae.getAddressCountShield();
 
 	cell = row.insertCell(-1);
 	let btn = document.createElement("button");
@@ -818,7 +818,7 @@ function addOwnAccount() {
 	btn.disabled = true;
 	cell.appendChild(btn);
 
-	cell = row.insertCell(-1); cell.textContent = ae.GetUserLevel();
+	cell = row.insertCell(-1); cell.textContent = ae.getUserLevel();
 
 	cell = row.insertCell(-1);
 	btn = document.createElement("button");
@@ -828,7 +828,7 @@ function addOwnAccount() {
 	btn.id = "btn_lowme";
 	btn.onclick = function() {
 		const newLevel = parseInt(row.cells[5].textContent, 10) - 1;
-		ae.Account_Update(ae.GetUserPkHex(), newLevel, function(error) {
+		ae.Account_Update(ae.getUserPkHex(), newLevel, function(error) {
 			if (error === 0) {
 				row.cells[5].textContent = newLevel;
 				if (newLevel === 0) {
@@ -847,7 +847,7 @@ function addOwnAccount() {
 	btn.disabled = true;
 	btn.id = "btn_delme";
 	btn.onclick = function() {
-		ae.Account_Delete(ae.GetUserPkHex(), function(error) {
+		ae.Account_Delete(ae.getUserPkHex(), function(error) {
 			if (error === 0) {
 				row.remove();
 				document.getElementById("chk_delme").disabled = true;
@@ -862,8 +862,8 @@ function deleteAddress(addr) {
 	buttons.forEach(function(btn) {btn.disabled = true;});
 
 	let addressToDelete = -1;
-	for (let i = 0; i < ae.GetAddressCount(); i++) {
-		if (addr === ae.GetAddress(i)) {
+	for (let i = 0; i < ae.getAddressCount(); i++) {
+		if (addr === ae.getAddress(i)) {
 			addressToDelete = i;
 			break;
 		}
@@ -892,46 +892,46 @@ function deleteAddress(addr) {
 function addAddress(num) {
 	const addrTable = document.getElementById("tbl_addrs");
 	const row = addrTable.insertRow(-1);
-	const addr = ae.GetAddress(num);
+	const addr = ae.getAddress(num);
 
 	let cell = row.insertCell(-1);
 	cell.textContent = addr;
-	cell.onclick = function() {navigator.clipboard.writeText(((this.textContent.length === 16) ? ae.ShieldMix(this.textContent) : this.textContent) + "@" + ae.GetDomainEml());};
+	cell.onclick = function() {navigator.clipboard.writeText(((this.textContent.length === 16) ? ae.shieldMix(this.textContent) : this.textContent) + "@" + ae.getDomainEml());};
 
 	cell = row.insertCell(-1);
 	let el = document.createElement("input");
 	el.type = "checkbox";
-	el.checked = ae.GetAddressAccInt(num);
+	el.checked = ae.getAddressAccInt(num);
 	cell.appendChild(el);
 
 	cell = row.insertCell(-1);
 	el = document.createElement("input");
 	el.type = "checkbox";
-	el.checked = ae.GetAddressAccExt(num);
+	el.checked = ae.getAddressAccExt(num);
 	cell.appendChild(el);
 
 	cell = row.insertCell(-1);
 	el = document.createElement("input");
 	el.type = "checkbox";
-	el.checked = ae.GetAddressAllVer(num);
+	el.checked = ae.getAddressAllVer(num);
 	cell.appendChild(el);
 
 	cell = row.insertCell(-1);
 	el = document.createElement("input");
 	el.type = "checkbox";
-	el.checked = ae.GetAddressAttach(num);
+	el.checked = ae.getAddressAttach(num);
 	cell.appendChild(el);
 
 	cell = row.insertCell(-1);
 	el = document.createElement("input");
 	el.type = "checkbox";
-	el.checked = ae.GetAddressSecure(num);
+	el.checked = ae.getAddressSecure(num);
 	cell.appendChild(el);
 
 	cell = row.insertCell(-1);
 	el = document.createElement("input");
 	el.type = "checkbox";
-	el.checked = ae.GetAddressOrigin(num);
+	el.checked = ae.getAddressOrigin(num);
 	cell.appendChild(el);
 
 	cell = row.insertCell(-1);
@@ -943,7 +943,7 @@ function addAddress(num) {
 
 	el = document.createElement("option");
 	el.value = addr;
-	el.textContent = addr + "@" + ae.GetDomainEml();
+	el.textContent = addr + "@" + ae.getDomainEml();
 	document.getElementById("write_from").appendChild(el);
 }
 
@@ -1015,13 +1015,13 @@ document.getElementById("btn_mdele").onclick = function() {
 function refreshContactList() {
 	let opts = [];
 
-	for (let i = 0; i < ae.GetContactCount(); i++) {
+	for (let i = 0; i < ae.getContactCount(); i++) {
 		const el = document.createElement("option");
-		el.value = ae.GetContactMail(i);
+		el.value = ae.getContactMail(i);
 		opts.push(el);
 	}
 
-	if (ae.IsUserAdmin()) {
+	if (ae.isUserAdmin()) {
 		const el = document.createElement("option");
 		el.value = "public";
 		opts.push(el);
@@ -1062,11 +1062,11 @@ function addContact(mail, name, note) {
 }
 
 function addContacts() {
-	for (let i = 0; i < ae.GetContactCount(); i++) {
+	for (let i = 0; i < ae.getContactCount(); i++) {
 		addContact(
-			ae.GetContactMail(i),
-			ae.GetContactName(i),
-			ae.GetContactNote(i)
+			ae.getContactMail(i),
+			ae.getContactName(i),
+			ae.getContactNote(i)
 		);
 	}
 
@@ -1074,7 +1074,7 @@ function addContacts() {
 }
 
 function addAddresses() {
-	for (let i = 0; i < ae.GetAddressCount(); i++) {
+	for (let i = 0; i < ae.getAddressCount(); i++) {
 		addAddress(i);
 	}
 }
@@ -1086,15 +1086,15 @@ function reloadAccount() {
 	addAddresses();
 	updateAddressCounts();
 
-	document.getElementById("txt_reg").disabled = !ae.IsUserAdmin();
-	document.getElementById("btn_reg").disabled = !ae.IsUserAdmin();
-	document.getElementById("txt_sender_hash").disabled = !ae.IsUserAdmin();
-	document.getElementById("txt_sender_date").disabled = !ae.IsUserAdmin();
-	document.getElementById("btn_sender").disabled = !ae.IsUserAdmin();
-	document.getElementById("btn_limits").disabled = !ae.IsUserAdmin();
+	document.getElementById("txt_reg").disabled = !ae.isUserAdmin();
+	document.getElementById("btn_reg").disabled = !ae.isUserAdmin();
+	document.getElementById("txt_sender_hash").disabled = !ae.isUserAdmin();
+	document.getElementById("txt_sender_date").disabled = !ae.isUserAdmin();
+	document.getElementById("btn_sender").disabled = !ae.isUserAdmin();
+	document.getElementById("btn_limits").disabled = !ae.isUserAdmin();
 
-	document.getElementById("chk_lowme").disabled = (ae.GetUserLevel() === 0);
-	document.getElementById("txt_notepad").value = ae.GetPrivateExtra();
+	document.getElementById("chk_lowme").disabled = (ae.getUserLevel() === 0);
+	document.getElementById("txt_notepad").value = ae.getPrivateExtra();
 }
 
 document.getElementById("btn_newcontact").onclick = function() {
@@ -1102,12 +1102,12 @@ document.getElementById("btn_newcontact").onclick = function() {
 };
 
 document.getElementById("btn_savecontacts").onclick = function() {
-	while (ae.GetContactCount() > 0) {
-		ae.DeleteContact(0);
+	while (ae.getContactCount() > 0) {
+		ae.deleteContact(0);
 	}
 
 	for (const row of document.getElementById("tbl_ctact").rows) {
-		ae.AddContact(row.cells[0].textContent, row.cells[1].textContent, row.cells[2].textContent);
+		ae.addContact(row.cells[0].textContent, row.cells[1].textContent, row.cells[2].textContent);
 	}
 
 	refreshContactList();
@@ -1137,7 +1137,7 @@ function writeVerify() {
 	document.getElementById("write2_body").textContent = document.getElementById("write_body").value;
 
 	if (document.getElementById("write_recv").value.indexOf("@") >= 0) {
-		document.getElementById("write2_from").textContent = document.getElementById("write_from").value + "@" + ae.GetDomainEml();
+		document.getElementById("write2_from").textContent = document.getElementById("write_from").value + "@" + ae.getDomainEml();
 		document.getElementById("write2_pkey").hidden = true;
 	} else {
 		document.getElementById("write2_from").textContent = document.getElementById("write_from").value;
@@ -1176,7 +1176,7 @@ function updateTab() {
 					document.getElementById("div_notes").children[1].hidden = false;
 					document.getElementById("div_notes").children[2].hidden = true;
 
-					document.querySelector("#div_notepad meter").value = ae.GetPrivateExtraSpace() / ae.GetPrivateExtraSpaceMax();
+					document.querySelector("#div_notepad meter").value = ae.getPrivateExtraSpace() / ae.getPrivateExtraSpaceMax();
 				break;
 
 				case 2:
@@ -1249,7 +1249,7 @@ function addressCreate(addr) {
 		ae.Private_Update(function(error2) {
 			updateAddressCounts();
 
-			addAddress(ae.GetAddressCount() - 1);
+			addAddress(ae.getAddressCount() - 1);
 			if (addr !== "SHIELD") {
 				document.getElementById("txt_address_create_normal").value = "";
 				document.getElementById("txt_address_create_normal").focus();
@@ -1261,7 +1261,7 @@ function addressCreate(addr) {
 }
 
 document.getElementById("btn_address_create_normal").onclick = function() {
-	if (ae.GetAddressCountNormal() >= ae.GetLimitNormalA(ae.GetUserLevel()) || ae.GetAddressCountNormal() + ae.GetAddressCountShield() >= 31) return;
+	if (ae.getAddressCountNormal() >= ae.getLimitNormalA(ae.getUserLevel()) || ae.getAddressCountNormal() + ae.getAddressCountShield() >= 31) return;
 
 	const txtNewAddr = document.getElementById("txt_address_create_normal");
 	if (!txtNewAddr.reportValidity()) return;
@@ -1276,7 +1276,7 @@ document.getElementById("txt_address_create_normal").onkeyup = function() {
 };
 
 document.getElementById("btn_address_create_shield").onclick = function() {
-	if (ae.GetAddressCountShield() >= ae.GetLimitShieldA(ae.GetUserLevel()) || ae.GetAddressCountNormal() + ae.GetAddressCountShield() >= 31) return;
+	if (ae.getAddressCountShield() >= ae.getLimitShieldA(ae.getUserLevel()) || ae.getAddressCountNormal() + ae.getAddressCountShield() >= 31) return;
 
 	addressCreate("SHIELD");
 };
@@ -1288,12 +1288,12 @@ document.getElementById("btn_address_update").onclick = function() {
 	const rows = document.getElementById("tbl_addrs").rows;
 
 	for (let i = 0; i < rows.length; i++) {
-		ae.SetAddressAccInt(i, rows[i].getElementsByTagName("input")[0].checked);
-		ae.SetAddressAccExt(i, rows[i].getElementsByTagName("input")[1].checked);
-		ae.SetAddressAllVer(i, rows[i].getElementsByTagName("input")[2].checked);
-		ae.SetAddressAttach(i, rows[i].getElementsByTagName("input")[3].checked);
-		ae.SetAddressSecure(i, rows[i].getElementsByTagName("input")[4].checked);
-		ae.SetAddressOrigin(i, rows[i].getElementsByTagName("input")[5].checked);
+		ae.setAddressAccInt(i, rows[i].getElementsByTagName("input")[0].checked);
+		ae.setAddressAccExt(i, rows[i].getElementsByTagName("input")[1].checked);
+		ae.setAddressAllVer(i, rows[i].getElementsByTagName("input")[2].checked);
+		ae.setAddressAttach(i, rows[i].getElementsByTagName("input")[3].checked);
+		ae.setAddressSecure(i, rows[i].getElementsByTagName("input")[4].checked);
+		ae.setAddressOrigin(i, rows[i].getElementsByTagName("input")[5].checked);
 	}
 
 	ae.Address_Update(function(error) {
@@ -1317,7 +1317,7 @@ document.getElementById("btn_reg").onclick = function() {
 
 	ae.Account_Create(txt.value, function(error) {
 		if (error === 0) {
-			addAccountToTable(ae.Admin_GetUserCount() - 1);
+			addAccountToTable(ae.admin_getUserCount() - 1);
 			txt.value = "";
 		} else errorDialog(error);
 
@@ -1329,14 +1329,14 @@ document.getElementById("chk_delme").onclick = function() {document.getElementBy
 document.getElementById("chk_lowme").onclick = function() {document.getElementById("btn_lowme").disabled = !this.checked;};
 
 document.getElementById("btn_notepad_restore").onclick = function() {
-	document.getElementById("txt_notepad").value = ae.GetPrivateExtra();
+	document.getElementById("txt_notepad").value = ae.getPrivateExtra();
 };
 
 document.getElementById("btn_notepad_savepad").onclick = function() {
 	const btn = this;
 	btn.disabled = true;
 
-	const error = ae.SetPrivateExtra(document.getElementById("txt_notepad").value);
+	const error = ae.setPrivateExtra(document.getElementById("txt_notepad").value);
 	if (error !== 0) {
 		btn.disabled = false;
 		errorDialog(error);
@@ -1348,7 +1348,7 @@ document.getElementById("btn_notepad_savepad").onclick = function() {
 		if (error2 !== 0) {
 			errorDialog(error2);
 		} else {
-			document.querySelector("#div_notepad meter").value = ae.GetPrivateExtraSpace() / ae.GetPrivateExtraSpaceMax();
+			document.querySelector("#div_notepad meter").value = ae.getPrivateExtraSpace() / ae.getPrivateExtraSpaceMax();
 		}
 	});
 };
@@ -1364,7 +1364,7 @@ document.getElementById("btn_notepad_saveupl").onclick = function() {
 		if (error === 0) {
 			np.value = "";
 			showFiles();
-			document.getElementById("tbd_accs").children[0].children[1].textContent = Math.round(ae.GetTotalMsgBytes() / 1024 / 1024);
+			document.getElementById("tbd_accs").children[0].children[1].textContent = Math.round(ae.getTotalMsgBytes() / 1024 / 1024);
 		} else errorDialog(error);
 
 		np.disabled = false;
@@ -1385,7 +1385,7 @@ document.getElementById("btn_upload").onclick = function() {
 			ae.Message_Upload(fileSelector.files[0].name, new Uint8Array(reader.result), function(error) {
 				if (error === 0) {
 					showFiles();
-					document.getElementById("tbd_accs").children[0].children[1].textContent = Math.round(ae.GetTotalMsgBytes() / 1024 / 1024);
+					document.getElementById("tbd_accs").children[0].children[1].textContent = Math.round(ae.getTotalMsgBytes() / 1024 / 1024);
 				} else errorDialog(error);
 
 				btn.disabled = false;
@@ -1490,7 +1490,7 @@ document.getElementById("btn_enter").onclick = function() {
 	const txtSkey = document.getElementById("txt_skey");
 
 	if (txtSkey.value === "") {
-		ae.Reset();
+		ae.reset();
 		document.getElementById("greeting").textContent = "Data cleared";
 		return;
 	}
@@ -1502,7 +1502,7 @@ document.getElementById("btn_enter").onclick = function() {
 
 	document.getElementById("txt_skey").disabled = true;
 
-	ae.SetKeys(txtSkey.value, function(successSetKeys) {
+	ae.setKeys(txtSkey.value, function(successSetKeys) {
 		if (!successSetKeys) {
 			document.getElementById("txt_skey").disabled = false;
 			txtSkey.focus();
@@ -1519,7 +1519,7 @@ document.getElementById("btn_enter").onclick = function() {
 			document.body.style.cursor = "";
 
 			if (statusBrowse !== 0 && statusBrowse !== 0x09) {
-				document.getElementById("greeting").textContent = ae.GetErrorMessage(statusBrowse) + " (0x" + statusBrowse.toString(16).padStart(2, "0").toUpperCase() + ")";
+				document.getElementById("greeting").textContent = ae.getErrorMessage(statusBrowse) + " (0x" + statusBrowse.toString(16).padStart(2, "0").toUpperCase() + ")";
 				document.getElementById("txt_skey").disabled = false;
 				btn.disabled = false;
 				btn.focus();
@@ -1533,11 +1533,11 @@ document.getElementById("btn_enter").onclick = function() {
 			showInbox();
 
 			if (statusBrowse !== 0) errorDialog(statusBrowse);
-			if (!ae.IsUserAdmin()) return;
+			if (!ae.isUserAdmin()) return;
 
 			ae.Account_Browse(function(statusAcc) {
 				if (statusAcc === 0) {
-					for (let i = 0; i < ae.Admin_GetUserCount(); i++) {addAccountToTable(i);}
+					for (let i = 0; i < ae.admin_getUserCount(); i++) {addAccountToTable(i);}
 					updateLimits();
 				} else {
 					errorDialog(statusAcc);
