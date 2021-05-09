@@ -217,16 +217,7 @@ function addFile(num) {
 
 	cell = row.insertCell(-1);
 	cell.innerHTML = "<button type=\"button\">D</button>";
-	cell.children[0].onclick = function() {
-		const a = document.createElement("a");
-		a.href = URL.createObjectURL(new Blob([ae.GetUplMsgBody(num).buffer]));
-		a.download = ae.GetUplMsgTitle(num);
-		a.click();
-
-		URL.revokeObjectURL(a.href);
-		a.href = "";
-		a.download = "";
-	};
+	cell.children[0].onclick = function() {ae.DownloadUplMsg(num);};
 
 	cell = row.insertCell(-1);
 	cell.innerHTML = "<button type=\"button\">X</button>";

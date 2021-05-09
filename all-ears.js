@@ -1070,6 +1070,17 @@ function AllEars(readyCallback) {
 		}
 	};
 
+	const _DownloadFile = function(title, body) {
+		const a = document.createElement("a");
+		a.href = URL.createObjectURL(new Blob([body]));
+		a.download = title;
+		a.click();
+
+		URL.revokeObjectURL(a.href);
+		a.href = "";
+		a.download = "";
+	};
+
 // Public
 	this.Reset = function() {
 		_maxStorage.splice(0);
@@ -1290,6 +1301,18 @@ function AllEars(readyCallback) {
 		+ "\r\n\r\n" + _intMsg[num].body.replaceAll("\n", "\r\n")
 		+ "\r\n";
 	};
+
+	this.DownloadExtMsg = function(num) {
+		_DownloadFile(_extMsg[num].subj + ".eml", new Blob([this.ExportExtMsg(num)]));
+	}
+
+	this.DownloadIntMsg = function(num) {
+		_DownloadFile(_intMsg[num].title + ".eml", new Blob([this.ExportIntMsg(num)]));
+	}
+
+	this.DownloadUplMsg = function(num) {
+		_DownloadFile(_uplMsg[num].title, _uplMsg[num].body.buffer);
+	}
 
 	this.GetExtMsgReplyAddress = function(num) {
 		if (_extMsg[num].hdrRt)   return _extMsg[num].hdrRt;

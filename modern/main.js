@@ -100,17 +100,6 @@ function getClockIcon(d) {
 	return String.fromCodePoint((128335 + h12) + m30);
 }
 
-function downloadFile(num) {
-	const a = document.createElement("a");
-	a.href = URL.createObjectURL(new Blob([ae.GetUplMsgBody(num).buffer]));
-	a.download = ae.GetUplMsgTitle(num);
-	a.click();
-
-	URL.revokeObjectURL(a.href);
-	a.href = "";
-	a.download = "";
-}
-
 function clearDisplay() {
 	const el = document.querySelector("article > img, article > audio, article > video, article > embed, article > iframe");
 	if (!el) return;
@@ -135,7 +124,7 @@ function addMsgFlag(abbr, abbrTitle) {
 
 function displayFile(num) {
 	const fileType = ae.GetUplMsgType(num);
-	if (!fileType) {downloadFile(num); return;}
+	if (!fileType) {ae.DownloadUplMsg(num); return;}
 
 	clearDisplay();
 	document.querySelector("article").scroll(0, 0);
@@ -145,7 +134,7 @@ function displayFile(num) {
 	document.getElementById("btn_msave").disabled = false;
 	document.getElementById("btn_reply").disabled = true;
 
-	document.getElementById("btn_msave").onclick = function() {downloadFile(num);};
+	document.getElementById("btn_msave").onclick = function() {ae.DownloadUplMsg(num);};
 
 	document.querySelector("article > table").hidden = true;
 	document.querySelector("article > h1").textContent = ae.GetUplMsgTitle(num);
@@ -230,17 +219,14 @@ function displayMsg(isInt, num) {
 
 	document.getElementById("btn_msave").disabled = false;
 	document.getElementById("btn_msave").onclick = function() {
+		if (isInt) {
+			ae.DownloadIntMsg(num);
+		} else {
+			ae.DownloadExtMsg(num);
+		}
+
 		this.blur();
-
-		const a = document.createElement("a");
-		a.href = URL.createObjectURL(new Blob([isInt? ae.ExportIntMsg(num) : ae.ExportExtMsg(num)]));
-		a.download = (isInt? ae.GetIntMsgTitle(num) : ae.GetExtMsgTitle(num)) + ".eml";
-		a.click();
-
-		URL.revokeObjectURL(a.href);
-		a.href = "";
-		a.download = "";
-	};
+	}
 
 	const ts = isInt? ae.GetIntMsgTime(num) : ae.GetExtMsgTime(num);
 
