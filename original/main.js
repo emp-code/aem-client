@@ -756,7 +756,7 @@ document.getElementById("btn_uploadfile").onclick = function() {
 		});
 	};
 
-	reader.readAsArrayBuffer(f);
+	reader.readAsArrayBuffer(fileSelector.files[0]);
 };
 
 function navNotesMenu(num) {
