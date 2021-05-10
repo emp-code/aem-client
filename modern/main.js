@@ -394,7 +394,7 @@ function displayMsg(isInt, num) {
 
 		// Right side
 		document.getElementById("readmsg_greet").children[0].textContent = ae.getExtMsgGreet(num) + (ae.getExtMsgFlagGrDm(num) ? " ✓" : "");
-		document.getElementById("readmsg_rdns").children[0].textContent = ae.getExtMsgRdns(num) + (ae.getExtMsgGreet(num) === ae.getExtMsgRdns(num) ? " ✓" : "");
+		document.getElementById("readmsg_rdns").children[0].textContent = ae.getExtMsgRdns(num) + (ae.getExtMsgGreet(num).toLowerCase() === ae.getExtMsgRdns(num).toLowerCase() ? " ✓" : "");
 		document.getElementById("readmsg_cert").children[0].textContent = ae.getExtMsgTlsDomain(num) ? (ae.getExtMsgTlsDomain(num) + " ✓") : "";
 		document.getElementById("readmsg_dkim").children[0].textContent = dkim;
 		document.getElementById("readmsg_envfrom").textContent = ae.getExtMsgEnvFrom(num);
