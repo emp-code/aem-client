@@ -1855,6 +1855,15 @@ function AllEars(readyCallback) {
 							msgBody = msgData.slice(18 + msgData[0]);
 						}
 
+						if (msgTitle.endsWith(".br")) {
+							try {
+								msgBody = new Uint8Array(window.BrotliDecode(new Int8Array(msgBody)));
+								msgTitle = msgTitle.replace(/\.br$/, "");
+							} catch(e) {
+								msgBody = "Failed decompression";
+							}
+						}
+
 						_uplMsg.push(new _UplMsg(msgId, msgTs, msgTitle, msgBody, msgParent, msgBytes / 16));
 					break;}
 
