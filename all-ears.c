@@ -150,7 +150,7 @@ static int apiFetch(const int apiCmd, const void * const clear, const size_t len
 								memcpy(*result, decrypted + 1, lenCpy);
 								lenResult = lenCpy;
 							} else lenResult = 0; // Result data not wanted, 0=success
-						} else lenResult = -1; // Invalid length --> Server reported error
+						} else lenResult = -lenCpy; // Invalid length --> Server reported error
 					} else lenResult = -2; // Failed to decrypt
 				} else lenResult = -3; // Incorrect length received
 			} else if (result != NULL) {
