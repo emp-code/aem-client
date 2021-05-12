@@ -144,13 +144,13 @@ static int apiFetch(const int apiCmd, const void * const clear, const size_t len
 				if (lenResult == AEM_LEN_SHORTRESPONSE_HEADERS + AEM_LEN_SHORTRESPONSE_DECRYPT + crypto_box_NONCEBYTES + crypto_box_MACBYTES) {
 					unsigned char decrypted[AEM_LEN_SHORTRESPONSE_DECRYPT];
 					if (crypto_box_open_easy(decrypted, response + AEM_LEN_SHORTRESPONSE_HEADERS + crypto_box_NONCEBYTES, AEM_LEN_SHORTRESPONSE_DECRYPT + crypto_box_MACBYTES, response + AEM_LEN_SHORTRESPONSE_HEADERS, api_pubkey, userKey_secret) == 0) {
-						if (result != NULL) {
-							const int lenCpy = decrypted[0];
-							if (lenCpy < AEM_LEN_SHORTRESPONSE_DECRYPT) {
+						const int lenCpy = decrypted[0];
+						if (lenCpy < AEM_LEN_SHORTRESPONSE_DECRYPT) {
+							if (result != NULL) {
 								memcpy(*result, decrypted + 1, lenCpy);
 								lenResult = lenCpy;
-							} else lenResult = -1; // Invalid length --> Server reported error
-						} else lenResult = 0; // Result data not wanted, 0=success
+							} else lenResult = 0; // Result data not wanted, 0=success
+						} else lenResult = -1; // Invalid length --> Server reported error
 					} else lenResult = -2; // Failed to decrypt
 				} else lenResult = -3; // Incorrect length received
 			} else if (result != NULL) {
