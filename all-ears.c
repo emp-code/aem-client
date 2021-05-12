@@ -21,8 +21,8 @@
 #define AEM_MAXLEN_MSGDATA 4194304 // 4 MiB
 #define AEM_PORT_API 302
 #define AEM_LEVEL_MAX 3
-#define AEM_RESPONSE_HEAD_SIZE_SHORT 166
-#define AEM_RESPONSE_DATA_SIZE_SHORT 33
+#define AEM_LEN_SHORTRESPONSE_HEADERS 120
+#define AEM_LEN_SHORTRESPONSE_DECRYPT 33
 #define AEM_SEALCLEAR_LEN (1 + crypto_box_NONCEBYTES + crypto_box_PUBLICKEYBYTES)
 #define AEM_ADDRESS_ARGON2_OPSLIMIT 3
 #define AEM_ADDRESS_ARGON2_MEMLIMIT 67108864
@@ -139,14 +139,14 @@ static int apiFetch(const int apiCmd, const void * const clear, const size_t len
 	if (ret1 == 0 && ret2 == 0) {
 		if (send(sock, req, lenReq, 0) == (int)lenReq) {
 			if (wantShortResponse) {
-				unsigned char response[AEM_RESPONSE_HEAD_SIZE_SHORT + AEM_RESPONSE_DATA_SIZE_SHORT + crypto_box_NONCEBYTES + crypto_box_MACBYTES + 1];
-				lenResult = recv(sock, response, AEM_RESPONSE_HEAD_SIZE_SHORT + AEM_RESPONSE_DATA_SIZE_SHORT + crypto_box_NONCEBYTES + crypto_box_MACBYTES + 1, 0);
-				if (lenResult == AEM_RESPONSE_HEAD_SIZE_SHORT + AEM_RESPONSE_DATA_SIZE_SHORT + crypto_box_NONCEBYTES + crypto_box_MACBYTES) {
-					unsigned char decrypted[AEM_RESPONSE_DATA_SIZE_SHORT];
-					if (crypto_box_open_easy(decrypted, response + AEM_RESPONSE_HEAD_SIZE_SHORT + crypto_box_NONCEBYTES, AEM_RESPONSE_DATA_SIZE_SHORT + crypto_box_MACBYTES, response + AEM_RESPONSE_HEAD_SIZE_SHORT, api_pubkey, userKey_secret) == 0) {
+				unsigned char response[AEM_LEN_SHORTRESPONSE_HEADERS + AEM_LEN_SHORTRESPONSE_DECRYPT + crypto_box_NONCEBYTES + crypto_box_MACBYTES + 1];
+				lenResult = recv(sock, response, AEM_LEN_SHORTRESPONSE_HEADERS + AEM_LEN_SHORTRESPONSE_DECRYPT + crypto_box_NONCEBYTES + crypto_box_MACBYTES + 1, 0);
+				if (lenResult == AEM_LEN_SHORTRESPONSE_HEADERS + AEM_LEN_SHORTRESPONSE_DECRYPT + crypto_box_NONCEBYTES + crypto_box_MACBYTES) {
+					unsigned char decrypted[AEM_LEN_SHORTRESPONSE_DECRYPT];
+					if (crypto_box_open_easy(decrypted, response + AEM_LEN_SHORTRESPONSE_HEADERS + crypto_box_NONCEBYTES, AEM_LEN_SHORTRESPONSE_DECRYPT + crypto_box_MACBYTES, response + AEM_LEN_SHORTRESPONSE_HEADERS, api_pubkey, userKey_secret) == 0) {
 						if (result != NULL) {
 							const int lenCpy = decrypted[0];
-							if (lenCpy < AEM_RESPONSE_DATA_SIZE_SHORT) {
+							if (lenCpy < AEM_LEN_SHORTRESPONSE_DECRYPT) {
 								memcpy(*result, decrypted + 1, lenCpy);
 								lenResult = lenCpy;
 							} else lenResult = -1; // Invalid length --> Server reported error
@@ -228,7 +228,7 @@ int allears_account_delete(const unsigned char * const targetPk) {
 
 int allears_address_create(struct aem_address * const addr, const char * const norm, const size_t lenNorm) {
 	if (norm == NULL) {
-		unsigned char data[AEM_RESPONSE_DATA_SIZE_SHORT - 1];
+		unsigned char data[AEM_LEN_SHORTRESPONSE_DECRYPT - 1];
 		if (apiFetch(AEM_API_ADDRESS_CREATE, (const unsigned char[]){'S', 'H', 'I', 'E', 'L', 'D'}, 6, (unsigned char**)&data) != 0) return -1;
 
 		memcpy(&(addr->hash), data, 8);
