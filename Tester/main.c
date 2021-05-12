@@ -8,14 +8,14 @@
 static int performTests(int * const retNum, const char onionId[56], const unsigned char * const pkApi, const unsigned char * const pkSig, const unsigned char * const saltNm, const unsigned char * const key_admin, const unsigned char * const key_user1, const unsigned char * const upk_user1, const unsigned char * const upk_user2) {
 	// Admin
 	*retNum = 0;
-	if (allears_init(onionId, pkApi, pkSig, saltNm, key_admin) != 0) return -1;
+	if (allears_init(onionId, pkApi, pkSig, saltNm, key_admin) != 0) return -999; //0
 
 	int ret;
 	struct aem_user *userList;
-	(*retNum)++; if ((ret = allears_account_create(upk_user1)) != 0) return ret;
-	(*retNum)++; if ((ret = allears_account_create(upk_user1)) >= 0) return -1;
-	(*retNum)++; if ((ret = allears_account_update(upk_user1, 2)) != 0) return ret;
-	(*retNum)++; if ((ret = allears_account_browse(&userList)) < 0)  return ret;
+	(*retNum)++; if ((ret = allears_account_create(upk_user1)) != 0) return ret; //1
+	(*retNum)++; if ((ret = allears_account_create(upk_user1)) >= 0) return -999; //2
+	(*retNum)++; if ((ret = allears_account_update(upk_user1, 2)) != 0) return ret; //3
+	(*retNum)++; if ((ret = allears_account_browse(&userList)) < 0)  return ret; //4
 
 	// Account created, level set to one: check result
 	(*retNum)++;
@@ -27,7 +27,7 @@ static int performTests(int * const retNum, const char onionId[56], const unsign
 		}
 	}
 
-	if (found == -1) return -1;
+	if (found == -1) return -999; //5
 	free(userList);
 
 	unsigned char privateData[AEM_LEN_PRIVATE];
@@ -39,39 +39,39 @@ static int performTests(int * const retNum, const char onionId[56], const unsign
 	sprintf(testAddress, "aemtest%.8x", randombytes_random());
 
 	// User1
-	if (allears_init(onionId, pkApi, pkSig, saltNm, key_user1) != 0) return -1;
-	(*retNum)++; if ((ret = allears_account_create(upk_user2)) >= 0) return -1;
-	(*retNum)++; if ((ret = allears_private_update(privateData)) != 0) return -1;
-	(*retNum)++; if ((ret = allears_address_create(&addr, testAddress, 15)) != 0) return -1;
+	if (allears_init(onionId, pkApi, pkSig, saltNm, key_user1) != 0) return -999;
+	(*retNum)++; if ((ret = allears_account_create(upk_user2)) >= 0) return -999; //6
+	(*retNum)++; if ((ret = allears_private_update(privateData)) != 0) return -999; //7
+	(*retNum)++; if ((ret = allears_address_create(&addr, testAddress, 15)) != 0) return -999; //8
 	addr.flags = AEM_ADDR_FLAG_ACCINT | AEM_ADDR_FLAG_ACCEXT;
 
 	// Admin
-	if (allears_init(onionId, pkApi, pkSig, saltNm, key_admin) != 0) return -1;
-	(*retNum)++; if ((ret = allears_account_create(upk_user2)) != 0) return ret;
-	(*retNum)++; if ((ret = allears_account_update(upk_user2, 2)) != 0) return -1;
-	(*retNum)++; if ((ret = allears_message_create("Test Message", 12, "This here is a test message.", 28, "admin", 5, testAddress, 15, NULL, 0, NULL)) >= 0) return -1;
+	if (allears_init(onionId, pkApi, pkSig, saltNm, key_admin) != 0) return -999;
+	(*retNum)++; if ((ret = allears_account_create(upk_user2)) != 0) return ret; //9
+	(*retNum)++; if ((ret = allears_account_update(upk_user2, 2)) != 0) return -999; //10
+	(*retNum)++; if ((ret = allears_message_create("Test Message", 12, "This here is a test message.", 28, "admin", 5, testAddress, 15, NULL, 0, NULL)) >= 0) return -999; //11
 
 	// User1
-	if (allears_init(onionId, pkApi, pkSig, saltNm, key_user1) != 0) return -1;
-	(*retNum)++; if ((ret = allears_address_delete(UINT64_MAX)) >= 0) return -1;
-	(*retNum)++; if ((ret = allears_account_delete(upk_user2)) >= 0) return -1;
-	(*retNum)++; if ((ret = allears_account_update(upk_user2, 3)) >= 0) return -1;
-	(*retNum)++; if ((ret = allears_account_update(upk_user2, 1)) >= 0) return -1;
-	(*retNum)++; if ((ret = allears_account_update(upk_user1, 3)) >= 0) return -1;
-	(*retNum)++; if ((ret = allears_account_update(upk_user1, 2)) >= 0) return -1;
-	(*retNum)++; if ((ret = allears_account_update(upk_user1, 1)) != 0) return ret;
-	(*retNum)++; if ((ret = allears_address_update(&addr, 1)) != 0) return ret;
+	if (allears_init(onionId, pkApi, pkSig, saltNm, key_user1) != 0) return -999;
+	(*retNum)++; if ((ret = allears_address_delete(UINT64_MAX)) >= 0) return -999; //12
+	(*retNum)++; if ((ret = allears_account_delete(upk_user2)) >= 0) return -999; //13
+	(*retNum)++; if ((ret = allears_account_update(upk_user2, 3)) >= 0) return -999; //14
+	(*retNum)++; if ((ret = allears_account_update(upk_user2, 1)) >= 0) return -999; //15
+	(*retNum)++; if ((ret = allears_account_update(upk_user1, 3)) >= 0) return -999; //16
+	(*retNum)++; if ((ret = allears_account_update(upk_user1, 2)) >= 0) return -999; //17
+	(*retNum)++; if ((ret = allears_account_update(upk_user1, 1)) != 0) return ret; //18
+	(*retNum)++; if ((ret = allears_address_update(&addr, 1)) != 0) return ret; //19
 
 	// Admin
-	if (allears_init(onionId, pkApi, pkSig, saltNm, key_admin) != 0) return -1;
-	(*retNum)++; if ((ret = allears_account_delete(upk_user2)) != 0) return ret;
-	(*retNum)++; if ((ret = allears_message_public("Test announcement", 17, "This announcement is a part of a test run.", 42)) != 0) return ret;
-	(*retNum)++; if ((ret = allears_message_create("Test Message", 12, "This here is a test message.", 28, "admin", 5, testAddress, 15, NULL, 0, NULL)) != 0) return ret;
+	if (allears_init(onionId, pkApi, pkSig, saltNm, key_admin) != 0) return -999;
+	(*retNum)++; if ((ret = allears_account_delete(upk_user2)) != 0) {puts("23?");return ret;} //20
+	(*retNum)++; if ((ret = allears_message_public("Test announcement", 17, "This announcement is a part of a test run.", 42)) != 0) return ret; //21
+	(*retNum)++; if ((ret = allears_message_create("Test Message", 12, "This here is a test message.", 28, "admin", 5, testAddress, 15, NULL, 0, NULL)) != 0) return ret; //22
 
 	// User1
-	if (allears_init(onionId, pkApi, pkSig, saltNm, key_user1) != 0) return -1;
-	(*retNum)++; if ((ret = allears_message_upload("test.txt", 8, (unsigned char*)"This is an uploaded test file.", 30)) != 0) return ret;
-	(*retNum)++; if ((ret = allears_message_browse()) != 0) return ret;
+	if (allears_init(onionId, pkApi, pkSig, saltNm, key_user1) != 0) return -999; //26
+	(*retNum)++; if ((ret = allears_message_upload("test.txt", 8, (unsigned char*)"This is an uploaded test file.", 30)) != 0) return ret; //23
+	(*retNum)++; if ((ret = allears_message_browse()) != 0) return ret; //24
 
 	struct aem_intMsg *msg = allears_intmsg(0);
 	if (msg == NULL) return -1000;
@@ -83,14 +83,14 @@ static int performTests(int * const retNum, const char onionId[56], const unsign
 	if (strcmp(msg->subj, "Test announcement") != 0) return -1011;
 	if (strcmp(msg->body, "This announcement is a part of a test run.") != 0) return -1012;
 
-	(*retNum)++; if ((ret = allears_message_delete((unsigned char[]){0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0})) >= 0) return -1;
-	(*retNum)++; if ((ret = allears_message_delete(msg->msgId)) != 0) return ret;
+	(*retNum)++; if ((ret = allears_message_delete((unsigned char[]){0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0})) >= 0) return -999; //25
+	(*retNum)++; if ((ret = allears_message_delete(msg->msgId)) != 0) return ret; //26
 
-	(*retNum)++; if ((ret = allears_message_browse()) != 0) return ret;
+	(*retNum)++; if ((ret = allears_message_browse()) != 0) return ret; //27
 	// TODO: Check messages
 
-	(*retNum)++; if ((ret = allears_address_delete(addr.hash)) != 0) return ret;
-	(*retNum)++; if ((ret = allears_account_delete(upk_user1)) != 0) return ret;
+	(*retNum)++; if ((ret = allears_address_delete(addr.hash)) != 0) return ret; //28
+	(*retNum)++; if ((ret = allears_account_delete(upk_user1)) != 0) return ret; //29
 
 	return 0;
 }
