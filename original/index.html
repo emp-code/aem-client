@@ -25,6 +25,12 @@
 		</header>
 
 		<main>
+			<div id="div_begin" class="center">
+				<input id="txt_skey" type="password" maxlength="64" pattern="[0-9a-f]{64}" autocomplete="current-password" required autofocus placeholder="Secret key (hex)" class="center">
+				<br>
+				<button type="button" id="btn_enter" disabled="disabled" autocomplete="off" class="topmargin">Enter</button>
+			</div>
+
 			<div id="div_allears" hidden>
 				<nav>
 					<button type="button" autocomplete="off" id="btn_toinbox">Inbox</button>
@@ -265,12 +271,6 @@
 
 					<div id="readmsg_body" class="topmargin"></div>
 				</div>
-			</div>
-
-			<div id="div_begin" class="center">
-				<input id="txt_skey" type="password" maxlength="64" pattern="[0-9a-f]{64}" autocomplete="current-password" required autofocus placeholder="Secret key (hex)" class="center">
-				<br>
-				<button type="button" id="btn_enter" disabled="disabled" autocomplete="off" class="topmargin">Enter</button>
 			</div>
 		</main>
 
