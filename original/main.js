@@ -775,13 +775,9 @@ document.getElementById("btn_uploadfile").onclick = function() {
 
 function navNotesMenu(num) {
 	for (let i = 0; i < 3; i++) {
-		if (i === num) {
-			document.getElementById("div_notes").children[0].children[i].disabled = true;
-			document.getElementById("div_notes").children[1 + i].hidden = false;
-		} else {
-			document.getElementById("div_notes").children[0].children[i].disabled = false;
-			document.getElementById("div_notes").children[1 + i].hidden = true;
-		}
+		const isCurrent = (i === num);
+		document.getElementById("div_notes").children[0].children[i].disabled = isCurrent;
+		document.getElementById("div_notes").children[1 + i].hidden = !isCurrent;
 	}
 }
 
