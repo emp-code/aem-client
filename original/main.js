@@ -6,7 +6,8 @@ const ae = new AllEars(function(ok) {
 	if (ok) {
 		document.getElementById("btn_enter").disabled = false;
 	} else {
-		console.log("Failed to load All-Ears");
+		document.getElementById("begin_message").hidden = false;
+		document.getElementById("begin_message").textContent = "Failed init";
 	}
 });
 
@@ -561,14 +562,16 @@ document.getElementById("btn_enter").onclick = function() {
 
 	ae.setKeys(txtSkey.value, function(success) {
 		if (!success) {
-			console.log("Invalid format for key");
+			document.getElementById("begin_message").hidden = false;
+			document.getElementById("begin_message").textContent = "Error: Invalid key format";
 			btn.disabled = false;
 			return;
 		}
 
 		ae.Message_Browse(false, true, function(statusBrowse) {
 			if (statusBrowse !== 0) {
-				console.log("Failed to enter");
+				document.getElementById("begin_message").hidden = false;
+				document.getElementById("begin_message").textContent = "Error: " + ae.getErrorMessage(statusBrowse);
 				btn.disabled = false;
 				return;
 			}
