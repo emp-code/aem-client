@@ -96,8 +96,12 @@ function addIntMessage(i) {
 	cell.className = (ae.getIntMsgTo(i).length === 16) ? "mono" : "";
 
 	cell = row.insertCell(-1);
-	cell.innerHTML = "<input class=\"delMsg\" type=\"checkbox\" data-id=\"" + ae.getIntMsgIdHex(i) + "\">";
-	cell.children[0].onchange = function() {deleteButtonShow(this.checked);};
+	const el = document.createElement("input");
+	el.className = "delMsg";
+	el.type = "checkbox";
+	el.setAttribute("data-id", ae.getIntMsgIdHex(i));
+	el.onchange = function() {deleteButtonShow(this.checked);};
+	cell.appendChild(el);
 }
 
 function addExtMessage(i) {
