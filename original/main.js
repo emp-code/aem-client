@@ -148,24 +148,28 @@ function addExtMessage(i) {
 	cell = row.insertCell(-1);
 	cell.textContent = from.substring(0, from.indexOf("@"));
 
-	const flag = document.createElement("abbr");
-	flag.textContent = getCountryFlag(ae.getExtMsgCcode(i));
-	flag.title = ae.getExtMsgCname(i);
-
-	const fromText = document.createElement("span");
-	fromText.textContent = " " + from2;
-
 	cell = row.insertCell(-1);
-	cell.appendChild(flag);
-	cell.appendChild(fromText);
+
+	let el = document.createElement("abbr");
+	el.textContent = getCountryFlag(ae.getExtMsgCcode(i));
+	el.title = ae.getExtMsgCname(i);
+	cell.appendChild(el);
+
+	el = document.createElement("span");
+	el.textContent = " " + from2;
+	cell.appendChild(el);
 
 	cell = row.insertCell(-1);
 	cell.textContent = ae.getExtMsgEnvTo(i);
 	cell.className = (ae.getExtMsgEnvTo(i).length === 16) ? "mono" : "";
 
 	cell = row.insertCell(-1);
-	cell.innerHTML = "<input class=\"delMsg\" type=\"checkbox\" data-id=\"" + ae.getExtMsgIdHex(i) + "\">";
-	cell.children[0].onchange = function() {deleteButtonShow(this.checked);};
+	el = document.createElement("input");
+	el.className = "delMsg";
+	el.type = "checkbox";
+	el.setAttribute("data-id", ae.getExtMsgIdHex(i));
+	el.onchange = function() {deleteButtonShow(this.checked);};
+	cell.appendChild(el);
 }
 
 function addMessages() {
