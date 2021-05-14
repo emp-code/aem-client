@@ -352,19 +352,28 @@ function addAddress(num) {
 	};
 
 	cell = row.insertCell(-1);
-	cell.innerHTML = ae.getAddressAccExt(num) ? "<input type=\"checkbox\" checked=\"checked\">" : "<input type=\"checkbox\">";
+	let el = document.createElement("input");
+	el.type = "checkbox";
+	el.checked = ae.getAddressAccExt(num);
+	cell.appendChild(el);
 
 	cell = row.insertCell(-1);
-	cell.innerHTML = ae.getAddressAccInt(num) ? "<input type=\"checkbox\" checked=\"checked\">" : "<input type=\"checkbox\">";
+	el = document.createElement("input");
+	el.type = "checkbox";
+	el.checked = ae.getAddressAccInt(num);
+	cell.appendChild(el);
 
 	cell = row.insertCell(-1);
-	cell.innerHTML = "<button type=\"button\">X</button>";
-	cell.children[0].onclick = function() {deleteAddress(ae.getAddress(num));};
+	el = document.createElement("button");
+	el.type = "button";
+	el.textContent = "X";
+	el.onclick = function() {deleteAddress(ae.getAddress(num));};
+	cell.appendChild(el);
 
-	const opt = document.createElement("option");
-	opt.value = ae.getAddress(num);
-	opt.textContent = ae.getAddress(num) + "@" + ae.getDomainEml();
-	document.getElementById("send_from").appendChild(opt);
+	el = document.createElement("option");
+	el.value = ae.getAddress(num);
+	el.textContent = ae.getAddress(num) + "@" + ae.getDomainEml();
+	document.getElementById("send_from").appendChild(el);
 }
 
 function clearMessages() {
