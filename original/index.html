@@ -237,14 +237,22 @@
 
 					<div id="readmsg_head" class="topmargin">
 						<div id="readmsg_extmsg">
-							IP: <span id="readmsg_ip"></span> (<span id="readmsg_country"></span>)
+							<span id="readmsg_country"></span>
+							<span id="readmsg_ip"></span>
+							<span id="readmsg_flags">
+								<abbr title="The sender did not use the Extended (ESMTP) protocol">SMTP</abbr>
+								<abbr title="The sender issued unusual command(s)">RARE</abbr>
+								<abbr title="The sender issued invalid command(s)">FAIL</abbr>
+								<abbr title="The sender violated the protocol">PROT</abbr>
+							</span>
 							<br>
-							Greeting: <span id="readmsg_greet"></span>
+
+							<span id="readmsg_greet"></span>
 							<br>
-							Flags: <span id="readmsg_flags"></span>
-							<br>
+
 							<span id="readmsg_tls"></span>
 							<br>
+
 							<details>
 								<summary>Headers</summary>
 								<pre id="readmsg_headers"></pre>

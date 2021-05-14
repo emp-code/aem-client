@@ -122,14 +122,14 @@ function addExtMessage(i) {
 		document.getElementById("readmsg_tls").textContent = ae.getExtMsgTLS(i);
 		document.getElementById("readmsg_ip").textContent = ae.getExtMsgIp(i);
 
-		document.getElementById("readmsg_country").textContent = ae.getExtMsgCname(i) + " " + getCountryFlag(ae.getExtMsgCcode(i));
+		document.getElementById("readmsg_country").textContent = getCountryFlag(ae.getExtMsgCcode(i));
+		document.getElementById("readmsg_country").title = ae.getExtMsgCname(i);
 
-		let flagText = "";
-		if (!ae.getExtMsgFlagPExt(i)) flagText += "<abbr title=\"The sender did not use the Extended (ESMTP) protocol\">SMTP</abbr> ";
-		if (ae.getExtMsgFlagRare(i)) flagText += "<abbr title=\"The sender issued unusual command(s)\">RARE</abbr> ";
-		if (ae.getExtMsgFlagFail(i)) flagText += "<abbr title=\"The sender issued invalid command(s)\">FAIL</abbr> ";
-		if (ae.getExtMsgFlagPErr(i)) flagText += "<abbr title=\"The sender violated the protocol\">PROT</abbr> ";
-		document.getElementById("readmsg_flags").innerHTML = flagText.trim();
+		const flags = document.getElementById("readmsg_flags").children;
+		flags[0].hidden = ae.getExtMsgFlagPExt(i);
+		flags[1].hidden = !ae.getExtMsgFlagRare(i);
+		flags[2].hidden = !ae.getExtMsgFlagFail(i);
+		flags[3].hidden = !ae.getExtMsgFlagPErr(i);
 
 		document.getElementById("readmsg_title").textContent = ae.getExtMsgTitle(i);
 		document.getElementById("readmsg_from").textContent = ae.getExtMsgEnvFrom(i);
