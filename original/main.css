@@ -46,12 +46,12 @@ textarea {
 	text-align: right;
 }
 
-#div_inbox td:not(:nth-child(3)):not(:last-child) {
-	text-align: left;
-}
-
 #div_inbox td:last-child {
 	text-align: center;
+}
+
+#div_inbox td:not(:nth-child(3)):not(:last-child) {
+	text-align: left;
 }
 
 .mono {
