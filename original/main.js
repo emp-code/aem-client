@@ -126,7 +126,6 @@ function addExtMessage(i) {
 
 		let flagText = "";
 		if (!ae.getExtMsgFlagPExt(i)) flagText += "<abbr title=\"The sender did not use the Extended (ESMTP) protocol\">SMTP</abbr> ";
-		if (!ae.getExtMsgFlagQuit(i)) flagText += "<abbr title=\"The sender did not issue the required QUIT command\">QUIT</abbr> ";
 		if (ae.getExtMsgFlagRare(i)) flagText += "<abbr title=\"The sender issued unusual command(s)\">RARE</abbr> ";
 		if (ae.getExtMsgFlagFail(i)) flagText += "<abbr title=\"The sender issued invalid command(s)\">FAIL</abbr> ";
 		if (ae.getExtMsgFlagPErr(i)) flagText += "<abbr title=\"The sender violated the protocol\">PROT</abbr> ";
