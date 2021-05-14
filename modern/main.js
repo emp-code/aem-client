@@ -226,7 +226,7 @@ function displayMsg(isInt, num) {
 		}
 
 		this.blur();
-	}
+	};
 
 	const ts = isInt? ae.getIntMsgTime(num) : ae.getExtMsgTime(num);
 

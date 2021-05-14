@@ -1304,15 +1304,15 @@ function AllEars(readyCallback) {
 
 	this.downloadExtMsg = function(num) {
 		_downloadFile(_extMsg[num].subj + ".eml", new Blob([this.ExportExtMsg(num)]));
-	}
+	};
 
 	this.downloadIntMsg = function(num) {
 		_downloadFile(_intMsg[num].title + ".eml", new Blob([this.ExportIntMsg(num)]));
-	}
+	};
 
 	this.downloadUplMsg = function(num) {
 		_downloadFile(_uplMsg[num].title, _uplMsg[num].body.buffer);
-	}
+	};
 
 	this.getExtMsgReplyAddress = function(num) {
 		if (_extMsg[num].hdrRt)   return _extMsg[num].hdrRt;
