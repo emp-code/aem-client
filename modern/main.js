@@ -706,7 +706,6 @@ function showFiles() {
 			btn.type = "button";
 			btn.textContent = "X";
 			btn.onclick = function() {
-				const tr = this.parentElement.parentElement;
 				ae.Message_Delete(this.getAttribute("data-msgid"), function(error) {
 					if (error === 0) updateTab();
 					else errorDialog(error);
