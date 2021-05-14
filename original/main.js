@@ -344,12 +344,7 @@ function addAddress(num) {
 	let cell = row.insertCell(-1);
 	cell.textContent = ae.getAddress(num);
 	if (cell.textContent.length === 16) cell.className = "mono";
-	cell.onclick = function() {
-		if (cell.textContent.length === 16)
-			navigator.clipboard.writeText(ae.shieldMix(cell.textContent) + "@" + ae.getDomainEml());
-		else
-			navigator.clipboard.writeText(cell.textContent + "@" + ae.getDomainEml());
-	};
+	cell.onclick = function() {navigator.clipboard.writeText(((this.textContent.length === 16) ? ae.shieldMix(this.textContent) : this.textContent) + "@" + ae.getDomainEml());};
 
 	cell = row.insertCell(-1);
 	let el = document.createElement("input");
