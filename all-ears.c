@@ -102,8 +102,63 @@ static uint64_t normalHash(const char addr32[10]) {
 	return (crypto_pwhash((unsigned char*)halves, 16, addr32, 10, saltNm, AEM_ADDRESS_ARGON2_OPSLIMIT, AEM_ADDRESS_ARGON2_MEMLIMIT, crypto_pwhash_ALG_ARGON2ID13) == 0) ? (halves[0] ^ halves[1]) : 0;
 }
 
+static int parseShortResponse(unsigned char * const result, const unsigned char * const response) {
+	unsigned char decrypted[AEM_LEN_SHORTRESPONSE_DECRYPT];
+	if (crypto_box_open_easy(decrypted, response + AEM_LEN_SHORTRESPONSE_HEADERS + crypto_box_NONCEBYTES, AEM_LEN_SHORTRESPONSE_DECRYPT + crypto_box_MACBYTES, response + AEM_LEN_SHORTRESPONSE_HEADERS, api_pubkey, userKey_secret) != 0) return -2;
+
+	const int lenCpy = decrypted[0];
+	if (lenCpy >= AEM_LEN_SHORTRESPONSE_DECRYPT) return -lenCpy; // Invalid length --> Server reported error
+
+	memcpy(result, decrypted + 1, lenCpy);
+	return lenCpy;
+}
+
+static int getShortResponse(const int sock, unsigned char * const result) {
+	unsigned char response[AEM_LEN_SHORTRESPONSE_HEADERS + AEM_LEN_SHORTRESPONSE_DECRYPT + crypto_box_NONCEBYTES + crypto_box_MACBYTES + 1];
+	const int lenResult = recv(sock, response, AEM_LEN_SHORTRESPONSE_HEADERS + AEM_LEN_SHORTRESPONSE_DECRYPT + crypto_box_NONCEBYTES + crypto_box_MACBYTES + 1, 0);
+	if (lenResult != AEM_LEN_SHORTRESPONSE_HEADERS + AEM_LEN_SHORTRESPONSE_DECRYPT + crypto_box_NONCEBYTES + crypto_box_MACBYTES) return -3;
+
+	unsigned char tmp[33];
+	return parseShortResponse((result == NULL) ? tmp : result, response);
+}
+
+static int getLongResponse(const int sock, unsigned char ** const result) {
+	unsigned char * const response = malloc(1000 + AEM_MAXLEN_MSGDATA);
+	if (response == NULL) return -5;
+
+	const int lenResponse = recv(sock, response, 1000 + AEM_MAXLEN_MSGDATA, 0);
+	if (lenResponse <= 0) {free(response); return -4;} // Server refused to answer
+
+	if (lenResponse == AEM_LEN_SHORTRESPONSE_HEADERS + AEM_LEN_SHORTRESPONSE_DECRYPT + crypto_box_NONCEBYTES + crypto_box_MACBYTES) {
+		*result = malloc(32);
+		if (*result == NULL) return -5;
+		const int ret = parseShortResponse(response, *result);
+		free(response);
+		return ret;
+	}
+
+	const unsigned char * const headEnd = memmem(response, lenResponse, "\r\n\r\n", 4);
+	if (headEnd == NULL) {free(response); return -3;} // Invalid response from server
+
+	const int lenBox = (response + lenResponse) - (headEnd + 4 + crypto_box_NONCEBYTES);
+	*result = malloc(lenBox - crypto_box_MACBYTES);
+	if (*result == NULL) {free(response); return -2;}
+
+	if (crypto_box_open_easy(*result, headEnd + 4 + crypto_box_NONCEBYTES, lenBox, headEnd + 4, api_pubkey, userKey_secret) != 0) {
+		free(response);
+		free(*result);
+		return -1;
+	}
+
+	free(response);
+	return lenBox - crypto_box_MACBYTES;
+}
+
 static int apiFetch(const int apiCmd, const void * const clear, const size_t lenClear, unsigned char **result) {
 	if (apiCmd < 0 || clear == NULL || lenClear < 1 || lenClear > AEM_API_BOX_SIZE_MAX) return -999;
+
+	const bool wantShortResponse = (apiCmd != AEM_API_ACCOUNT_BROWSE && apiCmd != AEM_API_MESSAGE_BROWSE && apiCmd != AEM_API_MESSAGE_CREATE);
+	if (!wantShortResponse && (result == NULL)) return -997;
 
 	const int sock = torConnect();
 	if (sock < 0) return -998;
@@ -133,46 +188,10 @@ static int apiFetch(const int apiCmd, const void * const clear, const size_t len
 	const int ret1 = crypto_box_seal(req + lenHeaders, sealClear, AEM_SEALCLEAR_LEN, api_pubkey);
 	const int ret2 = crypto_box_easy(req + lenHeaders + AEM_SEALCLEAR_LEN + crypto_box_SEALBYTES, clear, lenClear, pbNonce, api_pubkey, userKey_secret);
 
-	const bool wantShortResponse = (apiCmd != AEM_API_ACCOUNT_BROWSE && apiCmd != AEM_API_MESSAGE_BROWSE);
-
 	int lenResult = -1;
 	if (ret1 == 0 && ret2 == 0) {
 		if (send(sock, req, lenReq, 0) == (int)lenReq) {
-			if (wantShortResponse) {
-				unsigned char response[AEM_LEN_SHORTRESPONSE_HEADERS + AEM_LEN_SHORTRESPONSE_DECRYPT + crypto_box_NONCEBYTES + crypto_box_MACBYTES + 1];
-				lenResult = recv(sock, response, AEM_LEN_SHORTRESPONSE_HEADERS + AEM_LEN_SHORTRESPONSE_DECRYPT + crypto_box_NONCEBYTES + crypto_box_MACBYTES + 1, 0);
-				if (lenResult == AEM_LEN_SHORTRESPONSE_HEADERS + AEM_LEN_SHORTRESPONSE_DECRYPT + crypto_box_NONCEBYTES + crypto_box_MACBYTES) {
-					unsigned char decrypted[AEM_LEN_SHORTRESPONSE_DECRYPT];
-					if (crypto_box_open_easy(decrypted, response + AEM_LEN_SHORTRESPONSE_HEADERS + crypto_box_NONCEBYTES, AEM_LEN_SHORTRESPONSE_DECRYPT + crypto_box_MACBYTES, response + AEM_LEN_SHORTRESPONSE_HEADERS, api_pubkey, userKey_secret) == 0) {
-						const int lenCpy = decrypted[0];
-						if (lenCpy < AEM_LEN_SHORTRESPONSE_DECRYPT) {
-							if (result != NULL) {
-								memcpy(*result, decrypted + 1, lenCpy);
-								lenResult = lenCpy;
-							} else lenResult = 0; // Result data not wanted, 0=success
-						} else lenResult = -lenCpy; // Invalid length --> Server reported error
-					} else lenResult = -2; // Failed to decrypt
-				} else lenResult = -3; // Incorrect length received
-			} else if (result != NULL) {
-				*result = malloc(1000 + AEM_MAXLEN_MSGDATA);
-				if (*result != NULL) {
-					lenResult = recv(sock, *result, 1000 + AEM_MAXLEN_MSGDATA, 0);
-					if (lenResult > 0) {
-						const unsigned char * const headEnd = memmem(*result, lenResult, "\r\n\r\n", 4);
-						if (headEnd != NULL) {
-							const int lenBox = (*result + lenResult) - (headEnd + 4 + crypto_box_NONCEBYTES);
-							unsigned char * const decrypted = malloc(lenBox - crypto_box_MACBYTES);
-							if (decrypted != NULL) {
-								if (crypto_box_open_easy(decrypted, headEnd + 4 + crypto_box_NONCEBYTES, lenBox, headEnd + 4, api_pubkey, userKey_secret) == 0) {
-									lenResult = lenBox - crypto_box_MACBYTES;
-									free(*result);
-									*result = decrypted;
-								} else {free(*result); free(decrypted); lenResult = -1;} // Failed decrypting box
-							} else {free(*result); lenResult = -2;} // Failed alloc
-						} else {free(*result); lenResult = -3;} // Invalid response from server
-					} else {free(*result); lenResult = -4;} // Server refused to answer
-				} else lenResult = -5; // Failed alloc
-			} else lenResult = -6; // Can't store long response: result parameter is null
+			lenResult = wantShortResponse? getShortResponse(sock, (result == NULL) ? NULL : *result) : getLongResponse(sock, result);
 		} else lenResult = -7; // Failed sending request
 	} else lenResult = -8; // Failed creating encrypted boxes
 
@@ -183,7 +202,7 @@ static int apiFetch(const int apiCmd, const void * const clear, const size_t len
 int allears_account_browse(struct aem_user ** const userList) {
 	if (userList == NULL) return -1;
 
-	unsigned char *res;
+	unsigned char *res = NULL;
 	const int ret = apiFetch(AEM_API_ACCOUNT_BROWSE, (unsigned char[]){0}, 1, &res);
 	if (ret < 0) return ret;
 	if (ret < 47) return -2;
@@ -272,7 +291,7 @@ int allears_account_update(const unsigned char * const targetPk, const uint8_t l
 }
 
 int allears_message_browse() {
-	unsigned char *browseData;
+	unsigned char *browseData = NULL;
 	const int lenBrowseData = apiFetch(AEM_API_MESSAGE_BROWSE, (const unsigned char[]){0}, 1, &browseData);
 	if (lenBrowseData < 0) return lenBrowseData;
 	if (lenBrowseData < 6) return -100;
@@ -424,7 +443,7 @@ static void getKxPublic(const unsigned char addr32_from[10], unsigned char * con
 	sodium_memzero(kxKeyPublic, crypto_kx_PUBLICKEYBYTES);
 }
 
-int allears_message_create(const char * const title, const size_t lenTitle, const char * const body, const size_t lenBody, const char * const addrFrom, const size_t lenAddrFrom, const char * const addrTo, const size_t lenAddrTo, const char * const replyId, const size_t lenReplyId, const unsigned char toPubkey[crypto_kx_PUBLICKEYBYTES]) {
+int allears_message_create(const char * const title, const size_t lenTitle, const char * const body, const size_t lenBody, const char * const addrFrom, const size_t lenAddrFrom, const char * const addrTo, const size_t lenAddrTo, const char * const replyId, const size_t lenReplyId, const unsigned char toPubkey[crypto_kx_PUBLICKEYBYTES], unsigned char * const msgId) {
 	if (title == NULL || body == NULL || addrFrom == NULL || addrTo == NULL || lenTitle < 1 || lenBody < 1 || lenAddrFrom < 1 || lenAddrTo < 1) return -1;
 
 	if (memchr(addrTo, '@', lenAddrTo) != NULL) {
@@ -467,7 +486,11 @@ int allears_message_create(const char * const title, const size_t lenTitle, cons
 		memcpy(final + (crypto_kx_PUBLICKEYBYTES * 2) + 26 + lenTitle, body, lenBody);
 	}
 
-	return apiFetch(AEM_API_MESSAGE_CREATE, final, lenFinal, NULL);
+	unsigned char *res = NULL;
+	const int ret = apiFetch(AEM_API_MESSAGE_CREATE, final, lenFinal, &res);
+	if (res != NULL) free(res);
+	if (ret < 0) return -ret;
+	return 0;
 }
 
 int allears_message_delete(const unsigned char msgId[16]) {
@@ -475,7 +498,7 @@ int allears_message_delete(const unsigned char msgId[16]) {
 	return apiFetch(AEM_API_MESSAGE_DELETE, msgId, 16, NULL);
 }
 
-int allears_message_public(const char * const title, const size_t lenTitle, const char * const body, const size_t lenBody) {
+int allears_message_public(const char * const title, const size_t lenTitle, const char * const body, const size_t lenBody, unsigned char * const msgId) {
 	if (title == NULL || body == NULL || lenTitle < 1 || lenBody < 1) return -1;
 
 	const size_t lenFinal = lenTitle + 1 + lenBody;
@@ -485,10 +508,17 @@ int allears_message_public(const char * const title, const size_t lenTitle, cons
 	final[lenTitle] = '\n';
 	memcpy(final + lenTitle + 1, body, lenBody);
 
-	return apiFetch(AEM_API_MESSAGE_PUBLIC, final, lenFinal, NULL);
+	unsigned char result[32];
+	unsigned char * const p_result = (unsigned char*)result;
+
+	const int ret = apiFetch(AEM_API_MESSAGE_PUBLIC, final, lenFinal, &p_result);
+	if (ret < 0) return -ret;
+	if (ret != 16) return -999;
+	memcpy(msgId, result, 16);
+	return 0;
 }
 
-int allears_message_upload(const char * const fileName, const size_t lenFileName, const unsigned char * const fileData, const size_t lenFileData) {
+int allears_message_upload(const char * const fileName, const size_t lenFileName, const unsigned char * const fileData, const size_t lenFileData, unsigned char * const msgId) {
 	if (fileName == NULL || fileData == NULL || lenFileName < 1 || lenFileName > 256 || lenFileData < 1) return -1;
 
 	const size_t lenData = 1 + lenFileName + lenFileData;
@@ -505,7 +535,14 @@ int allears_message_upload(const char * const fileName, const size_t lenFileName
 	randombytes_buf(final, crypto_secretbox_NONCEBYTES);
 	crypto_secretbox_easy(final + crypto_secretbox_NONCEBYTES, data, lenData, final, userKey_symmetric);
 
-	return apiFetch(AEM_API_MESSAGE_UPLOAD, final, lenFinal, NULL);
+	unsigned char result[32];
+	unsigned char * const p_result = (unsigned char*)result;
+
+	const int ret = apiFetch(AEM_API_MESSAGE_UPLOAD, final, lenFinal, &p_result);
+	if (ret < 0) return -ret;
+	if (ret != 16) return -999;
+	memcpy(msgId, result, 16);
+	return 0;
 }
 
 int allears_private_update(const unsigned char newPrivate[AEM_LEN_PRIVATE]) {

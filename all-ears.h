@@ -4,9 +4,15 @@
 #include <stddef.h>
 #include <sodium.h>
 
-#define AEM_ADDR_FLAG_ACCINT 2
-#define AEM_ADDR_FLAG_ACCEXT 1
-#define AEM_ADDR_FLAGS_DEFAULT AEM_ADDR_FLAG_ACCEXT
+#define AEM_ADDR_FLAG_SHIELD 128
+// 64 unused
+#define AEM_ADDR_FLAG_ORIGIN 32
+#define AEM_ADDR_FLAG_SECURE 16
+#define AEM_ADDR_FLAG_ATTACH  8
+#define AEM_ADDR_FLAG_ALLVER  4
+#define AEM_ADDR_FLAG_ACCEXT  2
+#define AEM_ADDR_FLAG_ACCINT  1
+#define AEM_ADDR_FLAGS_DEFAULT (AEM_ADDR_FLAG_ACCEXT | AEM_ADDR_FLAG_ALLVER | AEM_ADDR_FLAG_ATTACH)
 
 #define AEM_ADDRESSES_PER_USER 31
 #define AEM_LEN_PRIVATE (4096 - crypto_box_PUBLICKEYBYTES - 1 - (AEM_ADDRESSES_PER_USER * 9))
@@ -24,9 +30,10 @@ enum aem_api_commands {
 	AEM_API_MESSAGE_CREATE,
 	AEM_API_MESSAGE_DELETE,
 	AEM_API_MESSAGE_PUBLIC,
+	AEM_API_MESSAGE_SENDER,
 	AEM_API_MESSAGE_UPLOAD,
 	AEM_API_PRIVATE_UPDATE,
-	AEM_API_SETTING_LIMITS
+	AEM_API_SETTING_LIMITS,
 };
 
 struct aem_user {
@@ -77,10 +84,10 @@ int allears_address_create(struct aem_address * const addr, const char * const n
 int allears_address_delete(const uint64_t hash);
 int allears_address_update(struct aem_address * const addr, const int count);
 int allears_message_browse();
-int allears_message_create(const char * const title, const size_t lenTitle, const char * const body, const size_t lenBody, const char * const addrFrom, const size_t lenAddrFrom, const char * const addrTo, const size_t lenAddrTo, const char * const replyId, const size_t lenReplyId, const unsigned char toPubkey[crypto_kx_PUBLICKEYBYTES]);
+int allears_message_create(const char * const title, const size_t lenTitle, const char * const body, const size_t lenBody, const char * const addrFrom, const size_t lenAddrFrom, const char * const addrTo, const size_t lenAddrTo, const char * const replyId, const size_t lenReplyId, const unsigned char toPubkey[crypto_kx_PUBLICKEYBYTES], unsigned char * const msgId);
 int allears_message_delete(const unsigned char msgId[16]);
-int allears_message_public(const char * const title, const size_t lenTitle, const char * const body, const size_t lenBody);
-int allears_message_upload(const char * const fileName, const size_t lenFileName, const unsigned char * const fileData, const size_t lenFileData);
+int allears_message_public(const char * const title, const size_t lenTitle, const char * const body, const size_t lenBody, unsigned char * const msgId);
+int allears_message_upload(const char * const fileName, const size_t lenFileName, const unsigned char * const fileData, const size_t lenFileData, unsigned char * const msgId);
 int allears_private_update(const unsigned char newPrivate[AEM_LEN_PRIVATE]);
 
 #endif
