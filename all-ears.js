@@ -1698,7 +1698,7 @@ function AllEars(readyCallback) {
 						const msgEsmtp = (msgData[8] &  32) !== 0;
 						const msgInval = (msgData[9] & 128) !== 0;
 						const msgProtV = (msgData[9] &  64) !== 0;
-						const msgRares = (msgData[9] &  32);
+						const msgRares = (msgData[9] &  32) !== 0;
 						// [10] & 32 unused
 						const lenEnvTo = msgData[10] &  31;
 						const msgDmarc = msgData[11] & 192;
