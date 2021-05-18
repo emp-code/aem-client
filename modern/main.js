@@ -697,15 +697,15 @@ function showFiles() {
 
 			let cell = row.insertCell(-1);
 			cell.textContent = new Date(ae.getUplMsgTime(i) * 1000).toISOString().slice(0, 10);
-			cell.onclick = function() {displayFile(this.parentElement.rowIndex);};
+			cell.onclick = function() {displayFile(i);};
 
 			cell = row.insertCell(-1);
 			cell.textContent = (ae.getUplMsgBytes(i) / 1024).toFixed(0).padStart(4, " ");
-			cell.onclick = function() {displayFile(this.parentElement.rowIndex);};
+			cell.onclick = function() {displayFile(i);};
 
 			cell = row.insertCell(-1);
 			cell.textContent = ae.getUplMsgTitle(i);
-			cell.onclick = function() {displayFile(this.parentElement.rowIndex);};
+			cell.onclick = function() {displayFile(i);};
 
 			cell = row.insertCell(-1);
 			const btn = document.createElement("button");
