@@ -8,10 +8,17 @@ const ae = new AllEars(function(ok) {
 		return;
 	}
 
-	if (localStorage.greeting) {
-		document.getElementById("greeting").textContent = localStorage.greeting;
-		document.getElementById("txt_pg").value = localStorage.greeting;
-	} else localStorage.greeting = document.getElementById("greeting").textContent;
+	try {
+		if (localStorage.greeting) {
+			document.getElementById("greeting").textContent = localStorage.greeting;
+			document.getElementById("txt_pg").value = localStorage.greeting;
+		} else localStorage.greeting = document.getElementById("greeting").textContent;
+	} catch(e) {
+		document.getElementById("btn_pg").disabled = true;
+		document.getElementById("txt_pg").disabled = true;
+		document.getElementById("txt_pg").className = "ita";
+		document.getElementById("txt_pg").value = "LocalStorage inaccessible";
+	}
 
 	document.getElementById("txt_skey").maxLength = "64";
 });

@@ -134,6 +134,10 @@ textarea {
 	opacity: 0.5;
 }
 
+.ita {
+	font-style: italic;
+}
+
 .mono,
 #div_write_1 select,
 #tbl_inbox td:first-child,
