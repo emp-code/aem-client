@@ -302,7 +302,8 @@ nav > button:enabled:focus {
 .mid input,
 .mid select,
 .mid textarea,
-.mid button:enabled {
+.mid button:enabled,
+dialog {
 	color: #fff;
 }
 
