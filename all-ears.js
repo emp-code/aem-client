@@ -250,12 +250,13 @@ function AllEars(readyCallback) {
 			referrerPolicy: "no-referrer",
 			body: postData
 		}).then(function(response) {
-			if (response.statusText !== "aem") {callback(0x20); return null;}
-			if (response.status === 400) {callback(0x17); return null;}
-			if (response.status === 403) {callback(0x18); return null;}
-			if (response.status === 500) {callback(0x19); return null;}
-			if (response.status !== 200) {callback(0x20); return null;}
-			return response.arrayBuffer();
+			switch ((response.statusText === "aem") ? response.status : -1) {
+				case 200: return response.arrayBuffer();
+				case 400: callback(0x17); return null;
+				case 403: callback(0x18); return null;
+				case 500: callback(0x19); return null;
+				default:  callback(0x20); return null;
+			}
 		}).then(function(ab) {
 			if (ab) callback(0, new Uint8Array(ab));
 		}).catch(() => {
