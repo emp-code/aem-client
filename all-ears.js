@@ -1181,6 +1181,7 @@ function AllEars(readyCallback) {
 	this.getExtMsgHeaders = function(num) {return _extMsg[num].headers;};
 	this.getExtMsgTitle   = function(num) {return _extMsg[num].subj;};
 	this.getExtMsgBody    = function(num) {
+		if (!_extMsg[num].body) return "";
 		let html = _extMsg[num].body.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").split("\r").reverse().join("<br><hr>");
 
 		// Links
