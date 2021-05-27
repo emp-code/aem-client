@@ -68,6 +68,7 @@ function AllEars(readyCallback) {
 	const _AEM_ADDRESSES_PER_USER = 31;
 	const _AEM_LEN_PRIVATE = 4096 - sodium.crypto_box_PUBLICKEYBYTES - 1 - (_AEM_ADDRESSES_PER_USER * 9);
 	const _AEM_MSG_MINBLOCKS = 12;
+	const _AEM_MSG_MINSIZE = _AEM_MSG_MINBLOCKS * 16;
 	const _AEM_API_BOX_SIZE_MAX = 1048635; // (((2^16 - 1) + 12) * 16) - 117
 	const _AEM_USER_MAXLEVEL = 3;
 
@@ -1678,7 +1679,14 @@ function AllEars(readyCallback) {
 				const padA = msgData.slice(msgData.length - sodium.crypto_sign_BYTES - padAmount, msgData.length - sodium.crypto_sign_BYTES);
 				const padB = sodium.randombytes_buf_deterministic(padAmount, msgData.slice(0, 32), null); // 32=sodium.randombytes_SEEDBYTES
 				const validPad = (padA && padB && padA.length === padB.length && _arraysEqual(padA, padB));
-				const validSig = sodium.crypto_sign_verify_detached(msgData.slice(msgData.length - sodium.crypto_sign_BYTES), msgData.slice(0, msgData.length - sodium.crypto_sign_BYTES), _AEM_SIG_PUBKEY);
+
+				let validSig = sodium.crypto_sign_verify_detached(msgData.slice(msgData.length - sodium.crypto_sign_BYTES), msgData.slice(0, msgData.length - sodium.crypto_sign_BYTES), _AEM_SIG_PUBKEY);
+				if (!validSig && msgData.length == _AEM_MSG_MINSIZE) { // Assume uses extra padding
+					const remPadding = msgData[msgData.length - 1] + 1;
+					// TODO: Verify extra-padding
+					msgData = msgData.slice(0, msgData.length - remPadding);
+					validSig = sodium.crypto_sign_verify_detached(msgData.slice(msgData.length - sodium.crypto_sign_BYTES), msgData.slice(0, msgData.length - sodium.crypto_sign_BYTES), _AEM_SIG_PUBKEY);
+				}
 
 				const msgTs = new Uint32Array(msgData.slice(1, 5).buffer)[0];
 				const msgTs_bin = msgData.slice(1, 5);
