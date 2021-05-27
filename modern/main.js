@@ -148,7 +148,11 @@ function displayFile(num) {
 
 	if (fileType === "text") {
 		document.querySelector("article > pre").hidden = false;
-		document.querySelector("article > pre").textContent = sodium.to_string(ae.getUplMsgBody(num));
+		try {
+			document.querySelector("article > pre").textContent = sodium.to_string(ae.getUplMsgBody(num));
+		} catch(e) {
+			document.querySelector("article > pre").textContent = "Failed decoding body: " + e.message;
+		}
 		return;
 	}
 
