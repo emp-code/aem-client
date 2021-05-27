@@ -529,7 +529,8 @@ function addMsg(isInt, i) {
 		cell.textContent = ae.getIntMsgFrom(i);
 		cell.className = (ae.getIntMsgFrom(i).length === 16) ? "mono" : "";
 	} else {
-		const from1 = ae.getExtMsgHdrFrom(i);
+		let from1 = ae.getExtMsgHdrFrom(i);
+		if (!from1) from1 = ae.getExtMsgEnvFrom(i);
 		const from2 = from1.substring(from1.indexOf("@") + 1);
 		cell = row.insertCell(-1);
 		cell.textContent = from1.substring(0, from1.indexOf("@"));
