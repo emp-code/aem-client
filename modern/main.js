@@ -523,6 +523,7 @@ function addMsg(isInt, i) {
 
 	cell = row.insertCell(-1);
 	cell.textContent = isInt? ae.getIntMsgTitle(i) : ae.getExtMsgTitle(i);
+	if (!cell.textContent) cell.textContent = "(fail)";
 
 	if (isInt) {
 		cell = row.insertCell(-1);
