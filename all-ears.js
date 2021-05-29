@@ -253,8 +253,9 @@ function AllEars(readyCallback) {
 		}).then(function(response) {
 			switch ((response.statusText === "aem") ? response.status : -1) {
 				case 200: return response.arrayBuffer();
-				case 400: callback(0x17); return null;
-				case 403: callback(0x18); return null;
+				case 400: callback(0x16); return null;
+				case 403: callback(0x17); return null;
+				case 499: callback(0x18); return null;
 				case 500: callback(0x19); return null;
 				default:  callback(0x20); return null;
 			}
@@ -274,6 +275,8 @@ function AllEars(readyCallback) {
 		// postBox: clearU8 encrypted
 		const nonce = new Uint8Array(sodium.crypto_box_NONCEBYTES);
 		window.crypto.getRandomValues(nonce);
+		nonce.set(new Uint8Array(new Uint32Array([Math.round(Date.now() / 1000)]).buffer));
+
 		const postBox = sodium.crypto_box_easy(clearU8, nonce, _AEM_API_PUBKEY, _userKeySecret);
 
 		// sealBox: apiCmd + UPK + Nonce for postBox
@@ -2192,8 +2195,9 @@ function AllEars(readyCallback) {
 			case 0x13: return "Private-field extra content too long";
 			case 0x14: return "Private-field out of space";
 
-			case 0x17: return "Server failed decrypting the request"; // 400
-			case 0x18: return "Account does not exist"; // 403
+			case 0x16: return "Server failed decrypting the request"; // 400
+			case 0x17: return "Account does not exist"; // 403
+			case 0x18: return "Invalid timestamp"; // 499
 			case 0x19: return "Server failed checking account data"; // 500
 			case 0x20: return "Invalid status code in response";
 
