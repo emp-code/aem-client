@@ -730,7 +730,7 @@ function AllEars(readyCallback) {
 			case "CN": return "China";
 			case "CC": return "Cocos [Keeling] Islands";
 			case "GE": return "Georgia";
-			case "JO": return "Hashemite Kingdom of Jordan";
+			case "JO": return "Jordan";
 			case "HK": return "Hong Kong";
 			case "IN": return "India";
 			case "ID": return "Indonesia";
@@ -806,8 +806,8 @@ function AllEars(readyCallback) {
 			case "NO": return "Norway";
 			case "PL": return "Poland";
 			case "PT": return "Portugal";
-			case "LT": return "Republic of Lithuania";
-			case "MD": return "Republic of Moldova";
+			case "LT": return "Lithuania";
+			case "MD": return "Moldova";
 			case "RO": return "Romania";
 			case "RU": return "Russia";
 			case "SM": return "San Marino";
@@ -867,7 +867,7 @@ function AllEars(readyCallback) {
 			case "AU": return "Australia";
 			case "CX": return "Christmas Island";
 			case "CK": return "Cook Islands";
-			case "TL": return "Democratic Republic of Timor-Leste";
+			case "TL": return "East Timor";
 			case "FM": return "Federated States of Micronesia";
 			case "FJ": return "Fiji";
 			case "PF": return "French Polynesia";
