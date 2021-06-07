@@ -29,7 +29,7 @@
 				</header>
 
 				<main>
-					<input type="password" id="txt_skey" maxlength="0" pattern="[0-9a-f]{64}" autocomplete="current-password" required autofocus>
+					<input type="password" id="txt_skey" maxlength="0" pattern="[0-9a-f]{64}" required autocomplete="current-password" autofocus>
 					<button type="button" id="btn_enter"></button>
 				</main>
 
@@ -70,15 +70,15 @@
 					<div id="div_write" hidden>
 						<div id="div_write_1">
 							<p class="flex0"><select id="write_from" required></select></p>
-							<p class="flex0"><input type="text" id="write_recv" required placeholder="Receiver" pattern="[0-9a-z]{1,16}|\S+@\S+" list="contact_emails" autocapitalize="off" spellcheck="false" inputmode="email"></p>
-							<p class="flex0"><input type="text" id="write_subj" required placeholder="Subject" autocapitalize="sentences" spellcheck="true"></p>
-							<p class="flex1"><textarea id="write_body" required placeholder="Message" autocapitalize="sentences" spellcheck="true"></textarea></p>
+							<p class="flex0"><input type="text" id="write_recv" pattern="[0-9a-z]{1,16}|\S+@\S+" required autocapitalize="off" inputmode="email" spellcheck="false" placeholder="Receiver" list="contact_emails"></p>
+							<p class="flex0"><input type="text" id="write_subj" required autocapitalize="sentences" spellcheck="true" placeholder="Subject"></p>
+							<p class="flex1"><textarea id="write_body" required autocapitalize="sentences" spellcheck="true" placeholder="Message"></textarea></p>
 
 							<datalist id="contact_emails"></datalist>
 						</div>
 
 						<div id="div_write_2" hidden>
-							<p id="write2_pkey"><input type="text" pattern="[0-9A-Za-z+/]{43}" size="43" maxlength="43" autocomplete="off" placeholder="Public key (enables end-to-end encryption)"></p>
+							<p id="write2_pkey"><input type="text" pattern="[0-9A-Za-z+/]{43}" size="43" minlength="43" maxlength="43" autocomplete="off" placeholder="Public key (enables end-to-end encryption)"></p>
 							<p id="write2_send"><button type="button"><span id="write2_btntxt">Send to</span> <span id="write2_recv"></span></button></p>
 							<hr>
 							<p id="write2_from"></p>
@@ -147,7 +147,7 @@
 									<td colspan="4"></td>
 								</tr>
 								<tr>
-									<td><input type="text" id="txt_address_create_normal" size="16" maxlength="15" pattern="[0-9a-z]{1,15}" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="new"></td>
+									<td><input type="text" id="txt_address_create_normal" size="16" minlength="1" maxlength="15" pattern="[0-9a-z]{1,15}" required autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="new"></td>
 									<td colspan="2"><button type="button" id="btn_address_create_normal" autocomplete="off">Register</button></td>
 									<td id="limit_normal"></td>
 								</tr>
@@ -190,27 +190,27 @@
 								<tbody>
 									<tr>
 										<td class="half">0</td>
-										<td><input type="number" id="lim_mib0" min="0" max="255" autocomplete="off" disabled required></td>
-										<td><input type="number" id="lim_nrm0" min="0" max="31" autocomplete="off" disabled required></td>
-										<td><input type="number" id="lim_shd0" min="0" max="31" autocomplete="off" disabled required></td>
+										<td><input type="number" id="lim_mib0" min="0" max="255" required autocomplete="off" disabled></td>
+										<td><input type="number" id="lim_nrm0" min="0" max="31" required autocomplete="off" disabled></td>
+										<td><input type="number" id="lim_shd0" min="0" max="31" required autocomplete="off" disabled></td>
 									</tr>
 									<tr>
 										<td class="half">1</td>
-										<td><input type="number" id="lim_mib1" min="0" max="255" autocomplete="off" disabled required></td>
-										<td><input type="number" id="lim_nrm1" min="0" max="31" autocomplete="off" disabled required></td>
-										<td><input type="number" id="lim_shd1" min="0" max="31" autocomplete="off" disabled required></td>
+										<td><input type="number" id="lim_mib1" min="0" max="255" required autocomplete="off" disabled></td>
+										<td><input type="number" id="lim_nrm1" min="0" max="31" required autocomplete="off" disabled></td>
+										<td><input type="number" id="lim_shd1" min="0" max="31" required autocomplete="off" disabled></td>
 									</tr>
 									<tr>
 										<td class="half">2</td>
-										<td><input type="number" id="lim_mib2" min="0" max="255" autocomplete="off" disabled required></td>
-										<td><input type="number" id="lim_nrm2" min="0" max="31" autocomplete="off" disabled required></td>
-										<td><input type="number" id="lim_shd2" min="0" max="31" autocomplete="off" disabled required></td>
+										<td><input type="number" id="lim_mib2" min="0" max="255" required autocomplete="off" disabled></td>
+										<td><input type="number" id="lim_nrm2" min="0" max="31" required autocomplete="off" disabled></td>
+										<td><input type="number" id="lim_shd2" min="0" max="31" required autocomplete="off" disabled></td>
 									</tr>
 									<tr>
 										<td class="half">3</td>
-										<td><input type="number" id="lim_mib3" min="0" max="255" autocomplete="off" disabled required></td>
-										<td><input type="number" id="lim_nrm3" min="0" max="31" autocomplete="off" disabled required></td>
-										<td><input type="number" id="lim_shd3" min="0" max="31" autocomplete="off" disabled required></td>
+										<td><input type="number" id="lim_mib3" min="0" max="255" required autocomplete="off" disabled></td>
+										<td><input type="number" id="lim_nrm3" min="0" max="31" required autocomplete="off" disabled></td>
+										<td><input type="number" id="lim_shd3" min="0" max="31" required autocomplete="off" disabled></td>
 									</tr>
 								</tbody>
 								<tfoot>
@@ -221,16 +221,16 @@
 							</table>
 
 							<p>
-								<input type="text" id="txt_reg" size="64" maxlength="64" pattern="[0-9a-f]{64}" autocomplete="off" required disabled>
+								<input type="text" id="txt_reg" size="64" minlength="64" maxlength="64" pattern="[0-9a-f]{64}" required autocomplete="off" disabled>
 								<button type="button" id="btn_reg" autocomplete="off">Register</button>
 							</p>
 
 							<p>
-								<input type="text" id="txt_sender_hash" autocomplete="off" required size="64" maxlength="64" pattern="[0-9A-Za-z_-]{64}" placeholder="Message-ID" disabled>
-								<input type="text" id="txt_sender_date" autocomplete="off" required placeholder="Date" disabled>
+								<input type="text" id="txt_sender_hash" size="64" minlength="64" maxlength="64" pattern="[0-9A-Za-z_-]{64}" required autocomplete="off" placeholder="Message-ID" disabled>
+								<input type="text" id="txt_sender_date" required autocomplete="off" placeholder="Date" disabled>
 								<button type="button" id="btn_sender" autocomplete="off">Identify</button>
 								<br>
-								<input type="text" id="txt_sender_res" autocomplete="off" size="64" placeholder="Result" readonly>
+								<input type="text" id="txt_sender_res" size="64" autocomplete="off" placeholder="Result" readonly>
 							</p>
 						</div>
 
