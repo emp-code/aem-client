@@ -1344,6 +1344,10 @@ document.getElementById("btn_notepad_restore").onclick = function() {
 	document.getElementById("txt_notepad").value = ae.getPrivateExtra();
 };
 
+document.getElementById("txt_notepad").oninput = function() {
+	document.getElementById("btn_notepad_savepad").disabled = false;
+};
+
 document.getElementById("btn_notepad_savepad").onclick = function() {
 	const btn = this;
 	btn.disabled = true;
@@ -1356,11 +1360,17 @@ document.getElementById("btn_notepad_savepad").onclick = function() {
 	}
 
 	ae.Private_Update(function(error2) {
-		btn.disabled = false;
 		if (error2 !== 0) {
+			btn.disabled = false;
 			errorDialog(error2);
 		} else {
 			document.querySelector("#div_notepad meter").value = ae.getPrivateExtraSpace() / ae.getPrivateExtraSpaceMax();
+			btn.textContent = "Saved";
+			document.getElementById("txt_notepad").oninput = function() {
+				this.oninput = null;
+				btn.textContent = "Save";
+				btn.disabled = false;
+			};
 		}
 	});
 };
