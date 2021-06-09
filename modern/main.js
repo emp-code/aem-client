@@ -1219,20 +1219,14 @@ function updateTab() {
 
 document.getElementById("btn_left").onclick = function() {
 	tabs[tab].cur--;
-	if (tabs[tab].cur === 0) this.disabled = true;
-	if (tabs[tab].cur < tabs[tab].max) document.getElementById("btn_rght").disabled = false;
 	updateTab();
 	updateNav();
-	this.blur();
 };
 
 document.getElementById("btn_rght").onclick = function() {
 	tabs[tab].cur++;
-	if (tabs[tab].cur === tabs[tab].max) this.disabled = true;
-	document.getElementById("btn_left").disabled = false;
 	updateTab();
 	updateNav();
-	this.blur();
 };
 
 const buttons = document.querySelectorAll("#main1 > nav:first-of-type > button");
