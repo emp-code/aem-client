@@ -1177,7 +1177,7 @@ function updateTab() {
 			if (tabs[tab].cur === 0) {
 				document.getElementById("div_write_1").hidden = false;
 				document.getElementById("div_write_2").hidden = true;
-				document.getElementById("write_body").focus();
+				document.getElementById("write_recv").focus();
 			} else {
 				writeVerify();
 			}
