@@ -226,10 +226,8 @@ textarea {
 /* Main */
 
 #div_main {
-	padding: 2em;
 	height: 100%;
 	display: grid;
-	grid-template-columns: 1fr 1fr;
 	background-image: radial-gradient(ellipse, #110a04, #080502);
 	box-sizing: border-box;
 }
@@ -237,20 +235,36 @@ textarea {
 .main {
 	scrollbar-color: #222 #333;
 	background: #001;
-	border-radius: 3em;
 	overflow: hidden;
 	display: grid;
 	grid-template-rows: 3em auto 3em;
 }
 
-#main1 {
-	box-shadow: -0.25em 0.25em black;
-	margin-right: 0.5em;
-}
+@media (min-width: 80em) {
+	#div_main {
+		grid-template-columns: 1fr 1fr;
+		padding: 2em;
+	}
 
-#main2 {
-	box-shadow: 0.25em 0.25em black;
-	margin-left: 0.5em;
+	#main1 {
+		box-shadow: -0.25em 0.25em black;
+		margin-right: 0.5em;
+	}
+
+	#main2 {
+		box-shadow: 0.25em 0.25em black;
+		margin-left: 0.5em;
+	}
+
+	.main {
+		border-radius: 3em;
+	}
+
+	.mid {
+		border-left: 1em solid #001;
+		border-right: 1em solid #001;
+		border-radius: 2em;
+	}
 }
 
 nav {
@@ -289,9 +303,6 @@ nav > button:enabled:focus {
 
 .mid {
 	background: #080a08;
-	border-left: 1em solid #001;
-	border-right: 1em solid #001;
-	border-radius: 2em;
 }
 
 .mid button {

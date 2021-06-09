@@ -158,6 +158,9 @@ function displayFile(isHistory, num) {
 	msgDisplay = new MsgInfo(ae.getUplMsgIdHex(num), "upl", num);
 	if (!isHistory) history.pushState({tab: tab, page: tabs[tab].cur, msg: msgDisplay}, null);
 
+	document.getElementById("main2").hidden = false;
+	document.getElementById("main1").hidden = !window.matchMedia("(min-width: 80em)").matches;
+
 	if (fileType === "text") {
 		document.querySelector("article > pre").hidden = false;
 		try {
@@ -231,6 +234,11 @@ function displayFile(isHistory, num) {
 	}
 
 	document.querySelector("article").appendChild(el);
+}
+
+document.getElementById("btn_leave").onclick = function() {
+	document.getElementById("main2").hidden = true;
+	document.getElementById("main1").hidden = false;
 }
 
 function displayMsg(isHistory, isInt, num) {
@@ -438,6 +446,9 @@ function displayMsg(isHistory, isInt, num) {
 		if ( ae.getExtMsgFlagPErr(num)) addMsgFlag("PROT", "The sender violated the protocol");
 	}
 
+	document.getElementById("main2").hidden = false;
+	document.getElementById("main1").hidden = !window.matchMedia("(min-width: 80em)").matches;
+
 	msgDisplay = new MsgInfo(isInt? ae.getIntMsgIdHex(num) : ae.getExtMsgIdHex(num), isInt? "int" : "ext", num);
 	if (!isHistory) history.pushState({tab: tab, page: tabs[tab].cur, msg: msgDisplay}, null);
 }
@@ -491,6 +502,9 @@ function displayOutMsg(isHistory, num) {
 	if (!ae.getOutMsgFlagVPad(num)) addMsgFlag("PAD", "Invalid padding");
 	if (!ae.getOutMsgFlagVSig(num)) addMsgFlag("SIG", "Invalid signature");
 	if ( ae.getOutMsgFlagE2ee(num)) addMsgFlag("E2EE", "End-to-end encrypted");
+
+	document.getElementById("main2").hidden = false;
+	document.getElementById("main1").hidden = !window.matchMedia("(min-width: 80em)").matches;
 
 	msgDisplay = new MsgInfo(ae.getOutMsgIdHex(num), "out", num);
 	if (!isHistory) history.pushState({tab: tab, page: tabs[tab].cur, msg: msgDisplay}, null);
@@ -1187,6 +1201,10 @@ function setTab(isHistory, tabNum, pageNum) {
 		btn.disabled = (tab === i);
 	});
 
+	const bigScreen = window.matchMedia("(min-width: 80em)").matches;
+	document.getElementById("main2").hidden = !bigScreen;
+	document.getElementById("btn_leave").disabled = bigScreen;
+
 	switch (tab) {
 		case TAB_INBOX: showInbox(); break;
 		case TAB_DRBOX: showDrbox(); break;
@@ -1575,9 +1593,9 @@ document.getElementById("btn_enter").onclick = function() {
 			document.getElementById("div_begin").hidden = true;
 			document.getElementById("div_main").hidden = false;
 			isReady = true;
-			history.replaceState({tab: 0, page: 0, msg: msgDisplay}, null);
 			reloadAccount();
-			showInbox();
+			history.replaceState({tab: 0, page: 0, msg: msgDisplay}, null);
+			setTab(true, 0, 0);
 
 			if (statusBrowse !== 0) errorDialog(statusBrowse);
 			if (!ae.isUserAdmin()) return;
