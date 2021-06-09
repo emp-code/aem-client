@@ -720,7 +720,7 @@ function showFiles() {
 			btn.textContent = "X";
 			btn.onclick = function() {
 				ae.Message_Delete(this.getAttribute("data-msgid"), function(error) {
-					if (error === 0) updateTab();
+					if (error === 0) showFiles();
 					else errorDialog(error);
 				});
 			};
@@ -960,9 +960,7 @@ function addAddress(num) {
 }
 
 function clearWrite() {
-	tabs[tab].cur = 0;
-	updateNav();
-	updateTab();
+	setTab(TAB_WRITE, 0);
 
 	document.querySelector("#write2_pkey > input").value = "";
 	document.getElementById("write_body").value = "";
@@ -1161,14 +1159,15 @@ function writeVerify() {
 	document.getElementById("write2_btntxt").textContent = (document.getElementById("write_recv").value === "public") ? "Make" : "Send to";
 }
 
-function updateNav() {
-	document.getElementById("btn_dele").disabled = !tabs[tab].btnDele;
-	document.getElementById("btn_left").disabled = (tabs[tab].cur === 0);
-	document.getElementById("btn_rght").disabled = (tabs[tab].cur === tabs[tab].max);
-	document.getElementById("btn_updt").disabled = !tabs[tab].btnUpdt;
-}
+function setTab(tabNum, pageNum) {
+	tab = tabNum;
+	if (pageNum !== -1) tabs[tab].cur = pageNum;
 
-function updateTab() {
+	document.querySelectorAll("#main1 > nav:first-of-type > button").forEach(function(btn, i) {
+		document.querySelectorAll("#main1 > .mid > div")[i].hidden = (tab !== i);
+		btn.disabled = (tab === i);
+	});
+
 	switch (tab) {
 		case TAB_INBOX: showInbox(); break;
 		case TAB_DRBOX: showDrbox(); break;
@@ -1215,34 +1214,24 @@ function updateTab() {
 			}
 		break;
 	}
+
+	document.getElementById("btn_dele").disabled = !tabs[tab].btnDele;
+	document.getElementById("btn_left").disabled = (tabs[tab].cur === 0);
+	document.getElementById("btn_rght").disabled = (tabs[tab].cur === tabs[tab].max);
+	document.getElementById("btn_updt").disabled = !tabs[tab].btnUpdt;
 }
 
+document.querySelectorAll("#main1 > nav:first-of-type > button").forEach(function(btn, i) {
+	btn.onclick = function() {setTab(i, -1);};
+});
+
 document.getElementById("btn_left").onclick = function() {
-	tabs[tab].cur--;
-	updateTab();
-	updateNav();
+	setTab(tab, tabs[tab].cur - 1);
 };
 
 document.getElementById("btn_rght").onclick = function() {
-	tabs[tab].cur++;
-	updateTab();
-	updateNav();
+	setTab(tab, tabs[tab].cur + 1);
 };
-
-const buttons = document.querySelectorAll("#main1 > nav:first-of-type > button");
-for (let i = 0; i < buttons.length; i++) {
-	buttons[i].onclick = function() {
-		tab = i;
-
-		for (let j = 0; j < buttons.length; j++) {
-			document.querySelectorAll("#main1 > .mid > div")[j].hidden = (tab !== j);
-			buttons[j].disabled = (tab === j);
-		}
-
-		updateNav();
-		updateTab();
-	};
-}
 
 function addressCreate(addr) {
 	document.getElementById("btn_address_create_normal").disabled = true;
