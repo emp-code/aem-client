@@ -2,6 +2,8 @@
 
 sodium.ready.then(function() {
 
+let isReady = true;
+
 const ae = new AllEars(function(ok) {
 	if (!ok) {
 		document.getElementById("greeting").textContent = "Failed loading All-Ears";
@@ -38,6 +40,13 @@ const tabs = [
 	new TabState(0, 2, false, false) // Tools
 ];
 
+function MsgInfo(msgIdHex, msgType, msgNum) {
+	this.idHex = msgIdHex;
+	this.type = msgType;
+	this.num = msgNum;
+}
+
+let msgDisplay = new MsgInfo(null, null, null);
 let showHeaders = false;
 
 let tab = 0;
@@ -129,7 +138,7 @@ function addMsgFlag(abbr, abbrTitle) {
 	parent.appendChild(el);
 }
 
-function displayFile(num) {
+function displayFile(isHistory, num) {
 	const fileType = ae.getUplMsgType(num);
 	if (!fileType) {ae.downloadUplMsg(num); return;}
 
@@ -145,6 +154,9 @@ function displayFile(num) {
 
 	document.querySelector("article > table").hidden = true;
 	document.querySelector("article > h1").textContent = ae.getUplMsgTitle(num);
+
+	msgDisplay = new MsgInfo(ae.getUplMsgIdHex(num), "upl", num);
+	if (!isHistory) history.pushState({tab: tab, page: tabs[tab].cur, msg: msgDisplay}, null);
 
 	if (fileType === "text") {
 		document.querySelector("article > pre").hidden = false;
@@ -221,7 +233,7 @@ function displayFile(num) {
 	document.querySelector("article").appendChild(el);
 }
 
-function displayMsg(isInt, num) {
+function displayMsg(isHistory, isInt, num) {
 	clearDisplay();
 	document.getElementById("btn_mdele").disabled = false;
 
@@ -425,9 +437,12 @@ function displayMsg(isInt, num) {
 		if ( ae.getExtMsgFlagFail(num)) addMsgFlag("FAIL", "The sender issued invalid command(s)");
 		if ( ae.getExtMsgFlagPErr(num)) addMsgFlag("PROT", "The sender violated the protocol");
 	}
+
+	msgDisplay = new MsgInfo(isInt? ae.getIntMsgIdHex(num) : ae.getExtMsgIdHex(num), isInt? "int" : "ext", num);
+	if (!isHistory) history.pushState({tab: tab, page: tabs[tab].cur, msg: msgDisplay}, null);
 }
 
-function displayOutMsg(num) {
+function displayOutMsg(isHistory, num) {
 	clearDisplay();
 	document.querySelector("article").scroll(0, 0);
 	document.querySelector("article").setAttribute("data-msgid", ae.getOutMsgIdHex(num));
@@ -476,6 +491,9 @@ function displayOutMsg(num) {
 	if (!ae.getOutMsgFlagVPad(num)) addMsgFlag("PAD", "Invalid padding");
 	if (!ae.getOutMsgFlagVSig(num)) addMsgFlag("SIG", "Invalid signature");
 	if ( ae.getOutMsgFlagE2ee(num)) addMsgFlag("E2EE", "End-to-end encrypted");
+
+	msgDisplay = new MsgInfo(ae.getOutMsgIdHex(num), "out", num);
+	if (!isHistory) history.pushState({tab: tab, page: tabs[tab].cur, msg: msgDisplay}, null);
 }
 
 function updateAddressButtons() {
@@ -549,7 +567,7 @@ function addMsg(isInt, i) {
 	}
 
 	row.onclick = function() {
-		displayMsg(isInt, i);
+		displayMsg(false, isInt, i);
 	};
 }
 
@@ -647,7 +665,7 @@ function showDrbox() {
 			let cell;
 			cell = row.insertCell(-1); cell.textContent = new Date(ae.getOutMsgTime(i) * 1000).toISOString().slice(0, 10);
 			cell = row.insertCell(-1); cell.textContent = ae.getOutMsgSubj(i);
-			row.onclick = function() {displayOutMsg(i);};
+			row.onclick = function() {displayOutMsg(false, i);};
 
 			numAdd++;
 		}
@@ -703,15 +721,15 @@ function showFiles() {
 
 			let cell = row.insertCell(-1);
 			cell.textContent = new Date(ae.getUplMsgTime(i) * 1000).toISOString().slice(0, 10);
-			cell.onclick = function() {displayFile(i);};
+			cell.onclick = function() {displayFile(false, i);};
 
 			cell = row.insertCell(-1);
 			cell.textContent = (ae.getUplMsgBytes(i) / 1024).toFixed(0).padStart(4, " ");
-			cell.onclick = function() {displayFile(i);};
+			cell.onclick = function() {displayFile(false, i);};
 
 			cell = row.insertCell(-1);
 			cell.textContent = ae.getUplMsgTitle(i);
-			cell.onclick = function() {displayFile(i);};
+			cell.onclick = function() {displayFile(false, i);};
 
 			cell = row.insertCell(-1);
 			const btn = document.createElement("button");
@@ -960,7 +978,7 @@ function addAddress(num) {
 }
 
 function clearWrite() {
-	setTab(TAB_WRITE, 0);
+	setTab(false, TAB_WRITE, 0);
 
 	document.querySelector("#write2_pkey > input").value = "";
 	document.getElementById("write_body").value = "";
@@ -1137,7 +1155,7 @@ function writeVerify() {
 	   !document.getElementById("write_recv").reportValidity()
 	|| !document.getElementById("write_subj").reportValidity()
 	|| !document.getElementById("write_body").reportValidity()
-	) {tabs[TAB_WRITE].cur = 0; return;}
+	) return false;
 
 	document.getElementById("div_write_1").hidden = true;
 	document.getElementById("div_write_2").hidden = false;
@@ -1157,9 +1175,10 @@ function writeVerify() {
 
 	document.querySelector("#write2_send > button").disabled = false;
 	document.getElementById("write2_btntxt").textContent = (document.getElementById("write_recv").value === "public") ? "Make" : "Send to";
+	return true;
 }
 
-function setTab(tabNum, pageNum) {
+function setTab(isHistory, tabNum, pageNum) {
 	tab = tabNum;
 	if (pageNum !== -1) tabs[tab].cur = pageNum;
 
@@ -1177,8 +1196,9 @@ function setTab(tabNum, pageNum) {
 				document.getElementById("div_write_1").hidden = false;
 				document.getElementById("div_write_2").hidden = true;
 				document.getElementById("write_recv").focus();
-			} else {
-				writeVerify();
+			} else if (!writeVerify()) {
+				tabs[TAB_WRITE].cur = 0;
+				return;
 			}
 		break;
 
@@ -1219,18 +1239,35 @@ function setTab(tabNum, pageNum) {
 	document.getElementById("btn_left").disabled = (tabs[tab].cur === 0);
 	document.getElementById("btn_rght").disabled = (tabs[tab].cur === tabs[tab].max);
 	document.getElementById("btn_updt").disabled = !tabs[tab].btnUpdt;
+
+	if (!isHistory) history.pushState({tab: tab, page: tabs[tab].cur, msg: msgDisplay}, null);
+}
+
+window.onpopstate = function(event) {
+	if (!isReady || !event.state) return;
+	setTab(true, event.state.tab, event.state.page);
+	msgDisplay = event.state.msg;
+
+	if (msgDisplay) {
+		switch (msgDisplay.type) {
+			case "ext": displayMsg(true, false, msgDisplay.num); break;
+			case "int": displayMsg(true, true, msgDisplay.num); break;
+			case "out": displayOutMsg(true, msgDisplay.num); break;
+			case "upl": displayFile(true, msgDisplay.num); break;
+		}
+	}
 }
 
 document.querySelectorAll("#main1 > nav:first-of-type > button").forEach(function(btn, i) {
-	btn.onclick = function() {setTab(i, -1);};
+	btn.onclick = function() {setTab(false, i, -1);};
 });
 
 document.getElementById("btn_left").onclick = function() {
-	setTab(tab, tabs[tab].cur - 1);
+	setTab(false, tab, tabs[tab].cur - 1);
 };
 
 document.getElementById("btn_rght").onclick = function() {
-	setTab(tab, tabs[tab].cur + 1);
+	setTab(false, tab, tabs[tab].cur + 1);
 };
 
 function addressCreate(addr) {
@@ -1405,7 +1442,7 @@ document.getElementById("btn_upload").onclick = function() {
 };
 
 document.getElementById("btn_pg").onclick = function() {
-	localStorage.greeting = document.getElementById("txt_pg").value;
+//	localStorage.greeting = document.getElementById("txt_pg").value;
 };
 
 document.querySelector("#write2_send > button").onclick = function() {
@@ -1423,7 +1460,7 @@ document.querySelector("#write2_send > button").onclick = function() {
 			}
 
 			clearWrite();
-			displayMsg(true, 0);
+			displayMsg(false, true, 0);
 		});
 
 		return;
@@ -1449,7 +1486,7 @@ document.querySelector("#write2_send > button").onclick = function() {
 
 			showDrbox();
 			clearWrite();
-			displayOutMsg(0);
+			displayOutMsg(false, 0);
 		}
 	);
 };
@@ -1485,7 +1522,7 @@ document.getElementById("btn_limits").onclick = function() {
 };
 
 document.getElementById("txt_skey").onfocus = function() {
-	document.getElementById("greeting").textContent = localStorage.greeting;
+//	document.getElementById("greeting").textContent = localStorage.greeting;
 };
 
 document.getElementById("txt_skey").onkeyup = function(event) {
@@ -1537,6 +1574,8 @@ document.getElementById("btn_enter").onclick = function() {
 			txtSkey.value = "";
 			document.getElementById("div_begin").hidden = true;
 			document.getElementById("div_main").hidden = false;
+			isReady = true;
+			history.replaceState({tab: 0, page: 0, msg: msgDisplay}, null);
 			reloadAccount();
 			showInbox();
 
