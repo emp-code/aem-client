@@ -555,3 +555,120 @@ dialog,
 	margin: 0 auto;
 	min-width: 90%;
 }
+
+@media (prefers-color-scheme: light) {
+	html,
+	body {
+		background: #eff6fc;
+	}
+
+	#div_begin,
+	#div_begin a {
+		color: #5a3c1e;
+	}
+
+	#div_begin > div {
+		border: 0.4em double #b4783c;
+		box-shadow: 0 0.4em #b4783c;
+		background: #fcd2a8;
+	}
+
+	#div_begin main {
+		border: 0.2em double #3c3cb4;
+		box-shadow: 0 0.2em #3c3cb4;
+		background: #e0e0fc;
+	}
+
+	#div_begin main button {
+		background-image: radial-gradient(circle, #e0e0fc, #3c3cb4);
+	}
+
+	#txt_skey {
+		border: 0.25em solid #78b43c;
+		color: #78b43c;
+	}
+
+	#txt_skey:disabled,
+	#txt_skey[maxlength="0"] {
+		background-color: #78b43c;
+	}
+
+	#txt_skey:not(:disabled)[maxlength="64"] {
+		background-color: #f5fcee;
+	}
+
+	#main2 article > table {
+		border-bottom: 1px solid #aaa;
+	}
+
+	#table_addrs > tfoot tr:first-of-type > td {
+		border-top: 1px solid #ddd;
+	}
+
+	#table_addrs {
+		border: 1px solid #ddd;
+	}
+
+	#div_notes > div:first-of-type > table {
+		border-bottom: 1px solid #ccc;
+	}
+
+	:is(#tbl_ctact, #tbl_drbox, #tbl_files, #tbl_inbox) tr:hover {
+		background: #e5e5e5;
+	}
+
+	.mid {
+		background: #f7f5f7;
+	}
+
+	dialog,
+	.mid,
+	.mid :is(a, input, select, textarea, button:enabled) {
+		color: #000;
+	}
+
+	.mid button:disabled {
+		color: #888;
+	}
+
+	.mid :is(button, input, select, textarea) {
+		background: #fff;
+		border: 1px solid #aaa;
+	}
+
+	nav > button {
+		background: #eef;
+	}
+
+	.main {
+		scrollbar-color: #ccc #ddd;
+		background: #eef;
+	}
+
+	#div_main {
+		background-image: radial-gradient(ellipse, #fceee0, #b4aaa0);
+	}
+
+	#main1 {
+		box-shadow: -0.25em 0.25em #bebecc;
+	}
+
+	#main2 {
+		box-shadow: 0.25em 0.25em #bebecc;
+	}
+
+	svg {
+		filter: invert(100%) hue-rotate(180deg);
+	}
+}
+
+@media (prefers-color-scheme: light) and (min-width: 80em) {
+	#div_begin {
+		background: radial-gradient(#eff6fc, #e3f0fc);
+	}
+
+	.mid {
+		border-left: 1em solid #eef;
+		border-right: 1em solid #eef;
+	}
+}
