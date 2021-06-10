@@ -1006,6 +1006,7 @@ function clearWrite() {
 
 // Interface
 if (window.matchMedia("(prefers-color-scheme: light)").matches) document.querySelector("head > meta[name='theme-color']").content = "#eef";
+window.matchMedia('(prefers-color-scheme: dark)').onchange = function() {document.querySelector("head > meta[name='theme-color']").content = window.matchMedia("(prefers-color-scheme: light)").matches? "#eef" : "#001";}
 
 document.getElementById("btn_dele").onclick = function() {
 	this.blur();
