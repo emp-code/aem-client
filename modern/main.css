@@ -6,15 +6,6 @@ body {
 	background: #00000a;
 }
 
-@media only screen and (hover: hover) {
-	#div_begin {
-		height: 100%;
-		background: radial-gradient(#00000a, #001);
-		padding-top: 5vh;
-		box-sizing: border-box;
-	}
-}
-
 [hidden] {
 	display: none !important;
 }
@@ -241,6 +232,13 @@ textarea {
 }
 
 @media (min-width: 80em) {
+	#div_begin {
+		height: 100%;
+		background: radial-gradient(#00000a, #001);
+		padding-top: 5vh;
+		box-sizing: border-box;
+	}
+
 	#div_main {
 		grid-template-columns: 1fr 1fr;
 		padding: 2em;
