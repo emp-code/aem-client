@@ -2238,7 +2238,7 @@ function AllEars(readyCallback) {
 			case 0xEB: return ["MESSAGE_CREATE_EXT_LINE_TOOLONG",    "Body exceeds line-length limit"];
 			case 0xEC: return ["MESSAGE_CREATE_EXT_BODY_FORMAT",     "Malformed body"];
 			case 0xED: return ["MESSAGE_CREATE_EXT_BODY_TOOSHORT",   "Body too short"];
-			case 0xEE: return ["MESSAGE_CREATE_EXT_TODOMAIN",        "Invalid to-address domain"];
+			case 0xEE: return ["MESSAGE_CREATE_EXT_OURDOMAIN",       "Remove @" + _AEM_DOMAIN_EML + " to send internally"];
 	//		case 0xEF: return ["", ""];
 
 			// 0xF0-0xF9	Message/Create sendMail()
