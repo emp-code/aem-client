@@ -1056,9 +1056,9 @@ document.getElementById("btn_mdele").onclick = function() {
 		}
 
 		switch (tab) {
-			case TAB_INBOX: showInbox(); break;
-			case TAB_DRBOX: showDrbox(); break;
-			case TAB_NOTES: showFiles(); break;
+			case TAB_INBOX: document.querySelector("#tbl_inbox > tbody > tr[data-msgid='" + delId + "']").remove(); break;
+			case TAB_DRBOX: document.querySelector("#tbl_drbox > tbody > tr[data-msgid='" + delId + "']").remove(); break;
+			case TAB_NOTES: document.querySelector("#tbl_files > tbody > tr[data-msgid='" + delId + "']").remove(); break;
 		}
 	});
 };
