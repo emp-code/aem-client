@@ -152,7 +152,7 @@ function displayFile(isHistory, num) {
 
 	document.getElementById("btn_msave").onclick = function() {ae.downloadUplMsg(num);};
 
-	document.querySelector("article > table").hidden = true;
+	document.getElementById("readmsg_info").hidden = true;
 	document.querySelector("article > h1").textContent = ae.getUplMsgTitle(num);
 
 	msgDisplay = new MsgInfo(ae.getUplMsgIdHex(num), "upl", num);
@@ -289,7 +289,7 @@ function displayMsg(isHistory, isInt, num) {
 		document.getElementById("btn_reply").disabled = true;
 	}
 
-	document.querySelector("article > table").hidden = false;
+	document.getElementById("readmsg_info").hidden = false;
 	document.querySelector("article > pre").hidden = false;
 
 	document.getElementById("readmsg_envto").textContent = isInt ? "" : ae.getExtMsgEnvTo(num);
@@ -462,7 +462,7 @@ function displayOutMsg(isHistory, num) {
 	document.getElementById("btn_msave").disabled = true;
 	document.getElementById("btn_reply").disabled = true;
 
-	document.querySelector("article > table").hidden = false;
+	document.getElementById("readmsg_info").hidden = false;
 	document.querySelector("article > pre").hidden = false;
 
 	document.querySelector("article > h1").textContent = ae.getOutMsgSubj(num);
