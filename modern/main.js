@@ -161,6 +161,11 @@ function displayFile(isHistory, num) {
 	document.getElementById("main2").hidden = false;
 	document.getElementById("main1").hidden = !window.matchMedia("(min-width: 80em)").matches;
 
+	document.getElementById("btn_mnext").disabled = (num === ae.getUplMsgCount() - 1);
+	document.getElementById("btn_mprev").disabled = (num === 0);
+	document.getElementById("btn_mnext").onclick = function() {displayFile(false, num + 1);}
+	document.getElementById("btn_mprev").onclick = function() {displayFile(false, num - 1);}
+
 	if (fileType === "text") {
 		document.querySelector("article > pre").hidden = false;
 		try {
