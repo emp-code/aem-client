@@ -48,6 +48,7 @@ function MsgInfo(msgIdHex, msgType, msgNum) {
 
 let msgDisplay = new MsgInfo(null, null, null);
 let showHeaders = false;
+let reloadTab = false
 
 let tab = 0;
 const TAB_INBOX = 0;
@@ -244,6 +245,14 @@ function displayFile(isHistory, num) {
 document.getElementById("btn_leave").onclick = function() {
 	document.getElementById("main2").hidden = true;
 	document.getElementById("main1").hidden = false;
+	if (!reloadTab) return;
+
+	reloadTab = false;
+	switch (tab) {
+		case TAB_INBOX: showInbox(); break;
+		case TAB_DRBOX: showDrbox(); break;
+		case TAB_NOTES: showFiles(); break;
+	}
 }
 
 function displayMsg(isHistory, isInt, num) {
@@ -1055,10 +1064,14 @@ document.getElementById("btn_mdele").onclick = function() {
 			return;
 		}
 
-		switch (tab) {
-			case TAB_INBOX: document.querySelector("#tbl_inbox > tbody > tr[data-msgid='" + delId + "']").remove(); break;
-			case TAB_DRBOX: document.querySelector("#tbl_drbox > tbody > tr[data-msgid='" + delId + "']").remove(); break;
-			case TAB_NOTES: document.querySelector("#tbl_files > tbody > tr[data-msgid='" + delId + "']").remove(); break;
+		if (window.matchMedia("(min-width: 80em)").matches) {
+			switch (tab) {
+				case TAB_INBOX: showInbox(); break;
+				case TAB_DRBOX: showDrbox(); break;
+				case TAB_NOTES: showFiles(); break;
+			}
+		} else {
+			reloadTab = true;
 		}
 	});
 };
@@ -1201,6 +1214,7 @@ function writeVerify() {
 }
 
 function setTab(isHistory, tabNum, pageNum) {
+	reloadTab = false;
 	tab = tabNum;
 	if (pageNum !== -1) tabs[tab].cur = pageNum;
 
