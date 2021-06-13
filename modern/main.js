@@ -48,7 +48,7 @@ function MsgInfo(msgIdHex, msgType, msgNum) {
 
 let msgDisplay = new MsgInfo(null, null, null);
 let showHeaders = false;
-let reloadTab = false
+let rowsPerPage = 0;
 
 let tab = 0;
 const TAB_INBOX = 0;
@@ -245,14 +245,6 @@ function displayFile(isHistory, num) {
 document.getElementById("btn_leave").onclick = function() {
 	document.getElementById("main2").hidden = true;
 	document.getElementById("main1").hidden = false;
-	if (!reloadTab) return;
-
-	reloadTab = false;
-	switch (tab) {
-		case TAB_INBOX: showInbox(); break;
-		case TAB_DRBOX: showDrbox(); break;
-		case TAB_NOTES: showFiles(); break;
-	}
 }
 
 function displayMsg(isHistory, isInt, num) {
@@ -611,7 +603,7 @@ function getRowsPerPage(tbl) {
 
 function showInbox() {
 	const tbl = document.getElementById("tbl_inbox");
-	const rowsPerPage = getRowsPerPage(tbl);
+	if (!document.getElementById("main1").hidden) rowsPerPage = getRowsPerPage(tbl);
 
 	const maxExt = ae.getExtMsgCount();
 	const maxInt = ae.getIntMsgCount();
@@ -668,7 +660,7 @@ function showInbox() {
 
 function showDrbox() {
 	const tbl = document.getElementById("tbl_drbox");
-	const rowsPerPage = getRowsPerPage(tbl);
+	if (!document.getElementById("main1").hidden) rowsPerPage = getRowsPerPage(tbl);
 
 	const drCount = ae.getOutMsgCount();
 	const loadMore = ae.getReadyMsgBytes() < ae.getTotalMsgBytes();
@@ -725,7 +717,7 @@ function showDrbox() {
 
 function showFiles() {
 	const tbl = document.getElementById("tbl_files");
-	const rowsPerPage = getRowsPerPage(tbl);
+	if (!document.getElementById("main1").hidden) rowsPerPage = getRowsPerPage(tbl);
 
 	const msgCount = ae.getUplMsgCount();
 	const loadMore = ae.getReadyMsgBytes() < ae.getTotalMsgBytes();
@@ -1064,14 +1056,10 @@ document.getElementById("btn_mdele").onclick = function() {
 			return;
 		}
 
-		if (window.matchMedia("(min-width: 80em)").matches) {
-			switch (tab) {
-				case TAB_INBOX: showInbox(); break;
-				case TAB_DRBOX: showDrbox(); break;
-				case TAB_NOTES: showFiles(); break;
-			}
-		} else {
-			reloadTab = true;
+		switch (tab) {
+			case TAB_INBOX: showInbox(); break;
+			case TAB_DRBOX: showDrbox(); break;
+			case TAB_NOTES: showFiles(); break;
 		}
 	});
 };
@@ -1214,7 +1202,6 @@ function writeVerify() {
 }
 
 function setTab(isHistory, tabNum, pageNum) {
-	reloadTab = false;
 	tab = tabNum;
 	if (pageNum !== -1) tabs[tab].cur = pageNum;
 
