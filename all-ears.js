@@ -2175,13 +2175,10 @@ function AllEars(readyCallback) {
 
 		const n = Math.floor(Math.random() * 16);
 		if (n === 0) return newAddr;
-
 		newAddr = newAddr.slice(0, n) + ((Math.random() > 0.5) ? "." : "-") + newAddr.slice(n);
 
 		const m = Math.floor(Math.random() * 17);
-		if (m === 0 || m === n || m === n + 1) return newAddr;
-
-		return newAddr.slice(0, m) + ((Math.random() > 0.5) ? "." : "-") + newAddr.slice(m);
+		return (m === 0 || m === n || m === n + 1) ? newAddr : newAddr.slice(0, m) + ((Math.random() > 0.5) ? "." : "-") + newAddr.slice(m);
 	};
 
 	this.getErrorMessage = function(err) {
