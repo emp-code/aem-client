@@ -561,7 +561,7 @@ dialog,
 	}
 
 	#main2 article > div > div {
-		overflow-wrap: anywhere;
+		line-break: anywhere;
 	}
 }
 
