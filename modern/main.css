@@ -557,7 +557,11 @@ dialog,
 	}
 
 	#main2 article > div {
-		grid-template-columns: 1fr 1fr;
+		grid-template-columns: 50% 50%;
+	}
+
+	#main2 article > div > div {
+		overflow-wrap: anywhere;
 	}
 }
 
