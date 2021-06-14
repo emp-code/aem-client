@@ -164,8 +164,8 @@ function displayFile(isHistory, num) {
 
 	document.getElementById("btn_mnext").disabled = (num === ae.getUplMsgCount() - 1);
 	document.getElementById("btn_mprev").disabled = (num === 0);
-	document.getElementById("btn_mnext").onclick = function() {displayFile(false, num + 1);}
-	document.getElementById("btn_mprev").onclick = function() {displayFile(false, num - 1);}
+	document.getElementById("btn_mnext").onclick = function() {displayFile(false, num + 1);};
+	document.getElementById("btn_mprev").onclick = function() {displayFile(false, num - 1);};
 
 	if (fileType === "text") {
 		document.querySelector("article > pre").hidden = false;
@@ -245,7 +245,7 @@ function displayFile(isHistory, num) {
 document.getElementById("btn_leave").onclick = function() {
 	document.getElementById("main2").hidden = true;
 	document.getElementById("main1").hidden = false;
-}
+};
 
 function displayMsg(isHistory, isInt, num) {
 	clearDisplay();
@@ -1012,7 +1012,7 @@ function clearWrite() {
 
 // Interface
 if (window.matchMedia("(prefers-color-scheme: light)").matches) document.querySelector("head > meta[name='theme-color']").content = "#eef";
-window.matchMedia('(prefers-color-scheme: dark)').onchange = function() {document.querySelector("head > meta[name='theme-color']").content = window.matchMedia("(prefers-color-scheme: light)").matches? "#eef" : "#001";}
+window.matchMedia("(prefers-color-scheme: light)").onchange = function() {document.querySelector("head > meta[name='theme-color']").content = window.matchMedia("(prefers-color-scheme: light)").matches? "#eef" : "#001";};
 
 document.getElementById("btn_dele").onclick = function() {
 	this.blur();
@@ -1283,7 +1283,7 @@ window.onpopstate = function(event) {
 			case "upl": displayFile(true, msgDisplay.num); break;
 		}
 	}
-}
+};
 
 document.querySelectorAll("#main1 > nav:first-of-type > button").forEach(function(btn, i) {
 	btn.onclick = function() {setTab(false, i, -1);};
