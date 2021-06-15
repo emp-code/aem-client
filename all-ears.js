@@ -1216,10 +1216,10 @@ function AllEars(readyCallback) {
 		if (!_extMsg[num].body) return "";
 
 		let html = _extMsg[num].body.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").split("\x0B").reverse().join("<br><hr>");
-		html = _htmlLinkReplace(html, "\x0D", false, "🔗");
-		html = _htmlLinkReplace(html, "\x0E", true,  "🔒");
-		html = _htmlLinkReplace(html, "\x0F", false, "👁");
-		return _htmlLinkReplace(html, "\x10", true,  "🖼");
+		html = _htmlLinkReplace(html, "\x0C", false, "🔗");
+		html = _htmlLinkReplace(html, "\x0D", true,  "🔒");
+		html = _htmlLinkReplace(html, "\x0E", false, "👁");
+		return _htmlLinkReplace(html, "\x0F", true,  "🖼");
 	};
 
 	this.getExtMsgFlagVPad = function(num) {return _extMsg[num].validPad;};
@@ -1253,10 +1253,10 @@ function AllEars(readyCallback) {
 
 	this.exportExtMsg = function(num) {
 		let textBody = _extMsg[num].body;
-		textBody = _textLinkReplace(textBody, "\x0D", false);
-		textBody = _textLinkReplace(textBody, "\x0E", true);
-		textBody = _textLinkReplace(textBody, "\x0F", false);
-		textBody = _textLinkReplace(textBody, "\x10", true);
+		textBody = _textLinkReplace(textBody, "\x0C", false);
+		textBody = _textLinkReplace(textBody, "\x0D", true);
+		textBody = _textLinkReplace(textBody, "\x0E", false);
+		textBody = _textLinkReplace(textBody, "\x0F", true);
 
 		return "Received: from " + _extMsg[num].greet +" (" + this.getExtMsgRdns(num) + " [" + this.getExtMsgIp(num) + "])"
 			+ " by " + _AEM_DOMAIN_EML
