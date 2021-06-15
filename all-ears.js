@@ -1086,6 +1086,35 @@ function AllEars(readyCallback) {
 		a.download = "";
 	};
 
+	// CET: Control-Enriched Text
+	const _htmlLinkReplace = function(body, needle, isSecure, linkIcon) {
+		while(1) {
+			const begin = body.indexOf(needle);
+			if (begin === -1) return body;
+			const end = body.slice(begin).indexOf(needle);
+			if (end === -1) return body;
+
+			let linkDomain = body.slice(begin + 1);
+			linkDomain = linkDomain.slice(0, linkDomain.indexOf(needle));
+
+			const domainEnd = linkDomain.search("[/?]");
+			if (domainEnd !== -1) linkDomain = linkDomain.slice(0, domainEnd);
+
+			body = body.replace(needle, isSecure? "<a href=\"https://" : "<a href=\"http://").replace(needle, "\">" + linkIcon + "&NoBreak;" + linkDomain + "</a> ");
+		}
+	}
+
+	const _textLinkReplace = function(body, needle, isSecure) {
+		while(1) {
+			const begin = body.indexOf(needle);
+			if (begin === -1) return body;
+			const end = body.slice(begin).indexOf(needle);
+			if (end === -1) return body;
+
+			body = body.replace(needle, isSecure? "https://" : "http://").replace(needle, "");
+		}
+	}
+
 // Public
 	this.reset = function() {
 		_maxStorage.splice(0);
@@ -1185,63 +1214,12 @@ function AllEars(readyCallback) {
 	this.getExtMsgTitle   = function(num) {return _extMsg[num].subj;};
 	this.getExtMsgBody    = function(num) {
 		if (!_extMsg[num].body) return "";
-		let html = _extMsg[num].body.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").split("\r").reverse().join("<br><hr>");
 
-		// Links
-		while(1) {
-			const begin = html.indexOf("\x11");
-			if (begin === -1) break;
-			const end = html.slice(begin).indexOf("\x12");
-			if (end === -1) break;
-
-			let linkDomain = html.slice(begin + 1);
-			linkDomain = linkDomain.slice(0, linkDomain.indexOf("\x12"));
-
-			let secure = false;
-			if (linkDomain.startsWith("https://")) {
-				secure = true;
-				linkDomain = linkDomain.slice(8);
-			} else if (linkDomain.startsWith("http://")) {
-				linkDomain = linkDomain.slice(7);
-			} else {
-				html = html.replace("\x11", "").replace("\x12", "");
-				continue;
-			}
-
-			const domainEnd = linkDomain.search("[/?]");
-			if (domainEnd !== -1) linkDomain = linkDomain.slice(0, domainEnd);
-
-			html = html.replace("\x11", "<a href=\"").replace("\x12", "\">" + (secure? "🔒&NoBreak;" : "🔗&NoBreak;") + linkDomain + "</a> ");
-		}
-
-		// Images
-		while(1) {
-			const begin = html.indexOf("\x13");
-			if (begin === -1) break;
-			const end = html.slice(begin).indexOf("\x14");
-			if (end === -1) break;
-
-			let linkDomain = html.slice(begin + 1);
-			linkDomain = linkDomain.slice(0, linkDomain.indexOf("\x14"));
-
-			let secure = false;
-			if (linkDomain.startsWith("https://")) {
-				secure = true;
-				linkDomain = linkDomain.slice(8);
-			} else if (linkDomain.startsWith("http://")) {
-				linkDomain = linkDomain.slice(7);
-			} else {
-				html = html.replace("\x13", "").replace("\x14", "");
-				continue;
-			}
-
-			const domainEnd = linkDomain.search("[/?]");
-			if (domainEnd !== -1) linkDomain = linkDomain.slice(0, domainEnd);
-
-			html = html.replace("\x13", "<a href=\"").replace("\x14", "\">" + (secure? "🖼&NoBreak;" : "👁&NoBreak;") + linkDomain + "</a> ");
-		}
-
-		return html;
+		let html = _extMsg[num].body.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").split("\x0B").reverse().join("<br><hr>");
+		html = _htmlLinkReplace(html, "\x0D", false, "🔗");
+		html = _htmlLinkReplace(html, "\x0E", true,  "🔒");
+		html = _htmlLinkReplace(html, "\x0F", false, "👁");
+		return _htmlLinkReplace(html, "\x10", true,  "🖼");
 	};
 
 	this.getExtMsgFlagVPad = function(num) {return _extMsg[num].validPad;};
@@ -1274,6 +1252,12 @@ function AllEars(readyCallback) {
 	};
 
 	this.exportExtMsg = function(num) {
+		let textBody = _extMsg[num].body;
+		textBody = _textLinkReplace(textBody, "\x0D", false);
+		textBody = _textLinkReplace(textBody, "\x0E", true);
+		textBody = _textLinkReplace(textBody, "\x0F", false);
+		textBody = _textLinkReplace(textBody, "\x10", true);
+
 		return "Received: from " + _extMsg[num].greet +" (" + this.getExtMsgRdns(num) + " [" + this.getExtMsgIp(num) + "])"
 			+ " by " + _AEM_DOMAIN_EML
 			+ " with " + (_extMsg[num].esmtp ? "E" : "") + "SMTP" + (_extMsg[num].tls ? "S" : "")
@@ -1291,7 +1275,7 @@ function AllEars(readyCallback) {
 		+ "\r\nSubject: " + _extMsg[num].subj
 		+ "\r\nTo: " + (_extMsg[num].dnTo ? ("\"" + _extMsg[num].dnTo + "\" <" + _extMsg[num].hdrTo + ">") : _extMsg[num].hdrTo)
 		+ "\r\n" + _extMsg[num].headers.replaceAll("\n", "\r\n")
-		+ "\r\n\r\n" + _extMsg[num].body.replaceAll("\r", "\n---\n").replaceAll("\n", "\r\n").replaceAll("\x11", "").replaceAll("\x12", "").replaceAll("\x13", "").replaceAll("\x14", "")
+		+ "\r\n\r\n" + textBody.replaceAll("\x0B", "\n---\n").replaceAll("\n", "\r\n")
 		+ "\r\n";
 	};
 
@@ -1777,16 +1761,16 @@ function AllEars(readyCallback) {
 							const msgHdrId = msgParts[3];
 							const msgSbjct = msgParts[4];
 
-							const msgHdrTo = hdrTo.includes("\r") ? hdrTo.slice(hdrTo.indexOf("\r") + 1) : hdrTo;
-							const msgHdrFr = hdrFr.includes("\r") ? hdrFr.slice(hdrFr.indexOf("\r") + 1) : hdrFr;
-							const msgHdrRt = hdrRt.includes("\r") ? hdrRt.slice(hdrRt.indexOf("\r") + 1) : hdrRt;
+							const msgHdrTo = hdrTo.includes("\x0B") ? hdrTo.slice(hdrTo.indexOf("\x0B") + 1) : hdrTo;
+							const msgHdrFr = hdrFr.includes("\x0B") ? hdrFr.slice(hdrFr.indexOf("\x0B") + 1) : hdrFr;
+							const msgHdrRt = hdrRt.includes("\x0B") ? hdrRt.slice(hdrRt.indexOf("\x0B") + 1) : hdrRt;
 
-							const msgDnTo = hdrTo.includes("\r") ? hdrTo.slice(0, hdrTo.indexOf("\r")) : null;
-							const msgDnFr = hdrFr.includes("\r") ? hdrFr.slice(0, hdrFr.indexOf("\r")) : null;
-							const msgDnRt = hdrRt.includes("\r") ? hdrRt.slice(0, hdrRt.indexOf("\r")) : null;
+							const msgDnTo = hdrTo.includes("\x0B") ? hdrTo.slice(0, hdrTo.indexOf("\x0B")) : null;
+							const msgDnFr = hdrFr.includes("\x0B") ? hdrFr.slice(0, hdrFr.indexOf("\x0B")) : null;
+							const msgDnRt = hdrRt.includes("\x0B") ? hdrRt.slice(0, hdrRt.indexOf("\x0B")) : null;
 
 							const body = msgParts.slice(5).join("\n");
-							const headersEnd = body.indexOf("\r");
+							const headersEnd = body.indexOf("\x0B");
 							const msgHeaders = (headersEnd > 0) ? body.slice(0, headersEnd) : "";
 							const msgBody = body.slice(headersEnd + 1);
 
