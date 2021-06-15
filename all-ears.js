@@ -1309,11 +1309,11 @@ function AllEars(readyCallback) {
 	};
 
 	this.downloadExtMsg = function(num) {
-		_downloadFile(_extMsg[num].subj + ".eml", new Blob([this.ExportExtMsg(num)]));
+		_downloadFile(_extMsg[num].subj + ".eml", new Blob([this.exportExtMsg(num)]));
 	};
 
 	this.downloadIntMsg = function(num) {
-		_downloadFile(_intMsg[num].title + ".eml", new Blob([this.ExportIntMsg(num)]));
+		_downloadFile(_intMsg[num].title + ".eml", new Blob([this.exportIntMsg(num)]));
 	};
 
 	this.downloadUplMsg = function(num) {
