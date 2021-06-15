@@ -1102,7 +1102,7 @@ function AllEars(readyCallback) {
 
 			body = body.replace(needle, isSecure? "<a href=\"https://" : "<a href=\"http://").replace(needle, "\">" + linkIcon + "&NoBreak;" + linkDomain + "</a> ");
 		}
-	}
+	};
 
 	const _textLinkReplace = function(body, needle, isSecure) {
 		while(1) {
@@ -1113,7 +1113,7 @@ function AllEars(readyCallback) {
 
 			body = body.replace(needle, isSecure? "https://" : "http://").replace(needle, "");
 		}
-	}
+	};
 
 // Public
 	this.reset = function() {
