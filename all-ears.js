@@ -1219,7 +1219,7 @@ function AllEars(readyCallback) {
 		html = _htmlLinkReplace(html, "\x0C", false, "🔗");
 		html = _htmlLinkReplace(html, "\x0D", true,  "🔒");
 		html = _htmlLinkReplace(html, "\x0E", false, "👁");
-		return _htmlLinkReplace(html, "\x0F", true,  "🖼");
+		return _htmlLinkReplace(html, "\x0F", true,  "🖼").replaceAll("  ", " ");
 	};
 
 	this.getExtMsgFlagVPad = function(num) {return _extMsg[num].validPad;};
