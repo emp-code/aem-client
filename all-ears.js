@@ -1787,7 +1787,7 @@ function AllEars(readyCallback) {
 							// 32/16/8/4/2/1 unused
 
 							const bodyAndTitle = sodium.to_string(msgData.slice(1));
-							const separator = bodyAndTitle.indexOf('\n');
+							const separator = bodyAndTitle.indexOf("\n");
 							_intMsg.push(new _IntMsg(validPad, validSig, msgId, msgTs, false, 3, null, (msgType === 192) ? "system" : "public", "", bodyAndTitle.slice(0, separator), bodyAndTitle.slice(separator + 1)));
 							break;
 						}
@@ -2086,9 +2086,9 @@ function AllEars(readyCallback) {
 		offset++;
 
 		for (let i = 0; i < _contactMail.length; i++) {
-			const cMail = sodium.from_string(_contactMail[i] + '\n');
-			const cName = sodium.from_string(_contactName[i] + '\n');
-			const cNote = sodium.from_string(_contactNote[i] + '\n');
+			const cMail = sodium.from_string(_contactMail[i] + "\n");
+			const cName = sodium.from_string(_contactName[i] + "\n");
+			const cNote = sodium.from_string(_contactNote[i] + "\n");
 
 			privData.set(cMail, offset);
 			offset += cMail.length;
