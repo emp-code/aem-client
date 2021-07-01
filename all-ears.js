@@ -109,6 +109,8 @@ function AllEars(readyCallback) {
 	const _intMsg = [];
 	const _uplMsg = [];
 	const _outMsg = [];
+	let _newestMsgId = null;
+	let _newestMsgTs = 0;
 
 	let _totalMsgCount = 0;
 	let _totalMsgBytes = 0;
@@ -406,22 +408,6 @@ function AllEars(readyCallback) {
 		_outMsg.forEach(function(msg) {if (_arraysEqual(msg.id, id)) found = true;}); if (found) return true;
 
 		return false;
-	};
-
-	const _getNewestMsgId = function() {
-		let ts = (_extMsg.length === 0) ? 0 : _extMsg[0].ts;
-		let result = 0;
-
-		if (_intMsg.length !== 0 && _intMsg[0].ts > ts) {result = 1; ts = _intMsg[0].ts;}
-		if (_uplMsg.length !== 0 && _uplMsg[0].ts > ts) {result = 2; ts = _uplMsg[0].ts;}
-		if (_outMsg.length !== 0 && _outMsg[0].ts > ts) {result = 3;}
-
-		switch (result) {
-			case 0: return _extMsg[0].id;
-			case 1: return _intMsg[0].id;
-			case 2: return _uplMsg[0].id;
-			case 3: return _outMsg[0].id;
-		}
 	};
 
 	const _getOldestMsgId = function() {
@@ -1618,7 +1604,7 @@ function AllEars(readyCallback) {
 			fetchId[0] = 0;
 			if (newest) fetchId[0] |= _AEM_FLAG_NEWER;
 			if (u_info) fetchId[0] |= _AEM_FLAG_UINFO;
-			fetchId.set(newest? _getNewestMsgId() : _getOldestMsgId(), 1);
+			fetchId.set(newest? _newestMsgId : _getOldestMsgId(), 1);
 		} else fetchId = new Uint8Array([u_info? _AEM_FLAG_UINFO : 0]);
 
 		let privateFail = false;
@@ -1678,6 +1664,10 @@ function AllEars(readyCallback) {
 
 				const msgTs = new Uint32Array(msgData.slice(1, 5).buffer)[0];
 				const msgTs_bin = msgData.slice(1, 5);
+				if (msgTs > _newestMsgTs) {
+					_newestMsgId = msgId;
+					_newestMsgTs = msgTs;
+				}
 
 				msgData = msgData.slice(5, msgData.length - padAmount - sodium.crypto_sign_BYTES);
 
