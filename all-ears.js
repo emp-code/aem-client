@@ -1624,6 +1624,7 @@ function AllEars(readyCallback) {
 			_totalMsgBytes = new Uint32Array(browseData.slice(2, 6).buffer)[0] * 16;
 
 			let offset = 6;
+			let prevTs = 1577836800; // 2020-01-01
 
 			while (offset < browseData.length) {
 				const msgBytes = (new Uint16Array(browseData.slice(offset, offset + 2).buffer)[0] + _AEM_MSG_MINBLOCKS) * 16;
@@ -1642,7 +1643,8 @@ function AllEars(readyCallback) {
 				let msgData;
 				try {msgData = sodium.crypto_box_seal_open(msgEnc, _userKeyPublic, _userKeySecret);}
 				catch(e) {
-					_intMsg.push(new _IntMsg(true, true, msgId, Date.now() / 1000, false, 3, null, "system", "", "Failed decrypting: " + offset + "/" + browseData.length + " (size: " + msgEnc.length + ")", e));
+					prevTs--; // The server sends the messages from newest the oldest -> this message is older than the previous one -> lower timestamp
+					_intMsg.push(new _IntMsg(true, true, msgId, prevTs, false, 3, null, "system", "", "Failed decrypting: " + offset + "/" + browseData.length + " (size: " + msgEnc.length + ")", e));
 					offset += msgBytes;
 					continue;
 				}
@@ -1668,6 +1670,7 @@ function AllEars(readyCallback) {
 					_newestMsgId = msgId;
 					_newestMsgTs = msgTs;
 				}
+				prevTs = msgTs;
 
 				msgData = msgData.slice(5, msgData.length - padAmount - sodium.crypto_sign_BYTES);
 
