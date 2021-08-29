@@ -1073,32 +1073,29 @@ function AllEars(readyCallback) {
 	};
 
 	// CET: Control-Enriched Text
-	const _htmlLinkReplace = function(body, needle, isSecure, linkIcon) {
+	const _htmlCetLinks = function(body, needle, isSecure, linkIcon) {
 		while(1) {
 			const begin = body.indexOf(needle);
-			if (begin === -1) return body;
-			const end = body.slice(begin).indexOf(needle);
-			if (end === -1) return body;
+			if (begin === -1) break;
+			const end = body.slice(begin + 1).indexOf(needle);
+			if (end === -1) break;
 
-			let linkDomain = body.slice(begin + 1);
-			linkDomain = linkDomain.slice(0, linkDomain.indexOf(needle));
+			let url = body.slice(begin + 1, begin + 1 + end);
+			const domainEnd = url.search("[/?]");
+			const linkDomain = (domainEnd === -1) ? url : url.slice(0, domainEnd);
 
-			const domainEnd = linkDomain.search("[/?]");
-			if (domainEnd !== -1) linkDomain = linkDomain.slice(0, domainEnd);
-
-			body = body.replace(needle, isSecure? "<a href=\"https://" : "<a href=\"http://").replace(needle, "\">" + linkIcon + "&NoBreak;" + linkDomain + "</a> ");
+			body = body.slice(0, begin) + (isSecure? "<a href=\"https://" : "<a href=\"http://") + url + "\">" + linkIcon + "&NoBreak;" + linkDomain + "</a> " + body.slice(begin + end + 2);
 		}
+
+		return body;
 	};
 
-	const _textLinkReplace = function(body, needle, isSecure) {
-		while(1) {
-			const begin = body.indexOf(needle);
-			if (begin === -1) return body;
-			const end = body.slice(begin).indexOf(needle);
-			if (end === -1) return body;
-
+	const _textCetLinks = function(body, needle, isSecure) {
+		while (body.indexOf(needle) >= 0) {
 			body = body.replace(needle, isSecure? "https://" : "http://").replace(needle, "");
 		}
+
+		return body
 	};
 
 // Public
@@ -1202,10 +1199,11 @@ function AllEars(readyCallback) {
 		if (!_extMsg[num].body) return "";
 
 		let html = _extMsg[num].body.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").split("\x0B").reverse().join("<br><hr>");
-		html = _htmlLinkReplace(html, "\x0C", false, "🔗");
-		html = _htmlLinkReplace(html, "\x0D", true,  "🔒");
-		html = _htmlLinkReplace(html, "\x0E", false, "👁");
-		return _htmlLinkReplace(html, "\x0F", true,  "🖼").replaceAll("  ", " ");
+		html = _htmlCetLinks(html, "\x0C", false, "🔗");
+		html = _htmlCetLinks(html, "\x0D", true,  "🔒");
+		html = _htmlCetLinks(html, "\x0E", false, "👁");
+		html = _htmlCetLinks(html, "\x0F", true,  "🖼");
+		return html.replaceAll("\x11", "\n---\n").replaceAll("\x10", " ").replaceAll("  ", " ");
 	};
 
 	this.getExtMsgFlagVPad = function(num) {return _extMsg[num].validPad;};
@@ -1239,10 +1237,10 @@ function AllEars(readyCallback) {
 
 	this.exportExtMsg = function(num) {
 		let textBody = _extMsg[num].body;
-		textBody = _textLinkReplace(textBody, "\x0C", false);
-		textBody = _textLinkReplace(textBody, "\x0D", true);
-		textBody = _textLinkReplace(textBody, "\x0E", false);
-		textBody = _textLinkReplace(textBody, "\x0F", true);
+		textBody = _textCetLinks(textBody, "\x0C", false);
+		textBody = _textCetLinks(textBody, "\x0D", true);
+		textBody = _textCetLinks(textBody, "\x0E", false);
+		textBody = _textCetLinks(textBody, "\x0F", true);
 
 		return "Received: from " + _extMsg[num].greet +" (" + this.getExtMsgRdns(num) + " [" + this.getExtMsgIp(num) + "])"
 			+ " by " + _AEM_DOMAIN_EML
