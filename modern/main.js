@@ -122,6 +122,9 @@ function clearDisplay() {
 	if (!el) return;
 	if (el.src) URL.revokeObjectURL(el.src);
 	el.remove();
+
+	document.getElementById("btn_mnext").disabled = true;
+	document.getElementById("btn_mprev").disabled = true;
 }
 
 function clearMsgFlags() {
