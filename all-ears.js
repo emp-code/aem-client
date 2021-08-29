@@ -1073,6 +1073,15 @@ function AllEars(readyCallback) {
 	};
 
 	// CET: Control-Enriched Text
+	const _isValidCet = function(html) {
+		return (
+		   ((html.match(/\x0C/g) || []).length & 1) === 0
+		&& ((html.match(/\x0D/g) || []).length & 1) === 0
+		&& ((html.match(/\x0E/g) || []).length & 1) === 0
+		&& ((html.match(/\x0F/g) || []).length & 1) === 0
+		);
+	};
+
 	const _htmlCetLinks = function(body, needle, isSecure, linkIcon) {
 		while(1) {
 			const begin = body.indexOf(needle);
@@ -1199,10 +1208,14 @@ function AllEars(readyCallback) {
 		if (!_extMsg[num].body) return "";
 
 		let html = _extMsg[num].body.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").split("\x0B").reverse().join("<br><hr>");
-		html = _htmlCetLinks(html, "\x0C", false, "🔗");
-		html = _htmlCetLinks(html, "\x0D", true,  "🔒");
-		html = _htmlCetLinks(html, "\x0E", false, "👁");
-		html = _htmlCetLinks(html, "\x0F", true,  "🖼");
+
+		if (_isValidCet(html)) {
+			html = _htmlCetLinks(html, "\x0C", false, "🔗");
+			html = _htmlCetLinks(html, "\x0D", true,  "🔒");
+			html = _htmlCetLinks(html, "\x0E", false, "👁");
+			html = _htmlCetLinks(html, "\x0F", true,  "🖼");
+		} else html = html.replaceAll("\x0C", " ").replaceAll("\x0D", " ").replaceAll("\x0E", " ").replaceAll("\x0F", " ");
+
 		return html.replaceAll("\x11", "\n---\n").replaceAll("\x10", " ").replaceAll("\n ", "\n").replaceAll("  ", " ");
 	};
 
@@ -1237,10 +1250,13 @@ function AllEars(readyCallback) {
 
 	this.exportExtMsg = function(num) {
 		let textBody = _extMsg[num].body;
-		textBody = _textCetLinks(textBody, "\x0C", false);
-		textBody = _textCetLinks(textBody, "\x0D", true);
-		textBody = _textCetLinks(textBody, "\x0E", false);
-		textBody = _textCetLinks(textBody, "\x0F", true);
+
+		if (_isValidCet(html)) {
+			textBody = _textCetLinks(textBody, "\x0C", false);
+			textBody = _textCetLinks(textBody, "\x0D", true);
+			textBody = _textCetLinks(textBody, "\x0E", false);
+			textBody = _textCetLinks(textBody, "\x0F", true);
+		} else textBody = textBody.replaceAll("\x0C", " ").replaceAll("\x0D", " ").replaceAll("\x0E", " ").replaceAll("\x0F", " ");
 
 		return "Received: from " + _extMsg[num].greet +" (" + this.getExtMsgRdns(num) + " [" + this.getExtMsgIp(num) + "])"
 			+ " by " + _AEM_DOMAIN_EML
