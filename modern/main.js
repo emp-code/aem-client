@@ -118,13 +118,13 @@ function getClockIcon(d) {
 }
 
 function clearDisplay() {
+	document.getElementById("btn_mnext").disabled = true;
+	document.getElementById("btn_mprev").disabled = true;
+
 	const el = document.querySelector("article > img, article > audio, article > video, article > embed, article > iframe");
 	if (!el) return;
 	if (el.src) URL.revokeObjectURL(el.src);
 	el.remove();
-
-	document.getElementById("btn_mnext").disabled = true;
-	document.getElementById("btn_mprev").disabled = true;
 }
 
 function clearMsgFlags() {
