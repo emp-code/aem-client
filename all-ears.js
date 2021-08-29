@@ -1203,7 +1203,7 @@ function AllEars(readyCallback) {
 		html = _htmlCetLinks(html, "\x0D", true,  "🔒");
 		html = _htmlCetLinks(html, "\x0E", false, "👁");
 		html = _htmlCetLinks(html, "\x0F", true,  "🖼");
-		return html.replaceAll("\x11", "\n---\n").replaceAll("\x10", " ").replaceAll("  ", " ");
+		return html.replaceAll("\x11", "\n---\n").replaceAll("\x10", " ").replaceAll("\n ", "\n").replaceAll("  ", " ");
 	};
 
 	this.getExtMsgFlagVPad = function(num) {return _extMsg[num].validPad;};
