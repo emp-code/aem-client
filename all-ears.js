@@ -1216,7 +1216,7 @@ function AllEars(readyCallback) {
 			html = _htmlCetLinks(html, "\x0F", true,  "🖼");
 		} else html = html.replaceAll("\x0C", " ").replaceAll("\x0D", " ").replaceAll("\x0E", " ").replaceAll("\x0F", " ");
 
-		return html.replaceAll("\x11", "\n---\n").replaceAll("\x10", " ").replaceAll("\n ", "\n").replaceAll("  ", " ");
+		return html.replaceAll("\x11", "\n---\n").replaceAll("\x10", " ").replaceAll("\n ", "\n").replaceAll("  ", " ").trim();
 	};
 
 	this.getExtMsgFlagVPad = function(num) {return _extMsg[num].validPad;};
