@@ -507,6 +507,10 @@ dialog,
 	margin-top: 0;
 }
 
+#main2 article > pre > p:first-child {
+	line-break: anywhere;
+}
+
 #main2 article > pre > p:nth-child(2) {
 	margin-bottom: 0.5em;
 }
