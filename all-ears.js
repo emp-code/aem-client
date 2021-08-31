@@ -1963,7 +1963,7 @@ function AllEars(readyCallback) {
 		final.set(msgBox, (sodium.crypto_kx_PUBLICKEYBYTES * 2) + 26);
 
 		_fetchEncrypted(_AEM_API_MESSAGE_CREATE, final, function(fetchErr, msgReport) {
-			if (fetchErr === 0 && (msgReport[16] & 48) === 48) _addOutMsg(msgReport.slice(21), true, true, msgReport.slice(0, 16), new Uint32Array(msgReport.slice(17, 21).buffer)[0], null, true);
+			if (fetchErr === 0 && (msgReport[16] & 48) === 48) _addOutMsg(msgReport.slice(21), true, true, msgReport.slice(0, 16), new Uint32Array(msgReport.slice(17, 21).buffer)[0], msgReport.slice(17, 21), true);
 			callback(fetchErr);
 		});
 	};
