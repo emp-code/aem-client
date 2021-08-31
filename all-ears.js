@@ -1985,7 +1985,7 @@ function AllEars(readyCallback) {
 			for (let i = 0; i < hexIds.length; i++) {
 				const id = sodium.from_hex(hexIds[i]);
 
-				[_extMsg, _intMsg, _uplMsg].forEach(function(msgSet) {
+				[_extMsg, _intMsg, _uplMsg, _outMsg].forEach(function(msgSet) {
 					for (let j = 0; j < msgSet.length; j++) {
 						let matches = true;
 
