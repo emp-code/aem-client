@@ -1047,9 +1047,17 @@ function AllEars(readyCallback) {
 				msgBin = msgData.slice(22);
 			}
 
-			msgBin = sodium.to_string(msgBin);
-			const msgSb = msgBin.slice(0, lenSb);
-			const msgBd = msgBin.slice(lenSb);
+			let msgSb;
+			let msgBd;
+
+			try {
+				msgBin = sodium.to_string(msgBin);
+				msgSb = msgBin.slice(0, lenSb);
+				msgBd = msgBin.slice(lenSb);
+			} catch(e) {
+				msgSb = "(fail)";
+				msgBd= "Message failed to decode.\n\n" + e;
+			}
 
 			newMsg = new _OutMsg_Int(validPad, validSig, msgId, msgTs, isE2ee, msgTo, msgFr, msgSb, msgBd);
 		}
