@@ -2217,7 +2217,7 @@ function AllEars(readyCallback) {
 
 			// 0x30-0x3F	Misc
 			case 0x30: return ["ACCOUNT_CREATE_EXIST",     "Account already exists"];
-			case 0x31: return ["ACCOUNT_DELETE_NOSTORAGE", "Account data was deleted, but deleting message data failed due to an internal error."];
+			case 0x31: return ["ACCOUNT_DELETE_NOSTORAGE", "Account data was deleted, but deleting message data failed due to an internal error"];
 
 			// 0xDA-0xDF	Address/Create|Delete|Update
 			case 0xDA: return ["ADDRESS_CREATE_INUSE",     "Address already taken"];
