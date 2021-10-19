@@ -2184,7 +2184,7 @@ function AllEars(readyCallback) {
 		switch (err) {
 			// 0x01-0x20	Client-side error codes
 			case 0x01: return "Invalid input";
-			case 0x02: return "Only administrators can perform this action";
+			case 0x02: return "Only administrators may perform this action";
 			case 0x03: return "Failed connecting to server";
 			case 0x04: return "Invalid input to _fetchEncrypted";
 			case 0x05: return "Failed decrypting response from server";
@@ -2199,11 +2199,11 @@ function AllEars(readyCallback) {
 			case 0x13: return "Private-field extra content too long";
 			case 0x14: return "Private-field out of space";
 
-			case 0x16: return "Server failed decrypting the request"; // 400
-			case 0x17: return "Account does not exist"; // 403
-			case 0x18: return "Invalid timestamp"; // 499
-			case 0x19: return "Server failed checking account data"; // 500
-			case 0x20: return "Invalid status code in response";
+			case 0x16: return "Server failed decrypt"; // 400
+			case 0x17: return "No such account"; // 403
+			case 0x18: return "Time mismatch"; // 499
+			case 0x19: return "Server error"; // 500
+			case 0x20: return "Response code invalid";
 
 			// 0x21-0x2F	Generic
 			case 0x21: return ["FORMAT",    "Invalid format"];
