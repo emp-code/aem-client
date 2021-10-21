@@ -1113,7 +1113,7 @@ function AllEars(readyCallback) {
 
 	const _textCetLinks = function(body, needle, isSecure) {
 		while (body.indexOf(needle) >= 0) {
-			body = body.replace(needle, isSecure? "https://" : "http://").replace(needle, "");
+			body = body.replace(needle, isSecure? "https://" : "http://").replace(needle, " ");
 		}
 
 		return body
