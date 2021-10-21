@@ -1317,19 +1317,23 @@ function AllEars(readyCallback) {
 	};
 
 	this.printExtMsg = function(num) {
+		const msgDate = new Date((_extMsg[num].ts * 1000) + ((new Date().getTimezoneOffset()) * -60000)).toISOString().slice(0, 19).replace("T", " ");
+
 		const el = document.createElement("iframe");
 		el.hidden = true;
 		document.body.appendChild(el);
-		el.contentWindow.document.write("<h1>" + _extMsg[num].subj + "</h1>" + this.getExtMsgBody(num, true).replaceAll("\n", "<br>"));
+		el.contentWindow.document.write("<pre>Date: " + msgDate + "\nFrom: " + _extMsg[num].hdrFrom + "\n  To: " + _extMsg[num].hdrTo + "</pre><h1>" + _extMsg[num].subj + "</h1>" + this.getExtMsgBody(num, true).replaceAll("\n", "<br>"));
 		el.contentWindow.print();
 		document.body.removeChild(el);
 	};
 
 	this.printIntMsg = function(num) {
+		const msgDate = new Date((_intMsg[num].ts * 1000) + ((new Date().getTimezoneOffset()) * -60000)).toISOString().slice(0, 19).replace("T", " ");
+
 		const el = document.createElement("iframe");
 		el.hidden = true;
 		document.body.appendChild(el);
-		el.contentWindow.document.write("<h1>" + _intMsg[num].title + "</h1>" + this.getIntMsgBody(num).replaceAll("\n", "<br>"));
+		el.contentWindow.document.write("<pre>Date: " + msgDate + "\nFrom: " + _intMsg[num].from + "@" + _AEM_DOMAIN_EML + "\n  To: " + _intMsg[num].to + "@" + _AEM_DOMAIN_EML + "</pre><h1>" + _intMsg[num].title + "</h1>" + this.getIntMsgBody(num).replaceAll("\n", "<br>"));
 		el.contentWindow.print();
 		document.body.removeChild(el);
 	};
