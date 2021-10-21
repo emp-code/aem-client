@@ -257,6 +257,8 @@ function displayExport(isHistory, isInt, num) {
 	document.getElementById("readmsg_export").hidden = false;
 	document.getElementById("btn_msave").blur();
 	document.getElementById("btn_msave").disabled = true;
+	document.getElementById("btn_reply").disabled = true;
+	document.getElementById("btn_mdele").disabled = true;
 
 //	document.querySelector("#readmsg_export > div:nth-child(1)").onclick = function() {};
 	document.querySelector("#readmsg_export > div:nth-child(2)").onclick = function() {if (isInt) {ae.downloadIntMsg(num);} else {ae.downloadExtMsg(num);} displayMsg(false, isInt, num);};
