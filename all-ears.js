@@ -1,6 +1,8 @@
 "use strict";
 
 function AllEars(readyCallback) {
+	if (typeof(readyCallback)!=="function") return;
+
 	try {
 		if ((!window.isSecureContext && !(/^[2-7a-z]{56}\.onion$/.test(document.domain)))
 		|| window.self !== window.top
@@ -1162,20 +1164,20 @@ function AllEars(readyCallback) {
 	this.getLevelMax = function() {return _AEM_USER_MAXLEVEL;};
 	this.getAddrPerUser = function() {return _AEM_ADDRESSES_PER_USER;};
 
-	this.getAddress = function(num) {return _addr32_decode(_userAddress[num].addr32, (_userAddress[num].flags & _AEM_ADDR_FLAG_SHIELD) !== 0);};
-	this.getAddressOrigin = function(num) {return (_userAddress[num].flags & _AEM_ADDR_FLAG_ORIGIN) !== 0;};
-	this.getAddressSecure = function(num) {return (_userAddress[num].flags & _AEM_ADDR_FLAG_SECURE) !== 0;};
-	this.getAddressAttach = function(num) {return (_userAddress[num].flags & _AEM_ADDR_FLAG_ATTACH) !== 0;};
-	this.getAddressAllVer = function(num) {return (_userAddress[num].flags & _AEM_ADDR_FLAG_ALLVER) !== 0;};
-	this.getAddressAccExt = function(num) {return (_userAddress[num].flags & _AEM_ADDR_FLAG_ACCEXT) !== 0;};
-	this.getAddressAccInt = function(num) {return (_userAddress[num].flags & _AEM_ADDR_FLAG_ACCINT) !== 0;};
+	this.getAddress = function(num) {if(typeof(num)!=="number"){return;} return _addr32_decode(_userAddress[num].addr32, (_userAddress[num].flags & _AEM_ADDR_FLAG_SHIELD) !== 0);};
+	this.getAddressOrigin = function(num) {if(typeof(num)!=="number"){return;} return (_userAddress[num].flags & _AEM_ADDR_FLAG_ORIGIN) !== 0;};
+	this.getAddressSecure = function(num) {if(typeof(num)!=="number"){return;} return (_userAddress[num].flags & _AEM_ADDR_FLAG_SECURE) !== 0;};
+	this.getAddressAttach = function(num) {if(typeof(num)!=="number"){return;} return (_userAddress[num].flags & _AEM_ADDR_FLAG_ATTACH) !== 0;};
+	this.getAddressAllVer = function(num) {if(typeof(num)!=="number"){return;} return (_userAddress[num].flags & _AEM_ADDR_FLAG_ALLVER) !== 0;};
+	this.getAddressAccExt = function(num) {if(typeof(num)!=="number"){return;} return (_userAddress[num].flags & _AEM_ADDR_FLAG_ACCEXT) !== 0;};
+	this.getAddressAccInt = function(num) {if(typeof(num)!=="number"){return;} return (_userAddress[num].flags & _AEM_ADDR_FLAG_ACCINT) !== 0;};
 
-	this.setAddressOrigin = function(num, val) {if (val) {_userAddress[num].flags |= _AEM_ADDR_FLAG_ORIGIN;} else {_userAddress[num].flags &= (0xFF & ~_AEM_ADDR_FLAG_ORIGIN);}};
-	this.setAddressSecure = function(num, val) {if (val) {_userAddress[num].flags |= _AEM_ADDR_FLAG_SECURE;} else {_userAddress[num].flags &= (0xFF & ~_AEM_ADDR_FLAG_SECURE);}};
-	this.setAddressAttach = function(num, val) {if (val) {_userAddress[num].flags |= _AEM_ADDR_FLAG_ATTACH;} else {_userAddress[num].flags &= (0xFF & ~_AEM_ADDR_FLAG_ATTACH);}};
-	this.setAddressAllVer = function(num, val) {if (val) {_userAddress[num].flags |= _AEM_ADDR_FLAG_ALLVER;} else {_userAddress[num].flags &= (0xFF & ~_AEM_ADDR_FLAG_ALLVER);}};
-	this.setAddressAccExt = function(num, val) {if (val) {_userAddress[num].flags |= _AEM_ADDR_FLAG_ACCEXT;} else {_userAddress[num].flags &= (0xFF & ~_AEM_ADDR_FLAG_ACCEXT);}};
-	this.setAddressAccInt = function(num, val) {if (val) {_userAddress[num].flags |= _AEM_ADDR_FLAG_ACCINT;} else {_userAddress[num].flags &= (0xFF & ~_AEM_ADDR_FLAG_ACCINT);}};
+	this.setAddressOrigin = function(num, val) {if(typeof(num)!=="number"){return;} if (val) {_userAddress[num].flags |= _AEM_ADDR_FLAG_ORIGIN;} else {_userAddress[num].flags &= (0xFF & ~_AEM_ADDR_FLAG_ORIGIN);}};
+	this.setAddressSecure = function(num, val) {if(typeof(num)!=="number"){return;} if (val) {_userAddress[num].flags |= _AEM_ADDR_FLAG_SECURE;} else {_userAddress[num].flags &= (0xFF & ~_AEM_ADDR_FLAG_SECURE);}};
+	this.setAddressAttach = function(num, val) {if(typeof(num)!=="number"){return;} if (val) {_userAddress[num].flags |= _AEM_ADDR_FLAG_ATTACH;} else {_userAddress[num].flags &= (0xFF & ~_AEM_ADDR_FLAG_ATTACH);}};
+	this.setAddressAllVer = function(num, val) {if(typeof(num)!=="number"){return;} if (val) {_userAddress[num].flags |= _AEM_ADDR_FLAG_ALLVER;} else {_userAddress[num].flags &= (0xFF & ~_AEM_ADDR_FLAG_ALLVER);}};
+	this.setAddressAccExt = function(num, val) {if(typeof(num)!=="number"){return;} if (val) {_userAddress[num].flags |= _AEM_ADDR_FLAG_ACCEXT;} else {_userAddress[num].flags &= (0xFF & ~_AEM_ADDR_FLAG_ACCEXT);}};
+	this.setAddressAccInt = function(num, val) {if(typeof(num)!=="number"){return;} if (val) {_userAddress[num].flags |= _AEM_ADDR_FLAG_ACCINT;} else {_userAddress[num].flags &= (0xFF & ~_AEM_ADDR_FLAG_ACCINT);}};
 
 	this.getAddressCount = function() {return _userAddress.length;};
 	this.getAddressCountNormal = function() {return _getAddressCount(false);};
@@ -1184,39 +1186,39 @@ function AllEars(readyCallback) {
 	this.isUserAdmin = function() {return (_userLevel === _AEM_USER_MAXLEVEL);};
 	this.getUserPkHex = function() {return sodium.to_hex(_userKeyPublic);};
 	this.getUserLevel = function() {return _userLevel;};
-	this.getLimitStorage = function(lvl) {return _maxStorage[lvl];};
-	this.getLimitNormalA = function(lvl) {return _maxNormalA[lvl];};
-	this.getLimitShieldA = function(lvl) {return _maxShieldA[lvl];};
+	this.getLimitStorage = function(lvl) {if(typeof(lvl)!=="number"){return;} return _maxStorage[lvl];};
+	this.getLimitNormalA = function(lvl) {if(typeof(lvl)!=="number"){return;} return _maxNormalA[lvl];};
+	this.getLimitShieldA = function(lvl) {if(typeof(lvl)!=="number"){return;} return _maxShieldA[lvl];};
 
 	this.getTotalMsgCount = function() {return _totalMsgCount;};
 	this.getTotalMsgBytes = function() {return _totalMsgBytes;};
 	this.getReadyMsgBytes = function() {return _readyMsgBytes;};
 
 	this.getExtMsgCount = function() {return _extMsg.length;};
-	this.getExtMsgIdHex   = function(num) {return sodium.to_hex(_extMsg[num].id);};
-	this.getExtMsgTime    = function(num) {return _extMsg[num].ts;};
-	this.getExtMsgHdrTime = function(num) {return _extMsg[num].hdrTs;};
-	this.getExtMsgHdrTz   = function(num) {return _extMsg[num].hdrTz;};
-	this.getExtMsgTLS     = function(num) {return (_extMsg[num].cs === 0) ? "" : "TLS v1." + (_extMsg[num].tls & 3) + " " + _getCiphersuite(_extMsg[num].cs);};
-	this.getExtMsgIp      = function(num) {return String(_extMsg[num].ip[0] + "." + _extMsg[num].ip[1] + "." + _extMsg[num].ip[2] + "." + _extMsg[num].ip[3]);};
-	this.getExtMsgDkim    = function(num) {return _extMsg[num].dkim;};
-	this.getExtMsgGreet   = function(num) {return _extMsg[num].greet;};
-	this.getExtMsgRdns    = function(num) {return _extMsg[num].rdns;};
-	this.getExtMsgAuSys   = function(num) {return _extMsg[num].auSys;};
-	this.getExtMsgCcode   = function(num) {return _extMsg[num].countryCode;};
-	this.getExtMsgCname   = function(num) {return _getCountryName(_extMsg[num].countryCode);};
-	this.getExtMsgEnvFrom = function(num) {return _extMsg[num].envFrom;};
-	this.getExtMsgHdrFrom = function(num) {return _extMsg[num].hdrFrom;};
-	this.getExtMsgDnFrom  = function(num) {return _extMsg[num].dnFrom;};
-	this.getExtMsgHdrRt   = function(num) {return _extMsg[num].hdrRt;};
-	this.getExtMsgDnRt    = function(num) {return _extMsg[num].dnRt;};
-	this.getExtMsgDnTo    = function(num) {return _extMsg[num].dnTo;};
-	this.getExtMsgEnvTo   = function(num) {return _extMsg[num].envTo;};
-	this.getExtMsgHdrTo   = function(num) {return _extMsg[num].hdrTo;};
-	this.getExtMsgHdrId   = function(num) {return _extMsg[num].hdrId;};
-	this.getExtMsgHeaders = function(num) {return _extMsg[num].headers;};
-	this.getExtMsgTitle   = function(num) {return _extMsg[num].subj;};
-	this.getExtMsgBody    = function(num, fullUrl) {
+	this.getExtMsgIdHex   = function(num) {if(typeof(num)!=="number"){return;} return sodium.to_hex(_extMsg[num].id);};
+	this.getExtMsgTime    = function(num) {if(typeof(num)!=="number"){return;} return _extMsg[num].ts;};
+	this.getExtMsgHdrTime = function(num) {if(typeof(num)!=="number"){return;} return _extMsg[num].hdrTs;};
+	this.getExtMsgHdrTz   = function(num) {if(typeof(num)!=="number"){return;} return _extMsg[num].hdrTz;};
+	this.getExtMsgTLS     = function(num) {if(typeof(num)!=="number"){return;} return (_extMsg[num].cs === 0) ? "" : "TLS v1." + (_extMsg[num].tls & 3) + " " + _getCiphersuite(_extMsg[num].cs);};
+	this.getExtMsgIp      = function(num) {if(typeof(num)!=="number"){return;} return String(_extMsg[num].ip[0] + "." + _extMsg[num].ip[1] + "." + _extMsg[num].ip[2] + "." + _extMsg[num].ip[3]);};
+	this.getExtMsgDkim    = function(num) {if(typeof(num)!=="number"){return;} return _extMsg[num].dkim;};
+	this.getExtMsgGreet   = function(num) {if(typeof(num)!=="number"){return;} return _extMsg[num].greet;};
+	this.getExtMsgRdns    = function(num) {if(typeof(num)!=="number"){return;} return _extMsg[num].rdns;};
+	this.getExtMsgAuSys   = function(num) {if(typeof(num)!=="number"){return;} return _extMsg[num].auSys;};
+	this.getExtMsgCcode   = function(num) {if(typeof(num)!=="number"){return;} return _extMsg[num].countryCode;};
+	this.getExtMsgCname   = function(num) {if(typeof(num)!=="number"){return;} return _getCountryName(_extMsg[num].countryCode);};
+	this.getExtMsgEnvFrom = function(num) {if(typeof(num)!=="number"){return;} return _extMsg[num].envFrom;};
+	this.getExtMsgHdrFrom = function(num) {if(typeof(num)!=="number"){return;} return _extMsg[num].hdrFrom;};
+	this.getExtMsgDnFrom  = function(num) {if(typeof(num)!=="number"){return;} return _extMsg[num].dnFrom;};
+	this.getExtMsgHdrRt   = function(num) {if(typeof(num)!=="number"){return;} return _extMsg[num].hdrRt;};
+	this.getExtMsgDnRt    = function(num) {if(typeof(num)!=="number"){return;} return _extMsg[num].dnRt;};
+	this.getExtMsgDnTo    = function(num) {if(typeof(num)!=="number"){return;} return _extMsg[num].dnTo;};
+	this.getExtMsgEnvTo   = function(num) {if(typeof(num)!=="number"){return;} return _extMsg[num].envTo;};
+	this.getExtMsgHdrTo   = function(num) {if(typeof(num)!=="number"){return;} return _extMsg[num].hdrTo;};
+	this.getExtMsgHdrId   = function(num) {if(typeof(num)!=="number"){return;} return _extMsg[num].hdrId;};
+	this.getExtMsgHeaders = function(num) {if(typeof(num)!=="number"){return;} return _extMsg[num].headers;};
+	this.getExtMsgTitle   = function(num) {if(typeof(num)!=="number"){return;} return _extMsg[num].subj;};
+	this.getExtMsgBody    = function(num, fullUrl) {if(typeof(num)!=="number" || typeof(fullUrl)!=="boolean"){return;}
 		if (!_extMsg[num].body) return "";
 
 		let html = _extMsg[num].body.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").split("\x0B").reverse().join("<br><hr>");
@@ -1231,23 +1233,23 @@ function AllEars(readyCallback) {
 		return html.replaceAll("\x11", "\n---\n").replaceAll("\x10", " ").replaceAll("\n ", "\n").replaceAll("  ", " ").trim();
 	};
 
-	this.getExtMsgFlagVPad = function(num) {return _extMsg[num].validPad;};
-	this.getExtMsgFlagVSig = function(num) {return _extMsg[num].validSig;};
-	this.getExtMsgFlagPExt = function(num) {return _extMsg[num].esmtp;};
-	this.getExtMsgFlagRare = function(num) {return _extMsg[num].rares;};
-	this.getExtMsgFlagFail = function(num) {return _extMsg[num].inval;};
-	this.getExtMsgFlagPErr = function(num) {return _extMsg[num].protV;};
-	this.getExtMsgFlagGrDm = function(num) {return _extMsg[num].greetDomainIp;};
-	this.getExtMsgFlagIpBl = function(num) {return _extMsg[num].ipBlacklisted;};
-	this.getExtMsgFlagDkFl = function(num) {return _extMsg[num].dkimFail;};
+	this.getExtMsgFlagVPad = function(num) {if(typeof(num)!=="number"){return;} return _extMsg[num].validPad;};
+	this.getExtMsgFlagVSig = function(num) {if(typeof(num)!=="number"){return;} return _extMsg[num].validSig;};
+	this.getExtMsgFlagPExt = function(num) {if(typeof(num)!=="number"){return;} return _extMsg[num].esmtp;};
+	this.getExtMsgFlagRare = function(num) {if(typeof(num)!=="number"){return;} return _extMsg[num].rares;};
+	this.getExtMsgFlagFail = function(num) {if(typeof(num)!=="number"){return;} return _extMsg[num].inval;};
+	this.getExtMsgFlagPErr = function(num) {if(typeof(num)!=="number"){return;} return _extMsg[num].protV;};
+	this.getExtMsgFlagGrDm = function(num) {if(typeof(num)!=="number"){return;} return _extMsg[num].greetDomainIp;};
+	this.getExtMsgFlagIpBl = function(num) {if(typeof(num)!=="number"){return;} return _extMsg[num].ipBlacklisted;};
+	this.getExtMsgFlagDkFl = function(num) {if(typeof(num)!=="number"){return;} return _extMsg[num].dkimFail;};
 
-	this.getExtMsgTlsDomain = function(num) {
+	this.getExtMsgTlsDomain = function(num) {if(typeof(num)!=="number"){return;}
 		if (_extMsg[num].tls & _AEM_EMAIL_CERT_MATCH_HDRFR && _extMsg[num].hdrFrom) return _extMsg[num].hdrFrom.split("@")[1];
 		if (_extMsg[num].tls & _AEM_EMAIL_CERT_MATCH_ENVFR && _extMsg[num].envFrom) return _extMsg[num].envFrom.split("@")[1];
 		if (_extMsg[num].tls & _AEM_EMAIL_CERT_MATCH_GREET && _extMsg[num].greet)   return _extMsg[num].greet;
 	};
 
-	this.getExtMsgTls_CertType = function(num) {
+	this.getExtMsgTls_CertType = function(num) {if(typeof(num)!=="number"){return;}
 		switch (_extMsg[num].tls & _AEM_EMAIL_CERT_EDDSA) {
 			case _AEM_EMAIL_CERT_EDDSA: return "EdDSA";
 			case _AEM_EMAIL_CERT_EC521: return "EC-521";
@@ -1260,7 +1262,7 @@ function AllEars(readyCallback) {
 		}
 	};
 
-	this.exportExtMsg = function(num) {
+	this.exportExtMsg = function(num) {if(typeof(num)!=="number"){return;}
 		let textBody = _extMsg[num].body;
 
 		if (_isValidCet(textBody)) {
@@ -1291,7 +1293,7 @@ function AllEars(readyCallback) {
 		+ "\r\n";
 	};
 
-	this.exportIntMsg = function(num) {
+	this.exportIntMsg = function(num) {if(typeof(num)!=="number"){return;}
 		return "Content-Transfer-Encoding: 8bit"
 		+ "\r\nContent-Type: text/plain; charset=utf-8"
 		+ "\r\nDate: " + new Date(_intMsg[num].ts * 1000).toUTCString().slice(0, 26) + "+0000"
@@ -1304,19 +1306,19 @@ function AllEars(readyCallback) {
 		+ "\r\n";
 	};
 
-	this.downloadExtMsg = function(num) {
+	this.downloadExtMsg = function(num) {if(typeof(num)!=="number"){return;}
 		_downloadFile(_extMsg[num].subj + ".eml", new Blob([this.exportExtMsg(num)]));
 	};
 
-	this.downloadIntMsg = function(num) {
+	this.downloadIntMsg = function(num) {if(typeof(num)!=="number"){return;}
 		_downloadFile(_intMsg[num].title + ".eml", new Blob([this.exportIntMsg(num)]));
 	};
 
-	this.downloadUplMsg = function(num) {
+	this.downloadUplMsg = function(num) {if(typeof(num)!=="number"){return;}
 		_downloadFile(_uplMsg[num].title, _uplMsg[num].body.buffer);
 	};
 
-	this.printExtMsg = function(num) {
+	this.printExtMsg = function(num) {if(typeof(num)!=="number"){return;}
 		const msgDate = new Date((_extMsg[num].ts * 1000) + ((new Date().getTimezoneOffset()) * -60000)).toISOString().slice(0, 19).replace("T", " ");
 
 		const elStyle = document.createElement("style");
@@ -1340,7 +1342,7 @@ function AllEars(readyCallback) {
 		document.body.removeChild(el);
 	};
 
-	this.printIntMsg = function(num) {
+	this.printIntMsg = function(num) {if(typeof(num)!=="number"){return;}
 		const msgDate = new Date((_intMsg[num].ts * 1000) + ((new Date().getTimezoneOffset()) * -60000)).toISOString().slice(0, 19).replace("T", " ");
 
 		const el = document.createElement("iframe");
@@ -1351,7 +1353,7 @@ function AllEars(readyCallback) {
 		document.body.removeChild(el);
 	};
 
-	this.getExtMsgReplyAddress = function(num) {
+	this.getExtMsgReplyAddress = function(num) {if(typeof(num)!=="number"){return;}
 		if (_extMsg[num].hdrRt)   return _extMsg[num].hdrRt;
 		if (_extMsg[num].hdrFrom) return _extMsg[num].hdrFrom;
 		if (_extMsg[num].envFrom) return _extMsg[num].envFrom;
@@ -1359,27 +1361,27 @@ function AllEars(readyCallback) {
 	};
 
 	this.getIntMsgCount = function() {return _intMsg.length;};
-	this.getIntMsgIdHex  = function(num) {return _intMsg[num].id? sodium.to_hex(_intMsg[num].id) : null;};
-	this.getIntMsgTime   = function(num) {return _intMsg[num].ts;};
-	this.getIntMsgLevel  = function(num) {return _intMsg[num].fromLv;};
-	this.getIntMsgFromPk = function(num) {return _intMsg[num].fromPk? sodium.to_base64(_intMsg[num].fromPk, sodium.base64_variants.ORIGINAL_NO_PADDING) : "";};
-	this.getIntMsgFrom   = function(num) {return _intMsg[num].from;};
-	this.getIntMsgTo     = function(num) {return _intMsg[num].to;};
-	this.getIntMsgTitle  = function(num) {return _intMsg[num].title;};
-	this.getIntMsgBody   = function(num) {return _intMsg[num].body;};
+	this.getIntMsgIdHex  = function(num) {if(typeof(num)!=="number"){return;} return _intMsg[num].id? sodium.to_hex(_intMsg[num].id) : null;};
+	this.getIntMsgTime   = function(num) {if(typeof(num)!=="number"){return;} return _intMsg[num].ts;};
+	this.getIntMsgLevel  = function(num) {if(typeof(num)!=="number"){return;} return _intMsg[num].fromLv;};
+	this.getIntMsgFromPk = function(num) {if(typeof(num)!=="number"){return;} return _intMsg[num].fromPk? sodium.to_base64(_intMsg[num].fromPk, sodium.base64_variants.ORIGINAL_NO_PADDING) : "";};
+	this.getIntMsgFrom   = function(num) {if(typeof(num)!=="number"){return;} return _intMsg[num].from;};
+	this.getIntMsgTo     = function(num) {if(typeof(num)!=="number"){return;} return _intMsg[num].to;};
+	this.getIntMsgTitle  = function(num) {if(typeof(num)!=="number"){return;} return _intMsg[num].title;};
+	this.getIntMsgBody   = function(num) {if(typeof(num)!=="number"){return;} return _intMsg[num].body;};
 
-	this.getIntMsgFlagVPad = function(num) {return _intMsg[num].validPad;};
-	this.getIntMsgFlagVSig = function(num) {return _intMsg[num].validSig;};
-	this.getIntMsgFlagE2ee = function(num) {return _intMsg[num].isE2ee;};
+	this.getIntMsgFlagVPad = function(num) {if(typeof(num)!=="number"){return;} return _intMsg[num].validPad;};
+	this.getIntMsgFlagVSig = function(num) {if(typeof(num)!=="number"){return;} return _intMsg[num].validSig;};
+	this.getIntMsgFlagE2ee = function(num) {if(typeof(num)!=="number"){return;} return _intMsg[num].isE2ee;};
 
 	this.getUplMsgCount = function() {return _uplMsg.length;};
-	this.getUplMsgIdHex = function(num) {return _uplMsg[num].id? sodium.to_hex(_uplMsg[num].id) : null;};
-	this.getUplMsgTime  = function(num) {return _uplMsg[num].ts;};
-	this.getUplMsgTitle = function(num) {return _uplMsg[num].title;};
-	this.getUplMsgBody  = function(num) {return _uplMsg[num].body;};
-	this.getUplMsgBytes = function(num) {return _uplMsg[num].blocks * 16;};
-	this.getUplMsgType  = function(num) {return _getFileType(_uplMsg[num].title);};
-	this.getUplMsgParent = function(num) {
+	this.getUplMsgIdHex = function(num) {if(typeof(num)!=="number"){return;} return _uplMsg[num].id? sodium.to_hex(_uplMsg[num].id) : null;};
+	this.getUplMsgTime  = function(num) {if(typeof(num)!=="number"){return;} return _uplMsg[num].ts;};
+	this.getUplMsgTitle = function(num) {if(typeof(num)!=="number"){return;} return _uplMsg[num].title;};
+	this.getUplMsgBody  = function(num) {if(typeof(num)!=="number"){return;} return _uplMsg[num].body;};
+	this.getUplMsgBytes = function(num) {if(typeof(num)!=="number"){return;} return _uplMsg[num].blocks * 16;};
+	this.getUplMsgType  = function(num) {if(typeof(num)!=="number"){return;} return _getFileType(_uplMsg[num].title);};
+	this.getUplMsgParent = function(num) {if(typeof(num)!=="number"){return;}
 		for (let i = 0; i < _extMsg.length; i++) {
 			if (_arraysEqual(_uplMsg[num].parent), _extMsg[num].id) {
 				return i;
@@ -1390,44 +1392,44 @@ function AllEars(readyCallback) {
 	};
 
 	this.getOutMsgCount = function() {return _outMsg.length;};
-	this.getOutMsgIdHex = function(num) {return sodium.to_hex(_outMsg[num].id);};
-	this.getOutMsgIsInt = function(num) {return _outMsg[num].isInt;};
-	this.getOutMsgTime  = function(num) {return _outMsg[num].ts;};
-	this.getOutMsgIp    = function(num) {return String(_outMsg[num].ip[0] + "." + _outMsg[num].ip[1] + "." + _outMsg[num].ip[2] + "." + _outMsg[num].ip[3]);};
-	this.getOutMsgCcode = function(num) {return _outMsg[num].countryCode;};
-	this.getOutMsgCname = function(num) {return _getCountryName(_outMsg[num].countryCode);};
-	this.getOutMsgTo    = function(num) {return _outMsg[num].to;};
-	this.getOutMsgFrom  = function(num) {return _outMsg[num].from;};
-	this.getOutMsgSubj  = function(num) {return _outMsg[num].subj;};
-	this.getOutMsgBody  = function(num) {return _outMsg[num].body;};
-	this.getOutMsgMxDom = function(num) {return _outMsg[num].mxDom;};
-	this.getOutMsgGreet = function(num) {return _outMsg[num].greet;};
-	this.getOutMsgTLS   = function(num) {return (_outMsg[num].tlsCs === 0) ? "" : "TLS v1." + _outMsg[num].tlsVer + " " + _getCiphersuite(_outMsg[num].tlsCs);};
-	this.getOutMsgAttach = function(num) {return _outMsg[num].attach;};
+	this.getOutMsgIdHex = function(num) {if(typeof(num)!=="number"){return;} return sodium.to_hex(_outMsg[num].id);};
+	this.getOutMsgIsInt = function(num) {if(typeof(num)!=="number"){return;} return _outMsg[num].isInt;};
+	this.getOutMsgTime  = function(num) {if(typeof(num)!=="number"){return;} return _outMsg[num].ts;};
+	this.getOutMsgIp    = function(num) {if(typeof(num)!=="number"){return;} return String(_outMsg[num].ip[0] + "." + _outMsg[num].ip[1] + "." + _outMsg[num].ip[2] + "." + _outMsg[num].ip[3]);};
+	this.getOutMsgCcode = function(num) {if(typeof(num)!=="number"){return;} return _outMsg[num].countryCode;};
+	this.getOutMsgCname = function(num) {if(typeof(num)!=="number"){return;} return _getCountryName(_outMsg[num].countryCode);};
+	this.getOutMsgTo    = function(num) {if(typeof(num)!=="number"){return;} return _outMsg[num].to;};
+	this.getOutMsgFrom  = function(num) {if(typeof(num)!=="number"){return;} return _outMsg[num].from;};
+	this.getOutMsgSubj  = function(num) {if(typeof(num)!=="number"){return;} return _outMsg[num].subj;};
+	this.getOutMsgBody  = function(num) {if(typeof(num)!=="number"){return;} return _outMsg[num].body;};
+	this.getOutMsgMxDom = function(num) {if(typeof(num)!=="number"){return;} return _outMsg[num].mxDom;};
+	this.getOutMsgGreet = function(num) {if(typeof(num)!=="number"){return;} return _outMsg[num].greet;};
+	this.getOutMsgTLS   = function(num) {if(typeof(num)!=="number"){return;} return (_outMsg[num].tlsCs === 0) ? "" : "TLS v1." + _outMsg[num].tlsVer + " " + _getCiphersuite(_outMsg[num].tlsCs);};
+	this.getOutMsgAttach = function(num) {if(typeof(num)!=="number"){return;} return _outMsg[num].attach;};
 
-	this.getOutMsgFlagE2ee = function(num) {return _outMsg[num].isE2ee;};
-	this.getOutMsgFlagVPad = function(num) {return _outMsg[num].validPad;};
-	this.getOutMsgFlagVSig = function(num) {return _outMsg[num].validSig;};
+	this.getOutMsgFlagE2ee = function(num) {if(typeof(num)!=="number"){return;} return _outMsg[num].isE2ee;};
+	this.getOutMsgFlagVPad = function(num) {if(typeof(num)!=="number"){return;} return _outMsg[num].validPad;};
+	this.getOutMsgFlagVSig = function(num) {if(typeof(num)!=="number"){return;} return _outMsg[num].validSig;};
 
 	this.admin_getUserCount = function() {return _admin_userPkHex.length;};
-	this.admin_getUserPkHex = function(num) {return _admin_userPkHex[num];};
-	this.admin_getUserSpace = function(num) {return _admin_userSpace[num];};
-	this.admin_getUserNAddr = function(num) {return _admin_userNaddr[num];};
-	this.admin_getUserSAddr = function(num) {return _admin_userSaddr[num];};
-	this.admin_getUserLevel = function(num) {return _admin_userLevel[num];};
+	this.admin_getUserPkHex = function(num) {if(typeof(num)!=="number"){return;} return _admin_userPkHex[num];};
+	this.admin_getUserSpace = function(num) {if(typeof(num)!=="number"){return;} return _admin_userSpace[num];};
+	this.admin_getUserNAddr = function(num) {if(typeof(num)!=="number"){return;} return _admin_userNaddr[num];};
+	this.admin_getUserSAddr = function(num) {if(typeof(num)!=="number"){return;} return _admin_userSaddr[num];};
+	this.admin_getUserLevel = function(num) {if(typeof(num)!=="number"){return;} return _admin_userLevel[num];};
 
 	this.getContactCount = function() {return _contactMail.length;};
-	this.getContactMail = function(num) {return _contactMail[num];};
-	this.getContactName = function(num) {return _contactName[num];};
-	this.getContactNote = function(num) {return _contactNote[num];};
+	this.getContactMail = function(num) {if(typeof(num)!=="number"){return;} return _contactMail[num];};
+	this.getContactName = function(num) {if(typeof(num)!=="number"){return;} return _contactName[num];};
+	this.getContactNote = function(num) {if(typeof(num)!=="number"){return;} return _contactNote[num];};
 
-	this.addContact = function(mail, name, note) {
+	this.addContact = function(mail, name, note) {if(typeof(mail)!=="string" || typeof(name)!=="string" || typeof(note)!=="string"){return;}
 		_contactMail.push(mail);
 		_contactName.push(name);
 		_contactNote.push(note);
 	};
 
-	this.deleteContact = function(index) {
+	this.deleteContact = function(index) {if(typeof(index)!=="number"){return;}
 		_contactMail.splice(index, 1);
 		_contactName.splice(index, 1);
 		_contactNote.splice(index, 1);
@@ -1454,15 +1456,14 @@ function AllEars(readyCallback) {
 		return _privateExtra;
 	};
 
-	this.setPrivateExtra = function(newData) {
-		if (!newData || typeof(newData) !== "string") return 0x01;
+	this.setPrivateExtra = function(newData) {if(typeof(newData)!=="string"){return;}
 		if (sodium.from_string(newData).length > this.getPrivateExtraSpaceMax()) return 0x13;
 		_privateExtra = newData;
 		return 0;
 	};
 
-	this.setKeys = function(skey_hex, callback) {
-		if (!skey_hex || typeof(skey_hex) !== "string" || skey_hex.length !== sodium.crypto_box_SECRETKEYBYTES * 2) {
+	this.setKeys = function(skey_hex, callback) {if(typeof(skey_hex)!=="string" || typeof(callback)!=="function"){return;}
+		if (skey_hex.length !== sodium.crypto_box_SECRETKEYBYTES * 2) {
 			callback(false);
 			return;
 		}
@@ -1488,7 +1489,7 @@ function AllEars(readyCallback) {
 	};
 
 	// API functions
-	this.Account_Browse = function(callback) {
+	this.Account_Browse = function(callback) {if(typeof(callback)!=="function"){return;}
 		if (_userLevel !== _AEM_USER_MAXLEVEL) {callback(0x02); return;}
 
 		_fetchEncrypted(_AEM_API_ACCOUNT_BROWSE, new Uint8Array([0]), function(fetchErr, browseData) {
@@ -1533,7 +1534,7 @@ function AllEars(readyCallback) {
 		});
 	};
 
-	this.Account_Create = function(pk_hex, callback) {
+	this.Account_Create = function(pk_hex, callback) {if(typeof(pk_hex)!=="string" || typeof(callback)!=="function"){return;}
 		_fetchEncrypted(_AEM_API_ACCOUNT_CREATE, sodium.from_hex(pk_hex), function(fetchErr) {
 			if (fetchErr) {callback(fetchErr); return;}
 
@@ -1547,7 +1548,7 @@ function AllEars(readyCallback) {
 		});
 	};
 
-	this.Account_Delete = function(pk_hex, callback) {
+	this.Account_Delete = function(pk_hex, callback) {if(typeof(pk_hex)!=="string" || typeof(callback)!=="function"){return;}
 		_fetchEncrypted(_AEM_API_ACCOUNT_DELETE, sodium.from_hex(pk_hex), function(fetchErr) {
 			if (fetchErr) {callback(fetchErr); return;}
 
@@ -1571,7 +1572,7 @@ function AllEars(readyCallback) {
 		});
 	};
 
-	this.Account_Update = function(pk_hex, level, callback) {
+	this.Account_Update = function(pk_hex, level, callback) {if(typeof(pk_hex)!=="string" || typeof(level)!=="number" || typeof(callback)!=="function"){return;}
 		if (level < 0 || level > _AEM_USER_MAXLEVEL) {callback(0x02); return;}
 
 		const upData = new Uint8Array(33);
@@ -1596,7 +1597,7 @@ function AllEars(readyCallback) {
 		});
 	};
 
-	this.Address_Create = function(addr, callback) {
+	this.Address_Create = function(addr, callback) {if(typeof(addr)!=="string" || typeof(callback)!=="function"){return;}
 		if (this.getPrivateExtraSpaceMax() - this.getPrivateExtraSpace() < 18) {callback(0x14); return;}
 
 		if (addr == "SHIELD") {
@@ -1630,7 +1631,7 @@ function AllEars(readyCallback) {
 		}
 	};
 
-	this.Address_Delete = function(num, callback) {
+	this.Address_Delete = function(num, callback) {if(typeof(num)!=="number" || typeof(callback)!=="function"){return;}
 		_fetchEncrypted(_AEM_API_ADDRESS_DELETE, _userAddress[num].hash, function(fetchErr) {
 			if (fetchErr) {callback(fetchErr); return;}
 
@@ -1639,13 +1640,13 @@ function AllEars(readyCallback) {
 		});
 	};
 
-	this.Address_Lookup = function(addr, callback) {
+	this.Address_Lookup = function(addr, callback) {if(typeof(addr)!=="string" || typeof(callback)!=="function"){return;}
 		_fetchEncrypted(_AEM_API_ADDRESS_LOOKUP, sodium.from_string(addr), function(fetchErr, result) {
 			callback(fetchErr? fetchErr : result);
 		});
 	};
 
-	this.Address_Update = function(callback) {
+	this.Address_Update = function(callback) {if(typeof(callback)!=="function"){return;}
 		const data = new Uint8Array(_userAddress.length * 9);
 
 		for (let i = 0; i < _userAddress.length; i++) {
@@ -1656,9 +1657,7 @@ function AllEars(readyCallback) {
 		_fetchEncrypted(_AEM_API_ADDRESS_UPDATE, data, function(fetchErr) {callback(fetchErr);});
 	};
 
-	this.Message_Browse = function(newest, u_info, callback) {
-		if (typeof(newest) !== "boolean" || typeof(u_info) !== "boolean") {callback(0x01); return;}
-
+	this.Message_Browse = function(newest, u_info, callback) {if(typeof(newest)!=="boolean" || typeof(u_info)!=="boolean" || typeof(callback)!=="function"){return;}
 		let fetchId;
 		if (_extMsg.length > 0 || _intMsg.length > 0 || _uplMsg.length > 0 || _outMsg.length > 0) {
 			fetchId = new Uint8Array(17);
@@ -1935,9 +1934,7 @@ function AllEars(readyCallback) {
 		});
 	};
 
-	this.Message_Create = function(title, body, addr_from, addr_to, replyId, to_pubkey, callback) {
-		if (typeof(title) !== "string" || typeof(body) !== "string" || typeof(addr_from) !== "string" || typeof(addr_to) !== "string") {callback(0x01); return;}
-
+	this.Message_Create = function(title, body, addr_from, addr_to, replyId, to_pubkey, callback) {if(typeof(title)!=="string" || typeof(body)!=="string" || typeof(addr_from)!=="string" || typeof(addr_to)!=="string" || typeof(callback)!=="function"){return;}
 		if (addr_to.indexOf("@") >= 0) { // Email
 			if (replyId === null) {
 				replyId = "";
@@ -2007,7 +2004,7 @@ function AllEars(readyCallback) {
 		});
 	};
 
-	this.Message_Delete = function(hexIds, callback) {
+	this.Message_Delete = function(hexIds, callback) {if(typeof(callback)!=="function"){return;}
 		if (typeof(hexIds) === "string") {
 			hexIds = [hexIds];
 		} else if (typeof(hexIds) !== "object") {
@@ -2049,7 +2046,7 @@ function AllEars(readyCallback) {
 		});
 	};
 
-	this.Message_Public = function(title, body, callback) {
+	this.Message_Public = function(title, body, callback) {if(typeof(title)!=="string" || typeof(body)!=="string" || typeof(callback)!=="function"){return;}
 		const binMsg = sodium.from_string(title + "\n" + body);
 		if (binMsg.length < 59) {callback(0x10); return;} // 59 = 177-48-64-5-1
 
@@ -2067,8 +2064,8 @@ function AllEars(readyCallback) {
 		});
 	};
 
-	this.Message_Sender = function(hash, ts, callback) {
-		if (typeof(hash) !== "string" || hash.length !== 64 || typeof(ts) !== "number" || ts < 1577836800 || ts > 4294967295) {callback(0x01); return;}
+	this.Message_Sender = function(hash, ts, callback) {if(typeof(hash)!=="string" || typeof(ts)!=="number" || typeof(callback)!=="function"){return;}
+		if (hash.length !== 64 || ts < 1577836800 || ts > 4294967295) {callback(0x01); return;}
 
 		const u8data = new Uint8Array(52);
 		u8data.set(sodium.from_base64(hash, sodium.base64_variants.URLSAFE));
@@ -2084,7 +2081,7 @@ function AllEars(readyCallback) {
 		});
 	};
 
-	this.Message_Upload = function(title, body, callback) {
+	this.Message_Upload = function(title, body, callback) {if(typeof(title)!=="string" || typeof(body)!=="string" || typeof(callback)!=="function"){return;}
 		if (typeof(title) !== "string" || title.length < 1 || body.length < 1) {callback(0x01); return;}
 
 		const u8title = sodium.from_string(title);
@@ -2123,7 +2120,7 @@ function AllEars(readyCallback) {
 		});
 	};
 
-	this.Private_Update = function(callback) {
+	this.Private_Update = function(callback) {if(typeof(callback)!=="function"){return;}
 		const privData = new Uint8Array(_AEM_LEN_PRIVATE - sodium.crypto_secretbox_NONCEBYTES - sodium.crypto_secretbox_MACBYTES);
 		privData.fill(0);
 		privData[0] = _userAddress.length;
@@ -2168,9 +2165,7 @@ function AllEars(readyCallback) {
 		_fetchEncrypted(_AEM_API_PRIVATE_UPDATE, final, function(fetchErr) {callback(fetchErr);});
 	};
 
-	this.Setting_Update = function(mib, nrm, shd, callback) {
-		if (typeof(mib) !== "object" || typeof(nrm) !== "object" || typeof(shd) !== "object") {callback(0x01); return;}
-
+	this.Setting_Update = function(mib, nrm, shd, callback) {if(typeof(mib)!=="object" || typeof(nrm)!=="object" || typeof(shd)!=="object" || typeof(callback)!=="function"){return;}
 		const data = new Uint8Array([
 			mib[0], nrm[0], shd[0],
 			mib[1], nrm[1], shd[1],
@@ -2192,7 +2187,7 @@ function AllEars(readyCallback) {
 	};
 
 	// Extras
-	this.shieldMix = function(addr) {
+	this.shieldMix = function(addr) {if(typeof(addr)!=="string"){return;}
 		let newAddr = "";
 
 		for (let i = 0; i < 16; i++) {
@@ -2219,7 +2214,7 @@ function AllEars(readyCallback) {
 		return (m === 0 || m === n || m === n + 1) ? newAddr : newAddr.slice(0, m) + ((Math.random() > 0.5) ? "." : "-") + newAddr.slice(m);
 	};
 
-	this.getErrorMessage = function(err) {
+	this.getErrorMessage = function(err) {if(typeof(err)!=="number"){return;}
 		switch (err) {
 			// 0x01-0x20	Client-side error codes
 			case 0x01: return "Invalid input";
