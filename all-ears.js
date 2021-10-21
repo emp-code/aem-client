@@ -1535,6 +1535,8 @@ function AllEars(readyCallback) {
 	};
 
 	this.Account_Create = function(pk_hex, callback) {if(typeof(pk_hex)!=="string" || typeof(callback)!=="function"){return;}
+		if (_userLevel !== _AEM_USER_MAXLEVEL) {callback(0x02); return;}
+
 		_fetchEncrypted(_AEM_API_ACCOUNT_CREATE, sodium.from_hex(pk_hex), function(fetchErr) {
 			if (fetchErr) {callback(fetchErr); return;}
 
