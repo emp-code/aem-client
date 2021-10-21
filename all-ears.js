@@ -1118,7 +1118,7 @@ function AllEars(readyCallback) {
 			body = body.replace(needle, isSecure? "https://" : "http://").replace(needle, " ");
 		}
 
-		return body
+		return body;
 	};
 
 // Public
