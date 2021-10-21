@@ -315,7 +315,7 @@ dialog,
 
 #tbl_inbox tr,
 #tbl_drbox tr {
-	grid-template-columns: auto 3fr 1fr 2fr;
+	grid-template-columns: auto 4fr 1fr 2fr;
 }
 
 #tbl_files tr {
