@@ -262,7 +262,7 @@ function displayExport(isHistory, isInt, num) {
 
 //	document.querySelector("#readmsg_export > div:nth-child(1)").onclick = function() {};
 	document.querySelector("#readmsg_export > div:nth-child(2)").onclick = function() {if (isInt) {ae.downloadIntMsg(num);} else {ae.downloadExtMsg(num);} displayMsg(false, isInt, num);};
-//	document.querySelector("#readmsg_export > div:nth-child(3)").onclick = function() {};
+	document.querySelector("#readmsg_export > div:nth-child(3)").onclick = function() {if (isInt) {ae.htmlIntMsg(num, true);} else {ae.htmlExtMsg(num, true);} displayMsg(false, isInt, num);};
 	document.querySelector("#readmsg_export > div:nth-child(4)").onclick = function() {if (isInt) {ae.txtIntMsg(num, true);} else {ae.txtExtMsg(num, true);} displayMsg(false, isInt, num);};
 	document.querySelector("#readmsg_export > div:nth-child(5)").onclick = function() {if (isInt) {ae.printIntMsg(num);} else {ae.printExtMsg(num);} displayMsg(false, isInt, num);};
 	document.querySelector("#readmsg_export > div:nth-child(6)").onclick = function() {navigator.clipboard.writeText(isInt? ae.txtIntMsg(num, false) : ae.txtExtMsg(num, false)); displayMsg(false, isInt, num);};

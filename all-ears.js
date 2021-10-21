@@ -1357,6 +1357,18 @@ function AllEars(readyCallback) {
 		document.body.removeChild(el);
 	};
 
+	this.htmlExtMsg = function(num, dl) {if(typeof(num)!=="number"){return;}
+		const msgDate = new Date((_extMsg[num].ts * 1000) + ((new Date().getTimezoneOffset()) * -60000)).toISOString().slice(0, 19).replace("T", " ");
+		const msg = "<html><body><pre>Date: " + msgDate + "\nFrom: " + _extMsg[num].hdrFrom + "\n  To: " + _extMsg[num].hdrTo + "</pre><h1>" + _extMsg[num].subj + "</h1><p>" + this.getExtMsgBody(num, true).replaceAll("\n", "<br>") + "</p></body></html>";
+		_downloadFile(_extMsg[num].subj + ".html", new Blob([msg]));;
+	};
+
+	this.htmlIntMsg = function(num, dl) {if(typeof(num)!=="number"){return;}
+		const msgDate = new Date((_intMsg[num].ts * 1000) + ((new Date().getTimezoneOffset()) * -60000)).toISOString().slice(0, 19).replace("T", " ");
+		const msg = "<html><body><pre>Date: " + msgDate + "\nFrom: " + _intMsg[num].from + "@" + _AEM_DOMAIN_EML + "\n  To: " + _intMsg[num].to + "@" + _AEM_DOMAIN_EML + "</pre><h1>" + _intMsg[num].title + "</h1><p>" + this.getIntMsgBody(num).replaceAll("\n", "<br>") + "</p></body></html>";
+		_downloadFile(_extMsg[num].subj + ".html", new Blob([msg]));
+	};
+
 	this.txtExtMsg = function(num, dl) {if(typeof(num)!=="number" || typeof(dl)!=="boolean"){return;}
 		const msgDate = new Date((_extMsg[num].ts * 1000) + ((new Date().getTimezoneOffset()) * -60000)).toISOString().slice(0, 19).replace("T", " ");
 		const msg = "Date: " + msgDate + "\nFrom: " + _extMsg[num].hdrFrom + "\nTo: " + _extMsg[num].hdrTo + "\nSubject: " + _extMsg[num].subj + "\n\n" + getPlainExtBody(num);
