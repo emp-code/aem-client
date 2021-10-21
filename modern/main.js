@@ -265,7 +265,7 @@ function displayExport(isHistory, isInt, num) {
 //	document.querySelector("#readmsg_export > div:nth-child(3)").onclick = function() {};
 	document.querySelector("#readmsg_export > div:nth-child(4)").onclick = function() {if (isInt) {ae.txtIntMsg(num, true);} else {ae.txtExtMsg(num, true);} displayMsg(false, isInt, num);};
 	document.querySelector("#readmsg_export > div:nth-child(5)").onclick = function() {if (isInt) {ae.printIntMsg(num);} else {ae.printExtMsg(num);} displayMsg(false, isInt, num);};
-//	document.querySelector("#readmsg_export > div:nth-child(6)").onclick = function() {};
+	document.querySelector("#readmsg_export > div:nth-child(6)").onclick = function() {navigator.clipboard.writeText(isInt? ae.txtIntMsg(num, false) : ae.txtExtMsg(num, false)); displayMsg(false, isInt, num);};
 
 	msgDisplay = new MsgInfo(isInt? ae.getIntMsgIdHex(num) : ae.getExtMsgIdHex(num), isInt? "int_exp" : "ext_exp", num);
 	if (!isHistory) history.pushState({tab: tab, page: tabs[tab].cur, msg: msgDisplay}, null);
