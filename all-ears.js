@@ -1346,7 +1346,7 @@ function AllEars(readyCallback) {
 		const el = document.createElement("iframe");
 		el.hidden = true;
 		document.body.appendChild(el);
-		el.contentWindow.document.write("<pre>Date: " + msgDate + "\nFrom: " + _intMsg[num].from + "@" + _AEM_DOMAIN_EML + "\n  To: " + _intMsg[num].to + "@" + _AEM_DOMAIN_EML + "</pre><h1>" + _intMsg[num].title + "</h1>" + this.getIntMsgBody(num).replaceAll("\n", "<br>"));
+		el.contentWindow.document.body.innerHTML = "<pre>Date: " + msgDate + "\nFrom: " + _intMsg[num].from + "@" + _AEM_DOMAIN_EML + "\n  To: " + _intMsg[num].to + "@" + _AEM_DOMAIN_EML + "</pre><h1>" + _intMsg[num].title + "</h1>" + this.getIntMsgBody(num).replaceAll("\n", "<br>");
 		el.contentWindow.print();
 		document.body.removeChild(el);
 	};
