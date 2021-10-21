@@ -1319,10 +1319,23 @@ function AllEars(readyCallback) {
 	this.printExtMsg = function(num) {
 		const msgDate = new Date((_extMsg[num].ts * 1000) + ((new Date().getTimezoneOffset()) * -60000)).toISOString().slice(0, 19).replace("T", " ");
 
+		const elStyle = document.createElement("style");
+		const elPre = document.createElement("pre");
+		const elH1 = document.createElement("h1");
+		const elP = document.createElement("p");
+		const elBody = document.createElement("body");
+
+		elStyle.textContent = "body {overflow-wrap: break-word;} a {text-decoration: none; word-break: break-all;}";
+		elPre.textContent = "Date: " + msgDate + "\nFrom: " + _extMsg[num].hdrFrom + "\n  To: " + _extMsg[num].hdrTo;
+		elH1.textContent = _extMsg[num].subj;
+		elP.innerHTML = this.getExtMsgBody(num, true).replaceAll("\n", "<br>");
+		elBody.replaceChildren(elPre, elH1, elP);
+
 		const el = document.createElement("iframe");
 		el.hidden = true;
 		document.body.appendChild(el);
-		el.contentWindow.document.write("<pre>Date: " + msgDate + "\nFrom: " + _extMsg[num].hdrFrom + "\n  To: " + _extMsg[num].hdrTo + "</pre><h1>" + _extMsg[num].subj + "</h1>" + this.getExtMsgBody(num, true).replaceAll("\n", "<br>"));
+		el.contentWindow.document.head.replaceChildren(elStyle);
+		el.contentWindow.document.body.replaceChildren(elBody);
 		el.contentWindow.print();
 		document.body.removeChild(el);
 	};
