@@ -1259,7 +1259,7 @@ function AllEars(readyCallback) {
 	this.exportExtMsg = function(num) {
 		let textBody = _extMsg[num].body;
 
-		if (_isValidCet(html)) {
+		if (_isValidCet(textBody)) {
 			textBody = _textCetLinks(textBody, "\x0C", false);
 			textBody = _textCetLinks(textBody, "\x0D", true);
 			textBody = _textCetLinks(textBody, "\x0E", false);
