@@ -139,7 +139,7 @@ function addExtMessage(i) {
 		document.getElementById("readmsg_title").textContent = ae.getExtMsgTitle(i);
 		document.getElementById("readmsg_from").textContent = ae.getExtMsgEnvFrom(i);
 		document.getElementById("readmsg_to").textContent = ae.getExtMsgEnvTo(i);
-		document.getElementById("readmsg_body").innerHTML = ae.getExtMsgBody(i);
+		document.getElementById("readmsg_body").innerHTML = ae.getExtMsgBody(i, false);
 		document.getElementById("readmsg_headers").textContent = ae.getExtMsgHeaders(i);
 
 		document.getElementById("readmsg_from").className = "";

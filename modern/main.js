@@ -367,7 +367,7 @@ function displayMsg(isHistory, isInt, num) {
 		headers.hidden = !showHeaders;
 
 		const body = document.createElement("p");
-		body.innerHTML = ae.getExtMsgBody(num);
+		body.innerHTML = ae.getExtMsgBody(num, false);
 
 		document.querySelector("#readmsg_main > pre").replaceChildren(headers, body);
 

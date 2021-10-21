@@ -1090,7 +1090,7 @@ function AllEars(readyCallback) {
 		);
 	};
 
-	const _htmlCetLinks = function(body, needle, isSecure, linkIcon) {
+	const _htmlCetLinks = function(body, needle, isSecure, linkIcon, fullUrl) {
 		while(1) {
 			const begin = body.indexOf(needle);
 			if (begin === -1) break;
@@ -1098,10 +1098,14 @@ function AllEars(readyCallback) {
 			if (end === -1) break;
 
 			let url = body.slice(begin + 1, begin + 1 + end);
-			const domainEnd = url.search("[/?]");
-			const linkDomain = (domainEnd === -1) ? url : url.slice(0, domainEnd);
 
-			body = body.slice(0, begin) + (isSecure? "<a href=\"https://" : "<a href=\"http://") + url + "\">" + linkIcon + "&NoBreak;" + linkDomain + "</a> " + body.slice(begin + end + 2);
+			if (!fullUrl) {
+				const domainEnd = url.search("[/?]");
+				const linkDomain = (domainEnd === -1) ? url : url.slice(0, domainEnd);
+				body = body.slice(0, begin) + (isSecure? "<a href=\"https://" : "<a href=\"http://") + url + "\">" + linkIcon + "&NoBreak;" + linkDomain + "</a> " + body.slice(begin + end + 2);
+			} else {
+				body = body.slice(0, begin) + (isSecure? "<a href=\"https://" : "<a href=\"http://") + url + "\">" + linkIcon + "&NoBreak;" + url + "</a> " + body.slice(begin + end + 2);
+			}
 		}
 
 		return body;
@@ -1212,16 +1216,16 @@ function AllEars(readyCallback) {
 	this.getExtMsgHdrId   = function(num) {return _extMsg[num].hdrId;};
 	this.getExtMsgHeaders = function(num) {return _extMsg[num].headers;};
 	this.getExtMsgTitle   = function(num) {return _extMsg[num].subj;};
-	this.getExtMsgBody    = function(num) {
+	this.getExtMsgBody    = function(num, fullUrl) {
 		if (!_extMsg[num].body) return "";
 
 		let html = _extMsg[num].body.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").split("\x0B").reverse().join("<br><hr>");
 
 		if (_isValidCet(html)) {
-			html = _htmlCetLinks(html, "\x0C", false, "🔗");
-			html = _htmlCetLinks(html, "\x0D", true,  "🔒");
-			html = _htmlCetLinks(html, "\x0E", false, "👁");
-			html = _htmlCetLinks(html, "\x0F", true,  "🖼");
+			html = _htmlCetLinks(html, "\x0C", false, "🔗", fullUrl);
+			html = _htmlCetLinks(html, "\x0D", true,  "🔒", fullUrl);
+			html = _htmlCetLinks(html, "\x0E", false, "👁", fullUrl);
+			html = _htmlCetLinks(html, "\x0F", true,  "🖼", fullUrl);
 		} else html = html.replaceAll("\x0C", " ").replaceAll("\x0D", " ").replaceAll("\x0E", " ").replaceAll("\x0F", " ");
 
 		return html.replaceAll("\x11", "\n---\n").replaceAll("\x10", " ").replaceAll("\n ", "\n").replaceAll("  ", " ").trim();
