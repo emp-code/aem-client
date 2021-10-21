@@ -262,7 +262,7 @@ function displayExport(isHistory, isInt, num) {
 	document.querySelector("#readmsg_export > div:nth-child(2)").onclick = function() {if (isInt) {ae.downloadIntMsg(num);} else {ae.downloadExtMsg(num);} displayMsg(false, isInt, num);};
 //	document.querySelector("#readmsg_export > div:nth-child(3)").onclick = function() {};
 //	document.querySelector("#readmsg_export > div:nth-child(4)").onclick = function() {};
-//	document.querySelector("#readmsg_export > div:nth-child(5)").onclick = function() {};
+	document.querySelector("#readmsg_export > div:nth-child(5)").onclick = function() {if (isInt) {ae.printIntMsg(num);} else {ae.printExtMsg(num);} displayMsg(false, isInt, num);};
 //	document.querySelector("#readmsg_export > div:nth-child(6)").onclick = function() {};
 
 	msgDisplay = new MsgInfo(isInt? ae.getIntMsgIdHex(num) : ae.getExtMsgIdHex(num), isInt? "int_exp" : "ext_exp", num);
