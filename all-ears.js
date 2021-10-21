@@ -1325,6 +1325,15 @@ function AllEars(readyCallback) {
 		document.body.removeChild(el);
 	};
 
+	this.printIntMsg = function(num) {
+		const el = document.createElement("iframe");
+		el.hidden = true;
+		document.body.appendChild(el);
+		el.contentWindow.document.write("<h1>" + _intMsg[num].title + "</h1>" + this.getIntMsgBody(num).replaceAll("\n", "<br>"));
+		el.contentWindow.print();
+		document.body.removeChild(el);
+	};
+
 	this.getExtMsgReplyAddress = function(num) {
 		if (_extMsg[num].hdrRt)   return _extMsg[num].hdrRt;
 		if (_extMsg[num].hdrFrom) return _extMsg[num].hdrFrom;
