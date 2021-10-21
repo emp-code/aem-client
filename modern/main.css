@@ -476,7 +476,7 @@ dialog,
 	flex-direction: column;
 }
 
-#main2 article > div {
+#readmsg_info {
 	width: 100%;
 	display: grid;
 	opacity: 0.5;
@@ -560,11 +560,11 @@ dialog,
 		border-radius: 2em;
 	}
 
-	#main2 article > div {
+	#readmsg_info {
 		grid-template-columns: 50% 50%;
 	}
 
-	#main2 article > div > div {
+	#readmsg_info > div {
 		line-break: anywhere;
 	}
 }
