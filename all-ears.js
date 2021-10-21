@@ -1600,7 +1600,7 @@ function AllEars(readyCallback) {
 	this.Address_Create = function(addr, callback) {if(typeof(addr)!=="string" || typeof(callback)!=="function"){return;}
 		if (this.getPrivateExtraSpaceMax() - this.getPrivateExtraSpace() < 18) {callback(0x14); return;}
 
-		if (addr == "SHIELD") {
+		if (addr === "SHIELD") {
 			_fetchEncrypted(_AEM_API_ADDRESS_CREATE, sodium.from_string("SHIELD"), function(fetchErr, byteArray) {
 				if (fetchErr) {callback(fetchErr); return;}
 				_userAddress.push(new _Address(byteArray.slice(0, 8), byteArray.slice(8, 18), _AEM_ADDR_FLAG_SHIELD | _AEM_ADDR_FLAGS_DEFAULT));
@@ -1717,7 +1717,7 @@ function AllEars(readyCallback) {
 				const validPad = (padA && padB && padA.length === padB.length && _arraysEqual(padA, padB));
 
 				let validSig = sodium.crypto_sign_verify_detached(msgData.slice(msgData.length - sodium.crypto_sign_BYTES), msgData.slice(0, msgData.length - sodium.crypto_sign_BYTES), _AEM_SIG_PUBKEY);
-				if (!validSig && msgData.length == _AEM_MSG_MINSIZE) { // Assume uses extra padding
+				if (!validSig && msgData.length === _AEM_MSG_MINSIZE) { // Assume uses extra padding
 					const remPadding = msgData[msgData.length - 1] + 1;
 					// TODO: Verify extra-padding
 					msgData = msgData.slice(0, msgData.length - remPadding);
