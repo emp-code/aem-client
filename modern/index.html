@@ -268,23 +268,52 @@
 					<button type="button" id="btn_top25" autocomplete="off" disabled><svg viewbox="0 0 96 64"><use xlink:href="#svg_sett"/></svg></button>
 				</nav>
 				<article class="mid">
-					<div id="readmsg_info" hidden>
-						<div id="readmsg_date"><span>&#128336;</span> <time></time></div>
-						<div id="readmsg_greet">&#128188; <span></span></div>
-						<div id="readmsg_ip"><span id="readmsg_country" title="Unknown">&#10068;</span> <span></span><span class="sans"></span></div>
-						<div id="readmsg_rdns">&#127760; <span></span></div>
-						<div id="readmsg_tls">&#128274; <span></span></div>
-						<div id="readmsg_cert">&#128220; <span></span></div>
-						<div id="readmsg_flags">&#128203;<span></span></div>
-						<div id="readmsg_dkim">&#9997; <span></span></div>
-						<div id="readmsg_envfrom"></div>
-						<div id="readmsg_envto"></div>
-						<div id="readmsg_hdrfrom"></div>
-						<div id="readmsg_hdrto"></div>
+					<div id="readmsg_export" hidden>
+						<div>
+							<h1>.aem</h1>
+							<p>A custom format. Preserves all data.</p>
+						</div>
+						<div>
+							<h1>.eml</h1>
+							<p>Supported by most email clients.</p>
+						</div>
+						<div>
+							<h1>.html</h1>
+							<p>HTML format. Preserves formatting.</p>
+						</div>
+						<div>
+							<h1>.txt</h1>
+							<p>Plain text.</p>
+						</div>
+						<div>
+							<h1>Print</h1>
+							<p>Print the email.</p>
+						</div>
+						<div>
+							<h1>Clipboard</h1>
+							<p>Copy the plain text.</p>
+						</div>
 					</div>
 
-					<h1></h1>
-					<pre></pre>
+					<div id="readmsg_main">
+						<div id="readmsg_info" hidden>
+							<div id="readmsg_date"><span>&#128336;</span> <time></time></div>
+							<div id="readmsg_greet">&#128188; <span></span></div>
+							<div id="readmsg_ip"><span id="readmsg_country" title="Unknown">&#10068;</span> <span></span><span class="sans"></span></div>
+							<div id="readmsg_rdns">&#127760; <span></span></div>
+							<div id="readmsg_tls">&#128274; <span></span></div>
+							<div id="readmsg_cert">&#128220; <span></span></div>
+							<div id="readmsg_flags">&#128203;<span></span></div>
+							<div id="readmsg_dkim">&#9997; <span></span></div>
+							<div id="readmsg_envfrom"></div>
+							<div id="readmsg_envto"></div>
+							<div id="readmsg_hdrfrom"></div>
+							<div id="readmsg_hdrto"></div>
+						</div>
+
+						<h1></h1>
+						<pre></pre>
+					</div>
 				</article>
 				<nav>
 					<button type="button" id="btn_mdele" autocomplete="off" disabled><svg viewbox="0 0 96 64"><use xlink:href="#svg_dele"/></svg></button>

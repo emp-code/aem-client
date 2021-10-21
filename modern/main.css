@@ -471,9 +471,46 @@ dialog,
 
 /* Main2 */
 #main2 article {
-	overflow-y: auto;
 	display: flex;
 	flex-direction: column;
+	overflow-y: auto;
+}
+
+#readmsg_main {
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+}
+
+#readmsg_export {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	grid-template-rows: 1fr 1fr 1fr;
+	align-items: center;
+	height: 100%;
+	text-align: center;
+	opacity: 0.5;
+
+	grid-gap: 5vw;
+	margin: 5vw;
+}
+
+#readmsg_export div {
+	height: 100%;
+	border: 1px solid #FFF;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	padding: 0 1vw 0 1vw;
+}
+
+#readmsg_export div:hover {
+	background-color: #1a211a;
+	cursor: pointer;
+}
+
+#readmsg_export p, #readmsg_export h1 {
+	margin: 0;
 }
 
 #readmsg_info {
@@ -487,13 +524,13 @@ dialog,
 	grid-template-columns: 1fr;
 }
 
-#main2 article > h1 {
+#readmsg_main > h1 {
 	font-size: large;
 	text-align: center;
 	opacity: 0.45;
 }
 
-#main2 article > pre {
+#readmsg_main > pre {
 	margin: 0;
 	padding: 0 1em;
 	opacity: 0.55;
@@ -503,26 +540,26 @@ dialog,
 	text-rendering: optimizeLegibility;
 }
 
-#main2 article > pre > p {
+#readmsg_main > pre > p {
 	margin-top: 0;
 }
 
-#main2 article > pre > p:first-child {
+#readmsg_main > pre > p:first-child {
 	line-break: anywhere;
 }
 
-#main2 article > pre > p:nth-child(2) {
+#readmsg_main > pre > p:nth-child(2) {
 	margin-bottom: 0.5em;
 }
 
-#main2 article > :is(img, video, embed, iframe) {
+#readmsg_main > :is(img, video, embed, iframe) {
 	flex-grow: 1;
 	object-fit: contain;
 	height: 1px;
 	border: 0;
 }
 
-#main2 article > audio {
+#readmsg_main > audio {
 	margin: 0 auto;
 	min-width: 90%;
 }
@@ -610,7 +647,7 @@ dialog,
 		background-color: #f5fcee;
 	}
 
-	#main2 article > table {
+	#readmsg_main > table {
 		border-bottom: 1px solid #aaa;
 	}
 

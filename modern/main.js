@@ -120,8 +120,9 @@ function getClockIcon(d) {
 function clearDisplay() {
 	document.getElementById("btn_mnext").disabled = true;
 	document.getElementById("btn_mprev").disabled = true;
+	document.getElementById("readmsg_export").hidden = true;
 
-	const el = document.querySelector("article > img, article > audio, article > video, article > embed, article > iframe");
+	const el = document.querySelector("#readmsg_main > img, #readmsg_main > audio, #readmsg_main > video, #readmsg_main > embed, #readmsg_main > iframe");
 	if (!el) return;
 	if (el.src) URL.revokeObjectURL(el.src);
 	el.remove();
@@ -157,7 +158,7 @@ function displayFile(isHistory, num) {
 	document.getElementById("btn_msave").onclick = function() {ae.downloadUplMsg(num);};
 
 	document.getElementById("readmsg_info").hidden = true;
-	document.querySelector("article > h1").textContent = ae.getUplMsgTitle(num);
+	document.querySelector("#readmsg_main > h1").textContent = ae.getUplMsgTitle(num);
 
 	msgDisplay = new MsgInfo(ae.getUplMsgIdHex(num), "upl", num);
 	if (!isHistory) history.pushState({tab: tab, page: tabs[tab].cur, msg: msgDisplay}, null);
@@ -171,16 +172,16 @@ function displayFile(isHistory, num) {
 	document.getElementById("btn_mprev").onclick = function() {displayFile(false, num - 1);};
 
 	if (fileType === "text") {
-		document.querySelector("article > pre").hidden = false;
+		document.querySelector("#readmsg_main > pre").hidden = false;
 		try {
-			document.querySelector("article > pre").textContent = sodium.to_string(ae.getUplMsgBody(num));
+			document.querySelector("#readmsg_main > pre").textContent = sodium.to_string(ae.getUplMsgBody(num));
 		} catch(e) {
-			document.querySelector("article > pre").textContent = "Failed decoding body: " + e.message;
+			document.querySelector("#readmsg_main > pre").textContent = "Failed decoding body: " + e.message;
 		}
 		return;
 	}
 
-	document.querySelector("article > pre").hidden = true;
+	document.querySelector("#readmsg_main > pre").hidden = true;
 	let el;
 
 	switch (fileType) {
@@ -242,13 +243,31 @@ function displayFile(isHistory, num) {
 		default: return;
 	}
 
-	document.querySelector("article").appendChild(el);
+	document.getElementById("readmsg_main").appendChild(el);
 }
 
 document.getElementById("btn_leave").onclick = function() {
 	document.getElementById("main2").hidden = true;
 	document.getElementById("main1").hidden = false;
 };
+
+function displayExport(isHistory, isInt, num) {
+	clearDisplay();
+	document.getElementById("readmsg_main").hidden = true;
+	document.getElementById("readmsg_export").hidden = false;
+	document.getElementById("btn_msave").blur();
+	document.getElementById("btn_msave").disabled = true;
+
+//	document.querySelector("#readmsg_export > div:nth-child(1)").onclick = function() {};
+	document.querySelector("#readmsg_export > div:nth-child(2)").onclick = function() {if (isInt) {ae.downloadIntMsg(num);} else {ae.downloadExtMsg(num);} displayMsg(false, isInt, num);};
+//	document.querySelector("#readmsg_export > div:nth-child(3)").onclick = function() {};
+//	document.querySelector("#readmsg_export > div:nth-child(4)").onclick = function() {};
+//	document.querySelector("#readmsg_export > div:nth-child(5)").onclick = function() {};
+//	document.querySelector("#readmsg_export > div:nth-child(6)").onclick = function() {};
+
+	msgDisplay = new MsgInfo(isInt? ae.getIntMsgIdHex(num) : ae.getExtMsgIdHex(num), isInt? "int_exp" : "ext_exp", num);
+	if (!isHistory) history.pushState({tab: tab, page: tabs[tab].cur, msg: msgDisplay}, null);
+}
 
 function displayMsg(isHistory, isInt, num) {
 	clearDisplay();
@@ -258,15 +277,7 @@ function displayMsg(isHistory, isInt, num) {
 	document.querySelector("article").setAttribute("data-msgid", isInt? ae.getIntMsgIdHex(num) : ae.getExtMsgIdHex(num));
 
 	document.getElementById("btn_msave").disabled = false;
-	document.getElementById("btn_msave").onclick = function() {
-		if (isInt) {
-			ae.downloadIntMsg(num);
-		} else {
-			ae.downloadExtMsg(num);
-		}
-
-		this.blur();
-	};
+	document.getElementById("btn_msave").onclick = function() {displayExport(false, isInt, num);};
 
 	const ts = isInt? ae.getIntMsgTime(num) : ae.getExtMsgTime(num);
 
@@ -299,7 +310,7 @@ function displayMsg(isHistory, isInt, num) {
 	}
 
 	document.getElementById("readmsg_info").hidden = false;
-	document.querySelector("article > pre").hidden = false;
+	document.querySelector("#readmsg_main > pre").hidden = false;
 
 	document.getElementById("readmsg_envto").textContent = isInt ? "" : ae.getExtMsgEnvTo(num);
 	document.getElementById("readmsg_hdrto").textContent = isInt ? ae.getIntMsgTo(num) : (ae.getExtMsgHdrTo(num));
@@ -316,8 +327,8 @@ function displayMsg(isHistory, isInt, num) {
 	document.getElementById("readmsg_date").children[1].dateTime = new Date(ts * 1000).toISOString();
 
 	if (isInt) {
-		document.querySelector("article > h1").textContent = ae.getIntMsgTitle(num);
-		document.querySelector("article > pre").textContent = ae.getIntMsgBody(num);
+		document.querySelector("#readmsg_main > h1").textContent = ae.getIntMsgTitle(num);
+		document.querySelector("#readmsg_main > pre").textContent = ae.getIntMsgBody(num);
 
 		document.getElementById("readmsg_date").children[1].textContent = msgDate.toISOString().slice(0, 19).replace("T", " ");
 
@@ -358,9 +369,9 @@ function displayMsg(isHistory, isInt, num) {
 		const body = document.createElement("p");
 		body.innerHTML = ae.getExtMsgBody(num);
 
-		document.querySelector("article > pre").replaceChildren(headers, body);
+		document.querySelector("#readmsg_main > pre").replaceChildren(headers, body);
 
-		const h1 = document.querySelector("article > h1");
+		const h1 = document.querySelector("#readmsg_main > h1");
 		h1.textContent = ae.getExtMsgTitle(num);
 		h1.style.cursor = headers.textContent? "pointer" : "";
 		h1.onclick = function() {
@@ -455,6 +466,7 @@ function displayMsg(isHistory, isInt, num) {
 		if ( ae.getExtMsgFlagPErr(num)) addMsgFlag("PROT", "The sender violated the protocol");
 	}
 
+	document.getElementById("readmsg_main").hidden = false;
 	document.getElementById("main2").hidden = false;
 	document.getElementById("main1").hidden = !window.matchMedia("(min-width: 80em)").matches;
 
@@ -472,10 +484,10 @@ function displayOutMsg(isHistory, num) {
 	document.getElementById("btn_reply").disabled = true;
 
 	document.getElementById("readmsg_info").hidden = false;
-	document.querySelector("article > pre").hidden = false;
+	document.querySelector("#readmsg_main > pre").hidden = false;
 
-	document.querySelector("article > h1").textContent = ae.getOutMsgSubj(num);
-	document.querySelector("article > pre").textContent = ae.getOutMsgBody(num);
+	document.querySelector("#readmsg_main > h1").textContent = ae.getOutMsgSubj(num);
+	document.querySelector("#readmsg_main > pre").textContent = ae.getOutMsgBody(num);
 
 	document.getElementById("readmsg_dkim").style.visibility    = "hidden";
 	document.getElementById("readmsg_hdrto").style.visibility   = "visible";
@@ -1284,6 +1296,8 @@ window.onpopstate = function(event) {
 			case "int": displayMsg(true, true, msgDisplay.num); break;
 			case "out": displayOutMsg(true, msgDisplay.num); break;
 			case "upl": displayFile(true, msgDisplay.num); break;
+			case "ext_exp": displayExport(true, false, msgDisplay.num); break;
+			case "int_exp": displayExport(true, true, msgDisplay.num); break;
 		}
 	}
 };
