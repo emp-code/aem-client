@@ -1121,6 +1121,19 @@ function AllEars(readyCallback) {
 		return body;
 	};
 
+	const getPlainExtBody = function(num) {
+		let textBody = _extMsg[num].body;
+
+		if (_isValidCet(textBody)) {
+			textBody = _textCetLinks(textBody, "\x0C", false);
+			textBody = _textCetLinks(textBody, "\x0D", true);
+			textBody = _textCetLinks(textBody, "\x0E", false);
+			textBody = _textCetLinks(textBody, "\x0F", true);
+		} else textBody = textBody.replaceAll("\x0C", " ").replaceAll("\x0D", " ").replaceAll("\x0E", " ").replaceAll("\x0F", " ");
+
+		return textBody;
+	}
+
 // Public
 	this.reset = function() {
 		_maxStorage.splice(0);
@@ -1263,15 +1276,6 @@ function AllEars(readyCallback) {
 	};
 
 	this.exportExtMsg = function(num) {if(typeof(num)!=="number"){return;}
-		let textBody = _extMsg[num].body;
-
-		if (_isValidCet(textBody)) {
-			textBody = _textCetLinks(textBody, "\x0C", false);
-			textBody = _textCetLinks(textBody, "\x0D", true);
-			textBody = _textCetLinks(textBody, "\x0E", false);
-			textBody = _textCetLinks(textBody, "\x0F", true);
-		} else textBody = textBody.replaceAll("\x0C", " ").replaceAll("\x0D", " ").replaceAll("\x0E", " ").replaceAll("\x0F", " ");
-
 		return "Received: from " + _extMsg[num].greet +" (" + this.getExtMsgRdns(num) + " [" + this.getExtMsgIp(num) + "])"
 			+ " by " + _AEM_DOMAIN_EML
 			+ " with " + (_extMsg[num].esmtp ? "E" : "") + "SMTP" + (_extMsg[num].tls ? "S" : "")
@@ -1289,7 +1293,7 @@ function AllEars(readyCallback) {
 		+ "\r\nSubject: " + _extMsg[num].subj
 		+ "\r\nTo: " + (_extMsg[num].dnTo ? ("\"" + _extMsg[num].dnTo + "\" <" + _extMsg[num].hdrTo + ">") : _extMsg[num].hdrTo)
 		+ "\r\n" + _extMsg[num].headers.replaceAll("\n", "\r\n")
-		+ "\r\n\r\n" + textBody.replaceAll("\x0B", "\n---\n").replaceAll("\n", "\r\n")
+		+ "\r\n\r\n" + getPlainExtBody(num).replaceAll("\x0B", "\n---\n").replaceAll("\n", "\r\n")
 		+ "\r\n";
 	};
 
@@ -1351,6 +1355,18 @@ function AllEars(readyCallback) {
 		el.contentWindow.document.body.innerHTML = "<pre>Date: " + msgDate + "\nFrom: " + _intMsg[num].from + "@" + _AEM_DOMAIN_EML + "\n  To: " + _intMsg[num].to + "@" + _AEM_DOMAIN_EML + "</pre><h1>" + _intMsg[num].title + "</h1>" + this.getIntMsgBody(num).replaceAll("\n", "<br>");
 		el.contentWindow.print();
 		document.body.removeChild(el);
+	};
+
+	this.txtExtMsg = function(num, dl) {if(typeof(num)!=="number" || typeof(dl)!=="boolean"){return;}
+		const msgDate = new Date((_extMsg[num].ts * 1000) + ((new Date().getTimezoneOffset()) * -60000)).toISOString().slice(0, 19).replace("T", " ");
+		const msg = "Date: " + msgDate + "\nFrom: " + _extMsg[num].hdrFrom + "\nTo: " + _extMsg[num].hdrTo + "\nSubject: " + _extMsg[num].subj + "\n\n" + getPlainExtBody(num);
+		if (dl) {_downloadFile(_extMsg[num].subj + ".txt", new Blob([msg]));} else return msg;
+	};
+
+	this.txtIntMsg = function(num, dl) {if(typeof(num)!=="number" || typeof(dl)!=="boolean"){return;}
+		const msgDate = new Date((_intMsg[num].ts * 1000) + ((new Date().getTimezoneOffset()) * -60000)).toISOString().slice(0, 19).replace("T", " ");
+		const msg = "Date: " + msgDate + "\nFrom: " + _intMsg[num].from + "@" + _AEM_DOMAIN_EML + "\nTo: " + _intMsg[num].to + "@" + _AEM_DOMAIN_EML + "\nSubject: " + _intMsg[num].title + "\n\n" + this.getIntMsgBody(num, true);
+		if (dl) {_downloadFile(_intMsg[num].title + ".txt", new Blob([msg]));} else return msg;
 	};
 
 	this.getExtMsgReplyAddress = function(num) {if(typeof(num)!=="number"){return;}
