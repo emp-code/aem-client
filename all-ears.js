@@ -2111,7 +2111,7 @@ function AllEars(readyCallback) {
 		});
 	};
 
-	this.Message_Upload = function(title, body, callback) {if(typeof(title)!=="string" || typeof(body)!=="string" || typeof(callback)!=="function"){return;}
+	this.Message_Upload = function(title, body, callback) {if(typeof(title)!=="string" || (typeof(body)!=="string" && body.constructor!==Uint8Array) || typeof(callback)!=="function"){return;}
 		if (typeof(title) !== "string" || title.length < 1 || body.length < 1) {callback(0x01); return;}
 
 		const u8title = sodium.from_string(title);
