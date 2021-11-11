@@ -497,7 +497,7 @@ dialog,
 
 #readmsg_export div {
 	height: 100%;
-	border: 1px solid #FFF;
+	border: 1px solid #fff;
 	display: flex;
 	flex-direction: column;
 	justify-content: center;
