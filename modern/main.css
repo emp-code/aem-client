@@ -509,7 +509,8 @@ dialog,
 	cursor: pointer;
 }
 
-#readmsg_export p, #readmsg_export h1 {
+#readmsg_export p,
+#readmsg_export h1 {
 	margin: 0;
 }
 
