@@ -178,6 +178,8 @@
 
 							<hr>
 
+							<h1>Administration</h1>
+
 							<table id="tbl_limits">
 								<thead>
 									<tr>
@@ -220,18 +222,21 @@
 								</tfoot>
 							</table>
 
-							<p>
-								<input type="text" id="txt_reg" size="64" minlength="64" maxlength="64" pattern="[0-9a-f]{64}" required autocomplete="off" disabled>
-								<button type="button" id="btn_reg" autocomplete="off">Register</button>
-							</p>
+							<hr>
 
-							<p>
-								<input type="text" id="txt_sender_hash" size="64" minlength="64" maxlength="64" pattern="[0-9A-Za-z_-]{64}" required autocomplete="off" placeholder="Message-ID" disabled>
-								<input type="text" id="txt_sender_date" required autocomplete="off" placeholder="Date" disabled>
-								<button type="button" id="btn_sender" autocomplete="off">Identify</button>
-								<br>
-								<input type="text" id="txt_sender_res" size="64" autocomplete="off" placeholder="Result" readonly>
-							</p>
+							<div>
+								<input type="text" id="txt_reg" minlength="64" maxlength="64" pattern="[0-9a-f]{64}" required autocomplete="off" placeholder="Public key (hex)" disabled>
+								<button type="button" id="btn_reg" autocomplete="off">Register</button>
+							</div>
+
+							<hr>
+
+							<div>
+								<p><input type="text" id="txt_sender_hash" minlength="64" maxlength="64" pattern="[0-9A-Za-z_-]{64}" required autocomplete="off" placeholder="Message-ID" disabled></p>
+								<p><input type="text" id="txt_sender_date" required autocomplete="off" placeholder="Date" disabled></p>
+								<p id="txt_sender_res" class="half">No currently registered account was identified as the sender.</p>
+								<p><button type="button" id="btn_sender" autocomplete="off">Identify</button></p>
+							</div>
 						</div>
 
 						<table id="tbl_accs" hidden>
@@ -271,7 +276,7 @@
 					<div id="readmsg_export" hidden>
 						<div>
 							<h1>.aem</h1>
-							<p>A custom format. Preserves all data.</p>
+							<p>Native format. Preserves all data.</p>
 						</div>
 						<div>
 							<h1>.eml</h1>

@@ -141,10 +141,17 @@ textarea {
 #div_begin,
 #div_write_1,
 #div_acc > p,
+#div_acc > div,
 #tbl_limits,
 #table_addrs tfoot td,
 #table_addrs tfoot button {
 	text-align: center;
+}
+
+#div_acc h1 {
+	opacity: 0.5;
+	text-align: center;
+	font-size: large;
 }
 
 .sans {
