@@ -1139,7 +1139,7 @@ function AllEars(readyCallback) {
 		} else textBody = textBody.replaceAll("\x0C", " ").replaceAll("\x0D", " ").replaceAll("\x0E", " ").replaceAll("\x0F", " ");
 
 		return textBody;
-	}
+	};
 
 // Public
 	this.reset = function() {
