@@ -1103,7 +1103,7 @@ function AllEars(readyCallback) {
 		let skip = 0;
 
 		while(1) {
-			const x = str.slice(skip).indexOf(protocol);
+			let x = str.slice(skip).indexOf(protocol);
 			if (x < 1) break;
 			x += skip;
 
