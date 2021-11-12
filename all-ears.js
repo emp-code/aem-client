@@ -1758,7 +1758,7 @@ function AllEars(readyCallback) {
 				let msgData;
 				try {msgData = sodium.crypto_box_seal_open(msgEnc, _userKeyPublic, _userKeySecret);}
 				catch(e) {
-					prevTs--; // The server sends the messages from newest the oldest -> this message is older than the previous one -> lower timestamp
+					prevTs--; // The server sends messages from newest to oldest -> this message is older than the previous one -> lower timestamp
 					_intMsg.push(new _IntMsg(true, true, msgId, prevTs, false, 3, null, "system", "", "Failed decrypting: " + offset + "/" + browseData.length + " (size: " + msgEnc.length + ")", e));
 					offset += msgBytes;
 					continue;
