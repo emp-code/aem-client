@@ -1109,7 +1109,7 @@ function AllEars(readyCallback) {
 
 			let y = 0;
 			const lnk = str.slice(x);
-			for (let i = 0; i < lnk.length; i++) {
+			for (let i = protocol.length; i < lnk.length; i++) {
 				if (lnk.charCodeAt(i) === 10 || lnk.charCodeAt(i) === 32) {
 					y = i;
 					break;
