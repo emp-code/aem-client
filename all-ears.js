@@ -1100,15 +1100,28 @@ function AllEars(readyCallback) {
 	};
 
 	const _replaceLinks = function(str, protocol, linkByte) {
+		let skip = 0;
+
 		while(1) {
-			const x = str.indexOf(protocol);
+			const x = str.slice(skip).indexOf(protocol);
 			if (x < 1) break;
 
-			const y = str.slice(x).search("[ \n]");
+			let y = 0;
+			const lnk = str.slice(x);
+			for (let i = 0; i < lnk.length; i++) {
+				if (lnk.charCodeAt(i) === 10 || lnk.charCodeAt(i) === 32) {
+					y = i;
+					break;
+				} else if (lnk.charCodeAt(i) < 32) {
+					skip = x + protocol.length;
+					break;
+				}
+			}
 			if (y < 1) break;
 
 			const url = str.slice(x + protocol.length, x + y);
 			str = str.slice(0, x) + linkByte + url + linkByte + str.slice(x + y);
+			skip = 0;
 		}
 
 		return str;
