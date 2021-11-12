@@ -1772,8 +1772,8 @@ function AllEars(readyCallback) {
 				const validPad = (padA && padB && padA.length === padB.length && _arraysEqual(padA, padB));
 				const validSig = sodium.crypto_sign_verify_detached(msgData.slice(msgData.length - sodium.crypto_sign_BYTES), msgData.slice(0, msgData.length - sodium.crypto_sign_BYTES), _AEM_SIG_PUBKEY);
 
-				const msgTs = new Uint32Array(msgData.slice(1, 5).buffer)[0];
 				const msgTs_bin = msgData.slice(1, 5);
+				const msgTs = new Uint32Array(msgTs_bin.buffer)[0];
 				if (msgTs > _newestMsgTs) {
 					_newestMsgId = msgId;
 					_newestMsgTs = msgTs;
