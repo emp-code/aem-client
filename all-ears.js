@@ -1112,7 +1112,7 @@ function AllEars(readyCallback) {
 		}
 
 		return str;
-	}
+	};
 
 	const _htmlCetLinks = function(body, needle, isSecure, linkIcon, fullUrl) {
 		while(1) {
