@@ -1377,7 +1377,7 @@ function AllEars(readyCallback) {
 		}
 
 		return msgTs;
-	}
+	};
 
 // Public
 	this.reset = function() {
