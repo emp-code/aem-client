@@ -1105,6 +1105,7 @@ function AllEars(readyCallback) {
 		while(1) {
 			const x = str.slice(skip).indexOf(protocol);
 			if (x < 1) break;
+			x += skip;
 
 			let y = 0;
 			const lnk = str.slice(x);
