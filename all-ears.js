@@ -1099,6 +1099,21 @@ function AllEars(readyCallback) {
 		);
 	};
 
+	const _replaceLinks = function(str, protocol, linkByte) {
+		while(1) {
+			const x = str.indexOf(protocol);
+			if (x < 1) break;
+
+			const y = str.slice(x).search("[ \n]");
+			if (y < 1) break;
+
+			const url = str.slice(x + protocol.length, x + y);
+			str = str.slice(0, x) + linkByte + url + linkByte + str.slice(x + y);
+		}
+
+		return str;
+	}
+
 	const _htmlCetLinks = function(body, needle, isSecure, linkIcon, fullUrl) {
 		while(1) {
 			const begin = body.indexOf(needle);
@@ -1244,6 +1259,9 @@ function AllEars(readyCallback) {
 		let html = _extMsg[num].body.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").split("\x0B").reverse().join("<br><hr>");
 
 		if (_isValidCet(html)) {
+			html = _replaceLinks(html, "http://", "\x0C");
+			html = _replaceLinks(html, "https://", "\x0D");
+
 			html = _htmlCetLinks(html, "\x0C", false, "🔗", fullUrl);
 			html = _htmlCetLinks(html, "\x0D", true,  "🔒", fullUrl);
 			html = _htmlCetLinks(html, "\x0E", false, "👁", fullUrl);
