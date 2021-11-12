@@ -1156,6 +1156,215 @@ function AllEars(readyCallback) {
 		return textBody;
 	};
 
+	const _addMessage = function(msgData, msgSize, msgId) {
+		const msgInfo = msgData[0];
+		const padAmount = msgInfo & 15;
+
+		const padA = msgData.slice(msgData.length - sodium.crypto_sign_BYTES - padAmount, msgData.length - sodium.crypto_sign_BYTES);
+		const padB = sodium.randombytes_buf_deterministic(padAmount, msgData.slice(0, 32), null); // 32=sodium.randombytes_SEEDBYTES
+		const validPad = (padA && padB && padA.length === padB.length && _arraysEqual(padA, padB));
+		const validSig = sodium.crypto_sign_verify_detached(msgData.slice(msgData.length - sodium.crypto_sign_BYTES), msgData.slice(0, msgData.length - sodium.crypto_sign_BYTES), _AEM_SIG_PUBKEY);
+
+		const msgTs_bin = msgData.slice(1, 5);
+		const msgTs = new Uint32Array(msgTs_bin.buffer)[0];
+		if (msgTs > _newestMsgTs) {
+			_newestMsgId = msgId;
+			_newestMsgTs = msgTs;
+		}
+
+		msgData = msgData.slice(5, msgData.length - padAmount - sodium.crypto_sign_BYTES);
+
+		switch (msgInfo & 48) {
+			case 0: { // ExtMsg
+				const msgIp = msgData.slice(0, 4);
+				const msgCs  = new Uint16Array(msgData.slice(4, 6).buffer)[0];
+				const msgTls = msgData[6];
+
+				const dkimCount = msgData[7] >> 5;
+				const msgAttach = msgData[7] & 31;
+
+				const msgIpBlk = (msgData[8] & 128) !== 0;
+				const msgGrDom = (msgData[8] &  64) !== 0;
+				const msgEsmtp = (msgData[8] &  32) !== 0;
+				const msgInval = (msgData[9] & 128) !== 0;
+				const msgProtV = (msgData[9] &  64) !== 0;
+				const msgRares = (msgData[9] &  32) !== 0;
+				// [10] & 32 unused
+				const lenEnvTo = msgData[10] &  31;
+				const msgDmarc = msgData[11] & 192;
+				const lenHdrTo = msgData[11] &  63;
+				const msgDnSec = msgData[12] & 192;
+				const lenGreet = msgData[12] &  63;
+				const msgDane  = msgData[13] & 192;
+				const lenRvDns = msgData[13] &  63;
+				// [14] & 192 unused
+				const lenAuSys = msgData[14] & 63;
+				const dkimFail = (msgData[15] & 128) !== 0;
+				const msgHdrTz = (msgData[15] & 127) * 15 - 900; // Timezone offset in minutes; -900m..900m (-15h..+15h)
+
+				const msgHdrTs = new Uint16Array(msgData.slice(16, 18).buffer)[0] - 736;
+				const msgCc = ((msgData[8] & 31) <= 26 && (msgData[9] & 31) <= 26) ? String.fromCharCode("A".charCodeAt(0) + (msgData[8] & 31)) + String.fromCharCode("A".charCodeAt(0) + (msgData[9] & 31)) : "??";
+
+				let msgDkim = null;
+				let lenDkimDomain = [];
+
+				let extOffset = 18;
+
+				if (dkimCount !== 0) {
+					msgDkim = new _Dkim();
+
+					for (let i = 0; i < dkimCount; i++) {
+						msgDkim.senderId   = [(msgData[extOffset + 1] & 128) !== 0];
+						msgDkim.sgnAll     = [(msgData[extOffset + 1] &  64) !== 0];
+						msgDkim.sgnDate    = [(msgData[extOffset + 1] &  32) !== 0];
+						msgDkim.sgnFrom    = [(msgData[extOffset + 1] &  16) !== 0];
+						msgDkim.sgnMsgId   = [(msgData[extOffset + 1] &   8) !== 0];
+						msgDkim.sgnReplyTo = [(msgData[extOffset + 1] &   4) !== 0];
+						msgDkim.sgnSubject = [(msgData[extOffset + 1] &   2) !== 0];
+						msgDkim.sgnTo      = [(msgData[extOffset + 1] &   1) !== 0];
+
+						lenDkimDomain.push((msgData[extOffset + 2] & 63) + 4);
+
+						extOffset += 3;
+					}
+				}
+
+				try {
+					const msgBodyBr = new Int8Array(msgData.slice(extOffset));
+					const msgBodyU8 = new Uint8Array(window.BrotliDecode(msgBodyBr));
+
+					const d = new TextDecoder("utf-8");
+					let o = 0;
+
+					for (let i = 0; i < dkimCount; i++) {
+						msgDkim.domain.push(d.decode(msgBodyU8.slice(o, o + lenDkimDomain[i])));
+						o += lenDkimDomain[i];
+					}
+
+					const msgEnvTo = d.decode(msgBodyU8.slice(o, o + lenEnvTo)) + "@" + _AEM_DOMAIN_EML; o += lenEnvTo;
+					const hdrTo    = d.decode(msgBodyU8.slice(o, o + lenHdrTo)); o+= lenHdrTo;
+					const msgGreet = d.decode(msgBodyU8.slice(o, o + lenGreet)); o+= lenGreet;
+					const msgRvDns = d.decode(msgBodyU8.slice(o, o + lenRvDns)); o+= lenRvDns;
+					const msgAuSys = d.decode(msgBodyU8.slice(o, o + lenAuSys)); o+= lenAuSys;
+
+					const msgParts = d.decode(msgBodyU8.slice(o)).split("\n");
+					const msgEnvFr = msgParts[0];
+					const hdrFr    = msgParts[1];
+					const hdrRt    = msgParts[2];
+					const msgHdrId = msgParts[3];
+					const msgSbjct = msgParts[4];
+
+					const msgHdrTo = hdrTo.includes("\x0B") ? hdrTo.slice(hdrTo.indexOf("\x0B") + 1) : hdrTo;
+					const msgHdrFr = hdrFr.includes("\x0B") ? hdrFr.slice(hdrFr.indexOf("\x0B") + 1) : hdrFr;
+					const msgHdrRt = hdrRt.includes("\x0B") ? hdrRt.slice(hdrRt.indexOf("\x0B") + 1) : hdrRt;
+
+					const msgDnTo = hdrTo.includes("\x0B") ? hdrTo.slice(0, hdrTo.indexOf("\x0B")) : null;
+					const msgDnFr = hdrFr.includes("\x0B") ? hdrFr.slice(0, hdrFr.indexOf("\x0B")) : null;
+					const msgDnRt = hdrRt.includes("\x0B") ? hdrRt.slice(0, hdrRt.indexOf("\x0B")) : null;
+
+					const body = msgParts.slice(5).join("\n");
+					const headersEnd = body.indexOf("\x0B");
+					const msgHeaders = (headersEnd > 0) ? body.slice(0, headersEnd) : "";
+					const msgBody = body.slice(headersEnd + 1);
+
+					_extMsg.push(new _ExtMsg(validPad, validSig, msgId, msgTs, msgHdrTs, msgHdrTz, msgIp, msgCc, msgCs, msgTls, msgEsmtp, msgProtV, msgInval, msgRares, msgAttach, msgGrDom, msgIpBlk, dkimFail, msgDkim, msgGreet, msgRvDns, msgAuSys, msgEnvFr, msgHdrFr, msgDnFr, msgEnvTo, msgHdrTo, msgDnTo, msgHdrRt, msgDnRt, msgHdrId, msgHeaders, msgSbjct, msgBody));
+				} catch(e) {
+					_extMsg.push(new _ExtMsg(validPad, validSig, msgId, msgTs, msgHdrTs, msgHdrTz, msgIp, msgCc, msgCs, msgTls, msgEsmtp, msgProtV, msgInval, msgRares, msgAttach, msgGrDom, msgIpBlk, dkimFail, null, "", "", "", "", "", "", "", "", "", "", "", "", "Failed decompression", "Size: " + msgData.length));
+				}
+			break;}
+
+			case 16: { // IntMsg
+				const msgType = msgData[0] & 192;
+
+				if (msgType >= 128) { // 192: System, 128: Public
+					// 32/16/8/4/2/1 unused
+
+					const bodyAndTitle = sodium.to_string(msgData.slice(1));
+					const separator = bodyAndTitle.indexOf("\n");
+					_intMsg.push(new _IntMsg(validPad, validSig, msgId, msgTs, false, 3, null, (msgType === 192) ? "system" : "public", "", bodyAndTitle.slice(0, separator), bodyAndTitle.slice(separator + 1)));
+					break;
+				}
+
+				// User-to-user message; 64: E2EE, 0: Non-E2EE
+				// 32/16 unused
+				const msgEncrypted  = (msgData[0] & 64) !== 0;
+				const msgFromShield = (msgData[0] &  8) !== 0;
+				const msgToShield   = (msgData[0] &  4) !== 0;
+				const msgFromLv = msgData[0] & 3;
+
+				const msgFrom = _addr32_decode(msgData.slice( 1, 11), msgFromShield);
+				const msgTo   = _addr32_decode(msgData.slice(11, 21), msgToShield);
+				const msgFromPk = msgData.slice(21, 21 + sodium.crypto_kx_PUBLICKEYBYTES);
+
+				const msgTitleLen = msgData[21 + sodium.crypto_kx_PUBLICKEYBYTES] & 127; // 128 unused
+				const msgBox = msgData.slice(22 + sodium.crypto_kx_PUBLICKEYBYTES);
+
+				let msgBin;
+				let msgTitle;
+				let msgBody;
+
+				try {
+					if (msgEncrypted) {
+						const nonce = new Uint8Array(sodium.crypto_secretbox_NONCEBYTES);
+						nonce.fill(0);
+						nonce.set(msgTs_bin);
+
+						const addr32_to = msgData.slice(11, 21);
+
+						const kxKeys = sodium.crypto_kx_seed_keypair(sodium.crypto_generichash(sodium.crypto_kx_SEEDBYTES, addr32_to, _userKeyKxHash));
+						const sessionKeys = sodium.crypto_kx_server_session_keys(kxKeys.publicKey, kxKeys.privateKey, msgFromPk);
+						msgBin = sodium.crypto_secretbox_open_easy(msgBox, nonce, sessionKeys.sharedRx);
+					} else {
+						msgBin = msgBox;
+					}
+
+					msgTitle = sodium.to_string(msgBin.slice(0, msgTitleLen));
+					msgBody = sodium.to_string(msgBin.slice(msgTitleLen));
+				} catch(e) {
+					msgTitle = "(error)";
+					msgBody = e.message;
+				}
+
+				_intMsg.push(new _IntMsg(validPad, validSig, msgId, msgTs, msgEncrypted, msgFromLv, msgFromPk, msgFrom, msgTo, msgTitle, msgBody));
+			break;}
+
+			case 32: { // UplMsg (Email attachment, or uploaded file)
+				let msgTitle;
+				let msgBody;
+				let msgParent = null;
+
+				try {
+					// Uploaded file, additional symmetric encryption
+					const dec = sodium.crypto_secretbox_open_easy(msgData.slice(sodium.crypto_secretbox_NONCEBYTES), msgData.slice(0, sodium.crypto_secretbox_NONCEBYTES), _userKeySymmetric);
+					msgTitle = sodium.to_string(dec.slice(1, 2 + dec[0]));
+					msgBody = dec.slice(2 + dec[0]);
+				} catch(e) {
+					// Email attachment, no additional encryption
+					msgParent = msgData.slice(1, 17);
+					msgTitle = sodium.to_string(msgData.slice(17, 18 + msgData[0])); // +1
+					msgBody = msgData.slice(18 + msgData[0]);
+				}
+
+				if (msgTitle.endsWith(".br")) {
+					try {
+						msgBody = new Uint8Array(window.BrotliDecode(new Int8Array(msgBody)));
+						msgTitle = msgTitle.replace(/\.br$/, "");
+					} catch(e) {
+						msgBody = "Failed decompression";
+					}
+				}
+
+				_uplMsg.push(new _UplMsg(msgId, msgTs, msgTitle, msgBody, msgParent, msgSize));
+			break;}
+
+			case 48: // OutMsg (Delivery report for sent message)
+				_addOutMsg(msgData, validPad, validSig, msgId, msgTs, msgTs_bin, false);
+			break;
+		}
+
+		return msgTs;
+	}
+
 // Public
 	this.reset = function() {
 		_maxStorage.splice(0);
@@ -1764,212 +1973,7 @@ function AllEars(readyCallback) {
 					continue;
 				}
 
-				const msgInfo = msgData[0];
-				const padAmount = msgInfo & 15;
-
-				const padA = msgData.slice(msgData.length - sodium.crypto_sign_BYTES - padAmount, msgData.length - sodium.crypto_sign_BYTES);
-				const padB = sodium.randombytes_buf_deterministic(padAmount, msgData.slice(0, 32), null); // 32=sodium.randombytes_SEEDBYTES
-				const validPad = (padA && padB && padA.length === padB.length && _arraysEqual(padA, padB));
-				const validSig = sodium.crypto_sign_verify_detached(msgData.slice(msgData.length - sodium.crypto_sign_BYTES), msgData.slice(0, msgData.length - sodium.crypto_sign_BYTES), _AEM_SIG_PUBKEY);
-
-				const msgTs_bin = msgData.slice(1, 5);
-				const msgTs = new Uint32Array(msgTs_bin.buffer)[0];
-				if (msgTs > _newestMsgTs) {
-					_newestMsgId = msgId;
-					_newestMsgTs = msgTs;
-				}
-				prevTs = msgTs;
-
-				msgData = msgData.slice(5, msgData.length - padAmount - sodium.crypto_sign_BYTES);
-
-				switch (msgInfo & 48) {
-					case 0: { // ExtMsg
-						const msgIp = msgData.slice(0, 4);
-						const msgCs  = new Uint16Array(msgData.slice(4, 6).buffer)[0];
-						const msgTls = msgData[6];
-
-						const dkimCount = msgData[7] >> 5;
-						const msgAttach = msgData[7] & 31;
-
-						const msgIpBlk = (msgData[8] & 128) !== 0;
-						const msgGrDom = (msgData[8] &  64) !== 0;
-						const msgEsmtp = (msgData[8] &  32) !== 0;
-						const msgInval = (msgData[9] & 128) !== 0;
-						const msgProtV = (msgData[9] &  64) !== 0;
-						const msgRares = (msgData[9] &  32) !== 0;
-						// [10] & 32 unused
-						const lenEnvTo = msgData[10] &  31;
-						const msgDmarc = msgData[11] & 192;
-						const lenHdrTo = msgData[11] &  63;
-						const msgDnSec = msgData[12] & 192;
-						const lenGreet = msgData[12] &  63;
-						const msgDane  = msgData[13] & 192;
-						const lenRvDns = msgData[13] &  63;
-						// [14] & 192 unused
-						const lenAuSys = msgData[14] & 63;
-						const dkimFail = (msgData[15] & 128) !== 0;
-						const msgHdrTz = (msgData[15] & 127) * 15 - 900; // Timezone offset in minutes; -900m..900m (-15h..+15h)
-
-						const msgHdrTs = new Uint16Array(msgData.slice(16, 18).buffer)[0] - 736;
-						const msgCc = ((msgData[8] & 31) <= 26 && (msgData[9] & 31) <= 26) ? String.fromCharCode("A".charCodeAt(0) + (msgData[8] & 31)) + String.fromCharCode("A".charCodeAt(0) + (msgData[9] & 31)) : "??";
-
-						let msgDkim = null;
-						let lenDkimDomain = [];
-
-						let extOffset = 18;
-
-						if (dkimCount !== 0) {
-							msgDkim = new _Dkim();
-
-							for (let i = 0; i < dkimCount; i++) {
-								msgDkim.senderId   = [(msgData[extOffset + 1] & 128) !== 0];
-								msgDkim.sgnAll     = [(msgData[extOffset + 1] &  64) !== 0];
-								msgDkim.sgnDate    = [(msgData[extOffset + 1] &  32) !== 0];
-								msgDkim.sgnFrom    = [(msgData[extOffset + 1] &  16) !== 0];
-								msgDkim.sgnMsgId   = [(msgData[extOffset + 1] &   8) !== 0];
-								msgDkim.sgnReplyTo = [(msgData[extOffset + 1] &   4) !== 0];
-								msgDkim.sgnSubject = [(msgData[extOffset + 1] &   2) !== 0];
-								msgDkim.sgnTo      = [(msgData[extOffset + 1] &   1) !== 0];
-
-								lenDkimDomain.push((msgData[extOffset + 2] & 63) + 4);
-
-								extOffset += 3;
-							}
-						}
-
-						try {
-							const msgBodyBr = new Int8Array(msgData.slice(extOffset));
-							const msgBodyU8 = new Uint8Array(window.BrotliDecode(msgBodyBr));
-
-							const d = new TextDecoder("utf-8");
-							let o = 0;
-
-							for (let i = 0; i < dkimCount; i++) {
-								msgDkim.domain.push(d.decode(msgBodyU8.slice(o, o + lenDkimDomain[i])));
-								o += lenDkimDomain[i];
-							}
-
-							const msgEnvTo = d.decode(msgBodyU8.slice(o, o + lenEnvTo)) + "@" + _AEM_DOMAIN_EML; o += lenEnvTo;
-							const hdrTo    = d.decode(msgBodyU8.slice(o, o + lenHdrTo)); o+= lenHdrTo;
-							const msgGreet = d.decode(msgBodyU8.slice(o, o + lenGreet)); o+= lenGreet;
-							const msgRvDns = d.decode(msgBodyU8.slice(o, o + lenRvDns)); o+= lenRvDns;
-							const msgAuSys = d.decode(msgBodyU8.slice(o, o + lenAuSys)); o+= lenAuSys;
-
-							const msgParts = d.decode(msgBodyU8.slice(o)).split("\n");
-							const msgEnvFr = msgParts[0];
-							const hdrFr    = msgParts[1];
-							const hdrRt    = msgParts[2];
-							const msgHdrId = msgParts[3];
-							const msgSbjct = msgParts[4];
-
-							const msgHdrTo = hdrTo.includes("\x0B") ? hdrTo.slice(hdrTo.indexOf("\x0B") + 1) : hdrTo;
-							const msgHdrFr = hdrFr.includes("\x0B") ? hdrFr.slice(hdrFr.indexOf("\x0B") + 1) : hdrFr;
-							const msgHdrRt = hdrRt.includes("\x0B") ? hdrRt.slice(hdrRt.indexOf("\x0B") + 1) : hdrRt;
-
-							const msgDnTo = hdrTo.includes("\x0B") ? hdrTo.slice(0, hdrTo.indexOf("\x0B")) : null;
-							const msgDnFr = hdrFr.includes("\x0B") ? hdrFr.slice(0, hdrFr.indexOf("\x0B")) : null;
-							const msgDnRt = hdrRt.includes("\x0B") ? hdrRt.slice(0, hdrRt.indexOf("\x0B")) : null;
-
-							const body = msgParts.slice(5).join("\n");
-							const headersEnd = body.indexOf("\x0B");
-							const msgHeaders = (headersEnd > 0) ? body.slice(0, headersEnd) : "";
-							const msgBody = body.slice(headersEnd + 1);
-
-							_extMsg.push(new _ExtMsg(validPad, validSig, msgId, msgTs, msgHdrTs, msgHdrTz, msgIp, msgCc, msgCs, msgTls, msgEsmtp, msgProtV, msgInval, msgRares, msgAttach, msgGrDom, msgIpBlk, dkimFail, msgDkim, msgGreet, msgRvDns, msgAuSys, msgEnvFr, msgHdrFr, msgDnFr, msgEnvTo, msgHdrTo, msgDnTo, msgHdrRt, msgDnRt, msgHdrId, msgHeaders, msgSbjct, msgBody));
-						} catch(e) {
-							_extMsg.push(new _ExtMsg(validPad, validSig, msgId, msgTs, msgHdrTs, msgHdrTz, msgIp, msgCc, msgCs, msgTls, msgEsmtp, msgProtV, msgInval, msgRares, msgAttach, msgGrDom, msgIpBlk, dkimFail, null, "", "", "", "", "", "", "", "", "", "", "", "", "Failed decompression", "Size: " + msgData.length));
-						}
-					break;}
-
-					case 16: { // IntMsg
-						const msgType = msgData[0] & 192;
-
-						if (msgType >= 128) { // 192: System, 128: Public
-							// 32/16/8/4/2/1 unused
-
-							const bodyAndTitle = sodium.to_string(msgData.slice(1));
-							const separator = bodyAndTitle.indexOf("\n");
-							_intMsg.push(new _IntMsg(validPad, validSig, msgId, msgTs, false, 3, null, (msgType === 192) ? "system" : "public", "", bodyAndTitle.slice(0, separator), bodyAndTitle.slice(separator + 1)));
-							break;
-						}
-
-						// User-to-user message; 64: E2EE, 0: Non-E2EE
-						// 32/16 unused
-						const msgEncrypted  = (msgData[0] & 64) !== 0;
-						const msgFromShield = (msgData[0] &  8) !== 0;
-						const msgToShield   = (msgData[0] &  4) !== 0;
-						const msgFromLv = msgData[0] & 3;
-
-						const msgFrom = _addr32_decode(msgData.slice( 1, 11), msgFromShield);
-						const msgTo   = _addr32_decode(msgData.slice(11, 21), msgToShield);
-						const msgFromPk = msgData.slice(21, 21 + sodium.crypto_kx_PUBLICKEYBYTES);
-
-						const msgTitleLen = msgData[21 + sodium.crypto_kx_PUBLICKEYBYTES] & 127; // 128 unused
-						const msgBox = msgData.slice(22 + sodium.crypto_kx_PUBLICKEYBYTES);
-
-						let msgBin;
-						let msgTitle;
-						let msgBody;
-
-						try {
-							if (msgEncrypted) {
-								const nonce = new Uint8Array(sodium.crypto_secretbox_NONCEBYTES);
-								nonce.fill(0);
-								nonce.set(msgTs_bin);
-
-								const addr32_to = msgData.slice(11, 21);
-
-								const kxKeys = sodium.crypto_kx_seed_keypair(sodium.crypto_generichash(sodium.crypto_kx_SEEDBYTES, addr32_to, _userKeyKxHash));
-								const sessionKeys = sodium.crypto_kx_server_session_keys(kxKeys.publicKey, kxKeys.privateKey, msgFromPk);
-								msgBin = sodium.crypto_secretbox_open_easy(msgBox, nonce, sessionKeys.sharedRx);
-							} else {
-								msgBin = msgBox;
-							}
-
-							msgTitle = sodium.to_string(msgBin.slice(0, msgTitleLen));
-							msgBody = sodium.to_string(msgBin.slice(msgTitleLen));
-						} catch(e) {
-							msgTitle = "(error)";
-							msgBody = e.message;
-						}
-
-						_intMsg.push(new _IntMsg(validPad, validSig, msgId, msgTs, msgEncrypted, msgFromLv, msgFromPk, msgFrom, msgTo, msgTitle, msgBody));
-					break;}
-
-					case 32: { // UplMsg (Email attachment, or uploaded file)
-						let msgTitle;
-						let msgBody;
-						let msgParent = null;
-
-						try {
-							// Uploaded file, additional symmetric encryption
-							const dec = sodium.crypto_secretbox_open_easy(msgData.slice(sodium.crypto_secretbox_NONCEBYTES), msgData.slice(0, sodium.crypto_secretbox_NONCEBYTES), _userKeySymmetric);
-							msgTitle = sodium.to_string(dec.slice(1, 2 + dec[0]));
-							msgBody = dec.slice(2 + dec[0]);
-						} catch(e) {
-							// Email attachment, no additional encryption
-							msgParent = msgData.slice(1, 17);
-							msgTitle = sodium.to_string(msgData.slice(17, 18 + msgData[0])); // +1
-							msgBody = msgData.slice(18 + msgData[0]);
-						}
-
-						if (msgTitle.endsWith(".br")) {
-							try {
-								msgBody = new Uint8Array(window.BrotliDecode(new Int8Array(msgBody)));
-								msgTitle = msgTitle.replace(/\.br$/, "");
-							} catch(e) {
-								msgBody = "Failed decompression";
-							}
-						}
-
-						_uplMsg.push(new _UplMsg(msgId, msgTs, msgTitle, msgBody, msgParent, msgBytes / 16));
-					break;}
-
-					case 48: // OutMsg (Delivery report for sent message)
-						_addOutMsg(msgData, validPad, validSig, msgId, msgTs, msgTs_bin, false);
-					break;
-				}
-
+				prevTs = _addMessage(msgData, msgBytes, msgId);
 				offset += msgBytes;
 			}
 
