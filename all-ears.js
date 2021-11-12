@@ -1117,7 +1117,7 @@ function AllEars(readyCallback) {
 					break;
 				}
 			}
-			if (y < 1) break;
+			if (y < 1) continue;
 
 			const url = str.slice(x + protocol.length, x + y);
 			str = str.slice(0, x) + linkByte + url + linkByte + str.slice(x + y);
