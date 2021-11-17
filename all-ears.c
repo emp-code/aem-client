@@ -8,6 +8,7 @@
 #include <string.h>
 #include <sys/socket.h>
 #include <unistd.h>
+#include <time.h>
 
 #include <sodium.h>
 
@@ -178,7 +179,9 @@ static int apiFetch(const int apiCmd, const void * const clear, const size_t len
 	lenReq += lenHeaders;
 
 	unsigned char pbNonce[crypto_box_NONCEBYTES];
-	randombytes_buf(pbNonce, crypto_box_NONCEBYTES);
+	const uint32_t ts = (uint32_t)time(NULL);
+	memcpy(pbNonce, &ts, 4);
+	randombytes_buf(pbNonce + 4, crypto_box_NONCEBYTES - 4);
 
 	unsigned char sealClear[AEM_SEALCLEAR_LEN];
 	sealClear[0] = apiCmd;
