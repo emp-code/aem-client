@@ -12,7 +12,7 @@
 
 [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/emp-code/aem-client/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/emp-code/aem-client/?branch=master)
 
-[![Code Inspector](https://www.code-inspector.com/project/11148/score/svg)](https://frontend.code-inspector.com/public/project/11148/aem-client/dashboard)
+[![Codiga](https://api.codiga.io/project/11148/score/svg)](https://app.codiga.io/public/project/11148/aem-client/dashboard)
 
 ## Web ##
 
