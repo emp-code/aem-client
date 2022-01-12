@@ -8,7 +8,7 @@
 
 [![CodeFactor](https://www.codefactor.io/repository/github/emp-code/aem-client/badge)](https://www.codefactor.io/repository/github/emp-code/aem-client)
 
-[![Codacy Badge](https://app.codacy.com/project/badge/Grade/4b18ae1da10d40759732e4c63644a6fd)](https://www.codacy.com/gh/emp-code/aem-client/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=emp-code/aem-client&amp;utm_campaign=Badge_Grade)
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/47c25a7e9599408b97460648999c016e)](https://www.codacy.com/gh/emp-code/aem-client/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=emp-code/aem-client&amp;utm_campaign=Badge_Grade)
 
 [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/emp-code/aem-client/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/emp-code/aem-client/?branch=master)
 
