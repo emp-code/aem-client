@@ -1061,7 +1061,7 @@ function AllEars(readyCallback) {
 				msgBd= "Message failed to decode.\n\n" + e + "\n\nBasic decode:\n\n";
 
 				for (let i = 0; i < msgBin.length; i++) {
-					if ((msgBin[i] != 10 && msgBin[i] <= 31) || msgBin[i] >= 127)
+					if ((msgBin[i] !== 10 && msgBin[i] <= 31) || msgBin[i] >= 127)
 						msgBd += "[" + msgBin[i] + "]";
 					else
 						msgBd += String.fromCharCode(msgBin[i]);
