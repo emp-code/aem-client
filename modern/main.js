@@ -251,26 +251,6 @@ document.getElementById("btn_leave").onclick = function() {
 	document.getElementById("main1").hidden = false;
 };
 
-function displayExport(isHistory, isInt, num) {
-	clearDisplay();
-	document.getElementById("readmsg_main").hidden = true;
-	document.getElementById("readmsg_export").hidden = false;
-	document.getElementById("btn_msave").blur();
-	document.getElementById("btn_msave").disabled = true;
-	document.getElementById("btn_reply").disabled = true;
-	document.getElementById("btn_mdele").disabled = true;
-
-//	document.querySelector("#readmsg_export > div:nth-child(1)").onclick = function() {};
-	document.querySelector("#readmsg_export > div:nth-child(2)").onclick = function() {if (isInt) {ae.downloadIntMsg(num);} else {ae.downloadExtMsg(num);} displayMsg(false, isInt, num);};
-	document.querySelector("#readmsg_export > div:nth-child(3)").onclick = function() {if (isInt) {ae.htmlIntMsg(num, true);} else {ae.htmlExtMsg(num, true);} displayMsg(false, isInt, num);};
-	document.querySelector("#readmsg_export > div:nth-child(4)").onclick = function() {if (isInt) {ae.txtIntMsg(num, true);} else {ae.txtExtMsg(num, true);} displayMsg(false, isInt, num);};
-	document.querySelector("#readmsg_export > div:nth-child(5)").onclick = function() {if (isInt) {ae.printIntMsg(num);} else {ae.printExtMsg(num);} displayMsg(false, isInt, num);};
-	document.querySelector("#readmsg_export > div:nth-child(6)").onclick = function() {navigator.clipboard.writeText(isInt? ae.txtIntMsg(num, false) : ae.txtExtMsg(num, false)); displayMsg(false, isInt, num);};
-
-	msgDisplay = new MsgInfo(isInt? ae.getIntMsgIdHex(num) : ae.getExtMsgIdHex(num), isInt? "int_exp" : "ext_exp", num);
-	if (!isHistory) history.pushState({tab: tab, page: tabs[tab].cur, msg: msgDisplay}, null);
-}
-
 function displayMsg(isHistory, isInt, num) {
 	clearDisplay();
 	document.getElementById("btn_mdele").disabled = false;
@@ -473,6 +453,26 @@ function displayMsg(isHistory, isInt, num) {
 	document.getElementById("main1").hidden = !window.matchMedia("(min-width: 80em)").matches;
 
 	msgDisplay = new MsgInfo(isInt? ae.getIntMsgIdHex(num) : ae.getExtMsgIdHex(num), isInt? "int" : "ext", num);
+	if (!isHistory) history.pushState({tab: tab, page: tabs[tab].cur, msg: msgDisplay}, null);
+}
+
+function displayExport(isHistory, isInt, num) {
+	clearDisplay();
+	document.getElementById("readmsg_main").hidden = true;
+	document.getElementById("readmsg_export").hidden = false;
+	document.getElementById("btn_msave").blur();
+	document.getElementById("btn_msave").disabled = true;
+	document.getElementById("btn_reply").disabled = true;
+	document.getElementById("btn_mdele").disabled = true;
+
+//	document.querySelector("#readmsg_export > div:nth-child(1)").onclick = function() {};
+	document.querySelector("#readmsg_export > div:nth-child(2)").onclick = function() {if (isInt) {ae.downloadIntMsg(num);} else {ae.downloadExtMsg(num);} displayMsg(false, isInt, num);};
+	document.querySelector("#readmsg_export > div:nth-child(3)").onclick = function() {if (isInt) {ae.htmlIntMsg(num, true);} else {ae.htmlExtMsg(num, true);} displayMsg(false, isInt, num);};
+	document.querySelector("#readmsg_export > div:nth-child(4)").onclick = function() {if (isInt) {ae.txtIntMsg(num, true);} else {ae.txtExtMsg(num, true);} displayMsg(false, isInt, num);};
+	document.querySelector("#readmsg_export > div:nth-child(5)").onclick = function() {if (isInt) {ae.printIntMsg(num);} else {ae.printExtMsg(num);} displayMsg(false, isInt, num);};
+	document.querySelector("#readmsg_export > div:nth-child(6)").onclick = function() {navigator.clipboard.writeText(isInt? ae.txtIntMsg(num, false) : ae.txtExtMsg(num, false)); displayMsg(false, isInt, num);};
+
+	msgDisplay = new MsgInfo(isInt? ae.getIntMsgIdHex(num) : ae.getExtMsgIdHex(num), isInt? "int_exp" : "ext_exp", num);
 	if (!isHistory) history.pushState({tab: tab, page: tabs[tab].cur, msg: msgDisplay}, null);
 }
 
