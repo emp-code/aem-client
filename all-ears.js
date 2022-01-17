@@ -1111,15 +1111,9 @@ function AllEars(readyCallback) {
 			let y = 0;
 			const lnk = str.slice(x);
 			for (let i = protocol.length; i < lnk.length; i++) {
-				if (lnk.charCodeAt(i) === 10 || lnk.charCodeAt(i) === 32) {
-					y = i;
-					break;
-				} else if (lnk.charCodeAt(i) < 32) {
-					skip = x + protocol.length;
-					break;
-				}
+				if (lnk.charCodeAt(i) <= 32) {y = i; break;}
 			}
-			if (y < 1) continue;
+			if (y === 0) y = lnk.length;
 
 			const url = str.slice(x + protocol.length, x + y);
 			str = str.slice(0, x) + linkByte + url + linkByte + str.slice(x + y);
