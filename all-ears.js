@@ -1855,6 +1855,12 @@ function AllEars(readyCallback) {
 		_fetchEncrypted(_AEM_API_ACCOUNT_UPDATE, upData, function(fetchErr) {
 			if (fetchErr) {callback(fetchErr); return;}
 
+			if (pk_hex === sodium.to_hex(_userKeyPublic)) { // Updated own account
+				_userLevel = level;
+				callback(0);
+				return;
+			}
+
 			let num = -1;
 			for (let i = 0; i < _admin_userPkHex.length; i++) {
 				if (pk_hex === _admin_userPkHex[i]) {
