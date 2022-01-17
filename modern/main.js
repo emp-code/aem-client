@@ -1378,7 +1378,6 @@ document.getElementById("btn_delme").onclick = function() {
 document.getElementById("btn_erame").onclick = function() {
 	ae.Message_Delete("ALL", function(error) {
 		if (error === 0) {
-			this.disabled = false;
 			document.getElementById("chk_dng_usr").checked = false;
 			document.getElementById("chk_dng_usr").onclick();
 		} else errorDialog(error);
