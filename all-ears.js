@@ -2074,10 +2074,11 @@ function AllEars(readyCallback) {
 	this.Message_Delete = function(hexIds, callback) {if(typeof(callback)!=="function"){return;}
 		if (typeof(hexIds) === "string") {
 			if (hexIds === "ALL") {
-				_fetchEncrypted(_AEM_API_MESSAGE_DELETE, sodium.from_string("A"), function(fetchErr) {
+				return _fetchEncrypted(_AEM_API_MESSAGE_DELETE, new Uint8Array([0]), function(fetchErr) {
 					if (fetchErr) {callback(fetchErr); return;}
 					[_extMsg, _intMsg, _uplMsg, _outMsg].forEach(function(msgSet) {msgSet.slice(0,0)});
 					callback(0);
+					return;
 				});
 			}
 
