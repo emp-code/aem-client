@@ -850,10 +850,6 @@ function updateLimits() {
 
 	if (ae.isUserAdmin()) {
 		for (let i = 0; i < 4; i++) {
-			tbl.rows[i].cells[1].children[0].disabled = false;
-			tbl.rows[i].cells[2].children[0].disabled = false;
-			tbl.rows[i].cells[3].children[0].disabled = false;
-
 			tbl.rows[i].cells[1].children[0].value = ae.getLimitStorage(i);
 			tbl.rows[i].cells[2].children[0].value = ae.getLimitNormalA(i);
 			tbl.rows[i].cells[3].children[0].value = ae.getLimitShieldA(i);
@@ -1099,12 +1095,9 @@ function reloadAccount() {
 	document.getElementById("ownlvl").textContent = ae.getUserLevel();
 	document.getElementById("ownmib").textContent = Math.round(ae.getTotalMsgBytes() / 1048576);
 
-	document.getElementById("txt_reg").disabled = !ae.isUserAdmin();
-	document.getElementById("btn_reg").disabled = !ae.isUserAdmin();
-	document.getElementById("txt_sender_hash").disabled = !ae.isUserAdmin();
-	document.getElementById("txt_sender_date").disabled = !ae.isUserAdmin();
-	document.getElementById("btn_sender").disabled = !ae.isUserAdmin();
-	document.getElementById("btn_limits").disabled = !ae.isUserAdmin();
+	document.querySelectorAll(".admin").forEach(function(el) {
+		el.disabled = !ae.isUserAdmin();
+	});
 
 	document.getElementById("txt_notepad").value = ae.getPrivateExtra();
 }
