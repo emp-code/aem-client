@@ -127,42 +127,44 @@
 					</div>
 
 					<div id="div_tools" hidden>
-						<table id="table_addrs">
-							<thead>
-								<tr>
-									<th>Address</th>
-									<th><abbr title="Accept internal mail">Int</abbr></th>
-									<th><abbr title="Accept email">Ext</abbr></th>
-									<th><abbr title="Store all variants (text/html)">All</abbr></th>
-									<th><abbr title="Store attachments">Att</abbr></th>
-									<th><abbr title="Require secure transport">Sec</abbr></th>
-									<th><abbr title="Store original">Org</abbr></th>
-									<th><abbr title="Delete">Del</abbr></th>
-								</tr>
-							</thead>
-							<tbody id="tbl_addrs">
-							</tbody>
-							<tfoot>
-								<tr>
-									<td colspan="4"></td>
-								</tr>
-								<tr>
-									<td><input type="text" id="txt_address_create_normal" size="16" minlength="1" maxlength="15" pattern="[0-9a-z]{1,15}" required autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="new"></td>
-									<td colspan="2"><button type="button" id="btn_address_create_normal" autocomplete="off">Register</button></td>
-									<td id="limit_normal"></td>
-								</tr>
-								<tr>
-									<td class="half">Shield</td>
-									<td colspan="2"><button type="button" id="btn_address_create_shield" autocomplete="off">Generate</button></td>
-									<td id="limit_shield"></td>
-								</tr>
-								<tr>
-									<td class="half">Total</td>
-									<td colspan="2"><button type="button" id="btn_address_update" autocomplete="off">Update</button></td>
-									<td id="limit_total"></td>
-								</tr>
-							</tfoot>
-						</table>
+						<div>
+							<table id="table_addrs">
+								<thead>
+									<tr>
+										<th>Address</th>
+										<th><abbr title="Accept internal mail">Int</abbr></th>
+										<th><abbr title="Accept email">Ext</abbr></th>
+										<th><abbr title="Store all variants (text/html)">All</abbr></th>
+										<th><abbr title="Store attachments">Att</abbr></th>
+										<th><abbr title="Require secure transport">Sec</abbr></th>
+										<th><abbr title="Store original">Org</abbr></th>
+										<th><abbr title="Delete">Del</abbr></th>
+									</tr>
+								</thead>
+								<tbody id="tbl_addrs">
+								</tbody>
+							</table>
+
+							<table id="table_reg">
+								<tbody>
+									<tr>
+										<td><input type="text" id="txt_address_create_normal" size="16" minlength="1" maxlength="15" pattern="[0-9a-z]{1,15}" required autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="new"></td>
+										<td colspan="2"><button type="button" id="btn_address_create_normal" autocomplete="off">Register</button></td>
+										<td id="limit_normal"></td>
+									</tr>
+									<tr>
+										<td class="half">Shield</td>
+										<td colspan="2"><button type="button" id="btn_address_create_shield" autocomplete="off">Generate</button></td>
+										<td id="limit_shield"></td>
+									</tr>
+									<tr>
+										<td class="half">Total</td>
+										<td colspan="2"><button type="button" id="btn_address_update" autocomplete="off">Update</button></td>
+										<td id="limit_total"></td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
 
 						<div id="div_acc" hidden>
 							<p>

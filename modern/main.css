@@ -147,8 +147,8 @@ textarea {
 #div_acc > p,
 #div_acc > div,
 #tbl_limits,
-#table_addrs tfoot td,
-#table_addrs tfoot button {
+#table_reg td,
+#table_reg button {
 	text-align: center;
 }
 
@@ -429,19 +429,20 @@ dialog,
 	max-height: 100%;
 }
 
-#table_addrs {
+#table_addrs, #table_reg {
 	margin: auto;
-	border: 1px solid #222;
+	border-left: 1px solid #222;
+	border-right: 1px solid #222;
+	border-bottom: 1px solid #222;
 	border-spacing: 0.25vw;
 }
 
-#table_addrs > tfoot button {
-	width: 100%;
+#table_reg {
+	padding-top: 0.5em;
 }
 
-#table_addrs > tfoot tr:first-of-type > td {
-	border-top: 1px solid #222;
-	height: 0.1em;
+#table_reg button {
+	width: 100%;
 }
 
 #tbl_addrs td:not(:last-of-type),
@@ -457,7 +458,7 @@ dialog,
 }
 
 #tbl_addrs td:first-of-type,
-#table_addrs tfoot input {
+#table_reg input {
 	font-family: monospace, monospace;
 	text-align: right;
 	font-size: 1em;
@@ -661,10 +662,6 @@ dialog,
 
 	#readmsg_main > table {
 		border-bottom: 1px solid #aaa;
-	}
-
-	#table_addrs > tfoot tr:first-of-type > td {
-		border-top: 1px solid #ddd;
 	}
 
 	#table_addrs {
