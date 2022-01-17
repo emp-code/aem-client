@@ -174,9 +174,15 @@
 
 							<hr>
 
-							<p class="half">Check to enable dangerous operations on the next page</p>
-							<p><input type="checkbox" id="chk_lowme"> <span class="half">I want to <b>lower my level</b></span></p>
-							<p><input type="checkbox" id="chk_delme"> <span class="half">I want to <b>delete my account</b></span></p>
+							<p class="half">Level <b id="ownlvl">?</b> account. Using <b id="ownmib">?</b> MiB.</p>
+							<p>
+								<input type="checkbox" id="chk_dng_usr" autocomplete="off"><label for="chk_dng_usr" class="half"> Confirm dangerous operation</label>
+							</p>
+							<div id="btnset_dng_usr">
+								<button id="btn_lowme" autocomplete="off" disabled>Decrease Level</button>
+								<button id="btn_erame" autocomplete="off" disabled>Erase Messages</button>
+								<button id="btn_delme" autocomplete="off" disabled>Delete Account</button>
+							</div>
 
 							<hr>
 
@@ -226,14 +232,14 @@
 
 							<hr>
 
-							<div>
+							<div class="center">
 								<input type="text" id="txt_reg" minlength="64" maxlength="64" pattern="[0-9a-f]{64}" required autocomplete="off" placeholder="Public key (hex)" disabled>
 								<button type="button" id="btn_reg" autocomplete="off">Register</button>
 							</div>
 
 							<hr>
 
-							<div>
+							<div class="center">
 								<p><input type="text" id="txt_sender_hash" minlength="64" maxlength="64" pattern="[0-9A-Za-z_-]{64}" required autocomplete="off" placeholder="Message-ID" disabled></p>
 								<p><input type="text" id="txt_sender_date" required autocomplete="off" placeholder="Date" disabled></p>
 								<p id="txt_sender_res" class="half">No currently registered account was identified as the sender.</p>

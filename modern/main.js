@@ -540,9 +540,6 @@ function updateAddressButtons() {
 }
 
 function updateAddressCounts() {
-	document.querySelector("#tbd_accs > tr > td:nth-child(3)").textContent = ae.getAddressCountNormal();
-	document.querySelector("#tbd_accs > tr > td:nth-child(4)").textContent = ae.getAddressCountShield();
-
 	document.getElementById("limit_normal").textContent = (ae.getAddressCountNormal() + "/" + ae.getLimitNormalA(ae.getUserLevel())).padStart(ae.getLimitNormalA(ae.getUserLevel()) > 9 ? 5 : 1);
 	document.getElementById("limit_shield").textContent = (ae.getAddressCountShield() + "/" + ae.getLimitShieldA(ae.getUserLevel())).padStart(ae.getLimitShieldA(ae.getUserLevel()) > 9 ? 5 : 1);
 	document.getElementById("limit_total").textContent = ((ae.getAddressCountNormal() + ae.getAddressCountShield()) + "/" + ae.getAddrPerUser()).padStart(5);
@@ -869,61 +866,6 @@ function updateLimits() {
 	}
 }
 
-function addOwnAccount() {
-	const row = document.getElementById("tbd_accs").insertRow(-1);
-
-	let cell;
-	cell = row.insertCell(-1); cell.textContent = ae.getUserPkHex();
-	cell = row.insertCell(-1); cell.textContent = Math.round(ae.getTotalMsgBytes() / 1048576); // MiB
-	cell = row.insertCell(-1); cell.textContent = ae.getAddressCountNormal();
-	cell = row.insertCell(-1); cell.textContent = ae.getAddressCountShield();
-
-	cell = row.insertCell(-1);
-	let btn = document.createElement("button");
-	btn.type = "button";
-	btn.textContent = "+";
-	btn.disabled = true;
-	cell.appendChild(btn);
-
-	cell = row.insertCell(-1); cell.textContent = ae.getUserLevel();
-
-	cell = row.insertCell(-1);
-	btn = document.createElement("button");
-	btn.type = "button";
-	btn.textContent = "−";
-	btn.disabled = true;
-	btn.id = "btn_lowme";
-	btn.onclick = function() {
-		const newLevel = parseInt(row.cells[5].textContent, 10) - 1;
-		ae.Account_Update(ae.getUserPkHex(), newLevel, function(error) {
-			if (error === 0) {
-				row.cells[5].textContent = newLevel;
-				if (newLevel === 0) {
-					document.getElementById("btn_lowme").disabled = true;
-					document.getElementById("chk_lowme").disabled = true;
-				}
-			} else errorDialog(error);
-		});
-	};
-	cell.appendChild(btn);
-
-	cell = row.insertCell(-1);
-	btn = document.createElement("button");
-	btn.type = "button";
-	btn.textContent = "X";
-	btn.disabled = true;
-	btn.id = "btn_delme";
-	btn.onclick = function() {
-		ae.Account_Delete(ae.getUserPkHex(), function(error) {
-			if (error === 0) {
-				row.remove();
-				document.getElementById("chk_delme").disabled = true;
-			} else errorDialog(error);
-		});
-	};
-	cell.appendChild(btn);
-}
-
 function deleteAddress(addr) {
 	const buttons = document.querySelectorAll("#tbl_addrs button");
 	buttons.forEach(function(btn) {btn.disabled = true;});
@@ -1150,10 +1092,12 @@ function addAddresses() {
 
 function reloadAccount() {
 	updateLimits();
-	addOwnAccount();
 	addContacts();
 	addAddresses();
 	updateAddressCounts();
+
+	document.getElementById("ownlvl").textContent = ae.getUserLevel();
+	document.getElementById("ownmib").textContent = Math.round(ae.getTotalMsgBytes() / 1048576);
 
 	document.getElementById("txt_reg").disabled = !ae.isUserAdmin();
 	document.getElementById("btn_reg").disabled = !ae.isUserAdmin();
@@ -1162,7 +1106,6 @@ function reloadAccount() {
 	document.getElementById("btn_sender").disabled = !ae.isUserAdmin();
 	document.getElementById("btn_limits").disabled = !ae.isUserAdmin();
 
-	document.getElementById("chk_lowme").disabled = (ae.getUserLevel() === 0);
 	document.getElementById("txt_notepad").value = ae.getPrivateExtra();
 }
 
@@ -1406,8 +1349,41 @@ document.getElementById("btn_reg").onclick = function() {
 	});
 };
 
-document.getElementById("chk_delme").onclick = function() {document.getElementById("btn_delme").disabled = !this.checked;};
-document.getElementById("chk_lowme").onclick = function() {document.getElementById("btn_lowme").disabled = !this.checked;};
+document.getElementById("chk_dng_usr").onclick = function() {
+	document.getElementById("btn_lowme").disabled = !this.checked || (ae.getUserLevel() === 0);
+	document.getElementById("btn_erame").disabled = !this.checked;
+	document.getElementById("btn_delme").disabled = !this.checked;
+};
+
+document.getElementById("btn_lowme").onclick = function() {
+	const newLevel = parseInt(ae.getUserLevel(), 10) - 1;
+	ae.Account_Update(ae.getUserPkHex(), newLevel, function(error) {
+		if (error === 0) {
+			document.getElementById("ownlvl").textContent = ae.getUserLevel();
+			document.getElementById("chk_dng_usr").onclick();
+		} else errorDialog(error);
+	});
+};
+
+document.getElementById("btn_delme").onclick = function() {
+	ae.Account_Delete(ae.getUserPkHex(), function(error) {
+		if (error === 0) {
+			document.getElementById("chk_dng_usr").checked = false;
+			document.getElementById("chk_dng_usr").onclick();
+			document.getElementById("chk_dng_usr").disabled = true;
+		} else errorDialog(error);
+	});
+}
+
+document.getElementById("btn_erame").onclick = function() {
+	ae.Message_Delete("ALL", function(error) {
+		if (error === 0) {
+			this.disabled = false;
+			document.getElementById("chk_dng_usr").checked = false;
+			document.getElementById("chk_dng_usr").onclick();
+		} else errorDialog(error);
+	});
+};
 
 document.getElementById("btn_notepad_restore").onclick = function() {
 	document.getElementById("txt_notepad").value = ae.getPrivateExtra();
