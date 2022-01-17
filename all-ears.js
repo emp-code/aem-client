@@ -1053,7 +1053,8 @@ function AllEars(readyCallback) {
 			let msgBd;
 
 			try {
-				msgBin = sodium.to_string(msgBin);
+				const zero = msgBin.indexOf(0);
+				msgBin = sodium.to_string(zero === -1 ? msgBin : msgBin.slice(0, zero));
 				msgSb = msgBin.slice(0, lenSb);
 				msgBd = msgBin.slice(lenSb);
 			} catch(e) {
