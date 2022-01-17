@@ -481,6 +481,11 @@ dialog,
 	opacity: 0.5;
 }
 
+#tbl_accs {
+	table-layout: fixed;
+	width: 100%;
+}
+
 /* Main2 */
 #main2 article {
 	display: flex;
