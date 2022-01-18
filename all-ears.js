@@ -100,13 +100,16 @@ function AllEars(readyCallback) {
 	const _maxNormalA = [];
 	const _maxShieldA = [];
 
-	let _userKeyPublic;
-	let _userKeySecret;
-	let _userKeyKxHash;
-	let _userKeySymmetric;
+	// Secrets: Only for internal use by this library
+	let __SECRET_own_usk; // USK (User Secret Key)
+	let __SECRET_own_kxHash; // For E2EE IntMsg
+	let __SECRET_own_symmetric; // Key used for client-side encryption: the private data field, uploaded files, etc
 
-	let _userLevel = 0;
-	const _userAddress = [];
+	// Non-secret user data
+	let _own_upk = 0
+	let _own_level = 0;
+	const _own_addr = [];
+
 	const _extMsg = [];
 	const _intMsg = [];
 	const _uplMsg = [];
@@ -123,11 +126,11 @@ function AllEars(readyCallback) {
 	const _contactNote = [];
 	let _privateExtra = "";
 
-	const _admin_userPkHex = [];
-	const _admin_userSpace = [];
-	const _admin_userNaddr = [];
-	const _admin_userSaddr = [];
-	const _admin_userLevel = [];
+	const _admin_userUpk = [];
+	const _admin_userKib = [];
+	const _admin_userNrm = [];
+	const _admin_userShd = [];
+	const _admin_userLvl = [];
 
 // Private functions
 	function _Dkim() {
@@ -281,13 +284,13 @@ function AllEars(readyCallback) {
 		window.crypto.getRandomValues(nonce);
 		nonce.set(new Uint8Array(new Uint32Array([Math.round(Date.now() / 1000)]).buffer));
 
-		const postBox = sodium.crypto_box_easy(clearU8, nonce, _AEM_API_PUBKEY, _userKeySecret);
+		const postBox = sodium.crypto_box_easy(clearU8, nonce, _AEM_API_PUBKEY, __SECRET_own_usk);
 
 		// sealBox: apiCmd + UPK + Nonce for postBox
 		const sealClear = new Uint8Array(1 + sodium.crypto_box_PUBLICKEYBYTES + sodium.crypto_box_NONCEBYTES);
 		sealClear[0] = apiCmd;
 		sealClear.set(nonce, 1);
-		sealClear.set(_userKeyPublic, 1 + sodium.crypto_box_NONCEBYTES);
+		sealClear.set(_own_upk, 1 + sodium.crypto_box_NONCEBYTES);
 		const sealBox = sodium.crypto_box_seal(sealClear, _AEM_API_PUBKEY);
 
 		// postMsg: sealBox + postBox
@@ -299,7 +302,7 @@ function AllEars(readyCallback) {
 			if (ret !== 0) {callback(ret); return;}
 
 			let decData;
-			try {decData = sodium.crypto_box_open_easy(encData.slice(sodium.crypto_box_NONCEBYTES), encData.slice(0, sodium.crypto_box_NONCEBYTES), _AEM_API_PUBKEY, _userKeySecret);}
+			try {decData = sodium.crypto_box_open_easy(encData.slice(sodium.crypto_box_NONCEBYTES), encData.slice(0, sodium.crypto_box_NONCEBYTES), _AEM_API_PUBKEY, __SECRET_own_usk);}
 			catch(e) {callback(0x05); return;}
 
 			if (decData.length > 33) {callback(0, decData); return;} // Long response
@@ -386,10 +389,10 @@ function AllEars(readyCallback) {
 	const _getAddressCount = function(isShield) {
 		let count = 0;
 
-		for (let i = 0; i < _userAddress.length; i++) {
+		for (let i = 0; i < _own_addr.length; i++) {
 			if (
-			   ( isShield && (_userAddress[i].flags & _AEM_ADDR_FLAG_SHIELD) !== 0)
-			|| (!isShield && (_userAddress[i].flags & _AEM_ADDR_FLAG_SHIELD) === 0)
+			   ( isShield && (_own_addr[i].flags & _AEM_ADDR_FLAG_SHIELD) !== 0)
+			|| (!isShield && (_own_addr[i].flags & _AEM_ADDR_FLAG_SHIELD) === 0)
 			) count++;
 		}
 
@@ -899,10 +902,10 @@ function AllEars(readyCallback) {
 	};
 
 	const _parseUinfo = function(browseData) {
-		_userLevel = browseData[0] & 3;
+		_own_level = browseData[0] & 3;
 
 		for (let i = 0; i < 4; i++) {
-			if (i === _userLevel) {
+			if (i === _own_level) {
 				_maxStorage.push(browseData[1]);
 				_maxNormalA.push(browseData[2]);
 				_maxShieldA.push(browseData[3]);
@@ -918,7 +921,7 @@ function AllEars(readyCallback) {
 		let offset = 4;
 		for (let i = 0; i < (browseData[0] >> 3); i++) {
 			const hash = browseData.slice(offset, offset + 8);
-			_userAddress.push(new _Address(hash, null, browseData[offset + 8]));
+			_own_addr.push(new _Address(hash, null, browseData[offset + 8]));
 			offset += 9;
 		}
 
@@ -936,7 +939,7 @@ function AllEars(readyCallback) {
 
 		if (privData === "0") return offset + _AEM_LEN_PRIVATE; // All zeroes = newly created, no data
 
-		try {privData = sodium.crypto_secretbox_open_easy(privData_enc, privNonce, _userKeySymmetric);}
+		try {privData = sodium.crypto_secretbox_open_easy(privData_enc, privNonce, __SECRET_own_symmetric);}
 		catch(e) {return -(offset + _AEM_LEN_PRIVATE);}
 
 		offset += _AEM_LEN_PRIVATE;
@@ -947,18 +950,18 @@ function AllEars(readyCallback) {
 			const hash = privData.slice(start, start + 8);
 			const addr32 = privData.slice(start + 8, start + 18);
 
-			for (let j = 0; j < _userAddress.length; j++) {
+			for (let j = 0; j < _own_addr.length; j++) {
 				let wasFound = true;
 
 				for (let k = 0; k < 8; k ++) {
-					if (hash[k] !== _userAddress[j].hash[k]) {
+					if (hash[k] !== _own_addr[j].hash[k]) {
 						wasFound = false;
 						break;
 					}
 				}
 
 				if (wasFound) {
-					_userAddress[j].addr32 = addr32;
+					_own_addr[j].addr32 = addr32;
 					break;
 				}
 			}
@@ -1040,7 +1043,7 @@ function AllEars(readyCallback) {
 				const addr32_from = msgData.slice(2, 12);
 				const recv_pubkey = msgData.slice(22, 22 + sodium.crypto_kx_PUBLICKEYBYTES);
 
-				const kxKeys = sodium.crypto_kx_seed_keypair(sodium.crypto_generichash(sodium.crypto_kx_SEEDBYTES, addr32_from, _userKeyKxHash));
+				const kxKeys = sodium.crypto_kx_seed_keypair(sodium.crypto_generichash(sodium.crypto_kx_SEEDBYTES, addr32_from, __SECRET_own_kxHash));
 				const sessionKeys = sodium.crypto_kx_client_session_keys(kxKeys.publicKey, kxKeys.privateKey, recv_pubkey);
 
 				msgBin = msgData.slice(22 + sodium.crypto_kx_PUBLICKEYBYTES);
@@ -1320,7 +1323,7 @@ function AllEars(readyCallback) {
 
 						const addr32_to = msgData.slice(11, 21);
 
-						const kxKeys = sodium.crypto_kx_seed_keypair(sodium.crypto_generichash(sodium.crypto_kx_SEEDBYTES, addr32_to, _userKeyKxHash));
+						const kxKeys = sodium.crypto_kx_seed_keypair(sodium.crypto_generichash(sodium.crypto_kx_SEEDBYTES, addr32_to, __SECRET_own_kxHash));
 						const sessionKeys = sodium.crypto_kx_server_session_keys(kxKeys.publicKey, kxKeys.privateKey, msgFromPk);
 						msgBin = sodium.crypto_secretbox_open_easy(msgBox, nonce, sessionKeys.sharedRx);
 					} else {
@@ -1344,7 +1347,7 @@ function AllEars(readyCallback) {
 
 				try {
 					// Uploaded file, additional symmetric encryption
-					const dec = sodium.crypto_secretbox_open_easy(msgData.slice(sodium.crypto_secretbox_NONCEBYTES), msgData.slice(0, sodium.crypto_secretbox_NONCEBYTES), _userKeySymmetric);
+					const dec = sodium.crypto_secretbox_open_easy(msgData.slice(sodium.crypto_secretbox_NONCEBYTES), msgData.slice(0, sodium.crypto_secretbox_NONCEBYTES), __SECRET_own_symmetric);
 					msgTitle = sodium.to_string(dec.slice(1, 2 + dec[0]));
 					msgBody = dec.slice(2 + dec[0]);
 				} catch(e) {
@@ -1379,8 +1382,8 @@ function AllEars(readyCallback) {
 		_maxStorage.splice(0);
 		_maxNormalA.splice(0);
 		_maxShieldA.splice(0);
-		_userLevel = 0;
-		_userAddress.splice(0);
+		_own_level = 0;
+		_own_addr.splice(0);
 
 		_extMsg.splice(0);
 		_intMsg.splice(0);
@@ -1391,21 +1394,21 @@ function AllEars(readyCallback) {
 		_contactName.splice(0);
 		_contactNote.splice(0);
 
-		_admin_userPkHex.splice(0);
-		_admin_userSpace.splice(0);
-		_admin_userNaddr.splice(0);
-		_admin_userSaddr.splice(0);
-		_admin_userLevel.splice(0);
+		_admin_userUpk.splice(0);
+		_admin_userKib.splice(0);
+		_admin_userNrm.splice(0);
+		_admin_userShd.splice(0);
+		_admin_userLvl.splice(0);
 
-		if (_userKeyPublic) sodium.memzero(_userKeyPublic);
-		if (_userKeySecret) sodium.memzero(_userKeySecret);
-		if (_userKeyKxHash) sodium.memzero(_userKeyKxHash);
-		if (_userKeySymmetric) sodium.memzero(_userKeySymmetric);
+		if (_own_upk) sodium.memzero(_own_upk);
+		if (__SECRET_own_usk) sodium.memzero(__SECRET_own_usk);
+		if (__SECRET_own_kxHash) sodium.memzero(__SECRET_own_kxHash);
+		if (__SECRET_own_symmetric) sodium.memzero(__SECRET_own_symmetric);
 
-		_userKeySecret = null;
-		_userKeyPublic = null;
-		_userKeyKxHash = null;
-		_userKeySymmetric = null;
+		_own_upk = null;
+		__SECRET_own_usk = null;
+		__SECRET_own_kxHash = null;
+		__SECRET_own_symmetric = null;
 
 		_totalMsgCount = 0;
 		_totalMsgBytes = 0;
@@ -1417,28 +1420,28 @@ function AllEars(readyCallback) {
 	this.getLevelMax = function() {return _AEM_USER_MAXLEVEL;};
 	this.getAddrPerUser = function() {return _AEM_ADDRESSES_PER_USER;};
 
-	this.getAddress = function(num) {if(typeof(num)!=="number"){return;} return _addr32_decode(_userAddress[num].addr32, (_userAddress[num].flags & _AEM_ADDR_FLAG_SHIELD) !== 0);};
-	this.getAddressOrigin = function(num) {if(typeof(num)!=="number"){return;} return (_userAddress[num].flags & _AEM_ADDR_FLAG_ORIGIN) !== 0;};
-	this.getAddressSecure = function(num) {if(typeof(num)!=="number"){return;} return (_userAddress[num].flags & _AEM_ADDR_FLAG_SECURE) !== 0;};
-	this.getAddressAttach = function(num) {if(typeof(num)!=="number"){return;} return (_userAddress[num].flags & _AEM_ADDR_FLAG_ATTACH) !== 0;};
-	this.getAddressAllVer = function(num) {if(typeof(num)!=="number"){return;} return (_userAddress[num].flags & _AEM_ADDR_FLAG_ALLVER) !== 0;};
-	this.getAddressAccExt = function(num) {if(typeof(num)!=="number"){return;} return (_userAddress[num].flags & _AEM_ADDR_FLAG_ACCEXT) !== 0;};
-	this.getAddressAccInt = function(num) {if(typeof(num)!=="number"){return;} return (_userAddress[num].flags & _AEM_ADDR_FLAG_ACCINT) !== 0;};
+	this.getAddress = function(num) {if(typeof(num)!=="number"){return;} return _addr32_decode(_own_addr[num].addr32, (_own_addr[num].flags & _AEM_ADDR_FLAG_SHIELD) !== 0);};
+	this.getAddressOrigin = function(num) {if(typeof(num)!=="number"){return;} return (_own_addr[num].flags & _AEM_ADDR_FLAG_ORIGIN) !== 0;};
+	this.getAddressSecure = function(num) {if(typeof(num)!=="number"){return;} return (_own_addr[num].flags & _AEM_ADDR_FLAG_SECURE) !== 0;};
+	this.getAddressAttach = function(num) {if(typeof(num)!=="number"){return;} return (_own_addr[num].flags & _AEM_ADDR_FLAG_ATTACH) !== 0;};
+	this.getAddressAllVer = function(num) {if(typeof(num)!=="number"){return;} return (_own_addr[num].flags & _AEM_ADDR_FLAG_ALLVER) !== 0;};
+	this.getAddressAccExt = function(num) {if(typeof(num)!=="number"){return;} return (_own_addr[num].flags & _AEM_ADDR_FLAG_ACCEXT) !== 0;};
+	this.getAddressAccInt = function(num) {if(typeof(num)!=="number"){return;} return (_own_addr[num].flags & _AEM_ADDR_FLAG_ACCINT) !== 0;};
 
-	this.setAddressOrigin = function(num, val) {if(typeof(num)!=="number"){return;} if (val) {_userAddress[num].flags |= _AEM_ADDR_FLAG_ORIGIN;} else {_userAddress[num].flags &= (0xFF & ~_AEM_ADDR_FLAG_ORIGIN);}};
-	this.setAddressSecure = function(num, val) {if(typeof(num)!=="number"){return;} if (val) {_userAddress[num].flags |= _AEM_ADDR_FLAG_SECURE;} else {_userAddress[num].flags &= (0xFF & ~_AEM_ADDR_FLAG_SECURE);}};
-	this.setAddressAttach = function(num, val) {if(typeof(num)!=="number"){return;} if (val) {_userAddress[num].flags |= _AEM_ADDR_FLAG_ATTACH;} else {_userAddress[num].flags &= (0xFF & ~_AEM_ADDR_FLAG_ATTACH);}};
-	this.setAddressAllVer = function(num, val) {if(typeof(num)!=="number"){return;} if (val) {_userAddress[num].flags |= _AEM_ADDR_FLAG_ALLVER;} else {_userAddress[num].flags &= (0xFF & ~_AEM_ADDR_FLAG_ALLVER);}};
-	this.setAddressAccExt = function(num, val) {if(typeof(num)!=="number"){return;} if (val) {_userAddress[num].flags |= _AEM_ADDR_FLAG_ACCEXT;} else {_userAddress[num].flags &= (0xFF & ~_AEM_ADDR_FLAG_ACCEXT);}};
-	this.setAddressAccInt = function(num, val) {if(typeof(num)!=="number"){return;} if (val) {_userAddress[num].flags |= _AEM_ADDR_FLAG_ACCINT;} else {_userAddress[num].flags &= (0xFF & ~_AEM_ADDR_FLAG_ACCINT);}};
+	this.setAddressOrigin = function(num, val) {if(typeof(num)!=="number"){return;} if (val) {_own_addr[num].flags |= _AEM_ADDR_FLAG_ORIGIN;} else {_own_addr[num].flags &= (0xFF & ~_AEM_ADDR_FLAG_ORIGIN);}};
+	this.setAddressSecure = function(num, val) {if(typeof(num)!=="number"){return;} if (val) {_own_addr[num].flags |= _AEM_ADDR_FLAG_SECURE;} else {_own_addr[num].flags &= (0xFF & ~_AEM_ADDR_FLAG_SECURE);}};
+	this.setAddressAttach = function(num, val) {if(typeof(num)!=="number"){return;} if (val) {_own_addr[num].flags |= _AEM_ADDR_FLAG_ATTACH;} else {_own_addr[num].flags &= (0xFF & ~_AEM_ADDR_FLAG_ATTACH);}};
+	this.setAddressAllVer = function(num, val) {if(typeof(num)!=="number"){return;} if (val) {_own_addr[num].flags |= _AEM_ADDR_FLAG_ALLVER;} else {_own_addr[num].flags &= (0xFF & ~_AEM_ADDR_FLAG_ALLVER);}};
+	this.setAddressAccExt = function(num, val) {if(typeof(num)!=="number"){return;} if (val) {_own_addr[num].flags |= _AEM_ADDR_FLAG_ACCEXT;} else {_own_addr[num].flags &= (0xFF & ~_AEM_ADDR_FLAG_ACCEXT);}};
+	this.setAddressAccInt = function(num, val) {if(typeof(num)!=="number"){return;} if (val) {_own_addr[num].flags |= _AEM_ADDR_FLAG_ACCINT;} else {_own_addr[num].flags &= (0xFF & ~_AEM_ADDR_FLAG_ACCINT);}};
 
-	this.getAddressCount = function() {return _userAddress.length;};
+	this.getAddressCount = function() {return _own_addr.length;};
 	this.getAddressCountNormal = function() {return _getAddressCount(false);};
 	this.getAddressCountShield = function() {return _getAddressCount(true);};
 
-	this.isUserAdmin = function() {return (_userLevel === _AEM_USER_MAXLEVEL);};
-	this.getUserPkHex = function() {return sodium.to_hex(_userKeyPublic);};
-	this.getUserLevel = function() {return _userLevel;};
+	this.isUserAdmin = function() {return (_own_level === _AEM_USER_MAXLEVEL);};
+	this.getOwnUpk = function() {return sodium.to_hex(_own_upk);};
+	this.getOwnLevel = function() {return _own_level;};
 	this.getLimitStorage = function(lvl) {if(typeof(lvl)!=="number"){return;} return _maxStorage[lvl];};
 	this.getLimitNormalA = function(lvl) {if(typeof(lvl)!=="number"){return;} return _maxNormalA[lvl];};
 	this.getLimitShieldA = function(lvl) {if(typeof(lvl)!=="number"){return;} return _maxShieldA[lvl];};
@@ -1682,12 +1685,12 @@ function AllEars(readyCallback) {
 	this.getOutMsgFlagVPad = function(num) {if(typeof(num)!=="number"){return;} return _outMsg[num].validPad;};
 	this.getOutMsgFlagVSig = function(num) {if(typeof(num)!=="number"){return;} return _outMsg[num].validSig;};
 
-	this.admin_getUserCount = function() {return _admin_userPkHex.length;};
-	this.admin_getUserPkHex = function(num) {if(typeof(num)!=="number"){return;} return _admin_userPkHex[num];};
-	this.admin_getUserSpace = function(num) {if(typeof(num)!=="number"){return;} return _admin_userSpace[num];};
-	this.admin_getUserNAddr = function(num) {if(typeof(num)!=="number"){return;} return _admin_userNaddr[num];};
-	this.admin_getUserSAddr = function(num) {if(typeof(num)!=="number"){return;} return _admin_userSaddr[num];};
-	this.admin_getUserLevel = function(num) {if(typeof(num)!=="number"){return;} return _admin_userLevel[num];};
+	this.admin_getUserNum = function() {return _admin_userUpk.length;};
+	this.admin_getUserUpk = function(num) {if(typeof(num)!=="number"){return;} return _admin_userUpk[num];};
+	this.admin_getUserKib = function(num) {if(typeof(num)!=="number"){return;} return _admin_userKib[num];};
+	this.admin_getUserNrm = function(num) {if(typeof(num)!=="number"){return;} return _admin_userNrm[num];};
+	this.admin_getUserShd = function(num) {if(typeof(num)!=="number"){return;} return _admin_userShd[num];};
+	this.admin_getUserLvl = function(num) {if(typeof(num)!=="number"){return;} return _admin_userLvl[num];};
 
 	this.getContactCount = function() {return _contactMail.length;};
 	this.getContactMail = function(num) {if(typeof(num)!=="number"){return;} return _contactMail[num];};
@@ -1707,7 +1710,7 @@ function AllEars(readyCallback) {
 	};
 
 	this.getPrivateExtraSpaceMax = function() {
-		let lenPriv = 2 + _userAddress.length * 18;
+		let lenPriv = 2 + _own_addr.length * 18;
 
 		for (let i = 0; i < _contactMail.length; i++) {
 			lenPriv += 3
@@ -1742,16 +1745,16 @@ function AllEars(readyCallback) {
 		const boxSeed = sodium.crypto_kdf_derive_from_key(sodium.crypto_box_SEEDBYTES, 1, "AEM-Usr0", sodium.from_hex(skey_hex));
 		const boxKeys = sodium.crypto_box_seed_keypair(boxSeed);
 
-		_userKeyPublic = boxKeys.publicKey;
-		_userKeySecret = boxKeys.privateKey;
-		_userKeyKxHash = sodium.crypto_kdf_derive_from_key(sodium.crypto_generichash_KEYBYTES, 4, "AEM-Usr0", sodium.from_hex(skey_hex));
-		_userKeySymmetric = sodium.crypto_kdf_derive_from_key(sodium.crypto_secretbox_KEYBYTES, 5, "AEM-Usr0", sodium.from_hex(skey_hex));
+		_own_upk = boxKeys.publicKey;
+		__SECRET_own_usk = boxKeys.privateKey;
+		__SECRET_own_kxHash = sodium.crypto_kdf_derive_from_key(sodium.crypto_generichash_KEYBYTES, 4, "AEM-Usr0", sodium.from_hex(skey_hex));
+		__SECRET_own_symmetric = sodium.crypto_kdf_derive_from_key(sodium.crypto_secretbox_KEYBYTES, 5, "AEM-Usr0", sodium.from_hex(skey_hex));
 
-		if (!_userKeyPublic || !_userKeySecret || !_userKeyKxHash || !_userKeySymmetric) {
-			_userKeySecret = null;
-			_userKeyPublic = null;
-			_userKeyKxHash = null;
-			_userKeySymmetric = null;
+		if (!_own_upk || !__SECRET_own_usk || !__SECRET_own_kxHash || !__SECRET_own_symmetric) {
+			_own_upk = null;
+			__SECRET_own_usk = null;
+			__SECRET_own_kxHash = null;
+			__SECRET_own_symmetric = null;
 			callback(false);
 			return;
 		}
@@ -1761,7 +1764,7 @@ function AllEars(readyCallback) {
 
 	// API functions
 	this.Account_Browse = function(callback) {if(typeof(callback)!=="function"){return;}
-		if (_userLevel !== _AEM_USER_MAXLEVEL) {callback(0x02); return;}
+		if (_own_level !== _AEM_USER_MAXLEVEL) {callback(0x02); return;}
 
 		_fetchEncrypted(_AEM_API_ACCOUNT_BROWSE, new Uint8Array([0]), function(fetchErr, browseData) {
 			if (fetchErr !== 0 || browseData === null) {callback(fetchErr); return;}
@@ -1783,20 +1786,13 @@ function AllEars(readyCallback) {
 
 			for (let i = 0; i < userCount; i++) {
 				const s = browseData.slice(offset, offset + 35);
-
 				const u16 = new Uint16Array(s.slice(0, 2).buffer)[0];
 
-				const newSpace = (s[2] | ((u16 >> 4) & 3840)) * 64; // in KiB
-				const newLevel = u16 & 3;
-				const newAddrN = (u16 >> 2) & 31;
-				const newAddrS = (u16 >> 7) & 31;
-				const newPkHex = sodium.to_hex(s.slice(3));
-
-				_admin_userPkHex.push(newPkHex);
-				_admin_userLevel.push(newLevel);
-				_admin_userSpace.push(newSpace);
-				_admin_userNaddr.push(newAddrN);
-				_admin_userSaddr.push(newAddrS);
+				_admin_userUpk.push(sodium.to_hex(s.slice(3)));
+				_admin_userKib.push((s[2] | ((u16 >> 4) & 3840)) * 64);
+				_admin_userLvl.push(u16 & 3);
+				_admin_userNrm.push((u16 >> 2) & 31);
+				_admin_userShd.push((u16 >> 7) & 31);
 
 				offset += 35;
 			}
@@ -1806,16 +1802,16 @@ function AllEars(readyCallback) {
 	};
 
 	this.Account_Create = function(pk_hex, callback) {if(typeof(pk_hex)!=="string" || typeof(callback)!=="function"){return;}
-		if (_userLevel !== _AEM_USER_MAXLEVEL) {callback(0x02); return;}
+		if (_own_level !== _AEM_USER_MAXLEVEL) {callback(0x02); return;}
 
 		_fetchEncrypted(_AEM_API_ACCOUNT_CREATE, sodium.from_hex(pk_hex), function(fetchErr) {
 			if (fetchErr) {callback(fetchErr); return;}
 
-			_admin_userPkHex.push(pk_hex);
-			_admin_userLevel.push(0);
-			_admin_userSpace.push(0);
-			_admin_userNaddr.push(0);
-			_admin_userSaddr.push(0);
+			_admin_userUpk.push(pk_hex);
+			_admin_userLvl.push(0);
+			_admin_userKib.push(0);
+			_admin_userNrm.push(0);
+			_admin_userShd.push(0);
 
 			callback(0);
 		});
@@ -1826,19 +1822,19 @@ function AllEars(readyCallback) {
 			if (fetchErr) {callback(fetchErr); return;}
 
 			let num = -1;
-			for (let i = 0; i < _admin_userPkHex.length; i++) {
-				if (pk_hex === _admin_userPkHex[i]) {
+			for (let i = 0; i < _admin_userUpk.length; i++) {
+				if (pk_hex === _admin_userUpk[i]) {
 					num = i;
 					break;
 				}
 			}
 
 			if (num >= 0) {
-				_admin_userPkHex.splice(num, 1);
-				_admin_userLevel.splice(num, 1);
-				_admin_userSpace.splice(num, 1);
-				_admin_userNaddr.splice(num, 1);
-				_admin_userSaddr.splice(num, 1);
+				_admin_userUpk.splice(num, 1);
+				_admin_userLvl.splice(num, 1);
+				_admin_userKib.splice(num, 1);
+				_admin_userNrm.splice(num, 1);
+				_admin_userShd.splice(num, 1);
 			}
 
 			callback(0);
@@ -1855,22 +1851,22 @@ function AllEars(readyCallback) {
 		_fetchEncrypted(_AEM_API_ACCOUNT_UPDATE, upData, function(fetchErr) {
 			if (fetchErr) {callback(fetchErr); return;}
 
-			if (pk_hex === sodium.to_hex(_userKeyPublic)) { // Updated own account
-				_userLevel = level;
+			if (pk_hex === sodium.to_hex(_own_upk)) { // Updated own account
+				_own_level = level;
 				callback(0);
 				return;
 			}
 
 			let num = -1;
-			for (let i = 0; i < _admin_userPkHex.length; i++) {
-				if (pk_hex === _admin_userPkHex[i]) {
+			for (let i = 0; i < _admin_userUpk.length; i++) {
+				if (pk_hex === _admin_userUpk[i]) {
 					num = i;
 					break;
 				}
 			}
 
 			if (num >= 0)
-				_admin_userLevel[num] = level;
+				_admin_userLvl[num] = level;
 
 			callback(0);
 		});
@@ -1882,7 +1878,7 @@ function AllEars(readyCallback) {
 		if (addr === "SHIELD") {
 			_fetchEncrypted(_AEM_API_ADDRESS_CREATE, sodium.from_string("SHIELD"), function(fetchErr, byteArray) {
 				if (fetchErr) {callback(fetchErr); return;}
-				_userAddress.push(new _Address(byteArray.slice(0, 8), byteArray.slice(8, 18), _AEM_ADDR_FLAG_SHIELD | _AEM_ADDR_FLAGS_DEFAULT));
+				_own_addr.push(new _Address(byteArray.slice(0, 8), byteArray.slice(8, 18), _AEM_ADDR_FLAG_SHIELD | _AEM_ADDR_FLAGS_DEFAULT));
 				callback(0);
 			});
 		} else {
@@ -1904,17 +1900,17 @@ function AllEars(readyCallback) {
 			_fetchEncrypted(_AEM_API_ADDRESS_CREATE, hash, function(fetchErr) {
 				if (fetchErr) {callback(fetchErr); return;}
 
-				_userAddress.push(new _Address(hash, addr32, _AEM_ADDR_FLAGS_DEFAULT));
+				_own_addr.push(new _Address(hash, addr32, _AEM_ADDR_FLAGS_DEFAULT));
 				callback(0);
 			});
 		}
 	};
 
 	this.Address_Delete = function(num, callback) {if(typeof(num)!=="number" || typeof(callback)!=="function"){return;}
-		_fetchEncrypted(_AEM_API_ADDRESS_DELETE, _userAddress[num].hash, function(fetchErr) {
+		_fetchEncrypted(_AEM_API_ADDRESS_DELETE, _own_addr[num].hash, function(fetchErr) {
 			if (fetchErr) {callback(fetchErr); return;}
 
-			_userAddress.splice(num, 1);
+			_own_addr.splice(num, 1);
 			callback(0);
 		});
 	};
@@ -1926,11 +1922,11 @@ function AllEars(readyCallback) {
 	};
 
 	this.Address_Update = function(callback) {if(typeof(callback)!=="function"){return;}
-		const data = new Uint8Array(_userAddress.length * 9);
+		const data = new Uint8Array(_own_addr.length * 9);
 
-		for (let i = 0; i < _userAddress.length; i++) {
-			data.set(_userAddress[i].hash, (i * 9));
-			data[(i * 9) + 8] = _userAddress[i].flags;
+		for (let i = 0; i < _own_addr.length; i++) {
+			data.set(_own_addr[i].hash, (i * 9));
+			data[(i * 9) + 8] = _own_addr[i].flags;
 		}
 
 		_fetchEncrypted(_AEM_API_ADDRESS_UPDATE, data, function(fetchErr) {callback(fetchErr);});
@@ -1980,7 +1976,7 @@ function AllEars(readyCallback) {
 				_readyMsgBytes += msgBytes;
 
 				let msgData;
-				try {msgData = sodium.crypto_box_seal_open(msgEnc, _userKeyPublic, _userKeySecret);}
+				try {msgData = sodium.crypto_box_seal_open(msgEnc, _own_upk, __SECRET_own_usk);}
 				catch(e) {
 					prevTs--; // The server sends messages from newest to oldest -> this message is older than the previous one -> lower timestamp
 					_intMsg.push(new _IntMsg(true, true, msgId, prevTs, false, 3, null, "system", "", "Failed decrypting: " + offset + "/" + browseData.length + " (size: " + msgEnc.length + ")", e));
@@ -2032,7 +2028,7 @@ function AllEars(readyCallback) {
 		const addr32_to = _addr32_encode(addr_to);
 		if (!addr32_to) {callback(0x08); return;}
 
-		const kxKeys = sodium.crypto_kx_seed_keypair(sodium.crypto_generichash(sodium.crypto_kx_SEEDBYTES, addr32_from, _userKeyKxHash));
+		const kxKeys = sodium.crypto_kx_seed_keypair(sodium.crypto_generichash(sodium.crypto_kx_SEEDBYTES, addr32_from, __SECRET_own_kxHash));
 		let msgBox;
 
 		if (isE2ee) {
@@ -2176,7 +2172,7 @@ function AllEars(readyCallback) {
 		const nonce = new Uint8Array(sodium.crypto_secretbox_NONCEBYTES);
 		window.crypto.getRandomValues(nonce);
 
-		const sbox = sodium.crypto_secretbox_easy(u8data, nonce, _userKeySymmetric);
+		const sbox = sodium.crypto_secretbox_easy(u8data, nonce, __SECRET_own_symmetric);
 
 		const final = new Uint8Array(nonce.length + sbox.length);
 		final.set(nonce);
@@ -2199,13 +2195,13 @@ function AllEars(readyCallback) {
 	this.Private_Update = function(callback) {if(typeof(callback)!=="function"){return;}
 		const privData = new Uint8Array(_AEM_LEN_PRIVATE - sodium.crypto_secretbox_NONCEBYTES - sodium.crypto_secretbox_MACBYTES);
 		privData.fill(0);
-		privData[0] = _userAddress.length;
+		privData[0] = _own_addr.length;
 
 		let offset = 1;
 
-		for (let i = 0; i < _userAddress.length; i++) {
-			privData.set(_userAddress[i].hash, offset);
-			privData.set(_userAddress[i].addr32, offset + 8);
+		for (let i = 0; i < _own_addr.length; i++) {
+			privData.set(_own_addr[i].hash, offset);
+			privData.set(_own_addr[i].addr32, offset + 8);
 			offset += 18;
 		}
 
@@ -2232,7 +2228,7 @@ function AllEars(readyCallback) {
 		const nonce = new Uint8Array(sodium.crypto_secretbox_NONCEBYTES);
 		window.crypto.getRandomValues(nonce);
 
-		const sbox = sodium.crypto_secretbox_easy(privData, nonce, _userKeySymmetric);
+		const sbox = sodium.crypto_secretbox_easy(privData, nonce, __SECRET_own_symmetric);
 
 		const final = new Uint8Array(nonce.length + sbox.length);
 		final.set(nonce);
