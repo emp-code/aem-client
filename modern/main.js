@@ -1483,13 +1483,22 @@ document.querySelector("#write2_send > button").onclick = function() {
 	// Email or internal message
 	document.getElementById("write2_btntxt").textContent = "Sending to";
 
+	let apk;
+	try {apk = (document.getElementById("write2_recv").textContent.indexOf("@") > 0) ? null : sodium.from_base64(document.querySelector("#write2_pkey > input").value, sodium.base64_variants.ORIGINAL_NO_PADDING);}
+	catch(e) {
+		errorDialog(1); // Invalid input
+		document.getElementById("write2_btntxt").textContent = "Retry sending to";
+		btn.disabled = false;
+		return;
+	}
+
 	ae.Message_Create(
 		document.getElementById("write_subj").value,
 		document.getElementById("write_body").value,
 		document.getElementById("write_from").value,
 		document.getElementById("write_recv").value,
 		document.getElementById("write_subj").getAttribute("data-replyid"),
-		(document.getElementById("write2_recv").textContent.indexOf("@") > 0) ? null : sodium.from_base64(document.querySelector("#write2_pkey > input").value, sodium.base64_variants.ORIGINAL_NO_PADDING),
+		apk,
 		function(error) {
 			if (error !== 0) {
 				errorDialog(error);
