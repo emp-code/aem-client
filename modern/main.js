@@ -540,11 +540,66 @@ function updateAddressButtons() {
 }
 
 function updateAddressCounts() {
+	document.querySelector("#tbd_accs > tr > td:nth-child(3)").textContent = ae.getAddressCountNormal();
+	document.querySelector("#tbd_accs > tr > td:nth-child(4)").textContent = ae.getAddressCountShield();
+
 	document.getElementById("limit_normal").textContent = (ae.getAddressCountNormal() + "/" + ae.getLimitNormalA(ae.getOwnLevel())).padStart(ae.getLimitNormalA(ae.getOwnLevel()) > 9 ? 5 : 1);
 	document.getElementById("limit_shield").textContent = (ae.getAddressCountShield() + "/" + ae.getLimitShieldA(ae.getOwnLevel())).padStart(ae.getLimitShieldA(ae.getOwnLevel()) > 9 ? 5 : 1);
 	document.getElementById("limit_total").textContent = ((ae.getAddressCountNormal() + ae.getAddressCountShield()) + "/" + ae.getAddrPerUser()).padStart(5);
 
 	updateAddressButtons();
+}
+
+function addOwnAccount() {
+	const row = document.getElementById("tbd_accs").insertRow(-1);
+
+	let cell;
+	cell = row.insertCell(-1); cell.textContent = ae.getOwnUpk();
+	cell = row.insertCell(-1); cell.textContent = Math.round(ae.getTotalMsgBytes() / 1048576); // MiB
+	cell = row.insertCell(-1); cell.textContent = ae.getAddressCountNormal();
+	cell = row.insertCell(-1); cell.textContent = ae.getAddressCountShield();
+
+	cell = row.insertCell(-1);
+	let btn = document.createElement("button");
+	btn.type = "button";
+	btn.textContent = "+";
+	btn.disabled = true;
+	cell.appendChild(btn);
+
+	cell = row.insertCell(-1); cell.textContent = ae.getOwnLevel();
+
+	cell = row.insertCell(-1);
+	btn = document.createElement("button");
+	btn.type = "button";
+	btn.textContent = "−";
+	btn.disabled = true;
+	btn.id = "btn_lowme";
+	btn.onclick = function() {
+		const newLevel = parseInt(row.cells[5].textContent, 10) - 1;
+		ae.Account_Update(ae.getOwnUpk(), newLevel, function(error) {
+			if (error === 0) {
+				row.cells[5].textContent = newLevel;
+				if (newLevel === 0) {document.getElementById("btn_lowme").disabled = true;}
+			} else errorDialog(error);
+		});
+	};
+	cell.appendChild(btn);
+
+	cell = row.insertCell(-1);
+	btn = document.createElement("button");
+	btn.type = "button";
+	btn.textContent = "X";
+	btn.disabled = true;
+	btn.id = "btn_delme";
+	btn.onclick = function() {
+		ae.Account_Delete(ae.getOwnUpk(), function(error) {
+			if (error === 0) {
+				row.remove();
+				document.getElementById("fs_users").disabled = true;
+			} else errorDialog(error);
+		});
+	};
+	cell.appendChild(btn);
 }
 
 function adjustLevel(pubkey, level, c) {
@@ -1088,17 +1143,12 @@ function addAddresses() {
 
 function reloadAccount() {
 	updateLimits();
+	addOwnAccount();
 	addContacts();
 	addAddresses();
 	updateAddressCounts();
 
-	document.getElementById("ownlvl").textContent = ae.getOwnLevel();
-	document.getElementById("ownmib").textContent = Math.round(ae.getTotalMsgBytes() / 1048576);
-
-	document.querySelectorAll(".admin").forEach(function(el) {
-		el.disabled = !ae.isUserAdmin();
-	});
-
+	document.getElementById("fs_admin").disabled = !ae.isUserAdmin();
 	document.getElementById("txt_notepad").value = ae.getPrivateExtra();
 }
 
@@ -1347,26 +1397,6 @@ document.getElementById("chk_dng_usr").onclick = function() {
 	document.getElementById("btn_erame").disabled = !this.checked;
 	document.getElementById("btn_delme").disabled = !this.checked;
 };
-
-document.getElementById("btn_lowme").onclick = function() {
-	const newLevel = parseInt(ae.getOwnLevel(), 10) - 1;
-	ae.Account_Update(ae.getUserPkHex(), newLevel, function(error) {
-		if (error === 0) {
-			document.getElementById("ownlvl").textContent = ae.getOwnLevel();
-			document.getElementById("chk_dng_usr").onclick();
-		} else errorDialog(error);
-	});
-};
-
-document.getElementById("btn_delme").onclick = function() {
-	ae.Account_Delete(ae.getUserPkHex(), function(error) {
-		if (error === 0) {
-			document.getElementById("chk_dng_usr").checked = false;
-			document.getElementById("chk_dng_usr").onclick();
-			document.getElementById("chk_dng_usr").disabled = true;
-		} else errorDialog(error);
-	});
-}
 
 document.getElementById("btn_erame").onclick = function() {
 	ae.Message_Delete("ALL", function(error) {

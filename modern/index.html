@@ -167,84 +167,83 @@
 						</div>
 
 						<div id="div_acc" hidden>
-							<p>
-								<input type="text" id="txt_pg" autocomplete="off">
-								<button type="button" id="btn_pg" autocomplete="off">Set greeting</button>
-							</p>
+							<fieldset id="fs_admin">
+								<legend align="center">Administration</legend>
 
-							<hr>
+								<table id="tbl_limits">
+									<thead>
+										<tr>
+											<th><abbr title="Level">Lvl</abbr></th>
+											<th><abbr title="Mebibytes">MiB</abbr></th>
+											<th><abbr title="Normal addresses">Nrm</abbr></th>
+											<th><abbr title="Shield addresses">Shd</abbr></th>
+										</tr>
+									</thead>
+									<tbody>
+										<tr>
+											<td class="half">0</td>
+											<td><input type="number" id="lim_mib0" min="0" max="255" required autocomplete="off"></td>
+											<td><input type="number" id="lim_nrm0" min="0" max="31" required autocomplete="off"></td>
+											<td><input type="number" id="lim_shd0" min="0" max="31" required autocomplete="off"></td>
+										</tr>
+										<tr>
+											<td class="half">1</td>
+											<td><input type="number" id="lim_mib1" min="0" max="255" required autocomplete="off"></td>
+											<td><input type="number" id="lim_nrm1" min="0" max="31" required autocomplete="off"></td>
+											<td><input type="number" id="lim_shd1" min="0" max="31" required autocomplete="off"></td>
+										</tr>
+										<tr>
+											<td class="half">2</td>
+											<td><input type="number" id="lim_mib2" min="0" max="255" required autocomplete="off"></td>
+											<td><input type="number" id="lim_nrm2" min="0" max="31" required autocomplete="off"></td>
+											<td><input type="number" id="lim_shd2" min="0" max="31" required autocomplete="off"></td>
+										</tr>
+										<tr>
+											<td class="half">3</td>
+											<td><input type="number" id="lim_mib3" min="0" max="255" required autocomplete="off"></td>
+											<td><input type="number" id="lim_nrm3" min="0" max="31" required autocomplete="off"></td>
+											<td><input type="number" id="lim_shd3" min="0" max="31" required autocomplete="off"></td>
+										</tr>
+									</tbody>
+									<tfoot>
+										<tr>
+											<td colspan="4"><button id="btn_limits" type="button" autocomplete="off">Update limits</button></td>
+										</tr>
+									</tfoot>
+								</table>
 
-							<p class="half">Level <b id="ownlvl">?</b> account. Using <b id="ownmib">?</b> MiB.</p>
-							<p>
-								<input type="checkbox" id="chk_dng_usr" autocomplete="off"><label for="chk_dng_usr" class="half"> Confirm dangerous operation</label>
-							</p>
-							<div id="btnset_dng_usr">
-								<button id="btn_lowme" autocomplete="off" disabled>Decrease Level</button>
-								<button id="btn_erame" autocomplete="off" disabled>Erase Messages</button>
-								<button id="btn_delme" autocomplete="off" disabled>Delete Account</button>
-							</div>
+								<hr>
 
-							<hr>
+								<div class="center">
+									<input type="text" id="txt_reg" minlength="64" maxlength="64" pattern="[0-9a-f]{64}" required autocomplete="off" placeholder="UPK (hex)">
+									<button type="button" id="btn_reg" autocomplete="off">Register</button>
+								</div>
 
-							<h1>Administration</h1>
+								<hr>
 
-							<table id="tbl_limits">
-								<thead>
-									<tr>
-										<th><abbr title="Level">Lvl</abbr></th>
-										<th><abbr title="Mebibytes">MiB</abbr></th>
-										<th><abbr title="Normal addresses">Nrm</abbr></th>
-										<th><abbr title="Shield addresses">Shd</abbr></th>
-									</tr>
-								</thead>
-								<tbody>
-									<tr>
-										<td class="half">0</td>
-										<td><input type="number" id="lim_mib0" min="0" max="255" required autocomplete="off" class="admin"></td>
-										<td><input type="number" id="lim_nrm0" min="0" max="31" required autocomplete="off" class="admin"></td>
-										<td><input type="number" id="lim_shd0" min="0" max="31" required autocomplete="off" class="admin"></td>
-									</tr>
-									<tr>
-										<td class="half">1</td>
-										<td><input type="number" id="lim_mib1" min="0" max="255" required autocomplete="off" class="admin"></td>
-										<td><input type="number" id="lim_nrm1" min="0" max="31" required autocomplete="off" class="admin"></td>
-										<td><input type="number" id="lim_shd1" min="0" max="31" required autocomplete="off" class="admin"></td>
-									</tr>
-									<tr>
-										<td class="half">2</td>
-										<td><input type="number" id="lim_mib2" min="0" max="255" required autocomplete="off" class="admin"></td>
-										<td><input type="number" id="lim_nrm2" min="0" max="31" required autocomplete="off" class="admin"></td>
-										<td><input type="number" id="lim_shd2" min="0" max="31" required autocomplete="off" class="admin"></td>
-									</tr>
-									<tr>
-										<td class="half">3</td>
-										<td><input type="number" id="lim_mib3" min="0" max="255" required autocomplete="off" class="admin"></td>
-										<td><input type="number" id="lim_nrm3" min="0" max="31" required autocomplete="off" class="admin"></td>
-										<td><input type="number" id="lim_shd3" min="0" max="31" required autocomplete="off" class="admin"></td>
-									</tr>
-								</tbody>
-								<tfoot>
-									<tr>
-										<td colspan="4"><button id="btn_limits" type="button" autocomplete="off" class="admin">Update limits</button></td>
-									</tr>
-								</tfoot>
-							</table>
+								<div class="center">
+									<p><input type="text" id="txt_sender_hash" minlength="64" maxlength="64" pattern="[0-9A-Za-z_-]{64}" required autocomplete="off" placeholder="Message-ID"></p>
+									<p><input type="text" id="txt_sender_date" required autocomplete="off" placeholder="Date"></p>
+									<p id="txt_sender_res" class="half">No currently registered account was identified as the sender.</p>
+									<p><button type="button" id="btn_sender" autocomplete="off">Identify sender</button></p>
+								</div>
+							</fieldset>
 
-							<hr>
+							<fieldset id="fs_users">
+								<legend align="center">Personal</legend>
 
-							<div class="center">
-								<input type="text" id="txt_reg" minlength="64" maxlength="64" pattern="[0-9a-f]{64}" required autocomplete="off" placeholder="Public key (hex)" class="admin">
-								<button type="button" id="btn_reg" autocomplete="off" class="admin">Register</button>
-							</div>
+								<p>
+									<input type="text" id="txt_pg" autocomplete="off">
+									<button type="button" id="btn_pg" autocomplete="off">Set greeting</button>
+								</p>
 
-							<hr>
+								<hr>
 
-							<div class="center">
-								<p><input type="text" id="txt_sender_hash" minlength="64" maxlength="64" pattern="[0-9A-Za-z_-]{64}" required autocomplete="off" placeholder="Message-ID" class="admin"></p>
-								<p><input type="text" id="txt_sender_date" required autocomplete="off" placeholder="Date" class="admin"></p>
-								<p id="txt_sender_res" class="half">No currently registered account was identified as the sender.</p>
-								<p><button type="button" id="btn_sender" autocomplete="off" class="admin">Identify</button></p>
-							</div>
+								<div id="btnset_dng_usr">
+									<button id="btn_erame" autocomplete="off" disabled>Empty storage</button>
+									<div><input type="checkbox" id="chk_dng_usr" autocomplete="off"><label for="chk_dng_usr" class="half"> Allow dangerous operations</label></div>
+								</div>
+							</fieldset>
 						</div>
 
 						<table id="tbl_accs" hidden>

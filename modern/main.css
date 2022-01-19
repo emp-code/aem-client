@@ -80,7 +80,13 @@ dialog p {
 	margin-bottom: 0;
 }
 
-label, .half {
+fieldset {
+	border: 1px solid #ffffff40;
+	margin: auto;
+	width: fit-content;
+}
+
+label, legend, .half {
 	opacity: 0.5;
 }
 
@@ -465,7 +471,7 @@ dialog,
 
 #btnset_dng_usr {
 	display: grid;
-	grid-template-columns: auto auto auto;
+	grid-template-columns: auto auto;
 	grid-template-rows: auto;
 	justify-items: center;
 }
@@ -487,14 +493,18 @@ dialog,
 	opacity: 0.5;
 }
 
-#tbl_accs {
-	table-layout: fixed;
-	width: 100%;
+#tbl_limits {
+	margin: auto;
 }
 
 #tbl_limits input {
 	width: 100%;
 	max-width: 5em;
+}
+
+#tbl_accs {
+	table-layout: fixed;
+	width: 100%;
 }
 
 /* Main2 */
