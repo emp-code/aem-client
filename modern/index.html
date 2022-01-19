@@ -78,7 +78,7 @@
 						</div>
 
 						<div id="div_write_2" hidden>
-							<p id="write2_pkey"><input type="text" pattern="[0-9A-Za-z+/]{43}" size="43" minlength="43" maxlength="43" autocomplete="off" placeholder="Public key (enables end-to-end encryption)"></p>
+							<p id="write2_pkey"><input type="text" pattern="[0-9A-Za-z+/]{43}" size="43" minlength="43" maxlength="43" autocomplete="off" placeholder="Receiver APK (enables E2EE)"></p>
 							<p id="write2_send"><button type="button"><span id="write2_btntxt">Send to</span> <span id="write2_recv"></span></button></p>
 							<hr>
 							<p id="write2_from"></p>
@@ -234,12 +234,23 @@
 							<fieldset id="fs_users">
 								<legend align="center">Personal</legend>
 
-								<input type="text" id="txt_pg" autocomplete="off">
-								<button type="button" id="btn_pg" autocomplete="off">Set greeting</button>
+								<div class="double">
+									<input type="text" id="txt_pg" autocomplete="off">
+									<button type="button" id="btn_pg" autocomplete="off">Set greeting</button>
+								</div>
 
 								<hr>
 
-								<div id="btnset_dng_usr">
+								<div class="double">
+									<select id="getapk_addr" required></select>
+									<button id="btn_getapk">Get APK</button>
+								</div>
+
+								<pre id="getapk_result" class="mono half">(share for E2EE internal mail)             </pre>
+
+								<hr>
+
+								<div class="double">
 									<button id="btn_erame" autocomplete="off" disabled>Empty storage</button>
 									<div><input type="checkbox" id="chk_dng_usr" autocomplete="off"><label for="chk_dng_usr" class="half"> Allow dangerous operations</label></div>
 								</div>

@@ -121,6 +121,13 @@ textarea {
 	resize: none;
 }
 
+.double {
+	display: grid;
+	grid-template-columns: auto auto;
+	grid-template-rows: auto;
+	justify-items: center;
+}
+
 .flex0 {
 	flex: 0 1 auto;
 }
@@ -467,13 +474,6 @@ dialog,
 	font-family: monospace, monospace;
 	text-align: right;
 	font-size: 1em;
-}
-
-#btnset_dng_usr {
-	display: grid;
-	grid-template-columns: auto auto;
-	grid-template-rows: auto;
-	justify-items: center;
 }
 
 #div_acc > table {

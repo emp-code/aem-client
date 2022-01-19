@@ -182,14 +182,14 @@ function AllEars(readyCallback) {
 		this.body = body;
 	}
 
-	function _IntMsg(validPad, validSig, id, ts, isE2ee, fromLv, fromPk, from, to, title, body) {
+	function _IntMsg(validPad, validSig, id, ts, isE2ee, fromLv, apk, from, to, title, body) {
 		this.validPad = validPad;
 		this.validSig = validSig;
 		this.id = id;
 		this.ts = ts;
 		this.isE2ee = isE2ee;
 		this.fromLv = fromLv;
-		this.fromPk = fromPk;
+		this.apk = apk;
 		this.from = from;
 		this.to = to;
 		this.title = title;
@@ -1306,7 +1306,7 @@ function AllEars(readyCallback) {
 
 				const msgFrom = _addr32_decode(msgData.slice( 1, 11), msgFromShield);
 				const msgTo   = _addr32_decode(msgData.slice(11, 21), msgToShield);
-				const msgFromPk = msgData.slice(21, 21 + sodium.crypto_kx_PUBLICKEYBYTES);
+				const msgApk  = msgData.slice(21, 21 + sodium.crypto_kx_PUBLICKEYBYTES);
 
 				const msgTitleLen = msgData[21 + sodium.crypto_kx_PUBLICKEYBYTES] & 127; // 128 unused
 				const msgBox = msgData.slice(22 + sodium.crypto_kx_PUBLICKEYBYTES);
@@ -1324,7 +1324,7 @@ function AllEars(readyCallback) {
 						const addr32_to = msgData.slice(11, 21);
 
 						const kxKeys = sodium.crypto_kx_seed_keypair(sodium.crypto_generichash(sodium.crypto_kx_SEEDBYTES, addr32_to, __SECRET_own_kxHash));
-						const sessionKeys = sodium.crypto_kx_server_session_keys(kxKeys.publicKey, kxKeys.privateKey, msgFromPk);
+						const sessionKeys = sodium.crypto_kx_server_session_keys(kxKeys.publicKey, kxKeys.privateKey, msgApk);
 						msgBin = sodium.crypto_secretbox_open_easy(msgBox, nonce, sessionKeys.sharedRx);
 					} else {
 						msgBin = msgBox;
@@ -1337,7 +1337,7 @@ function AllEars(readyCallback) {
 					msgBody = e.message;
 				}
 
-				_intMsg.push(new _IntMsg(validPad, validSig, msgId, msgTs, msgEncrypted, msgFromLv, msgFromPk, msgFrom, msgTo, msgTitle, msgBody));
+				_intMsg.push(new _IntMsg(validPad, validSig, msgId, msgTs, msgEncrypted, msgFromLv, msgApk, msgFrom, msgTo, msgTitle, msgBody));
 			break;}
 
 			case 32: { // UplMsg (Email attachment, or uploaded file)
@@ -1445,6 +1445,15 @@ function AllEars(readyCallback) {
 	this.getLimitStorage = function(lvl) {if(typeof(lvl)!=="number"){return;} return _maxStorage[lvl];};
 	this.getLimitNormalA = function(lvl) {if(typeof(lvl)!=="number"){return;} return _maxNormalA[lvl];};
 	this.getLimitShieldA = function(lvl) {if(typeof(lvl)!=="number"){return;} return _maxShieldA[lvl];};
+
+	this.getOwnApk = function(addr) {if (typeof(addr)!=="string"){return;}
+		try {
+			const kxKeys = sodium.crypto_kx_seed_keypair(sodium.crypto_generichash(sodium.crypto_kx_SEEDBYTES, _addr32_encode(addr), __SECRET_own_kxHash));
+			return sodium.to_base64(kxKeys.publicKey, sodium.base64_variants.ORIGINAL_NO_PADDING);
+		} catch(e) {
+			return "(error)".padEnd(43);
+		}
+	};
 
 	this.getTotalMsgCount = function() {return _totalMsgCount;};
 	this.getTotalMsgBytes = function() {return _totalMsgBytes;};
@@ -1638,7 +1647,7 @@ function AllEars(readyCallback) {
 	this.getIntMsgIdHex  = function(num) {if(typeof(num)!=="number"){return;} return _intMsg[num].id? sodium.to_hex(_intMsg[num].id) : null;};
 	this.getIntMsgTime   = function(num) {if(typeof(num)!=="number"){return;} return _intMsg[num].ts;};
 	this.getIntMsgLevel  = function(num) {if(typeof(num)!=="number"){return;} return _intMsg[num].fromLv;};
-	this.getIntMsgFromPk = function(num) {if(typeof(num)!=="number"){return;} return _intMsg[num].fromPk? sodium.to_base64(_intMsg[num].fromPk, sodium.base64_variants.ORIGINAL_NO_PADDING) : "";};
+	this.getIntMsgApk    = function(num) {if(typeof(num)!=="number"){return;} return _intMsg[num].apk? sodium.to_base64(_intMsg[num].apk, sodium.base64_variants.ORIGINAL_NO_PADDING) : "";};
 	this.getIntMsgFrom   = function(num) {if(typeof(num)!=="number"){return;} return _intMsg[num].from;};
 	this.getIntMsgTo     = function(num) {if(typeof(num)!=="number"){return;} return _intMsg[num].to;};
 	this.getIntMsgTitle  = function(num) {if(typeof(num)!=="number"){return;} return _intMsg[num].title;};
@@ -1997,7 +2006,7 @@ function AllEars(readyCallback) {
 		});
 	};
 
-	this.Message_Create = function(title, body, addr_from, addr_to, replyId, to_pubkey, callback) {if(typeof(title)!=="string" || typeof(body)!=="string" || typeof(addr_from)!=="string" || typeof(addr_to)!=="string" || typeof(callback)!=="function"){return;}
+	this.Message_Create = function(title, body, addr_from, addr_to, replyId, to_apk, callback) {if(typeof(title)!=="string" || typeof(body)!=="string" || typeof(addr_from)!=="string" || typeof(addr_to)!=="string" || typeof(callback)!=="function"){return;}
 		if (addr_to.indexOf("@") >= 0) { // Email
 			if (replyId === null) {
 				replyId = "";
@@ -2018,7 +2027,7 @@ function AllEars(readyCallback) {
 		}
 
 		// Internal mail
-		const isE2ee = (to_pubkey.constructor === Uint8Array && to_pubkey.length === sodium.crypto_kx_PUBLICKEYBYTES);
+		const isE2ee = (to_apk.constructor === Uint8Array && to_apk.length === sodium.crypto_kx_PUBLICKEYBYTES);
 		const msgTs = new Uint8Array(isE2ee? (new Uint32Array([Math.round(Date.now() / 1000) + 2]).buffer) : [0,0,0,0]); // +2 to account for connection delay
 		if (!isE2ee && (title.length + body.length) < 38) body = body.padEnd(38 - title.length, "\0"); // Minimum message size: 177-48-64-5-1-32-10-10-1 = 6; -32 does not apply for DR, hence 38
 
@@ -2036,7 +2045,7 @@ function AllEars(readyCallback) {
 			nonce.fill(0);
 			nonce.set(msgTs);
 
-			const sessionKeys = sodium.crypto_kx_client_session_keys(kxKeys.publicKey, kxKeys.privateKey, to_pubkey);
+			const sessionKeys = sodium.crypto_kx_client_session_keys(kxKeys.publicKey, kxKeys.privateKey, to_apk);
 			msgBox = sodium.crypto_secretbox_easy(sodium.from_string(title + body), nonce, sessionKeys.sharedTx);
 		} else {
 			msgBox = sodium.from_string(title + body);
@@ -2051,7 +2060,7 @@ function AllEars(readyCallback) {
 		if (addr_to.length   === 16) final[0] |= 4;
 		// Server sets sender level (0-3)
 
-		if (isE2ee) final.set(to_pubkey, 1);
+		if (isE2ee) final.set(to_apk, 1);
 		final.set(msgTs, 1 + sodium.crypto_kx_PUBLICKEYBYTES);
 
 		final.set(addr32_from, sodium.crypto_kx_PUBLICKEYBYTES + 5);
