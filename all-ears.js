@@ -106,7 +106,7 @@ function AllEars(readyCallback) {
 	let __SECRET_own_symmetric; // Key used for client-side encryption: the private data field, uploaded files, etc
 
 	// Non-secret user data
-	let _own_upk = 0
+	let _own_upk = 0;
 	let _own_level = 0;
 	const _own_addr = [];
 
