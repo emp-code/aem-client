@@ -82,6 +82,7 @@ dialog p {
 
 fieldset {
 	border: 1px solid #ffffff40;
+	border-radius: 1em;
 	margin: auto;
 	width: fit-content;
 }
