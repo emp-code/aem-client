@@ -941,12 +941,17 @@ function deleteAddress(addr) {
 		document.getElementById("tbl_addrs").deleteRow(addressToDelete);
 		document.getElementById("write_from").remove(addressToDelete);
 
-		const apkList = document.getElementById("getapk_addr");
-		for (let i = 0; i < apkList.children.length; i++) {
-			if (apkList.children[i].value === addr) {
-				apkList.remove(i);
-				break;
+		if (ae.getAddressCountNormal() > 0) {
+			const apkList = document.getElementById("getapk_addr");
+			for (let i = 0; i < apkList.children.length; i++) {
+				if (apkList.children[i].value === addr) {
+					apkList.remove(i);
+					break;
+				}
 			}
+		} else {
+			document.getElementById("getapk_addr").replaceChildren();
+			document.getElementById("btn_getapk").disabled = true;
 		}
 
 		updateAddressCounts();
