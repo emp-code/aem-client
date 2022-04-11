@@ -1433,6 +1433,12 @@ document.getElementById("btn_erame").onclick = function() {
 
 document.getElementById("btn_notepad_restore").onclick = function() {
 	document.getElementById("txt_notepad").value = ae.getPrivateExtra();
+	document.getElementById("btn_notepad_savepad").disabled = true;
+	document.getElementById("txt_notepad").oninput = function() {
+		this.oninput = null;
+		document.getElementById("btn_notepad_savepad").disabled = false;
+		document.getElementById("btn_notepad_savepad").textContent = "Save";
+	};
 };
 
 document.getElementById("txt_notepad").oninput = function() {
