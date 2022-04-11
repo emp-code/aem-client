@@ -270,7 +270,7 @@ function displayMsg(isHistory, isInt, num) {
 			document.getElementById("write_recv").value = isInt? ae.getIntMsgFrom(num) : ae.getExtMsgReplyAddress(num);
 			document.getElementById("write_subj").value = isInt? ae.getIntMsgTitle(num) : ae.getExtMsgTitle(num);
 			if (!document.getElementById("write_subj").value.startsWith("Re:")) document.getElementById("write_subj").value = "Re: " + document.getElementById("write_subj").value;
-			document.querySelector("#write2_pkey > input").value = isInt? ae.getIntMsgFromPk(num) : "";
+			document.querySelector("#write2_pkey > input").value = isInt? ae.getIntMsgApk(num) : "";
 
 			document.getElementById("write_recv").readOnly = !isInt;
 			document.getElementById("write_subj").readOnly = !isInt;
@@ -324,7 +324,7 @@ function displayMsg(isHistory, isInt, num) {
 
 		if (ae.getIntMsgFrom(num) !== "system" && ae.getIntMsgFrom(num) !== "public") {
 			document.getElementById("readmsg_tls").style.visibility = "visible";
-			document.getElementById("readmsg_tls").children[0].textContent = ae.getIntMsgFromPk(num);
+			document.getElementById("readmsg_tls").children[0].textContent = ae.getIntMsgApk(num);
 		} else document.getElementById("readmsg_tls").style.visibility = "hidden";
 
 		let symbol = document.createElement("span");
@@ -1005,6 +1005,13 @@ function addAddress(num) {
 	el.value = addr;
 	el.textContent = addr + "@" + ae.getDomainEml();
 	document.getElementById("write_from").appendChild(el);
+
+	if (addr.length !== 16) {
+		el = document.createElement("option");
+		el.value = addr;
+		el.textContent = addr;
+		document.getElementById("getapk_addr").appendChild(el);
+	}
 }
 
 function clearWrite() {
@@ -1572,6 +1579,10 @@ document.getElementById("btn_limits").onclick = function() {
 			updateAddressCounts();
 		}
 	});
+};
+
+document.getElementById("btn_getapk").onclick = function() {
+	document.getElementById("getapk_result").textContent = ae.getOwnApk(document.getElementById("getapk_addr").value);
 };
 
 document.getElementById("txt_skey").onfocus = function() {
