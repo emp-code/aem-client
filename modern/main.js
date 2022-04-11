@@ -1146,6 +1146,8 @@ function addAddresses() {
 	for (let i = 0; i < ae.getAddressCount(); i++) {
 		addAddress(i);
 	}
+
+	document.getElementById("btn_getapk").disabled = (ae.getAddressCountNormal() < 1);
 }
 
 function reloadAccount() {
