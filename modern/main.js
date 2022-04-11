@@ -1327,6 +1327,7 @@ function addressCreate(addr) {
 
 			addAddress(ae.getAddressCount() - 1);
 			if (addr !== "SHIELD") {
+				document.getElementById("btn_getapk").disabled = false;
 				document.getElementById("txt_address_create_normal").value = "";
 				document.getElementById("txt_address_create_normal").focus();
 			}
