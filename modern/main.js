@@ -1483,7 +1483,7 @@ document.getElementById("btn_notepad_saveupl").onclick = function() {
 		if (error === 0) {
 			np.value = "";
 			showFiles();
-			document.getElementById("ownmib").textContent = Math.round(ae.getTotalMsgBytes() / 1048576);
+			document.getElementById("tbd_accs").children[0].children[1].textContent = Math.round(ae.getTotalMsgBytes() / 1024 / 1024);
 		} else errorDialog(error);
 
 		np.disabled = false;
@@ -1504,7 +1504,7 @@ document.getElementById("btn_upload").onclick = function() {
 			ae.Message_Upload(fileSelector.files[0].name, new Uint8Array(reader.result), function(error) {
 				if (error === 0) {
 					showFiles();
-					document.getElementById("ownmib").textContent = Math.round(ae.getTotalMsgBytes() / 1048576);
+					document.getElementById("tbd_accs").children[0].children[1].textContent = Math.round(ae.getTotalMsgBytes() / 1024 / 1024);
 				} else errorDialog(error);
 
 				btn.disabled = false;
