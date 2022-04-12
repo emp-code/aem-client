@@ -124,7 +124,7 @@ textarea {
 
 .double {
 	display: grid;
-	grid-template-columns: auto auto;
+	grid-template-columns: 1fr 3em;
 	grid-template-rows: auto;
 	justify-items: center;
 }
@@ -370,6 +370,10 @@ dialog,
 #tbl_inbox tr > td:nth-child(3n) {
 	text-align: right;
 	direction: rtl;
+}
+
+#txt_pg, #getapk_addr {
+	width: 100%;
 }
 
 #div_write,
