@@ -1366,7 +1366,7 @@ function AllEars(readyCallback) {
 					}
 				}
 
-				_uplMsg.push(new _UplMsg(msgId, msgTs, msgTitle, msgBody, msgParent, msgSize));
+				_uplMsg.push(new _UplMsg(msgId, msgTs, msgTitle, msgBody, msgParent, msgSize / 16));
 			break;}
 
 			case 48: // OutMsg (Delivery report for sent message)
