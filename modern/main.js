@@ -1541,16 +1541,23 @@ document.querySelector("#write2_send > button").onclick = function() {
 	}
 
 	// Email or internal message
-	document.getElementById("write2_btntxt").textContent = "Sending to";
+	let apk = null;
+	if (document.getElementById("write2_recv").textContent.indexOf("@") === -1) {
+		const elApk = document.querySelector("#write2_pkey > input");
+		if (!elApk.reportValidity()) {
+			btn.disabled = false;
+			return;
+		}
 
-	let apk;
-	try {apk = (document.getElementById("write2_recv").textContent.indexOf("@") > 0) ? null : sodium.from_base64(document.querySelector("#write2_pkey > input").value, sodium.base64_variants.ORIGINAL_NO_PADDING);}
-	catch(e) {
-		errorDialog(1); // Invalid input
-		document.getElementById("write2_btntxt").textContent = "Retry sending to";
-		btn.disabled = false;
-		return;
+		try {apk = sodium.from_base64(elApk.value, sodium.base64_variants.ORIGINAL_NO_PADDING);}
+		catch(e) {
+			errorDialog(1); // Invalid input
+			btn.disabled = false;
+			return;
+		}
 	}
+
+	document.getElementById("write2_btntxt").textContent = "Sending to";
 
 	ae.Message_Create(
 		document.getElementById("write_subj").value,
