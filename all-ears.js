@@ -1733,7 +1733,7 @@ function AllEars(readyCallback) {
 	};
 
 	this.getPrivateExtraSpaceMax = function() {
-		let lenPriv = 2 + _own_addr.length * 18;
+		let lenPriv = 2 + (_own_addr.length * 18);
 
 		for (let i = 0; i < _contactMail.length; i++) {
 			lenPriv += 3
