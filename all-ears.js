@@ -1547,7 +1547,7 @@ function AllEars(readyCallback) {
 		+ "\r\nReturn-Path: <" + _extMsg[num].envFrom + ">"
 		+ "\r\nSubject: " + _extMsg[num].subj
 		+ "\r\nTo: " + (_extMsg[num].dnTo ? ("\"" + _extMsg[num].dnTo + "\" <" + _extMsg[num].hdrTo + ">") : _extMsg[num].hdrTo)
-		+ "\r\n" + _extMsg[num].headers.replaceAll("\n", "\r\n")
+		+ (_extMsg[num].headers? ("\r\n" + _extMsg[num].headers.replaceAll("\n", "\r\n")) : "")
 		+ "\r\n\r\n" + getPlainExtBody(num).replaceAll("\x0B", "\n---\n").replaceAll("\n", "\r\n")
 		+ "\r\n";
 	};
