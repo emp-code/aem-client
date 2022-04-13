@@ -1957,7 +1957,7 @@ function AllEars(readyCallback) {
 
 	this.Message_Browse = function(newest, u_info, callback) {if(typeof(newest)!=="boolean" || typeof(u_info)!=="boolean" || typeof(callback)!=="function"){return;}
 		let fetchId;
-		if (_extMsg.length > 0 || _intMsg.length > 0 || _uplMsg.length > 0 || _outMsg.length > 0) {
+		if (_newestMsgTs > 0) {
 			fetchId = new Uint8Array(17);
 			fetchId[0] = 0;
 			if (newest) fetchId[0] |= _AEM_FLAG_NEWER;
@@ -2095,7 +2095,7 @@ function AllEars(readyCallback) {
 			if (hexIds === "ALL") {
 				return _fetchEncrypted(_AEM_API_MESSAGE_DELETE, new Uint8Array([0]), function(fetchErr) {
 					if (fetchErr) {callback(fetchErr); return;}
-					[_extMsg, _intMsg, _uplMsg, _outMsg].forEach(function(msgSet) {msgSet.slice(0,0)});
+					_newestMsgTs = 0;
 					callback(0);
 					return;
 				});
