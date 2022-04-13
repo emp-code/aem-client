@@ -1632,7 +1632,12 @@ function AllEars(readyCallback) {
 
 	this.txtIntMsg = function(num, dl) {if(typeof(num)!=="number" || typeof(dl)!=="boolean"){return;}
 		const msgDate = new Date((_intMsg[num].ts * 1000) + ((new Date().getTimezoneOffset()) * -60000)).toISOString().slice(0, 19).replace("T", " ");
-		const msg = "Date: " + msgDate + "\nFrom: " + _intMsg[num].from + "@" + _AEM_DOMAIN_EML + "\nTo: " + _intMsg[num].to + "@" + _AEM_DOMAIN_EML + "\nSubject: " + _intMsg[num].title + "\n\n" + this.getIntMsgBody(num, true);
+		const msg = "Date: " + msgDate
+			+ "\nFrom: " + _intMsg[num].from
+			+ (_intMsg[num].to? ("@" + _AEM_DOMAIN_EML + "\nTo: " + _intMsg[num].to + "@" + _AEM_DOMAIN_EML) : "")
+			+ "\nSubject: " + _intMsg[num].title
+			+ "\n\n" + this.getIntMsgBody(num, true);
+
 		if (dl) {_downloadFile(_intMsg[num].title + ".txt", new Blob([msg]));} else return msg;
 	};
 
