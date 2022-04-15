@@ -1680,9 +1680,7 @@ function AllEars(readyCallback) {
 	this.getUplMsgType  = function(num) {if(typeof(num)!=="number"){return;} return _getFileType(_uplMsg[num].title);};
 	this.getUplMsgParent = function(num) {if(typeof(num)!=="number"){return;}
 		for (let i = 0; i < _extMsg.length; i++) {
-			if (_arraysEqual(_uplMsg[num].parent, _extMsg[i].id)) {
-				return i;
-			}
+			if (_arraysEqual(_uplMsg[num].parent, _extMsg[i].id)) return i;
 		}
 
 		return null;
