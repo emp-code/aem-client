@@ -817,6 +817,15 @@ function showFiles() {
 			cell.onclick = function() {displayFile(false, i);};
 
 			cell = row.insertCell(-1);
+			const parentNum = ae.getUplMsgParent(i);
+			if (parentNum) {
+				cell.textContent = ae.getExtMsgTitle(parentNum);
+				cell.onclick = function() {displayMsg(false, false, parentNum);};
+			} else {
+				cell.textContent = "Upload";
+			}
+
+			cell = row.insertCell(-1);
 			cell.textContent = ae.getUplMsgTitle(i);
 			cell.onclick = function() {displayFile(false, i);};
 

@@ -343,7 +343,7 @@ dialog,
 }
 
 #tbl_files tr {
-	grid-template-columns: auto auto 1fr auto;
+	grid-template-columns: auto auto 1fr 1fr auto;
 }
 
 :is(#tbl_ctact, #tbl_drbox, #tbl_files, #tbl_inbox) tr:hover {
@@ -359,6 +359,10 @@ dialog,
 	margin: 0 1em 0 1em;
 	text-align: right;
 	white-space: pre;
+}
+
+#tbl_files td:nth-child(4) {
+	margin: 0 0 0 1em;
 }
 
 #tbl_inbox tr > td:nth-child(2n) {
