@@ -149,7 +149,7 @@ textarea {
 
 .mono,
 #div_write_1 select,
-:is(#tbl_drbox, #tbl_files, #tbl_inbox) td:first-child,
+:is(#tbl_drbox, .rowfile, #tbl_inbox) td:first-child,
 #txt_reg,
 #write_recv {
 	font-family: monospace, monospace;
@@ -342,8 +342,12 @@ dialog,
 	grid-template-columns: auto 4fr 1fr 2fr;
 }
 
-#tbl_files tr {
+.rowfile {
 	grid-template-columns: auto auto 1fr 1fr auto;
+}
+
+.rowfilex {
+	grid-template-columns: 1fr 1fr;
 }
 
 :is(#tbl_ctact, #tbl_drbox, #tbl_files, #tbl_inbox) tr:hover {
@@ -354,14 +358,14 @@ dialog,
 	cursor: pointer;
 }
 
-#tbl_files td:nth-child(2) {
+.rowfile td:nth-child(2) {
 	font-family: monospace, monospace;
 	margin: 0 1em 0 1em;
 	text-align: right;
 	white-space: pre;
 }
 
-#tbl_files td:nth-child(4) {
+.rowfile td:nth-child(4) {
 	margin: 0 0 0 1em;
 }
 
