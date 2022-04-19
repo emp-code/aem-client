@@ -148,11 +148,16 @@ function addMsgFlag(abbr, abbrTitle) {
 	parent.appendChild(el);
 }
 
-function displayFile(isHistory, num) {
-	if (num >= ae.getUplMsgCount()) return;
+function displayFile(isHistory, num, showNext) {
+	if (num < 0 || num >= ae.getUplMsgCount()) return;
 
 	const fileType = ae.getUplMsgType(num);
-	if (!fileType) {ae.downloadUplMsg(num); return;}
+	if (!fileType) {
+		if (isHistory) return;
+		if (showNext === true) return displayFile(false, num + 1, true);
+		if (showNext === false) return displayFile(false, num - 1, false);
+		ae.downloadUplMsg(num); return;
+	}
 
 	clearDisplay();
 	document.querySelector("article").scroll(0, 0);
@@ -175,8 +180,8 @@ function displayFile(isHistory, num) {
 
 	document.getElementById("btn_mnext").disabled = (num === ae.getUplMsgCount() - 1);
 	document.getElementById("btn_mprev").disabled = (num === 0);
-	document.getElementById("btn_mnext").onclick = function() {displayFile(false, num + 1);};
-	document.getElementById("btn_mprev").onclick = function() {displayFile(false, num - 1);};
+	document.getElementById("btn_mnext").onclick = function() {displayFile(false, num + 1, true);};
+	document.getElementById("btn_mprev").onclick = function() {displayFile(false, num - 1, false);};
 
 	if (fileType === "text") {
 		document.querySelector("#readmsg_main > pre").hidden = false;
@@ -818,11 +823,11 @@ function showFiles() {
 
 			let cell = row.insertCell(-1);
 			cell.textContent = new Date(ae.getUplMsgTime(i) * 1000).toISOString().slice(0, 10);
-			cell.onclick = function() {displayFile(false, i);};
+			cell.onclick = function() {displayFile(false, i, null);};
 
 			cell = row.insertCell(-1);
 			cell.textContent = (ae.getUplMsgBytes(i) / 1024).toFixed(0).padStart(4, " ");
-			cell.onclick = function() {displayFile(false, i);};
+			cell.onclick = function() {displayFile(false, i, null);};
 
 			cell = row.insertCell(-1);
 			const parentNum = ae.getUplMsgParent(i);
@@ -837,7 +842,7 @@ function showFiles() {
 
 			cell = row.insertCell(-1);
 			cell.textContent = ae.getUplMsgTitle(i);
-			cell.onclick = function() {displayFile(false, i);};
+			cell.onclick = function() {displayFile(false, i, null);};
 
 			cell = row.insertCell(-1);
 			const btn = document.createElement("button");
@@ -1387,7 +1392,7 @@ window.onpopstate = function(event) {
 			case "ext": displayMsg(true, false, msgDisplay.num); break;
 			case "int": displayMsg(true, true, msgDisplay.num); break;
 			case "out": displayOutMsg(true, msgDisplay.num); break;
-			case "upl": displayFile(true, msgDisplay.num); break;
+			case "upl": displayFile(true, msgDisplay.num, null); break;
 			case "ext_exp": displayExport(true, false, msgDisplay.num); break;
 			case "int_exp": displayExport(true, true, msgDisplay.num); break;
 		}
