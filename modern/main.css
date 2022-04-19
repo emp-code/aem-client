@@ -616,6 +616,12 @@ dialog,
 	min-width: 90%;
 }
 
+#getapk_result {
+	font-family: monospace;
+	white-space: break-spaces;
+	word-break: break-all;
+}
+
 @media (min-width: 80em) {
 	#div_begin {
 		height: 100%;
