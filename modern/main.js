@@ -1587,14 +1587,24 @@ document.getElementById("btn_upload").onclick = function() {
 
 		const reader = new FileReader();
 		reader.onload = function() {
-			ae.Message_Upload(fileSelector.files[0].name, new Uint8Array(reader.result), function(error) {
-				if (error === 0) {
-					showFiles();
-					document.getElementById("tbd_accs").children[0].children[1].textContent = Math.round(ae.getTotalMsgBytes() / 1024 / 1024);
-				} else errorDialog(error);
+			if (vaultOk) { // Vault opened -> upload to PostVault
+				vault.uploadFile(fileSelector.files[0].name, new Uint8Array(reader.result), function(status) {
+					if (status === 0) {
+						showFiles();
+					} // TODO else show error
 
-				btn.disabled = false;
-			});
+					btn.disabled = false;
+				});
+			} else { // No vault access -> upload to All-Ears
+				ae.Message_Upload(fileSelector.files[0].name, new Uint8Array(reader.result), function(status) {
+					if (status === 0) {
+						showFiles();
+						document.getElementById("tbd_accs").children[0].children[1].textContent = Math.round(ae.getTotalMsgBytes() / 1024 / 1024);
+					} else errorDialog(error);
+
+					btn.disabled = false;
+				});
+			}
 		};
 
 		reader.readAsArrayBuffer(fileSelector.files[0]);
