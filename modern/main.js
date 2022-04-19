@@ -1737,9 +1737,11 @@ document.getElementById("btn_enter").onclick = function() {
 			return;
 		}
 
-		vault.setKeys(txtSkey.value, function(successPv) {
-			if (!successPv) vaultOk = null;
-		});
+		if (vaultOk === false) {
+			vault.setKeys(txtSkey.value, function(successPv) {
+				if (!successPv) vaultOk = null;
+			});
+		}
 
 		document.body.style.cursor = "wait";
 		document.getElementById("greeting").textContent = "Connecting...";
