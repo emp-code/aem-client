@@ -149,6 +149,8 @@ function addMsgFlag(abbr, abbrTitle) {
 }
 
 function displayFile(isHistory, num) {
+	if (num >= ae.getUplMsgCount()) return;
+
 	const fileType = ae.getUplMsgType(num);
 	if (!fileType) {ae.downloadUplMsg(num); return;}
 
