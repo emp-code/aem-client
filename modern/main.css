@@ -432,6 +432,7 @@ dialog,
 
 #div_notes > div:first-of-type > table {
 	border-bottom: 1px solid #333;
+	table-layout: fixed;
 	width: 100%;
 }
 
