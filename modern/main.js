@@ -827,8 +827,10 @@ function showFiles() {
 			if (parentNum) {
 				cell.textContent = ae.getExtMsgTitle(parentNum);
 				cell.onclick = function() {displayMsg(false, false, parentNum);};
-			} else {
+			} else if (parentNum === false) {
 				cell.textContent = "Upload";
+			} else {
+				cell.textContent = "Unknown";
 			}
 
 			cell = row.insertCell(-1);

@@ -1679,6 +1679,8 @@ function AllEars(readyCallback) {
 	this.getUplMsgBytes = function(num) {if(typeof(num)!=="number"){return;} return _uplMsg[num].blocks * 16;};
 	this.getUplMsgType  = function(num) {if(typeof(num)!=="number"){return;} return _getFileType(_uplMsg[num].title);};
 	this.getUplMsgParent = function(num) {if(typeof(num)!=="number"){return;}
+		if (!_uplMsg[num].parent) return false;
+
 		for (let i = 0; i < _extMsg.length; i++) {
 			if (_arraysEqual(_uplMsg[num].parent, _extMsg[i].id)) return i;
 		}
