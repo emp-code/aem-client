@@ -831,7 +831,7 @@ function showFiles() {
 
 			cell = row.insertCell(-1);
 			const parentNum = ae.getUplMsgParent(i);
-			if (parentNum) {
+			if (typeof(parentNum) === "number") {
 				cell.textContent = ae.getExtMsgTitle(parentNum);
 				cell.onclick = function() {displayMsg(false, false, parentNum);};
 			} else if (parentNum === false) {
