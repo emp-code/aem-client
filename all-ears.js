@@ -1525,7 +1525,6 @@ function AllEars(readyCallback) {
 		+ "\r\n\r\n" + getPlainExtBody(num).replaceAll("\x0B", "\n---\n").replaceAll("\n", "\r\n")
 		+ "\r\n";
 	};
-
 	this.exportIntMsg = function(num) {if(typeof(num)!=="number"){return;}
 		return "Content-Transfer-Encoding: 8bit"
 		+ "\r\nContent-Type: text/plain; charset=utf-8"
@@ -2084,10 +2083,16 @@ function AllEars(readyCallback) {
 		const delCount = hexIds.length;
 
 		let data = new Uint8Array(delCount * 16);
+		const oldestId = _getOldestMsgId();
 
 		for (let i = 0; i < hexIds.length; i++) {
 			const id = sodium.from_hex(hexIds[i]);
 			if (id.length !== 16) {callback(0x01); return;}
+
+			if (_arraysEqual(oldestId, id)) {
+				callback(0x15);
+				return;
+			}
 
 			data.set(id, i * 16);
 		}
@@ -2301,6 +2306,7 @@ function AllEars(readyCallback) {
 			case 0x12: return "File too large";
 			case 0x13: return "Private-field extra content too long";
 			case 0x14: return "Private-field out of space";
+			case 0x15: return "Cannot delete oldest message";
 
 			case 0x16: return "Server failed decrypt"; // 400
 			case 0x17: return "No such account"; // 403
