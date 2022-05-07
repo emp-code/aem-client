@@ -40,15 +40,17 @@ if [ -f "$outname" ]; then echo "File exists"; exit; fi
 
 readonly url_brotli="https://cdn.jsdelivr.net/gh/google/brotli@1.0.7/js/decode.min.js"
 readonly url_sodium="https://cdn.jsdelivr.net/gh/jedisct1/libsodium.js@0.7.10/dist/browsers/sodium.js"
+readonly url_pvault="https://cdn.jsdelivr.net/gh/emp-code/PostVault@bfbad3ed7942e9c391346f12197a8ef088a2e3be/Client/PostVault.js"
 
 readonly js_brotli=$(if hash 2>/dev/null curl; then curl --fail --silent --user-agent '' "$url_brotli"; else wget -4 -q -U '' -O - "$url_brotli"; fi)
 readonly js_sodium=$(if hash 2>/dev/null curl; then curl --fail --silent --user-agent '' "$url_sodium"; else wget -4 -q -U '' -O - "$url_sodium"; fi)
+readonly js_pvault=$(if hash 2>/dev/null curl; then curl --fail --silent --user-agent '' "$url_pvault"; else wget -4 -q -U '' -O - "$url_pvault"; fi)
 readonly js_aem_js=$(cat all-ears.js)
 readonly js_modern=$(cat modern/main.js)
 readonly css_modern=$(cat modern/main.css)
 
-if [ ! "$js_brotli" ] || [ ! "$js_sodium" ]; then
-	echo "Failed fetching Brotli and/or Sodium libraries"
+if [ ! "$js_brotli" ] || [ ! "$js_sodium" ] || [ ! "$js_pvault" ]; then
+	echo "Failed fetching JS libraries"
 	exit
 fi
 
@@ -56,6 +58,7 @@ if [ ! "$js_aem_js" ] || [ ! "$js_modern" ] || [ ! "$css_modern" ]; then exit; f
 
 readonly hash_js_brotli="D02d+8Zt5n4/7mnD+GctnXcW7NBcKHdgDsl3msmWdkOG3094pdP0ceN/4c/zChml"
 readonly hash_js_sodium="GEJ3DUwTjXaoqVwjTaPCJN0gtk+mbUoJ7/QO/6IKrlO+P7QHrV9497Vy5q+JNp7j"
+readonly hash_js_pvault="8SOIAsqDvlFNFwTTqqs3oZKyEqaThZ3bLsr+Uv4o+LBypJJvzmkmaq/v/py50wo+"
 readonly hash_js_aem_js=$(echo -n "$js_aem_js" | openssl dgst -sha384 -binary | openssl base64 -A)
 readonly hash_js_modern=$(echo -n "$js_modern" | openssl dgst -sha384 -binary | openssl base64 -A)
 
@@ -64,6 +67,7 @@ readonly hash_favicon=$(echo -n "$favicon" | openssl dgst -sha384 -binary | open
 
 if [ $(echo -n "$js_brotli" | openssl dgst -sha384 -binary | openssl base64 -A) != "$hash_js_brotli" ]; then echo "Brotli hash mismatch"; exit; fi
 if [ $(echo    "$js_sodium" | openssl dgst -sha384 -binary | openssl base64 -A) != "$hash_js_sodium" ]; then echo "Sodium hash mismatch"; exit; fi
+if [ $(echo    "$js_pvault" | openssl dgst -sha384 -binary | openssl base64 -A) != "$hash_js_pvault" ]; then echo "PostVault hash mismatch"; exit; fi
 
 readonly LineCss=$(grep -F 'main.css' -n -m 1 modern/index.html | sed 's/:.*//')
 readonly LineJsFirst=$(grep -F '<script' -n -m 1 modern/index.html | sed 's/:.*//')
@@ -76,12 +80,13 @@ $(head -n $((LineCss - 1)) modern/index.html)\
 $(echo -en '\n\t\t<meta charset="utf-8">')\
 $(echo -en '\n\t\t<meta name="referrer" content="no-referrer">')\
 $(echo -en '\n\t\t<meta http-equiv="content-security-policy" content="')\
-$(echo -n "connect-src http$apidom_sec://$apidom:302/api data:; script-src 'unsafe-eval' 'sha384-$hash_js_brotli' 'sha384-$hash_js_sodium' 'sha384-$hash_js_aem_js' 'sha384-$hash_js_modern'; style-src 'unsafe-inline'; img-src 'sha384-$hash_favicon' blob:;")\
+$(echo -n "connect-src http$apidom_sec://$apidom:302/api data:; script-src 'unsafe-eval' 'sha384-$hash_js_brotli' 'sha384-$hash_js_sodium' 'sha384-$hash_js_pvault' 'sha384-$hash_js_aem_js' 'sha384-$hash_js_modern'; style-src 'unsafe-inline'; img-src 'sha384-$hash_favicon' blob:;")\
 $(echo -n " frame-src blob:; media-src blob:; object-src blob:; base-uri 'none'; child-src 'none'; default-src 'none'; font-src 'none'; form-action 'none'; manifest-src 'none'; prefetch-src 'none'; worker-src 'none'; plugin-types application/pdf;\">")\
 $(echo -en '\n\t\t<style>')$(echo -n "$css_modern")$(echo -en '</style>\n ')\
 $(tail -n +$((LineCss + 2)) modern/index.html | head -n $((LineJsFirst - LineCss - 2)))\
 $(echo -en '\n\t\t<script>')$(echo -n "$js_brotli")$(echo -en '</script>')\
 $(echo -en '\n\t\t<script>')$(echo -n "$js_sodium")$(echo -en '\n</script>')\
+$(echo -en '\n\t\t<script>')$(echo -n "$js_pvault")$(echo -en '\n</script>')\
 $(echo -en '\n\t\t<script>')$(cat all-ears.js)$(echo -en '</script>')\
 $(echo -en '\n\t\t<script>')$(cat modern/main.js)$(echo -en '</script>\n ')\
 $(tail -n +$((LineJsLast + 1)) modern/index.html)\
