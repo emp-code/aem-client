@@ -2336,23 +2336,17 @@ function AllEars(readyCallback) {
 			case 0xDE: return ["ADDRESS_UPDATE_SOMEFOUND", "Partial success - some addresses not found"];
 			case 0xDF: return ["ADDRESS_UPDATE_NONEFOUND", "No update performed - address(es) not found"];
 
-			// 0xE0-0xEF	Message/Create
-			case 0xE0: return ["MESSAGE_CREATE_EXT_MINLEVEL",        "Account level too low"];
-			case 0xE1: return ["MESSAGE_CREATE_EXT_FORMAT_FROM",     "Malformed from-address"];
-			case 0xE2: return ["MESSAGE_CREATE_EXT_FORMAT_TO",       "Malformed to-address"];
-			case 0xE3: return ["MESSAGE_CREATE_EXT_FORMAT_REPLYID",  "Malformed reply-id"];
-			case 0xE4: return ["MESSAGE_CREATE_EXT_FORMAT_SUBJECT",  "Malformed subject"];
-			case 0xE5: return ["MESSAGE_CREATE_EXT_INVALID_REPLYID", "Invalid reply-id"];
-			case 0xE6: return ["MESSAGE_CREATE_EXT_INVALID_FROM",    "Invalid from-address"];
-			case 0xE7: return ["MESSAGE_CREATE_EXT_INVALID_TO",      "Invalid to-address"];
-			case 0xE8: return ["MESSAGE_CREATE_EXT_BODY_SIZE",       "Body too long or short"];
-			case 0xE9: return ["MESSAGE_CREATE_EXT_BODY_UTF8",       "Body not UTF-8"];
-			case 0xEA: return ["MESSAGE_CREATE_EXT_BODY_CONTROL",    "Body contains control characters"];
-			case 0xEB: return ["MESSAGE_CREATE_EXT_LINE_TOOLONG",    "Body exceeds line-length limit"];
-			case 0xEC: return ["MESSAGE_CREATE_EXT_BODY_FORMAT",     "Malformed body"];
-			case 0xED: return ["MESSAGE_CREATE_EXT_BODY_TOOSHORT",   "Body too short"];
-			case 0xEE: return ["MESSAGE_CREATE_EXT_OURDOMAIN",       "Remove @" + _AEM_DOMAIN_EML + " to send internally"];
-	//		case 0xEF: return ["", ""];
+			// 0xE0-0xE9	Message/Create
+			case 0xE0: return ["MESSAGE_CREATE_EXT_MINLEVEL", "Account level too low"];
+			case 0xE1: return ["MESSAGE_CREATE_EXT_HDR_ADFR", "Malformed from-address"];
+			case 0xE2: return ["MESSAGE_CREATE_EXT_HDR_ADTO", "Malformed to-address"];
+			case 0xE3: return ["MESSAGE_CREATE_EXT_HDR_RPLY", "Malformed reply-id"];
+			case 0xE4: return ["MESSAGE_CREATE_EXT_HDR_SUBJ", "Malformed subject"];
+			case 0xE5: return ["MESSAGE_CREATE_EXT_BDY_UTF8", "Body must be UTF-8"];
+			case 0xE6: return ["MESSAGE_CREATE_EXT_BDY_CTRL", "Body must not contain control characters"];
+			case 0xE7: return ["MESSAGE_CREATE_EXT_BDY_SIZE", "Body too long or short"];
+			case 0xE8: return ["MESSAGE_CREATE_EXT_BDY_LONG", "Body exceeds line-length limit"];
+			case 0xE9: return ["MESSAGE_CREATE_EXT_MYDOMAIN", "Remove @" + _AEM_DOMAIN_EML + " to send internally"];
 
 			// 0xF0-0xF9	Message/Create sendMail()
 			case 0xF0: return ["MESSAGE_CREATE_SENDMAIL_GREET", "Failed greeting receiver server"];
