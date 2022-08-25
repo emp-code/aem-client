@@ -228,17 +228,31 @@ function displayFile(isHistory, num, showNext) {
 			el.referrerPolicy = "no-referrer";
 
 			try {
+				const sanBody = document.createElement("body");
+				sanBody.setHTML(sodium.to_string(ae.getUplMsgBody(num).buffer), {sanitizer: new Sanitizer({
+					"allowElements": [
+						"a","div","p",
+						"h1","h2","h3","h4","h5","h6",
+						"em","strong","b","i","u"
+					],
+					'allowAttributes': {
+						"href": ["*"]
+					}
+				})});
+
 				el.srcdoc =
-					"<html><head><style>html, body {background: #080a08; color: #fff; scrollbar-color: #222 #333;} body {opacity:0.55;} body > *:first-child {margin-top: 0; padding-top: 0;} a {color: #fff;} button, input, select, textarea {background: #000; color: #fff;}</style></head>"
-					+ sodium.to_string(ae.getUplMsgBody(num).buffer)
-						.replace(/.*<body/s, "<body")
-						.replaceAll(/<head.*\/head>/gs, "")
-						.replaceAll("<head", "<ignore")
-						.replaceAll(/<style.*\/style>/gs, "")
-						.replaceAll("<style", "<ignore")
-						.replaceAll(/style=".[^"]*"/gs, "")
-						.replaceAll(/style='.[^']*'/gs, "")
-						.replaceAll(/style=[^ >]*/gs, "");
+				"<html>" +
+					"<head>" +
+						"<style>" +
+							"html, body {background: #080a08; color: #fff; scrollbar-color: #222 #333;}\n" +
+							"body {opacity:0.55;}\n" +
+							"body > *:first-child {margin-top: 0; padding-top: 0;}\n" +
+							"a {color: #fff;}\n" +
+							"button, input, select, textarea {background: #000; color: #fff;}\n" +
+						"</style>" +
+					"</head>" +
+					sanBody.outerHTML +
+				"</html>";
 			} catch(e) {
 				el.srcdoc = "<!doctype html><html><head><style>body {background: #080a08; color: #fff; opacity:0.55;} h1 {margin: 0;}</style><body><h1>Error</h1><p>" + e.message + "</p></body></html>";
 			}
