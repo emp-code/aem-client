@@ -223,7 +223,7 @@ function displayFile(isHistory, num, showNext) {
 
 		case "html": {
 			el = document.createElement("iframe");
-			el.allow = "";
+			el.allow = "vertical-scroll";
 			el.sandbox = "";
 			el.referrerPolicy = "no-referrer";
 
