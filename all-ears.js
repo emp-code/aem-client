@@ -1505,7 +1505,8 @@ function AllEars(readyCallback) {
 	};
 
 	this.exportExtMsg = function(num) {if(typeof(num)!=="number"){return;}
-		return "Received: from " + _extMsg[num].greet +" (" + this.getExtMsgRdns(num) + " [" + this.getExtMsgIp(num) + "])"
+		return "Return-Path: <" + _extMsg[num].envFrom + ">"
+		+ "\r\nReceived: from " + _extMsg[num].greet +" (" + this.getExtMsgRdns(num) + " [" + this.getExtMsgIp(num) + "])"
 			+ " by " + _AEM_DOMAIN_EML
 			+ " with " + (_extMsg[num].esmtp ? "E" : "") + "SMTP" + (_extMsg[num].tls ? "S" : "")
 			+ " id " + sodium.to_base64(_extMsg[num].id, sodium.base64_variants.URLSAFE_NO_PADDING)
@@ -1518,13 +1519,13 @@ function AllEars(readyCallback) {
 		+ "\r\nMIME-Version: 1.0"
 		+ (_extMsg[num].hdrId? ("\r\nMessage-ID: <" + _extMsg[num].hdrId + ">") : "")
 		+ (_extMsg[num].hdrRt? ("\r\nReply-To: " + (_extMsg[num].dnRt ? ("\"" + _extMsg[num].dnRt + "\" <" + _extMsg[num].hdrRt + ">") : _extMsg[num].hdrRt)) : "")
-		+ "\r\nReturn-Path: <" + _extMsg[num].envFrom + ">"
 		+ "\r\nSubject: " + _extMsg[num].subj
 		+ "\r\nTo: " + (_extMsg[num].dnTo ? ("\"" + _extMsg[num].dnTo + "\" <" + _extMsg[num].hdrTo + ">") : _extMsg[num].hdrTo)
 		+ (_extMsg[num].headers? ("\r\n" + _extMsg[num].headers.replaceAll("\n", "\r\n")) : "")
 		+ "\r\n\r\n" + getPlainExtBody(num).replaceAll("\x0B", "\n---\n").replaceAll("\n", "\r\n")
 		+ "\r\n";
 	};
+
 	this.exportIntMsg = function(num) {if(typeof(num)!=="number"){return;}
 		return "Content-Transfer-Encoding: 8bit"
 		+ "\r\nContent-Type: text/plain; charset=utf-8"
