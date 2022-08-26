@@ -62,7 +62,6 @@ const TAB_WRITE = 2;
 const TAB_NOTES = 3;
 const TAB_TOOLS = 4;
 
-// Helper functions
 function errorDialog(err, focusAfter) {
 	if (typeof(err) !== "number" || err < 1) return;
 
@@ -271,11 +270,6 @@ function displayFile(isHistory, num, showNext) {
 
 	document.getElementById("readmsg_main").appendChild(el);
 }
-
-document.getElementById("btn_leave").onclick = function() {
-	document.getElementById("main2").hidden = true;
-	document.getElementById("main1").hidden = false;
-};
 
 function displayExport(isHistory, isInt, num) {
 	clearDisplay();
@@ -1062,6 +1056,80 @@ function deleteAddress(addr) {
 	});
 }
 
+function clearWrite() {
+	setTab(false, TAB_WRITE, 0);
+
+	document.querySelector("#write2_pkey > input").value = "";
+	document.getElementById("write_body").value = "";
+	document.getElementById("write_subj").value = "";
+	document.getElementById("write_subj").readOnly = false;
+	document.getElementById("write_subj").setAttribute("data-replyid", "");
+	document.getElementById("write_recv").value = "";
+	document.getElementById("write_recv").readOnly = false;
+	document.getElementById("write_recv").focus();
+}
+
+function refreshContactList() {
+	let opts = [];
+
+	for (let i = 0; i < ae.getContactCount(); i++) {
+		const el = document.createElement("option");
+		el.value = ae.getContactMail(i);
+		opts.push(el);
+	}
+
+	if (ae.isUserAdmin()) {
+		const el = document.createElement("option");
+		el.value = "public";
+		opts.push(el);
+	}
+
+	document.getElementById("contact_emails").replaceChildren(...opts);
+}
+
+function addContact(mail, name, note) {
+	const tbl = document.getElementById("tbl_ctact");
+	const row = tbl.insertRow(-1);
+
+	let cell = row.insertCell(-1);
+	cell.autocapitalize = "off";
+	cell.contentEditable = true;
+	cell.inputMode = "email";
+	cell.spellcheck = false;
+	cell.textContent = mail;
+
+	cell = row.insertCell(-1);
+	cell.autocapitalize = "words";
+	cell.contentEditable = true;
+	cell.spellcheck = false;
+	cell.textContent = name;
+
+	cell = row.insertCell(-1);
+	cell.autocapitalize = "off";
+	cell.contentEditable = true;
+	cell.spellcheck = false;
+	cell.textContent = note;
+
+	cell = row.insertCell(-1);
+	const el = document.createElement("button");
+	el.type = "button";
+	el.textContent = "X";
+	el.onclick = function() {row.remove();};
+	cell.appendChild(el);
+}
+
+function addContacts() {
+	for (let i = 0; i < ae.getContactCount(); i++) {
+		addContact(
+			ae.getContactMail(i),
+			ae.getContactName(i),
+			ae.getContactNote(i)
+		);
+	}
+
+	refreshContactList();
+}
+
 function addAddress(num) {
 	const addrTable = document.getElementById("tbl_addrs");
 	const row = addrTable.insertRow(-1);
@@ -1127,140 +1195,38 @@ function addAddress(num) {
 	}
 }
 
-function clearWrite() {
-	setTab(false, TAB_WRITE, 0);
-
-	document.querySelector("#write2_pkey > input").value = "";
-	document.getElementById("write_body").value = "";
-	document.getElementById("write_subj").value = "";
-	document.getElementById("write_subj").readOnly = false;
-	document.getElementById("write_subj").setAttribute("data-replyid", "");
-	document.getElementById("write_recv").value = "";
-	document.getElementById("write_recv").readOnly = false;
-	document.getElementById("write_recv").focus();
-}
-
-// Interface
-if (window.matchMedia("(prefers-color-scheme: light)").matches) document.querySelector("head > meta[name='theme-color']").content = "#eef";
-window.matchMedia("(prefers-color-scheme: light)").onchange = function() {document.querySelector("head > meta[name='theme-color']").content = window.matchMedia("(prefers-color-scheme: light)").matches? "#eef" : "#001";};
-
-document.getElementById("btn_dele").onclick = function() {
-	this.blur();
-
-	if (tab === TAB_WRITE) clearWrite();
-};
-
-document.getElementById("btn_updt").onclick = function() {
-	const btn = this;
-	btn.disabled = true;
-	btn.blur();
-
-	if (tab === TAB_INBOX) {
-		document.getElementById("tbl_inbox").style.opacity = 0.5;
-
-		ae.Message_Browse(true, false, function(error) {
-			btn.disabled = false;
-			document.getElementById("tbl_inbox").style.opacity = 1;
-
-			if (error === 0) {
-				showInbox();
-			} else {
-				errorDialog(error);
-			}
-		});
-	}
-};
-
-document.getElementById("btn_mdele").onclick = function() {
-	const delId = document.querySelector("article").getAttribute("data-msgid");
-	if (!delId) return;
-
-	const btn = this;
-	btn.blur();
-	btn.disabled = true;
-
-	ae.Message_Delete(delId, function(error) {
-		if (error !== 0) {
-			btn.disabled = false;
-			errorDialog(error);
-			return;
-		}
-
-		switch (tab) {
-			case TAB_INBOX: showInbox(); break;
-			case TAB_DRBOX: showDrbox(); break;
-			case TAB_NOTES: showFiles(); break;
-		}
-	});
-};
-
-function refreshContactList() {
-	let opts = [];
-
-	for (let i = 0; i < ae.getContactCount(); i++) {
-		const el = document.createElement("option");
-		el.value = ae.getContactMail(i);
-		opts.push(el);
-	}
-
-	if (ae.isUserAdmin()) {
-		const el = document.createElement("option");
-		el.value = "public";
-		opts.push(el);
-	}
-
-	document.getElementById("contact_emails").replaceChildren(...opts);
-}
-
-function addContact(mail, name, note) {
-	const tbl = document.getElementById("tbl_ctact");
-	const row = tbl.insertRow(-1);
-
-	let cell = row.insertCell(-1);
-	cell.autocapitalize = "off";
-	cell.contentEditable = true;
-	cell.inputMode = "email";
-	cell.spellcheck = false;
-	cell.textContent = mail;
-
-	cell = row.insertCell(-1);
-	cell.autocapitalize = "words";
-	cell.contentEditable = true;
-	cell.spellcheck = false;
-	cell.textContent = name;
-
-	cell = row.insertCell(-1);
-	cell.autocapitalize = "off";
-	cell.contentEditable = true;
-	cell.spellcheck = false;
-	cell.textContent = note;
-
-	cell = row.insertCell(-1);
-	const el = document.createElement("button");
-	el.type = "button";
-	el.textContent = "X";
-	el.onclick = function() {row.remove();};
-	cell.appendChild(el);
-}
-
-function addContacts() {
-	for (let i = 0; i < ae.getContactCount(); i++) {
-		addContact(
-			ae.getContactMail(i),
-			ae.getContactName(i),
-			ae.getContactNote(i)
-		);
-	}
-
-	refreshContactList();
-}
-
 function addAddresses() {
 	for (let i = 0; i < ae.getAddressCount(); i++) {
 		addAddress(i);
 	}
 
 	document.getElementById("btn_getapk").disabled = (ae.getAddressCountNormal() < 1);
+}
+
+function addressCreate(addr) {
+	document.getElementById("btn_address_create_normal").disabled = true;
+	document.getElementById("btn_address_create_shield").disabled = true;
+
+	ae.Address_Create(addr, function(error1) {
+		if (error1 !== 0) {
+			updateAddressButtons();
+			errorDialog(error1, (addr !== "SHIELD") ? document.getElementById("txt_address_create_normal") : null);
+			return;
+		}
+
+		ae.Private_Update(function(error2) {
+			updateAddressCounts();
+
+			addAddress(ae.getAddressCount() - 1);
+			if (addr !== "SHIELD") {
+				document.getElementById("btn_getapk").disabled = false;
+				document.getElementById("txt_address_create_normal").value = "";
+				document.getElementById("txt_address_create_normal").focus();
+			}
+
+			if (error2 !== 0) errorDialog(error2, (addr !== "SHIELD") ? document.getElementById("txt_address_create_normal") : null);
+		});
+	});
 }
 
 function reloadAccount() {
@@ -1273,30 +1239,6 @@ function reloadAccount() {
 	document.getElementById("fs_admin").disabled = !ae.isUserAdmin();
 	document.getElementById("txt_notepad").value = ae.getPrivateExtra();
 }
-
-document.getElementById("btn_newcontact").onclick = function() {
-	addContact("", "", "");
-};
-
-document.getElementById("btn_savecontacts").onclick = function() {
-	while (ae.getContactCount() > 0) {
-		ae.deleteContact(0);
-	}
-
-	for (const row of document.getElementById("tbl_ctact").rows) {
-		ae.addContact(row.cells[0].textContent, row.cells[1].textContent, row.cells[2].textContent);
-	}
-
-	refreshContactList();
-
-	const btn = this;
-	btn.disabled = true;
-
-	ae.Private_Update(function(error) {
-		btn.disabled = false;
-		if (error) errorDialog(error);
-	});
-};
 
 function writeVerify() {
 	if (
@@ -1395,6 +1337,10 @@ function setTab(isHistory, tabNum, pageNum) {
 	if (!isHistory) history.pushState({tab: tab, page: tabs[tab].cur, msg: msgDisplay}, null);
 }
 
+// Interface elements
+if (window.matchMedia("(prefers-color-scheme: light)").matches) document.querySelector("head > meta[name='theme-color']").content = "#eef";
+window.matchMedia("(prefers-color-scheme: light)").onchange = function() {document.querySelector("head > meta[name='theme-color']").content = window.matchMedia("(prefers-color-scheme: light)").matches? "#eef" : "#001";};
+
 window.onpopstate = function(event) {
 	if (!isReady || !event.state) return;
 	setTab(true, event.state.tab, event.state.page);
@@ -1424,31 +1370,85 @@ document.getElementById("btn_rght").onclick = function() {
 	setTab(false, tab, tabs[tab].cur + 1);
 };
 
-function addressCreate(addr) {
-	document.getElementById("btn_address_create_normal").disabled = true;
-	document.getElementById("btn_address_create_shield").disabled = true;
 
-	ae.Address_Create(addr, function(error1) {
-		if (error1 !== 0) {
-			updateAddressButtons();
-			errorDialog(error1, (addr !== "SHIELD") ? document.getElementById("txt_address_create_normal") : null);
+document.getElementById("btn_dele").onclick = function() {
+	this.blur();
+
+	if (tab === TAB_WRITE) clearWrite();
+};
+
+document.getElementById("btn_updt").onclick = function() {
+	const btn = this;
+	btn.disabled = true;
+	btn.blur();
+
+	if (tab === TAB_INBOX) {
+		document.getElementById("tbl_inbox").style.opacity = 0.5;
+
+		ae.Message_Browse(true, false, function(error) {
+			btn.disabled = false;
+			document.getElementById("tbl_inbox").style.opacity = 1;
+
+			if (error === 0) {
+				showInbox();
+			} else {
+				errorDialog(error);
+			}
+		});
+	}
+};
+
+document.getElementById("btn_mdele").onclick = function() {
+	const delId = document.querySelector("article").getAttribute("data-msgid");
+	if (!delId) return;
+
+	const btn = this;
+	btn.blur();
+	btn.disabled = true;
+
+	ae.Message_Delete(delId, function(error) {
+		if (error !== 0) {
+			btn.disabled = false;
+			errorDialog(error);
 			return;
 		}
 
-		ae.Private_Update(function(error2) {
-			updateAddressCounts();
-
-			addAddress(ae.getAddressCount() - 1);
-			if (addr !== "SHIELD") {
-				document.getElementById("btn_getapk").disabled = false;
-				document.getElementById("txt_address_create_normal").value = "";
-				document.getElementById("txt_address_create_normal").focus();
-			}
-
-			if (error2 !== 0) errorDialog(error2, (addr !== "SHIELD") ? document.getElementById("txt_address_create_normal") : null);
-		});
+		switch (tab) {
+			case TAB_INBOX: showInbox(); break;
+			case TAB_DRBOX: showDrbox(); break;
+			case TAB_NOTES: showFiles(); break;
+		}
 	});
-}
+};
+
+document.getElementById("btn_leave").onclick = function() {
+	document.getElementById("main2").hidden = true;
+	document.getElementById("main1").hidden = false;
+};
+
+document.getElementById("btn_newcontact").onclick = function() {
+	addContact("", "", "");
+};
+
+document.getElementById("btn_savecontacts").onclick = function() {
+	while (ae.getContactCount() > 0) {
+		ae.deleteContact(0);
+	}
+
+	for (const row of document.getElementById("tbl_ctact").rows) {
+		ae.addContact(row.cells[0].textContent, row.cells[1].textContent, row.cells[2].textContent);
+	}
+
+	refreshContactList();
+
+	const btn = this;
+	btn.disabled = true;
+
+	ae.Private_Update(function(error) {
+		btn.disabled = false;
+		if (error) errorDialog(error);
+	});
+};
 
 document.getElementById("btn_address_create_normal").onclick = function() {
 	if (ae.getAddressCountNormal() >= ae.getLimitNormalA(ae.getOwnLevel()) || ae.getAddressCountNormal() + ae.getAddressCountShield() >= 31) return;
