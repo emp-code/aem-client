@@ -1104,7 +1104,7 @@ function AllEars(readyCallback) {
 	};
 
 	const _htmlCetLinks = function(body, needle, isSecure, linkIcon, fullUrl) {
-		while(1) {
+		for(;;) {
 			const begin = body.indexOf(needle);
 			if (begin === -1) break;
 			const end = body.slice(begin + 1).indexOf(needle);
