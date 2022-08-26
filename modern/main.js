@@ -1460,7 +1460,7 @@ document.getElementById("btn_address_create_normal").onclick = function() {
 	addressCreate(txtNewAddr.value);
 };
 
-document.getElementById("txt_address_create_normal").onkeyup = function() {
+document.getElementById("txt_address_create_normal").onkeyup = function(event) {
 	if (event.key !== "Enter") return;
 	event.preventDefault();
 	document.getElementById("btn_address_create_normal").click();
