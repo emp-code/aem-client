@@ -10,7 +10,7 @@ function AllEars(readyCallback) {
 		|| document.compatMode == "BackCompat"
 		|| document.characterSet !== "UTF-8"
 		) return readyCallback(false);
-	} catch(e) return readyCallback(false);
+	} catch(e) {return readyCallback(false);}
 
 	const docDomApi = document.head.querySelector("meta[name='aem.domain.api']").content;
 	const docDomEml = document.head.querySelector("meta[name='aem.domain.eml']").content;
