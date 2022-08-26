@@ -686,19 +686,18 @@ function addMsg(isInt, i) {
 	};
 }
 
-function getRowsPerPage(tbl) {
+function setRowsPerPage(tbl) {
 	tbl.replaceChildren();
 	const row = tbl.insertRow(-1);
 	const cell = row.insertCell(-1);
 	cell.textContent = "0";
-	const rowsPerPage = Math.floor(getComputedStyle(tbl).height.replace("px", "") / getComputedStyle(tbl.getElementsByTagName("tr")[0]).height.replace("px", ""));
+	rowsPerPage = Math.floor(getComputedStyle(tbl).height.replace("px", "") / getComputedStyle(tbl.getElementsByTagName("tr")[0]).height.replace("px", ""));
 	tbl.replaceChildren();
-	return rowsPerPage;
 }
 
 function showInbox() {
 	const tbl = document.getElementById("tbl_inbox");
-	if (!document.getElementById("main1").hidden) rowsPerPage = getRowsPerPage(tbl);
+	if (!document.getElementById("main1").hidden) setRowsPerPage(tbl);
 
 	const maxExt = ae.getExtMsgCount();
 	const maxInt = ae.getIntMsgCount();
@@ -755,7 +754,7 @@ function showInbox() {
 
 function showDrbox() {
 	const tbl = document.getElementById("tbl_drbox");
-	if (!document.getElementById("main1").hidden) rowsPerPage = getRowsPerPage(tbl);
+	if (!document.getElementById("main1").hidden) setRowsPerPage(tbl);
 
 	const drCount = ae.getOutMsgCount();
 	const loadMore = ae.getReadyMsgBytes() < ae.getTotalMsgBytes();
@@ -812,7 +811,7 @@ function showDrbox() {
 
 function showFiles() {
 	const tbl = document.getElementById("tbl_files");
-	if (!document.getElementById("main1").hidden) rowsPerPage = getRowsPerPage(tbl);
+	if (!document.getElementById("main1").hidden) setRowsPerPage(tbl);
 
 	const msgCount = ae.getUplMsgCount() + (vaultOk? vault.getFileCount() : 0);
 	const loadMore = (ae.getReadyMsgBytes() < ae.getTotalMsgBytes()) || (vaultOk === false);
