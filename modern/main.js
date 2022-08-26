@@ -234,7 +234,7 @@ function displayFile(isHistory, num, showNext) {
 						"h1","h2","h3","h4","h5","h6",
 						"em","strong","b","i","u"
 					],
-					'allowAttributes': {
+					"allowAttributes": {
 						"href": ["*"]
 					}
 				})});
