@@ -241,7 +241,7 @@ function displayFile(isHistory, num, showNext) {
 				})});
 
 				el.srcdoc =
-				"<html>" +
+				"<!doctype html><html>" +
 					"<head>" +
 						"<style>" +
 							"html, body {background: #080a08; color: #fff; scrollbar-color: #222 #333;}\n" +
