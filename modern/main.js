@@ -1056,6 +1056,75 @@ function deleteAddress(addr) {
 	});
 }
 
+function setTab(isHistory, tabNum, pageNum) {
+	tab = tabNum;
+	if (pageNum !== -1) tabs[tab].cur = pageNum;
+
+	document.querySelectorAll("#main1 > nav:first-of-type > button").forEach(function(btn, i) {
+		document.querySelectorAll("#main1 > .mid > div")[i].hidden = (tab !== i);
+		btn.disabled = (tab === i);
+	});
+
+	const bigScreen = window.matchMedia("(min-width: 80em)").matches;
+	document.getElementById("main2").hidden = !bigScreen;
+	document.getElementById("btn_leave").disabled = bigScreen;
+
+	switch (tab) {
+		case TAB_INBOX: showInbox(); break;
+		case TAB_DRBOX: showDrbox(); break;
+
+		case TAB_WRITE:
+			if (tabs[tab].cur === 0) {
+				document.getElementById("div_write_1").hidden = false;
+				document.getElementById("div_write_2").hidden = true;
+				document.getElementById("write_recv").focus();
+			} else if (!writeVerify()) {
+				tabs[TAB_WRITE].cur = 0;
+				return;
+			}
+		break;
+
+		case TAB_NOTES:
+			switch (tabs[tab].cur) {
+				case 0:
+					document.getElementById("div_notes").children[0].hidden = false;
+					document.getElementById("div_notes").children[1].hidden = true;
+					document.getElementById("div_notes").children[2].hidden = true;
+				break;
+
+				case 1:
+					document.getElementById("div_notes").children[0].hidden = true;
+					document.getElementById("div_notes").children[1].hidden = false;
+					document.getElementById("div_notes").children[2].hidden = true;
+
+					document.querySelector("#div_notepad meter").value = ae.getPrivateExtraSpace() / ae.getPrivateExtraSpaceMax();
+				break;
+
+				case 2:
+					document.getElementById("div_notes").children[0].hidden = true;
+					document.getElementById("div_notes").children[1].hidden = true;
+					document.getElementById("div_notes").children[2].hidden = false;
+
+				default:
+					showFiles();
+			}
+		break;
+
+		case TAB_TOOLS:
+			for (let i = 0; i <= tabs[tab].max; i++) {
+				document.getElementById("div_tools").children[i].hidden = (i !== tabs[tab].cur);
+			}
+		break;
+	}
+
+	document.getElementById("btn_dele").disabled = !tabs[tab].btnDele;
+	document.getElementById("btn_left").disabled = (tabs[tab].cur === 0);
+	document.getElementById("btn_rght").disabled = (tabs[tab].cur === tabs[tab].max);
+	document.getElementById("btn_updt").disabled = !tabs[tab].btnUpdt;
+
+	if (!isHistory) history.pushState({tab: tab, page: tabs[tab].cur, msg: msgDisplay}, null);
+}
+
 function clearWrite() {
 	setTab(false, TAB_WRITE, 0);
 
@@ -1266,75 +1335,6 @@ function writeVerify() {
 	document.querySelector("#write2_send > button").disabled = false;
 	document.getElementById("write2_btntxt").textContent = (document.getElementById("write_recv").value === "public") ? "Make" : "Send to";
 	return true;
-}
-
-function setTab(isHistory, tabNum, pageNum) {
-	tab = tabNum;
-	if (pageNum !== -1) tabs[tab].cur = pageNum;
-
-	document.querySelectorAll("#main1 > nav:first-of-type > button").forEach(function(btn, i) {
-		document.querySelectorAll("#main1 > .mid > div")[i].hidden = (tab !== i);
-		btn.disabled = (tab === i);
-	});
-
-	const bigScreen = window.matchMedia("(min-width: 80em)").matches;
-	document.getElementById("main2").hidden = !bigScreen;
-	document.getElementById("btn_leave").disabled = bigScreen;
-
-	switch (tab) {
-		case TAB_INBOX: showInbox(); break;
-		case TAB_DRBOX: showDrbox(); break;
-
-		case TAB_WRITE:
-			if (tabs[tab].cur === 0) {
-				document.getElementById("div_write_1").hidden = false;
-				document.getElementById("div_write_2").hidden = true;
-				document.getElementById("write_recv").focus();
-			} else if (!writeVerify()) {
-				tabs[TAB_WRITE].cur = 0;
-				return;
-			}
-		break;
-
-		case TAB_NOTES:
-			switch (tabs[tab].cur) {
-				case 0:
-					document.getElementById("div_notes").children[0].hidden = false;
-					document.getElementById("div_notes").children[1].hidden = true;
-					document.getElementById("div_notes").children[2].hidden = true;
-				break;
-
-				case 1:
-					document.getElementById("div_notes").children[0].hidden = true;
-					document.getElementById("div_notes").children[1].hidden = false;
-					document.getElementById("div_notes").children[2].hidden = true;
-
-					document.querySelector("#div_notepad meter").value = ae.getPrivateExtraSpace() / ae.getPrivateExtraSpaceMax();
-				break;
-
-				case 2:
-					document.getElementById("div_notes").children[0].hidden = true;
-					document.getElementById("div_notes").children[1].hidden = true;
-					document.getElementById("div_notes").children[2].hidden = false;
-
-				default:
-					showFiles();
-			}
-		break;
-
-		case TAB_TOOLS:
-			for (let i = 0; i <= tabs[tab].max; i++) {
-				document.getElementById("div_tools").children[i].hidden = (i !== tabs[tab].cur);
-			}
-		break;
-	}
-
-	document.getElementById("btn_dele").disabled = !tabs[tab].btnDele;
-	document.getElementById("btn_left").disabled = (tabs[tab].cur === 0);
-	document.getElementById("btn_rght").disabled = (tabs[tab].cur === tabs[tab].max);
-	document.getElementById("btn_updt").disabled = !tabs[tab].btnUpdt;
-
-	if (!isHistory) history.pushState({tab: tab, page: tabs[tab].cur, msg: msgDisplay}, null);
 }
 
 // Interface elements
