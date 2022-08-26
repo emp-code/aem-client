@@ -1,7 +1,7 @@
 "use strict";
 
 function AllEars(readyCallback) {
-	if (typeof(readyCallback)!=="function") return;
+	if (typeof(readyCallback) !== "function") return;
 
 	try {
 		if ((!window.isSecureContext && !(/^[2-7a-z]{56}\.onion$/.test(document.domain)))
