@@ -9,8 +9,8 @@ function AllEars(readyCallback) {
 		|| window.opener !== null
 		|| document.compatMode == "BackCompat"
 		|| document.characterSet !== "UTF-8"
-		) {readyCallback(false); return;}
-	} catch(e) {readyCallback(false); return;}
+		) return readyCallback(false);
+	} catch(e) return readyCallback(false);
 
 	const docDomApi = document.head.querySelector("meta[name='aem.domain.api']").content;
 	const docDomEml = document.head.querySelector("meta[name='aem.domain.eml']").content;
@@ -20,20 +20,14 @@ function AllEars(readyCallback) {
 
 	if (docDomApi !== "" || docDomEml !== "") {
 		const domainRegex = new RegExp(/^[0-9a-z.-]{1,63}\.[0-9a-z-]{2,63}$/);
-		if ((docDomApi !== "" && !domainRegex.test(docDomApi)) || (docDomEml !== "" && !domainRegex.test(docDomEml))) {
-			readyCallback(false);
-			return;
-		}
+		if ((docDomApi !== "" && !domainRegex.test(docDomApi)) || (docDomEml !== "" && !domainRegex.test(docDomEml))) return readyCallback(false);
 	}
 
 	if (
 	   !docPubApi || !(new RegExp("^[0-9A-f]{" + (sodium.crypto_box_PUBLICKEYBYTES * 2).toString() + "}$").test(docPubApi))
 	|| !docPubSig || !(new RegExp("^[0-9A-f]{" + (sodium.crypto_sign_PUBLICKEYBYTES * 2).toString() + "}$").test(docPubSig))
 	|| !docSltNrm || !(new RegExp("^[0-9A-f]{" + (sodium.crypto_pwhash_SALTBYTES * 2).toString() + "}$").test(docSltNrm))
-	) {
-		readyCallback(false);
-		return;
-	}
+	) return readyCallback(false);
 
 // Private constants - must match server
 	const _AEM_API_ACCOUNT_BROWSE = 0;
