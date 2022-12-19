@@ -2,10 +2,6 @@
 
 ## Status ##
 
-[![Language grade: JavaScript](https://img.shields.io/lgtm/grade/javascript/g/emp-code/aem-client.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/emp-code/aem-client/context:javascript)
-
-[![Language grade: C/C++](https://img.shields.io/lgtm/grade/cpp/g/emp-code/aem-client.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/emp-code/aem-client/context:cpp)
-
 [![CodeFactor](https://www.codefactor.io/repository/github/emp-code/aem-client/badge)](https://www.codefactor.io/repository/github/emp-code/aem-client)
 
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/47c25a7e9599408b97460648999c016e)](https://www.codacy.com/gh/emp-code/aem-client/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=emp-code/aem-client&amp;utm_campaign=Badge_Grade)
