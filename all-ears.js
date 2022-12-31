@@ -18,6 +18,7 @@ function AllEars(readyCallback) {
 	const docSigApi = document.head.querySelector("meta[name='aem.key.apisig']").content;
 	const docSigDlv = document.head.querySelector("meta[name='aem.key.dlvsig']").content;
 	const docSltNrm = document.head.querySelector("meta[name='aem.adrslt.nrm']").content;
+	const docSltLim = document.head.querySelector("meta[name='aem.adrslt.lim']").content;
 
 	if (docDomApi !== "" || docDomEml !== "") {
 		const domainRegex = new RegExp(/^[0-9a-z.-]{1,63}\.[0-9a-z-]{2,63}$/);
@@ -29,6 +30,7 @@ function AllEars(readyCallback) {
 	&& docSigApi && (new RegExp("^[0-9A-f]{" + (sodium.crypto_sign_PUBLICKEYBYTES * 2).toString() + "}$")).test(docSigApi)
 	&& docSigDlv && (new RegExp("^[0-9A-f]{" + (sodium.crypto_sign_PUBLICKEYBYTES * 2).toString() + "}$")).test(docSigDlv)
 	&& docSltNrm && (new RegExp("^[0-9A-f]{" + (sodium.crypto_pwhash_SALTBYTES * 2).toString() + "}$")).test(docSltNrm)
+	&& docSltLim && (new RegExp("^[0-9];[0-9]+$").test(docSltLim))
 	)) return readyCallback(false);
 
 // Private constants - must match server
@@ -70,15 +72,14 @@ function AllEars(readyCallback) {
 	const _AEM_API_BOX_SIZE_MAX = 1048635; // (((2^16 - 1) + 12) * 16) - 117
 	const _AEM_USER_MAXLEVEL = 3;
 
-	const _AEM_ARGON2_MEMLIMIT = 67108864;
-	const _AEM_ARGON2_OPSLIMIT = 3;
-
 	const _AEM_DOMAIN_API = docDomApi? docDomApi : document.domain;
 	const _AEM_DOMAIN_EML = docDomEml? docDomEml : document.domain;
 	const _AEM_API_BOXKEY = sodium.from_hex(docBoxApi);
 	const _AEM_API_SIGKEY = sodium.from_hex(docSigApi);
 	const _AEM_DLV_SIGKEY = sodium.from_hex(docSigDlv);
 	const _AEM_SALT_NORMAL = sodium.from_hex(docSltNrm);
+	const _AEM_OLIM_NORMAL = parseInt(docSltLim.substr(0,1));
+	const _AEM_MLIM_NORMAL = parseInt(docSltLim.substr(2));
 
 	const _AEM_EMAIL_CERT_MATCH_HDRFR = 96;
 	const _AEM_EMAIL_CERT_MATCH_ENVFR = 64;
@@ -1879,7 +1880,7 @@ function AllEars(readyCallback) {
 			const addr32 = _addr32_encode(addr);
 			if (!addr32) {callback(0x08); return;}
 
-			const full = sodium.crypto_pwhash(16, addr32, _AEM_SALT_NORMAL, _AEM_ARGON2_OPSLIMIT, _AEM_ARGON2_MEMLIMIT, sodium.crypto_pwhash_ALG_ARGON2ID13);
+			const full = sodium.crypto_pwhash(16, addr32, _AEM_SALT_NORMAL, _AEM_OLIM_NORMAL, _AEM_MLIM_NORMAL, sodium.crypto_pwhash_ALG_ARGON2ID13);
 			const hash = new Uint8Array([
 				full[0] ^ full[8],
 				full[1] ^ full[9],
