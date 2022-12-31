@@ -14,8 +14,9 @@ function AllEars(readyCallback) {
 
 	const docDomApi = document.head.querySelector("meta[name='aem.domain.api']").content;
 	const docDomEml = document.head.querySelector("meta[name='aem.domain.eml']").content;
-	const docPubApi = document.head.querySelector("meta[name='aem.pubkey.api']").content;
-	const docPubSig = document.head.querySelector("meta[name='aem.pubkey.sig']").content;
+	const docBoxApi = document.head.querySelector("meta[name='aem.key.apibox']").content;
+	const docSigApi = document.head.querySelector("meta[name='aem.key.apisig']").content;
+	const docSigDlv = document.head.querySelector("meta[name='aem.key.dlvsig']").content;
 	const docSltNrm = document.head.querySelector("meta[name='aem.adrslt.nrm']").content;
 
 	if (docDomApi !== "" || docDomEml !== "") {
@@ -23,11 +24,12 @@ function AllEars(readyCallback) {
 		if ((docDomApi !== "" && !domainRegex.test(docDomApi)) || (docDomEml !== "" && !domainRegex.test(docDomEml))) return readyCallback(false);
 	}
 
-	if (
-	   !docPubApi || !(new RegExp("^[0-9A-f]{" + (sodium.crypto_box_PUBLICKEYBYTES * 2).toString() + "}$").test(docPubApi))
-	|| !docPubSig || !(new RegExp("^[0-9A-f]{" + (sodium.crypto_sign_PUBLICKEYBYTES * 2).toString() + "}$").test(docPubSig))
-	|| !docSltNrm || !(new RegExp("^[0-9A-f]{" + (sodium.crypto_pwhash_SALTBYTES * 2).toString() + "}$").test(docSltNrm))
-	) return readyCallback(false);
+	if (!(
+	   docBoxApi && (new RegExp("^[0-9A-f]{" + (sodium.crypto_box_PUBLICKEYBYTES * 2).toString() + "}$")).test(docBoxApi)
+	&& docSigApi && (new RegExp("^[0-9A-f]{" + (sodium.crypto_sign_PUBLICKEYBYTES * 2).toString() + "}$")).test(docSigApi)
+	&& docSigDlv && (new RegExp("^[0-9A-f]{" + (sodium.crypto_sign_PUBLICKEYBYTES * 2).toString() + "}$")).test(docSigDlv)
+	&& docSltNrm && (new RegExp("^[0-9A-f]{" + (sodium.crypto_pwhash_SALTBYTES * 2).toString() + "}$")).test(docSltNrm)
+	)) return readyCallback(false);
 
 // Private constants - must match server
 	const _AEM_API_ACCOUNT_BROWSE = 0;
@@ -73,8 +75,9 @@ function AllEars(readyCallback) {
 
 	const _AEM_DOMAIN_API = docDomApi? docDomApi : document.domain;
 	const _AEM_DOMAIN_EML = docDomEml? docDomEml : document.domain;
-	const _AEM_API_PUBKEY = sodium.from_hex(docPubApi);
-	const _AEM_SIG_PUBKEY = sodium.from_hex(docPubSig);
+	const _AEM_API_BOXKEY = sodium.from_hex(docBoxApi);
+	const _AEM_API_SIGKEY = sodium.from_hex(docSigApi);
+	const _AEM_DLV_SIGKEY = sodium.from_hex(docSigDlv);
 	const _AEM_SALT_NORMAL = sodium.from_hex(docSltNrm);
 
 	const _AEM_EMAIL_CERT_MATCH_HDRFR = 96;
@@ -278,14 +281,14 @@ function AllEars(readyCallback) {
 		window.crypto.getRandomValues(nonce);
 		nonce.set(new Uint8Array(new Uint32Array([Math.round(Date.now() / 1000)]).buffer));
 
-		const postBox = sodium.crypto_box_easy(clearU8, nonce, _AEM_API_PUBKEY, __SECRET_own_usk);
+		const postBox = sodium.crypto_box_easy(clearU8, nonce, _AEM_API_BOXKEY, __SECRET_own_usk);
 
 		// sealBox: apiCmd + UPK + Nonce for postBox
 		const sealClear = new Uint8Array(1 + sodium.crypto_box_PUBLICKEYBYTES + sodium.crypto_box_NONCEBYTES);
 		sealClear[0] = apiCmd;
 		sealClear.set(nonce, 1);
 		sealClear.set(_own_upk, 1 + sodium.crypto_box_NONCEBYTES);
-		const sealBox = sodium.crypto_box_seal(sealClear, _AEM_API_PUBKEY);
+		const sealBox = sodium.crypto_box_seal(sealClear, _AEM_API_BOXKEY);
 
 		// postMsg: sealBox + postBox
 		const postMsg = new Uint8Array(sealBox.length + postBox.length);
@@ -296,7 +299,7 @@ function AllEars(readyCallback) {
 			if (ret !== 0) {callback(ret); return;}
 
 			let decData;
-			try {decData = sodium.crypto_box_open_easy(encData.slice(sodium.crypto_box_NONCEBYTES), encData.slice(0, sodium.crypto_box_NONCEBYTES), _AEM_API_PUBKEY, __SECRET_own_usk);}
+			try {decData = sodium.crypto_box_open_easy(encData.slice(sodium.crypto_box_NONCEBYTES), encData.slice(0, sodium.crypto_box_NONCEBYTES), _AEM_API_BOXKEY, __SECRET_own_usk);}
 			catch(e) {callback(0x05); return;}
 
 			if (decData.length > 33) {callback(0, decData); return;} // Long response
@@ -1146,7 +1149,7 @@ function AllEars(readyCallback) {
 		const padA = msgData.slice(msgData.length - sodium.crypto_sign_BYTES - padAmount, msgData.length - sodium.crypto_sign_BYTES);
 		const padB = sodium.randombytes_buf_deterministic(padAmount, msgData.slice(0, 32), null); // 32=sodium.randombytes_SEEDBYTES
 		const validPad = (padA && padB && padA.length === padB.length && _arraysEqual(padA, padB));
-		const validSig = sodium.crypto_sign_verify_detached(msgData.slice(msgData.length - sodium.crypto_sign_BYTES), msgData.slice(0, msgData.length - sodium.crypto_sign_BYTES), _AEM_SIG_PUBKEY);
+		const validSig = sodium.crypto_sign_verify_detached(msgData.slice(msgData.length - sodium.crypto_sign_BYTES), msgData.slice(0, msgData.length - sodium.crypto_sign_BYTES), ((msgInfo & 48) == 0) ? _AEM_DLV_SIGKEY : _AEM_API_SIGKEY);
 
 		const msgTs_bin = msgData.slice(1, 5);
 		const msgTs = new Uint32Array(msgTs_bin.buffer)[0];
