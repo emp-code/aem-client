@@ -342,6 +342,14 @@ function deleteAddress(addr) {
 	});
 }
 
+function addCellbox(row, checked) {
+	let cell = row.insertCell(-1);
+	let el = document.createElement("input");
+	el.type = "checkbox";
+	el.checked = checked;
+	cell.appendChild(el);
+}
+
 function addAddress(num) {
 	const addrTable = document.getElementById("tbody_opt_addr");
 	const row = addrTable.insertRow(-1);
@@ -351,23 +359,18 @@ function addAddress(num) {
 	if (cell.textContent.length === 16) cell.className = "mono";
 	cell.onclick = function() {navigator.clipboard.writeText(((this.textContent.length === 16) ? ae.shieldMix(this.textContent) : this.textContent) + "@" + ae.getDomainEml());};
 
-	cell = row.insertCell(-1);
-	let el = document.createElement("input");
-	el.type = "checkbox";
-	el.checked = ae.getAddressAccExt(num);
-	cell.appendChild(el);
+	addCellbox(row, ae.getAddressAccExt(num));
+	addCellbox(row, ae.getAddressAccInt(num));
+	addCellbox(row, ae.getAddressAllVer(num));
+	addCellbox(row, ae.getAddressAttach(num));
+	addCellbox(row, ae.getAddressSecure(num));
+	addCellbox(row, ae.getAddressOrigin(num));
 
 	cell = row.insertCell(-1);
-	el = document.createElement("input");
-	el.type = "checkbox";
-	el.checked = ae.getAddressAccInt(num);
-	cell.appendChild(el);
-
-	cell = row.insertCell(-1);
-	el = document.createElement("button");
+	let el = document.createElement("button");
 	el.type = "button";
 	el.textContent = "X";
-	el.onclick = function() {deleteAddress(ae.getAddress(num));};
+	el.onclick = function() {deleteAddress(num);};
 	cell.appendChild(el);
 
 	el = document.createElement("option");
