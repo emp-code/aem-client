@@ -758,7 +758,7 @@ document.getElementById("upfile").onchange = function() {
 	reader.onload = function() {
 		ae.Message_Upload(fn, new Uint8Array(reader.result), function(error) {
 			if (error === 0) {
-				addFile(ae.getUplMsgCount() - 1);
+				addFile(0);
 			} else {
 				console.log("Failed to upload file");
 			}
