@@ -522,7 +522,7 @@ function reloadInterface() {
 			});
 		};
 
-		for (let i = 0; i < ae.admin_getUserCount(); i++) {
+		for (let i = 0; i < ae.admin_getUserNum(); i++) {
 			addRowAdmin(i);
 		}
 	}
@@ -735,7 +735,7 @@ document.getElementById("btn_admin_addaccount").onclick = function() {
 
 	ae.Account_Create(txtPkey.value, function(error) {
 		if (error === 0) {
-			addRowAdmin(ae.admin_getUserCount() - 1);
+			addRowAdmin(ae.admin_getUserNum() - 1);
 			txtPkey.value = "";
 		} else {
 			console.log("Failed to add account");
