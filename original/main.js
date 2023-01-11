@@ -444,7 +444,7 @@ function addRowAdmin(num) {
 	const cellBtnDe = row.insertCell(-1);
 
 	cellPk.textContent = ae.admin_getUserUpk(num);
-	cellMb.textContent = ae.admin_getUserKib(num);
+	cellMb.textContent = Math.round(ae.admin_getUserKib(num) / 1024);
 	cellNa.textContent = ae.admin_getUserNrm(num);
 	cellSa.textContent = ae.admin_getUserShd(num);
 	cellLv.textContent = ae.admin_getUserLvl(num);
