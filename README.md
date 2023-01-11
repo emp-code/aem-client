@@ -12,14 +12,16 @@
 
 ## Web ##
 
-The JavaScript library, *all-ears.js*, is made for web clients.
+The JavaScript library, `all-ears.js`, is made for web clients.
 
-The library loads data from five `<meta>` tags:
+The library loads data from several `<meta>` tags. These must be set up to match the server.
 * aem.domain.api (API domain; if blank, uses current domain)
 * aem.domain.eml (Email domain; if blank, uses current domain)
-* aem.pubkey.api (API public key, hex)
-* aem.pubkey.sig (Signature public key, hex)
+* aem.key.apibox (API public key, hex)
+* aem.key.apisig (Message signature public key for API, hex)
+* aem.key.dlvsig (Message signature public key for DLV, hex)
 * aem.adrslt.nrm (Normal address salt, hex)
+* aem.adrslt.lim (Settings for the normal address hashing)
 
 To use the library, create a new AllEars object:
 
