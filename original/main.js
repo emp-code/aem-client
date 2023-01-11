@@ -759,6 +759,7 @@ document.getElementById("upfile").onchange = function() {
 		ae.Message_Upload(fn, new Uint8Array(reader.result), function(error) {
 			if (error === 0) {
 				addFile(0);
+				document.getElementById("upfile").value = "";
 			} else {
 				console.log("Failed to upload file");
 			}
