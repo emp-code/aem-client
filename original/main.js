@@ -330,8 +330,8 @@ function deleteAddress(addr) {
 		document.getElementById("addr_use_normal").textContent = ae.getAddressCountNormal();
 		document.getElementById("addr_use_shield").textContent = ae.getAddressCountShield();
 
-		if (ae.getAddressCountNormal() < ae.getLimitNormalA(ae.getUserLevel())) document.getElementById("btn_newaddress").disabled = false;
-		if (ae.getAddressCountShield() < ae.getLimitShieldA(ae.getUserLevel())) document.getElementById("btn_newshieldaddress").disabled = false;
+		if (ae.getAddressCountNormal() < ae.getLimitNormalA(ae.getOwnLevel())) document.getElementById("btn_newaddress").disabled = false;
+		if (ae.getAddressCountShield() < ae.getLimitShieldA(ae.getOwnLevel())) document.getElementById("btn_newshieldaddress").disabled = false;
 
 		ae.Private_Update(function(error2) {
 			if (error2 !== 0) console.log("Failed to update the Private field");
@@ -496,11 +496,11 @@ function reloadInterface() {
 
 	document.getElementById("addr_use_normal").textContent = ae.getAddressCountNormal();
 	document.getElementById("addr_use_shield").textContent = ae.getAddressCountShield();
-	document.getElementById("addr_max_normal").textContent = ae.getLimitNormalA(ae.getUserLevel());
-	document.getElementById("addr_max_shield").textContent = ae.getLimitShieldA(ae.getUserLevel());
+	document.getElementById("addr_max_normal").textContent = ae.getLimitNormalA(ae.getOwnLevel());
+	document.getElementById("addr_max_shield").textContent = ae.getLimitShieldA(ae.getOwnLevel());
 
-	if (ae.getAddressCountNormal() >= ae.getLimitNormalA(ae.getUserLevel())) document.getElementById("btn_newaddress").disabled = true;
-	if (ae.getAddressCountShield() >= ae.getLimitShieldA(ae.getUserLevel())) document.getElementById("btn_newshieldaddress").disabled = true;
+	if (ae.getAddressCountNormal() >= ae.getLimitNormalA(ae.getOwnLevel())) document.getElementById("btn_newaddress").disabled = true;
+	if (ae.getAddressCountShield() >= ae.getLimitShieldA(ae.getOwnLevel())) document.getElementById("btn_newshieldaddress").disabled = true;
 
 	if (ae.isUserAdmin()) {
 		const tblLimits = document.getElementById("tbl_limits");
@@ -658,7 +658,7 @@ document.getElementById("btn_send").onclick = function() {
 };
 
 document.getElementById("btn_newaddress").onclick = function() {
-	if (ae.getAddressCountNormal() >= ae.getLimitNormalA(ae.getUserLevel())) return;
+	if (ae.getAddressCountNormal() >= ae.getLimitNormalA(ae.getOwnLevel())) return;
 
 	const txtNewAddr = document.getElementById("txt_newaddress");
 	if (!txtNewAddr.reportValidity()) return;
@@ -676,19 +676,19 @@ document.getElementById("btn_newaddress").onclick = function() {
 				txtNewAddr.value = "";
 
 				if (error2 !== 0) console.log("Failed to update the Private field");
-				if (ae.getAddressCountNormal() < ae.getLimitNormalA(ae.getUserLevel())) btnN.disabled = false;
-				if (ae.getAddressCountShield() < ae.getLimitShieldA(ae.getUserLevel())) btnS.disabled = false;
+				if (ae.getAddressCountNormal() < ae.getLimitNormalA(ae.getOwnLevel())) btnN.disabled = false;
+				if (ae.getAddressCountShield() < ae.getLimitShieldA(ae.getOwnLevel())) btnS.disabled = false;
 			});
 		} else {
 			console.log("Failed to add address");
-			if (ae.getAddressCountNormal() < ae.getLimitNormalA(ae.getUserLevel())) btnN.disabled = false;
-			if (ae.getAddressCountShield() < ae.getLimitShieldA(ae.getUserLevel())) btnS.disabled = false;
+			if (ae.getAddressCountNormal() < ae.getLimitNormalA(ae.getOwnLevel())) btnN.disabled = false;
+			if (ae.getAddressCountShield() < ae.getLimitShieldA(ae.getOwnLevel())) btnS.disabled = false;
 		}
 	});
 };
 
 document.getElementById("btn_newshieldaddress").onclick = function() {
-	if (ae.getLimitShieldA() >= ae.getLimitShieldA(ae.getUserLevel())) return;
+	if (ae.getLimitShieldA() >= ae.getLimitShieldA(ae.getOwnLevel())) return;
 
 	const btnN = document.getElementById("btn_newaddress");
 	const btnS = document.getElementById("btn_newshieldaddress");
@@ -698,8 +698,8 @@ document.getElementById("btn_newshieldaddress").onclick = function() {
 	ae.Address_Create("SHIELD", function(error1) {
 		if (error1 !== 0) {
 			console.log("Failed to add Shield address");
-			if (ae.getAddressCountNormal() < ae.getLimitNormalA(ae.getUserLevel())) btnN.disabled = false;
-			if (ae.getAddressCountShield() < ae.getLimitShieldA(ae.getUserLevel())) btnS.disabled = false;
+			if (ae.getAddressCountNormal() < ae.getLimitNormalA(ae.getOwnLevel())) btnN.disabled = false;
+			if (ae.getAddressCountShield() < ae.getLimitShieldA(ae.getOwnLevel())) btnS.disabled = false;
 			return;
 		}
 
@@ -708,8 +708,8 @@ document.getElementById("btn_newshieldaddress").onclick = function() {
 			addAddress(ae.getAddressCount() - 1);
 
 			if (error2 !== 0) console.log("Failed to update the Private field");
-			if (ae.getAddressCountNormal() < ae.getLimitNormalA(ae.getUserLevel())) btnN.disabled = false;
-			if (ae.getAddressCountShield() < ae.getLimitShieldA(ae.getUserLevel())) btnS.disabled = false;
+			if (ae.getAddressCountNormal() < ae.getLimitNormalA(ae.getOwnLevel())) btnN.disabled = false;
+			if (ae.getAddressCountShield() < ae.getLimitShieldA(ae.getOwnLevel())) btnS.disabled = false;
 		});
 	});
 };
