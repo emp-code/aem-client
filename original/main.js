@@ -715,6 +715,8 @@ document.getElementsByTagName("fieldset")[0].onchange = function() {
 };
 
 document.getElementById("btn_saveaddrdata").onclick = function() {
+	this.disabled = true;
+
 	const tbl = document.getElementById("tbody_opt_addr");
 
 	for (let i = 0; i < tbl.rows.length; i++) {
@@ -726,12 +728,16 @@ document.getElementById("btn_saveaddrdata").onclick = function() {
 		ae.setAddressOrigin(i, tbl.rows[i].cells[6].firstChild.checked);
 	}
 
+	const btn = document.getElementById("btn_saveaddrdata");
+
 	ae.Address_Update(function(error) {
 		if (error === 0) {
-			document.getElementById("btn_saveaddrdata").hidden = true;
+			btn.hidden = true;
 		} else {
 			console.log("Failed to save address data");
 		}
+
+		btn.disabled = false;
 	});
 };
 
