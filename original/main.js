@@ -710,6 +710,10 @@ document.getElementById("btn_newshieldaddress").onclick = function() {
 	});
 };
 
+document.getElementsByTagName("fieldset")[0].onchange = function() {
+	document.getElementById("btn_saveaddrdata").hidden = false;
+};
+
 document.getElementById("btn_saveaddrdata").onclick = function() {
 	const tbl = document.getElementById("tbody_opt_addr");
 
