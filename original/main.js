@@ -303,29 +303,20 @@ function setAccountLevel(upk_hex, level) {
 	});
 }
 
-function deleteAddress(addr) {
+function deleteAddress(num) {
+	if (num < 0) return;
+
 	let btns = document.getElementById("tbody_opt_addr").getElementsByTagName("button");
 	for (let i = 0; i < btns.length; i++) btns[i].disabled = true;
 
-	let addressToDelete = -1;
-
-	for (let i = 0; i < ae.getAddressCount(); i++) {
-		if (addr === ae.getAddress(i)) {
-			addressToDelete = i;
-			break;
-		}
-	}
-
-	if (addressToDelete === -1) return;
-
-	ae.Address_Delete(addressToDelete, function(error) {
+	ae.Address_Delete(num, function(error) {
 		if (error !== 0) {
 			console.log("Failed to delete address");
 			return;
 		}
 
-		document.getElementById("tbody_opt_addr").deleteRow(addressToDelete);
-		document.getElementById("send_from").remove(addressToDelete);
+		document.getElementById("tbody_opt_addr").deleteRow(num);
+		document.getElementById("send_from").remove(num);
 
 		document.getElementById("addr_use_normal").textContent = ae.getAddressCountNormal();
 		document.getElementById("addr_use_shield").textContent = ae.getAddressCountShield();
