@@ -787,7 +787,6 @@ btns = document.getElementById("div_notes").getElementsByTagName("button");
 btns[0].onclick = function() {navNotesMenu(0);};
 btns[1].onclick = function() {navNotesMenu(1);};
 btns[2].onclick = function() {navNotesMenu(2);};
-btns[3].onclick = function() {navNotesMenu(3);};
 
 document.getElementById("txt_skey").onkeyup = function(e) {
 	if (e.key === "Enter") document.getElementById("btn_enter").click();
