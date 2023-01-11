@@ -522,9 +522,11 @@ function reloadInterface() {
 			});
 		};
 
-		for (let i = 0; i < ae.admin_getUserNum(); i++) {
-			addRowAdmin(i);
-		}
+		ae.Account_Browse(function(error) {
+			for (let i = 0; i < ae.admin_getUserNum(); i++) {
+				addRowAdmin(i);
+			}
+		});
 	}
 }
 
