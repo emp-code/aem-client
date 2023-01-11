@@ -296,8 +296,8 @@ function setAccountLevel(upk_hex, level) {
 			tbl.rows[rowid].cells[6].children[0].disabled = false;
 		}
 
-		const pkHex = ae.admin_getUserPkHex(rowid);
-		const currentLevel = ae.admin_getUserLevel(rowid);
+		const pkHex = ae.admin_getUserUpk(rowid);
+		const currentLevel = ae.admin_getUserLvl(rowid);
 		tbl.rows[rowid].cells[5].children[0].onclick = function() {setAccountLevel(pkHex, currentLevel + 1);};
 		tbl.rows[rowid].cells[6].children[0].onclick = function() {setAccountLevel(pkHex, currentLevel - 1);};
 	});
@@ -443,21 +443,21 @@ function addRowAdmin(num) {
 	const cellBtnMn = row.insertCell(-1);
 	const cellBtnDe = row.insertCell(-1);
 
-	cellPk.textContent = ae.admin_getUserPkHex(num);
-	cellMb.textContent = ae.admin_getUserSpace(num);
-	cellNa.textContent = ae.admin_getUserNAddr(num);
-	cellSa.textContent = ae.admin_getUserSAddr(num);
-	cellLv.textContent = ae.admin_getUserLevel(num);
+	cellPk.textContent = ae.admin_getUserUpk(num);
+	cellMb.textContent = ae.admin_getUserKib(num);
+	cellNa.textContent = ae.admin_getUserNrm(num);
+	cellSa.textContent = ae.admin_getUserShd(num);
+	cellLv.textContent = ae.admin_getUserLvl(num);
 	cellBtnPl.innerHTML = "<button type=\"button\">+</button>";
 	cellBtnMn.innerHTML = "<button type=\"button\">-</button>";
 	cellBtnDe.innerHTML = "<button type=\"button\">X</button>";
 
 	cellPk.className = "mono";
-	if (ae.admin_getUserLevel(num) === ae.getLevelMax()) cellBtnPl.children[0].disabled = true;
-	if (ae.admin_getUserLevel(num) === 0) cellBtnMn.children[0].disabled = true;
+	if (ae.admin_getUserLvl(num) === ae.getLevelMax()) cellBtnPl.children[0].disabled = true;
+	if (ae.admin_getUserLvl(num) === 0) cellBtnMn.children[0].disabled = true;
 
-	const pkHex = ae.admin_getUserPkHex(num);
-	const currentLevel = ae.admin_getUserLevel(num);
+	const pkHex = ae.admin_getUserUpk(num);
+	const currentLevel = ae.admin_getUserLvl(num);
 	cellBtnPl.children[0].onclick = function() {setAccountLevel(pkHex, currentLevel + 1);};
 	cellBtnMn.children[0].onclick = function() {setAccountLevel(pkHex, currentLevel - 1);};
 	cellBtnDe.children[0].onclick = function() {destroyAccount(pkHex);};
