@@ -218,7 +218,7 @@ function addFile(num) {
 	cell.textContent = new Date(ae.getUplMsgTime(num) * 1000).toISOString().slice(0, 10);
 
 	cell = row.insertCell(-1);
-	cell.textContent = ae.getUplMsgBytes(num) / 1024;
+	cell.textContent = (ae.getUplMsgBytes(num) / 1024).toFixed(2);
 
 	cell = row.insertCell(-1);
 	cell.textContent = ae.getUplMsgTitle(num);
