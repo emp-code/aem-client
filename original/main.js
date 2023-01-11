@@ -644,7 +644,7 @@ document.getElementById("btn_send").onclick = function() {
 			sto.value = "";
 			sbody.value = "";
 		} else {
-			console.log("Failed sending message");
+			console.log("Failed sending message: " + ae.getErrorMessage(error));
 		}
 
 		btn.disabled = false;
