@@ -751,26 +751,21 @@ document.getElementById("btn_admin_addaccount").onclick = function() {
 	btn.disabled = false;
 };
 
-document.getElementById("btn_uploadfile").onclick = function() {
-	const fileSelector = document.getElementById("upfile");
-
-	const btn = this;
-	btn.disabled = true;
-
+document.getElementById("upfile").onchange = function() {
+	const fn = this.files[0].name;
 	const reader = new FileReader();
+
 	reader.onload = function() {
-		ae.Message_Upload(true, fileSelector.files[0].name, new Uint8Array(reader.result), function(error) {
+		ae.Message_Upload(fn, new Uint8Array(reader.result), function(error) {
 			if (error === 0) {
-				addFile(ae.getFileCount() - 1);
+				addFile(ae.getUplMsgCount() - 1);
 			} else {
 				console.log("Failed to upload file");
 			}
-
-			btn.disabled = false;
 		});
 	};
 
-	reader.readAsArrayBuffer(fileSelector.files[0]);
+	reader.readAsArrayBuffer(this.files[0]);
 };
 
 function navNotesMenu(num) {
