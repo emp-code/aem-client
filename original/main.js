@@ -720,6 +720,10 @@ document.getElementById("btn_saveaddrdata").onclick = function() {
 	for (let i = 0; i < tbl.rows.length; i++) {
 		ae.setAddressAccExt(i, tbl.rows[i].cells[1].firstChild.checked);
 		ae.setAddressAccInt(i, tbl.rows[i].cells[2].firstChild.checked);
+		ae.setAddressAllVer(i, tbl.rows[i].cells[3].firstChild.checked);
+		ae.setAddressAttach(i, tbl.rows[i].cells[4].firstChild.checked);
+		ae.setAddressSecure(i, tbl.rows[i].cells[5].firstChild.checked);
+		ae.setAddressOrigin(i, tbl.rows[i].cells[6].firstChild.checked);
 	}
 
 	ae.Address_Update(function(error) {
