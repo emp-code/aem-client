@@ -1176,8 +1176,7 @@ function AllEars(readyCallback) {
 				const msgInval = (msgData[9] & 128) !== 0;
 				const msgProtV = (msgData[9] &  64) !== 0;
 				const msgRares = (msgData[9] &  32) !== 0;
-				// [10] & 32 unused
-				const lenEnvTo = msgData[10] &  31;
+				const lenEnvTo = msgData[10] &  63;
 				const msgDmarc = msgData[11] & 192;
 				const lenHdrTo = msgData[11] &  63;
 				const msgDnSec = msgData[12] & 192;
@@ -1185,19 +1184,24 @@ function AllEars(readyCallback) {
 				const msgDane  = msgData[13] & 192;
 				const lenRvDns = msgData[13] &  63;
 				// [14] & 192 unused
-				const lenAuSys = msgData[14] & 63;
-				const dkimFail = (msgData[15] & 128) !== 0;
-				const msgHdrTz = (msgData[15] & 127) * 15 - 900; // Timezone offset in minutes; -900m..900m (-15h..+15h)
+				const lenAuSys = msgData[14] &  63;
+				const lenEnvFr = msgData[15] & 255;
+				const lenHdrFr = msgData[16] & 255;
+				const lenRplTo = msgData[17] & 255;
+				const lenMsgId = msgData[18] & 255;
+				const lenSbjct = msgData[19] & 255;
+				const dkimFail = (msgData[20] & 128) !== 0;
+				const msgHdrTz = (msgData[20] & 127) * 15 - 900; // Timezone offset in minutes; -900m..900m (-15h..+15h)
 
-				const msgHdrTs = new Uint16Array(msgData.slice(16, 18).buffer)[0] - 736;
+				const msgHdrTs = new Uint16Array(msgData.slice(21,23).buffer)[0] - 736;
 				const msgCc = ((msgData[8] & 31) <= 26 && (msgData[9] & 31) <= 26) ? String.fromCharCode("A".charCodeAt(0) + (msgData[8] & 31)) + String.fromCharCode("A".charCodeAt(0) + (msgData[9] & 31)) : "??";
 
 				let msgDkim = null;
 				let lenDkimDomain = [];
 
-				let extOffset = 18;
+				let extOffset = 23;
 
-				if (dkimCount !== 0) {
+				if (dkimCount > 0) {
 					msgDkim = new _Dkim();
 
 					for (let i = 0; i < dkimCount; i++) {
@@ -1229,32 +1233,30 @@ function AllEars(readyCallback) {
 					}
 
 					const msgEnvTo = d.decode(msgBodyU8.slice(o, o + lenEnvTo)) + "@" + _AEM_DOMAIN_EML; o += lenEnvTo;
-					const hdrTo    = d.decode(msgBodyU8.slice(o, o + lenHdrTo)); o+= lenHdrTo;
+					const    hdrTo = d.decode(msgBodyU8.slice(o, o + lenHdrTo)); o+= lenHdrTo;
 					const msgGreet = d.decode(msgBodyU8.slice(o, o + lenGreet)); o+= lenGreet;
 					const msgRvDns = d.decode(msgBodyU8.slice(o, o + lenRvDns)); o+= lenRvDns;
 					const msgAuSys = d.decode(msgBodyU8.slice(o, o + lenAuSys)); o+= lenAuSys;
-
-					const msgParts = d.decode(msgBodyU8.slice(o)).split("\n");
-					const msgEnvFr = msgParts[0];
-					const hdrFr    = msgParts[1];
-					const hdrRt    = msgParts[2];
-					const msgHdrId = msgParts[3];
-					const msgSbjct = msgParts[4];
+					const msgEnvFr = d.decode(msgBodyU8.slice(o, o + lenEnvFr)); o+= lenEnvFr;
+					const    hdrFr = d.decode(msgBodyU8.slice(o, o + lenHdrFr)); o+= lenHdrFr;
+					const    rplTo = d.decode(msgBodyU8.slice(o, o + lenRplTo)); o+= lenRplTo;
+					const msgMsgId = d.decode(msgBodyU8.slice(o, o + lenMsgId)); o+= lenMsgId;
+					const msgSbjct = d.decode(msgBodyU8.slice(o, o + lenSbjct)); o+= lenSbjct;
 
 					const msgHdrTo = hdrTo.includes("\x0B") ? hdrTo.slice(hdrTo.indexOf("\x0B") + 1) : hdrTo;
 					const msgHdrFr = hdrFr.includes("\x0B") ? hdrFr.slice(hdrFr.indexOf("\x0B") + 1) : hdrFr;
-					const msgHdrRt = hdrRt.includes("\x0B") ? hdrRt.slice(hdrRt.indexOf("\x0B") + 1) : hdrRt;
+					const msgRplTo = rplTo.includes("\x0B") ? rplTo.slice(rplTo.indexOf("\x0B") + 1) : rplTo;
 
 					const msgDnTo = hdrTo.includes("\x0B") ? hdrTo.slice(0, hdrTo.indexOf("\x0B")) : null;
 					const msgDnFr = hdrFr.includes("\x0B") ? hdrFr.slice(0, hdrFr.indexOf("\x0B")) : null;
-					const msgDnRt = hdrRt.includes("\x0B") ? hdrRt.slice(0, hdrRt.indexOf("\x0B")) : null;
+					const msgDnRt = rplTo.includes("\x0B") ? rplTo.slice(0, rplTo.indexOf("\x0B")) : null;
 
-					const body = msgParts.slice(5).join("\n");
+					const body = d.decode(msgBodyU8.slice(o));
 					const headersEnd = body.indexOf("\x0B");
 					const msgHeaders = (headersEnd > 0) ? body.slice(0, headersEnd) : "";
 					const msgBody = body.slice(headersEnd + 1);
 
-					_extMsg.push(new _ExtMsg(validPad, validSig, msgId, msgTs, msgHdrTs, msgHdrTz, msgIp, msgCc, msgCs, msgTls, msgEsmtp, msgProtV, msgInval, msgRares, msgAttach, msgGrDom, msgIpBlk, dkimFail, msgDkim, msgGreet, msgRvDns, msgAuSys, msgEnvFr, msgHdrFr, msgDnFr, msgEnvTo, msgHdrTo, msgDnTo, msgHdrRt, msgDnRt, msgHdrId, msgHeaders, msgSbjct, msgBody));
+					_extMsg.push(new _ExtMsg(validPad, validSig, msgId, msgTs, msgHdrTs, msgHdrTz, msgIp, msgCc, msgCs, msgTls, msgEsmtp, msgProtV, msgInval, msgRares, msgAttach, msgGrDom, msgIpBlk, dkimFail, msgDkim, msgGreet, msgRvDns, msgAuSys, msgEnvFr, msgHdrFr, msgDnFr, msgEnvTo, msgHdrTo, msgDnTo, msgRplTo, msgDnRt, msgMsgId, msgHeaders, msgSbjct, msgBody));
 				} catch(e) {
 					_extMsg.push(new _ExtMsg(validPad, validSig, msgId, msgTs, msgHdrTs, msgHdrTz, msgIp, msgCc, msgCs, msgTls, msgEsmtp, msgProtV, msgInval, msgRares, msgAttach, msgGrDom, msgIpBlk, dkimFail, null, "", "", "", "", "", "", "", "", "", "", "", "", "Failed decompression", "Size: " + msgData.length));
 				}
