@@ -5,7 +5,7 @@
 
 #include "../all-ears.h"
 
-static int performTests(int * const retNum, const char onionId[56], const unsigned char * const spk_api_box, const unsigned char * const spk_api_sig, const unsigned char * const spk_dlv_sig, const unsigned char * const saltNm, const unsigned char * const usk_admin, const unsigned char * const key_user1, const unsigned char * const upk_user1, const unsigned char * const upk_user2) {
+static int performTests(int * const retNum, const char onionId[56], const unsigned char * const spk_api_box, const unsigned char * const spk_api_sig, const unsigned char * const spk_dlv_sig, const unsigned char * const saltNm, const unsigned char * const usk_admin, const unsigned char * const usk_user1, const unsigned char * const upk_user1, const unsigned char * const upk_user2) {
 	// Admin
 	*retNum = 0;
 	if (allears_init(onionId, spk_api_box, spk_api_sig, spk_dlv_sig, saltNm, usk_admin) != 0) return -999; //0
@@ -43,7 +43,7 @@ static int performTests(int * const retNum, const char onionId[56], const unsign
 	unsigned char msgId_upl[16];
 
 	// User1
-	if (allears_init(onionId, spk_api_box, spk_api_sig, spk_dlv_sig, saltNm, key_user1) != 0) return -999;
+	if (allears_init(onionId, spk_api_box, spk_api_sig, spk_dlv_sig, saltNm, usk_user1) != 0) return -999;
 	(*retNum)++; if ((ret = allears_account_create(upk_user2)) >= 0) return -999; //6
 	(*retNum)++; if ((ret = allears_private_update(privateData)) != 0) return -999; //7
 	(*retNum)++; if ((ret = allears_address_create(&addr, testAddress, 15)) != 0) return -999; //8
@@ -55,7 +55,7 @@ static int performTests(int * const retNum, const char onionId[56], const unsign
 	(*retNum)++; if ((ret = allears_account_update(upk_user2, 2)) != 0) return -999; //10
 
 	// User1
-	if (allears_init(onionId, spk_api_box, spk_api_sig, spk_dlv_sig, saltNm, key_user1) != 0) return -999;
+	if (allears_init(onionId, spk_api_box, spk_api_sig, spk_dlv_sig, saltNm, usk_user1) != 0) return -999;
 	(*retNum)++; if ((ret = allears_address_delete(UINT64_MAX)) >= 0) return -999; //11
 	(*retNum)++; if ((ret = allears_account_delete(upk_user2)) >= 0) return -999; //12
 	(*retNum)++; if ((ret = allears_account_update(upk_user2, 3)) >= 0) return -999; //13
@@ -72,7 +72,7 @@ static int performTests(int * const retNum, const char onionId[56], const unsign
 	(*retNum)++; if ((ret = allears_message_create("Test Message", 12, "This here is a test message.", 28, "admin", 5, testAddress, 15, NULL, 0, NULL, msgId_ann)) != 0) return ret; //21
 
 	// User1
-	if (allears_init(onionId, spk_api_box, spk_api_sig, spk_dlv_sig, saltNm, key_user1) != 0) return -999;
+	if (allears_init(onionId, spk_api_box, spk_api_sig, spk_dlv_sig, saltNm, usk_user1) != 0) return -999;
 	(*retNum)++; if ((ret = allears_message_upload("test.txt", 8, (unsigned char*)"This is an uploaded test file.", 30, msgId_upl)) != 0) {puts("24?");return ret;} //22
 	(*retNum)++; if ((ret = allears_message_browse()) != 0) {puts("25?");return ret;} //23
 
@@ -126,10 +126,10 @@ int main(int argc, char *argv[]) {
 	unsigned char tmp_sk[crypto_box_SECRETKEYBYTES];
 
 	// User 1
-	unsigned char key_user1[crypto_kdf_KEYBYTES];
+	unsigned char usk_user1[crypto_kdf_KEYBYTES];
 	unsigned char upk_user1[crypto_box_PUBLICKEYBYTES];
-	crypto_kdf_derive_from_key(key_user1, crypto_kdf_KEYBYTES, 1, "AEM-Tst0", usk_admin);
-	crypto_kdf_derive_from_key(tmp_bs, crypto_box_SEEDBYTES, 1, "AEM-Usr0", key_user1);
+	crypto_kdf_derive_from_key(usk_user1, crypto_kdf_KEYBYTES, 1, "AEM-Tst0", usk_admin);
+	crypto_kdf_derive_from_key(tmp_bs, crypto_box_SEEDBYTES, 1, "AEM-Usr0", usk_user1);
 	crypto_box_seed_keypair(upk_user1, tmp_sk, tmp_bs);
 
 	// User 2
@@ -138,7 +138,7 @@ int main(int argc, char *argv[]) {
 
 	// Perform the tests
 	int retNum;
-	const int ret = performTests(&retNum, argv[1], spk_api_box, spk_api_sig, spk_dlv_sig, saltNm, usk_admin, key_user1, upk_user1, upk_user2);
+	const int ret = performTests(&retNum, argv[1], spk_api_box, spk_api_sig, spk_dlv_sig, saltNm, usk_admin, usk_user1, upk_user1, upk_user2);
 	if (ret != 0) printf("Failed test %d: %d\n", retNum, ret); else puts("All Ok");
 
 	allears_free();
