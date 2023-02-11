@@ -19,28 +19,29 @@
 // Server settigns - must match server
 #define AEM_MSG_MINBLOCKS 12
 #define AEM_API_BOX_SIZE_MAX ((UINT16_MAX + AEM_MSG_MINBLOCKS) * 16)
-#define AEM_MAXLEN_MSGDATA 4194304 // 4 MiB
+#define AEM_MAXLEN_MSGDATA 1048576 // 1 MiB
 #define AEM_PORT_API 302
 #define AEM_LEVEL_MAX 3
 #define AEM_LEN_SHORTRESPONSE_HEADERS 120
 #define AEM_LEN_SHORTRESPONSE_DECRYPT 33
 #define AEM_SEALCLEAR_LEN (1 + crypto_box_NONCEBYTES + crypto_box_PUBLICKEYBYTES)
-#define AEM_ADDRESS_ARGON2_OPSLIMIT 3
-#define AEM_ADDRESS_ARGON2_MEMLIMIT 67108864
+#define AEM_ADDRESS_ARGON2_OPSLIMIT 2
+#define AEM_ADDRESS_ARGON2_MEMLIMIT 16777216
 
 // Local settings
 #define AEM_PORT_TOR 9050
 #define AEM_SOCKET_TIMEOUT 30
 
-static unsigned char api_pubkey[crypto_box_PUBLICKEYBYTES];
-static unsigned char sig_pubkey[crypto_sign_PUBLICKEYBYTES];
+static unsigned char spk_api_box[crypto_box_PUBLICKEYBYTES];
+static unsigned char spk_api_sig[crypto_box_PUBLICKEYBYTES];
+static unsigned char spk_dlv_sig[crypto_sign_PUBLICKEYBYTES];
 static unsigned char saltNm[crypto_pwhash_SALTBYTES];
 static char onionId[56];
 
-static unsigned char userKey_kxHash[crypto_generichash_KEYBYTES];
-static unsigned char userKey_symmetric[crypto_secretbox_KEYBYTES];
-static unsigned char userKey_public[crypto_box_PUBLICKEYBYTES];
-static unsigned char userKey_secret[crypto_box_SECRETKEYBYTES];
+static unsigned char usk_kxHash[crypto_generichash_KEYBYTES];
+static unsigned char usk_symmetric[crypto_secretbox_KEYBYTES];
+static unsigned char usk_public[crypto_box_PUBLICKEYBYTES];
+static unsigned char usk_secret[crypto_box_SECRETKEYBYTES];
 
 static uint16_t totalMsgCount = 0;
 static uint32_t totalMsgBlock = 0;
@@ -105,7 +106,7 @@ static uint64_t normalHash(const char addr32[10]) {
 
 static int parseShortResponse(unsigned char * const result, const unsigned char * const response) {
 	unsigned char decrypted[AEM_LEN_SHORTRESPONSE_DECRYPT];
-	if (crypto_box_open_easy(decrypted, response + AEM_LEN_SHORTRESPONSE_HEADERS + crypto_box_NONCEBYTES, AEM_LEN_SHORTRESPONSE_DECRYPT + crypto_box_MACBYTES, response + AEM_LEN_SHORTRESPONSE_HEADERS, api_pubkey, userKey_secret) != 0) return -2;
+	if (crypto_box_open_easy(decrypted, response + AEM_LEN_SHORTRESPONSE_HEADERS + crypto_box_NONCEBYTES, AEM_LEN_SHORTRESPONSE_DECRYPT + crypto_box_MACBYTES, response + AEM_LEN_SHORTRESPONSE_HEADERS, spk_api_box, usk_secret) != 0) return -2;
 
 	const int lenCpy = decrypted[0];
 	if (lenCpy >= AEM_LEN_SHORTRESPONSE_DECRYPT) return -lenCpy; // Invalid length --> Server reported error
@@ -145,7 +146,7 @@ static int getLongResponse(const int sock, unsigned char ** const result) {
 	*result = malloc(lenBox - crypto_box_MACBYTES);
 	if (*result == NULL) {free(response); return -2;}
 
-	if (crypto_box_open_easy(*result, headEnd + 4 + crypto_box_NONCEBYTES, lenBox, headEnd + 4, api_pubkey, userKey_secret) != 0) {
+	if (crypto_box_open_easy(*result, headEnd + 4 + crypto_box_NONCEBYTES, lenBox, headEnd + 4, spk_api_box, usk_secret) != 0) {
 		free(response);
 		free(*result);
 		return -1;
@@ -186,10 +187,10 @@ static int apiFetch(const int apiCmd, const void * const clear, const size_t len
 	unsigned char sealClear[AEM_SEALCLEAR_LEN];
 	sealClear[0] = apiCmd;
 	memcpy(sealClear + 1, pbNonce, crypto_box_NONCEBYTES);
-	memcpy(sealClear + 1 + crypto_box_NONCEBYTES, userKey_public, crypto_box_PUBLICKEYBYTES);
+	memcpy(sealClear + 1 + crypto_box_NONCEBYTES, usk_public, crypto_box_PUBLICKEYBYTES);
 
-	const int ret1 = crypto_box_seal(req + lenHeaders, sealClear, AEM_SEALCLEAR_LEN, api_pubkey);
-	const int ret2 = crypto_box_easy(req + lenHeaders + AEM_SEALCLEAR_LEN + crypto_box_SEALBYTES, clear, lenClear, pbNonce, api_pubkey, userKey_secret);
+	const int ret1 = crypto_box_seal(req + lenHeaders, sealClear, AEM_SEALCLEAR_LEN, spk_api_box);
+	const int ret2 = crypto_box_easy(req + lenHeaders + AEM_SEALCLEAR_LEN + crypto_box_SEALBYTES, clear, lenClear, pbNonce, spk_api_box, usk_secret);
 
 	int lenResult = -1;
 	if (ret1 == 0 && ret2 == 0) {
@@ -315,7 +316,7 @@ int allears_message_browse() {
 
 		const size_t lenMsgData = msgBytes - crypto_box_SEALBYTES;
 		unsigned char msgData[lenMsgData];
-		if (crypto_box_seal_open(msgData, browseData + offset, msgBytes, userKey_public, userKey_secret) != 0) {
+		if (crypto_box_seal_open(msgData, browseData + offset, msgBytes, usk_public, usk_secret) != 0) {
 			// Error decrypting
 			offset += msgBytes;
 			continue;
@@ -327,7 +328,7 @@ int allears_message_browse() {
 		unsigned char padBytes[padAmount];
 		randombytes_buf_deterministic(padBytes, padAmount, msgData);
 		const bool validPad = (memcmp(padBytes, msgData + lenMsgData - crypto_sign_BYTES - padAmount, padAmount) == 0);
-		const bool validSig = (crypto_sign_verify_detached(msgData + lenMsgData - crypto_sign_BYTES, msgData, lenMsgData - crypto_sign_BYTES, sig_pubkey) == 0);
+		const bool validSig = (crypto_sign_verify_detached(msgData + lenMsgData - crypto_sign_BYTES, msgData, lenMsgData - crypto_sign_BYTES, spk_dlv_sig) == 0);
 
 		uint32_t msgTs;
 		memcpy(&msgTs, msgData + 1, 4);
@@ -388,7 +389,7 @@ int allears_message_browse() {
 					bzero(nonce + 4, crypto_secretbox_NONCEBYTES - 4);
 
 					unsigned char seedHash[crypto_kx_SEEDBYTES];
-					crypto_generichash(seedHash, crypto_kx_SEEDBYTES, intMsg[count_intMsg - 1].addr32_to, 10, userKey_kxHash, crypto_generichash_KEYBYTES);
+					crypto_generichash(seedHash, crypto_kx_SEEDBYTES, intMsg[count_intMsg - 1].addr32_to, 10, usk_kxHash, crypto_generichash_KEYBYTES);
 
 					unsigned char kxKeyPk[crypto_kx_PUBLICKEYBYTES];
 					unsigned char kxKeySk[crypto_kx_SECRETKEYBYTES];
@@ -433,7 +434,7 @@ int allears_message_browse() {
 
 static void getKxPublic(const unsigned char addr32_from[10], unsigned char * const target) {
 	unsigned char hash[crypto_kx_SEEDBYTES];
-	crypto_generichash(hash, crypto_kx_SEEDBYTES, addr32_from, 10, userKey_kxHash, crypto_generichash_KEYBYTES);
+	crypto_generichash(hash, crypto_kx_SEEDBYTES, addr32_from, 10, usk_kxHash, crypto_generichash_KEYBYTES);
 
 	unsigned char kxKeyPublic[crypto_kx_PUBLICKEYBYTES];
 	unsigned char kxKeySecret[crypto_kx_SECRETKEYBYTES];
@@ -536,7 +537,7 @@ int allears_message_upload(const char * const fileName, const size_t lenFileName
 	unsigned char final[lenFinal];
 
 	randombytes_buf(final, crypto_secretbox_NONCEBYTES);
-	crypto_secretbox_easy(final + crypto_secretbox_NONCEBYTES, data, lenData, final, userKey_symmetric);
+	crypto_secretbox_easy(final + crypto_secretbox_NONCEBYTES, data, lenData, final, usk_symmetric);
 
 	unsigned char result[32];
 	unsigned char * const p_result = (unsigned char*)result;
@@ -552,26 +553,27 @@ int allears_private_update(const unsigned char newPrivate[AEM_LEN_PRIVATE]) {
 	return apiFetch(AEM_API_PRIVATE_UPDATE, newPrivate, AEM_LEN_PRIVATE, NULL);
 }
 
-int allears_init(const char * const newOnionId, const unsigned char pkApi[crypto_box_PUBLICKEYBYTES], const unsigned char pkSig[crypto_sign_PUBLICKEYBYTES], const unsigned char newSaltNm[crypto_pwhash_SALTBYTES], const unsigned char userKey[crypto_kdf_KEYBYTES]) {
+int allears_init(const char * const newOnionId, const unsigned char pk_apiBox[crypto_box_PUBLICKEYBYTES], const unsigned char pk_apiSig[crypto_sign_PUBLICKEYBYTES], const unsigned char pk_dlvSig[crypto_sign_PUBLICKEYBYTES], const unsigned char newSaltNm[crypto_pwhash_SALTBYTES], const unsigned char usk[crypto_kdf_KEYBYTES]) {
 	memcpy(onionId, newOnionId, 56);
 	memcpy(saltNm, newSaltNm, crypto_pwhash_SALTBYTES);
-	memcpy(api_pubkey, pkApi, crypto_box_PUBLICKEYBYTES);
-	memcpy(sig_pubkey, pkSig, crypto_sign_PUBLICKEYBYTES);
+	memcpy(spk_api_box, pk_apiBox, crypto_box_PUBLICKEYBYTES);
+	memcpy(spk_dlv_sig, pk_apiSig, crypto_sign_PUBLICKEYBYTES);
+	memcpy(spk_dlv_sig, pk_dlvSig, crypto_sign_PUBLICKEYBYTES);
 
-	crypto_kdf_derive_from_key(userKey_kxHash, crypto_generichash_KEYBYTES, 4, "AEM-Usr0", userKey);
-	crypto_kdf_derive_from_key(userKey_symmetric, crypto_secretbox_KEYBYTES, 5, "AEM-Usr0", userKey);
+	crypto_kdf_derive_from_key(usk_kxHash, crypto_generichash_KEYBYTES, 4, "AEM-Usr0", usk);
+	crypto_kdf_derive_from_key(usk_symmetric, crypto_secretbox_KEYBYTES, 5, "AEM-Usr0", usk);
 
 	unsigned char boxSeed[crypto_box_SEEDBYTES];
-	crypto_kdf_derive_from_key(boxSeed, crypto_box_SEEDBYTES, 1, "AEM-Usr0", userKey);
-	crypto_box_seed_keypair(userKey_public, userKey_secret, boxSeed);
+	crypto_kdf_derive_from_key(boxSeed, crypto_box_SEEDBYTES, 1, "AEM-Usr0", usk);
+	crypto_box_seed_keypair(usk_public, usk_secret, boxSeed);
 	sodium_memzero(boxSeed, crypto_box_SEEDBYTES);
 	return 0;
 }
 
 void allears_free(void) {
-	sodium_memzero(userKey_kxHash, crypto_generichash_KEYBYTES);
-	sodium_memzero(userKey_secret, crypto_box_SECRETKEYBYTES);
-	sodium_memzero(userKey_symmetric, crypto_secretbox_KEYBYTES);
+	sodium_memzero(usk_kxHash, crypto_generichash_KEYBYTES);
+	sodium_memzero(usk_secret, crypto_box_SECRETKEYBYTES);
+	sodium_memzero(usk_symmetric, crypto_secretbox_KEYBYTES);
 
 	if (intMsg != NULL) {
 		for (int i = 0; i < count_intMsg; i++) {
@@ -584,8 +586,9 @@ void allears_free(void) {
 		count_intMsg = 0;
 	}
 
-	bzero(api_pubkey, crypto_box_PUBLICKEYBYTES);
-	bzero(sig_pubkey, crypto_sign_PUBLICKEYBYTES);
+	bzero(spk_api_box, crypto_box_PUBLICKEYBYTES);
+	bzero(spk_api_sig, crypto_box_PUBLICKEYBYTES);
+	bzero(spk_dlv_sig, crypto_sign_PUBLICKEYBYTES);
 	bzero(saltNm, crypto_pwhash_SALTBYTES);
 	bzero(onionId, 56);
 }
