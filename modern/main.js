@@ -1601,16 +1601,16 @@ document.getElementById("btn_upload").onclick = function() {
 		const reader = new FileReader();
 		reader.onload = function() {
 			if (vaultOk) { // Vault opened -> upload to PostVault
-				vault.uploadFile(fileSelector.files[0].name, new Uint8Array(reader.result), function(status) {
-					if (status === 0) {
+				vault.uploadFile(fileSelector.files[0].name, new Uint8Array(reader.result), function(error) {
+					if (error === 0) {
 						showFiles();
 					} // TODO else show error
 
 					btn.disabled = false;
 				});
 			} else { // No vault access -> upload to All-Ears
-				ae.Message_Upload(fileSelector.files[0].name, new Uint8Array(reader.result), function(status) {
-					if (status === 0) {
+				ae.Message_Upload(fileSelector.files[0].name, new Uint8Array(reader.result), function(error) {
+					if (error === 0) {
 						showFiles();
 						document.getElementById("tbd_accs").children[0].children[1].textContent = Math.round(ae.getTotalMsgBytes() / 1024 / 1024);
 					} else errorDialog(error);
@@ -1769,11 +1769,11 @@ document.getElementById("btn_enter").onclick = function() {
 		document.body.style.cursor = "wait";
 		document.getElementById("greeting").textContent = "Connecting...";
 
-		ae.Message_Browse(false, true, function(statusBrowse) {
+		ae.Message_Browse(false, true, function(errorBrowse) {
 			document.body.style.cursor = "";
 
-			if (statusBrowse !== 0 && statusBrowse !== 0x09) {
-				document.getElementById("greeting").textContent = ae.getErrorMessage(statusBrowse) + " (0x" + statusBrowse.toString(16).padStart(2, "0").toUpperCase() + ")";
+			if (errorBrowse !== 0 && errorBrowse !== 0x09) {
+				document.getElementById("greeting").textContent = ae.getErrorMessage(errorBrowse) + " (0x" + errorBrowse.toString(16).padStart(2, "0").toUpperCase() + ")";
 				document.getElementById("txt_skey").disabled = false;
 				btn.disabled = false;
 				btn.focus();
@@ -1788,15 +1788,15 @@ document.getElementById("btn_enter").onclick = function() {
 			history.replaceState({tab: 0, page: 0, msg: msgDisplay}, null);
 			setTab(true, 0, 0);
 
-			if (statusBrowse !== 0) errorDialog(statusBrowse);
+			if (errorBrowse !== 0) errorDialog(errorBrowse);
 			if (!ae.isUserAdmin()) return;
 
-			ae.Account_Browse(function(statusAcc) {
-				if (statusAcc === 0) {
+			ae.Account_Browse(function(errorAcc) {
+				if (errorAcc === 0) {
 					for (let i = 0; i < ae.admin_getUserNum(); i++) {addAccountToTable(i);}
 					updateLimits();
 				} else {
-					errorDialog(statusAcc);
+					errorDialog(errorAcc);
 				}
 			});
 		});
