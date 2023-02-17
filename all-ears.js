@@ -1130,6 +1130,19 @@ function AllEars(readyCallback) {
 		return body;
 	};
 
+	const _htmlCetTags = function(body, needle, tagName) {
+		for(;;) {
+			const begin = body.indexOf(needle);
+			if (begin === -1) break;
+			const end = body.slice(begin + 1).indexOf(needle);
+			if (end === -1) break;
+
+			body = body.slice(0, begin) + "<" + tagName + ">" + body.slice(begin + 1, begin + end + 1) + "</" + tagName + ">" + body.slice(begin + end + 2);
+		}
+
+		return body;
+	};
+
 	const getPlainExtBody = function(num) {
 		let textBody = _extMsg[num].body;
 
@@ -1470,6 +1483,10 @@ function AllEars(readyCallback) {
 			html = _htmlCetLinks(html, "\x0D", true,  "🔒", fullUrl);
 			html = _htmlCetLinks(html, "\x0E", false, "👁", fullUrl);
 			html = _htmlCetLinks(html, "\x0F", true,  "🖼", fullUrl);
+			html = _htmlCetTags(html, "\x06", "b");
+			html = _htmlCetTags(html, "\x07", "i");
+			html = _htmlCetTags(html, "\x08", "u");
+			html = _htmlCetTags(html, "\x09", "s");
 		} else html = html.replaceAll("\x0C", " ").replaceAll("\x0D", " ").replaceAll("\x0E", " ").replaceAll("\x0F", " ");
 
 		return html.replaceAll("\x11", "\n---\n").replaceAll("\x10", " ").replaceAll("\n ", "\n").replaceAll("  ", " ").trim();
