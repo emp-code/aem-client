@@ -605,6 +605,11 @@ dialog,
 	margin-bottom: 0.5em;
 }
 
+#readmsg_main > pre > p > h2 {
+	margin: 0;
+	font-size: large;
+}
+
 #readmsg_main > :is(img, video, embed, iframe) {
 	flex-grow: 1;
 	object-fit: contain;
