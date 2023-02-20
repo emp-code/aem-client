@@ -1256,16 +1256,16 @@ function AllEars(readyCallback) {
 					const msgMsgId = d.decode(msgBodyU8.slice(o, o + lenMsgId)); o+= lenMsgId;
 					const msgSbjct = d.decode(msgBodyU8.slice(o, o + lenSbjct)); o+= lenSbjct;
 
-					const msgHdrTo = hdrTo.includes("\x0B") ? hdrTo.slice(hdrTo.indexOf("\x0B") + 1) : hdrTo;
-					const msgHdrFr = hdrFr.includes("\x0B") ? hdrFr.slice(hdrFr.indexOf("\x0B") + 1) : hdrFr;
-					const msgRplTo = rplTo.includes("\x0B") ? rplTo.slice(rplTo.indexOf("\x0B") + 1) : rplTo;
+					const msgHdrTo = hdrTo.includes("\x7F") ? hdrTo.slice(hdrTo.indexOf("\x7F") + 1) : hdrTo;
+					const msgHdrFr = hdrFr.includes("\x7F") ? hdrFr.slice(hdrFr.indexOf("\x7F") + 1) : hdrFr;
+					const msgRplTo = rplTo.includes("\x7F") ? rplTo.slice(rplTo.indexOf("\x7F") + 1) : rplTo;
 
-					const msgDnTo = hdrTo.includes("\x0B") ? hdrTo.slice(0, hdrTo.indexOf("\x0B")) : null;
-					const msgDnFr = hdrFr.includes("\x0B") ? hdrFr.slice(0, hdrFr.indexOf("\x0B")) : null;
-					const msgDnRt = rplTo.includes("\x0B") ? rplTo.slice(0, rplTo.indexOf("\x0B")) : null;
+					const msgDnTo = hdrTo.includes("\x7F") ? hdrTo.slice(0, hdrTo.indexOf("\x7F")) : null;
+					const msgDnFr = hdrFr.includes("\x7F") ? hdrFr.slice(0, hdrFr.indexOf("\x7F")) : null;
+					const msgDnRt = rplTo.includes("\x7F") ? rplTo.slice(0, rplTo.indexOf("\x7F")) : null;
 
 					const body = d.decode(msgBodyU8.slice(o));
-					const headersEnd = body.indexOf("\x0B");
+					const headersEnd = body.indexOf("\x7F");
 					const msgHeaders = (headersEnd > 0) ? body.slice(0, headersEnd) : "";
 					const msgBody = body.slice(headersEnd + 1);
 
@@ -1476,7 +1476,7 @@ function AllEars(readyCallback) {
 	this.getExtMsgBody    = function(num, fullUrl) {if(typeof(num)!=="number" || typeof(fullUrl)!=="boolean"){return;}
 		if (!_extMsg[num].body) return "";
 
-		let html = _extMsg[num].body.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").split("\x0B").reverse().join("<br><hr>");
+		let html = _extMsg[num].body.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").split("\x7F").reverse().join("<br><hr>");
 
 		if (_isValidCet(html)) {
 			html = _htmlCetLinks(html, "\x0C", false, "🔗", fullUrl);
@@ -1539,7 +1539,7 @@ function AllEars(readyCallback) {
 		+ "\r\nSubject: " + _extMsg[num].subj
 		+ "\r\nTo: " + (_extMsg[num].dnTo ? ("\"" + _extMsg[num].dnTo + "\" <" + _extMsg[num].hdrTo + ">") : _extMsg[num].hdrTo)
 		+ (_extMsg[num].headers? ("\r\n" + _extMsg[num].headers.replaceAll("\n", "\r\n")) : "")
-		+ "\r\n\r\n" + getPlainExtBody(num).replaceAll("\x0B", "\n---\n").replaceAll("\n", "\r\n")
+		+ "\r\n\r\n" + getPlainExtBody(num).replaceAll("\x7F", "\n---\n").replaceAll("\n", "\r\n")
 		+ "\r\n";
 	};
 
