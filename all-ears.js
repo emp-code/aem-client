@@ -1123,18 +1123,25 @@ function AllEars(readyCallback) {
 
 	const _cetTag = function(n) {
 		switch (n) {
-			case 0x01: return "h2";
-			case 0x02: return "small";
-			case 0x03: return "sub";
-			case 0x04: return "sup";
-			case 0x05: return "code";
-			case 0x06: return "b";
-			case 0x07: return "i";
-			case 0x08: return "u";
-			case 0x09: return "s";
-//			     0x0A = linebreak
-			case 0x0B: return "hr";
-//			     0x0C..0x0F links
+			case 0x01: return "br";
+			case 0x02: return "hr";
+
+			case 0x11: return "h2";
+			case 0x12: return "small";
+			case 0x13: return "sub";
+			case 0x14: return "sup";
+			case 0x15: return "code";
+			case 0x16: return "b";
+			case 0x17: return "i";
+			case 0x18: return "u";
+			case 0x19: return "s";
+			case 0x1A: return "table";
+			case 0x1B: return "tr";
+			case 0x1C: return "td";
+			case 0x1D: return "ol";
+			case 0x1E: return "ul";
+			case 0x1F: return "li";
+
 			default : return "";
 		}
 	}
@@ -1147,8 +1154,12 @@ function AllEars(readyCallback) {
 			const cc = body.charCodeAt(i);
 			const tagName = _cetTag(cc);
 			if (tagName) {
-				newBody += (tagOpen[cc] ? "</" : "<") + tagName + ">"
-				tagOpen[cc] = !tagOpen[cc];
+				if (cc < 0x11) {
+					newBody += "<" + tagName + ">";
+				} else {
+					newBody += (tagOpen[cc] ? "</" : "<") + tagName + ">"
+					tagOpen[cc] = !tagOpen[cc];
+				}
 			} else {
 				newBody += body[i];
 			}
@@ -1160,12 +1171,12 @@ function AllEars(readyCallback) {
 	const getPlainExtBody = function(num) {
 		let textBody = _extMsg[num].body;
 
-		textBody = _textCetLinks(textBody, "\x0C", false);
-		textBody = _textCetLinks(textBody, "\x0D", true);
-		textBody = _textCetLinks(textBody, "\x0E", false);
-		textBody = _textCetLinks(textBody, "\x0F", true);
+		textBody = _textCetLinks(textBody, "\x04", false);
+		textBody = _textCetLinks(textBody, "\x05", true);
+		textBody = _textCetLinks(textBody, "\x06", false);
+		textBody = _textCetLinks(textBody, "\x07", true);
 
-		return textBody.replace("\x01", "*").replace("\x02", "").replace("\x03", "").replace("\x04", "").replace("\x05", "*").replace("\x06", "*").replace("\x07", "_").replace("\x08", "_").replace("\x09", "-");
+		return textBody.replaceAll(/[\x03-\x15\x18-\x1c]/g, "").replaceAll(/[\x01\x1d\x1e\x1f]/g, "\n").replaceAll("\x02", "---\n---").replaceAll("\x16", "*").replaceAll("\x17", "_");
 	};
 
 	const _addMessage = function(msgData, msgSize, msgId) {
@@ -1490,10 +1501,10 @@ function AllEars(readyCallback) {
 
 		let html = _extMsg[num].body.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").split("\x7F").reverse().join("<br><hr>");
 
-		html = _htmlCetLinks(html, "\x0C", false, "🔗", fullUrl);
-		html = _htmlCetLinks(html, "\x0D", true,  "🔒", fullUrl);
-		html = _htmlCetLinks(html, "\x0E", false, "👁", fullUrl);
-		html = _htmlCetLinks(html, "\x0F", true,  "🖼", fullUrl);
+		html = _htmlCetLinks(html, "\x04", false, "🔗", fullUrl);
+		html = _htmlCetLinks(html, "\x05", true,  "🔒", fullUrl);
+		html = _htmlCetLinks(html, "\x06", false, "👁", fullUrl);
+		html = _htmlCetLinks(html, "\x07", true,  "🖼", fullUrl);
 		return _htmlCetTags(html);
 	};
 
