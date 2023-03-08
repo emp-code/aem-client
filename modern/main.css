@@ -103,13 +103,13 @@ thead {
 	opacity: 0.4125;
 }
 
-table,
-td {
+#main1 table,
+#main1 td {
 	white-space: nowrap;
 	overflow: inherit;
 }
 
-tr {
+#main1 tr {
 	height: 1.5em;
 	overflow: hidden;
 }
@@ -593,6 +593,10 @@ dialog,
 	text-rendering: optimizeLegibility;
 }
 
+#readmsg_main > pre a {
+	word-break: break-word;
+}
+
 #readmsg_main > pre > p {
 	margin-top: 0;
 }
@@ -605,9 +609,18 @@ dialog,
 	margin-bottom: 0.5em;
 }
 
-#readmsg_main > pre > p > h2 {
+#readmsg_main > pre h2 {
 	margin: 0;
 	font-size: large;
+}
+
+#readmsg_main ol,
+#readmsg_main ul {
+	margin: 0;
+}
+
+#readmsg_main > pre td {
+	display: inline-block;
 }
 
 #readmsg_main > :is(img, video, embed, iframe) {
