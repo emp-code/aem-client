@@ -611,6 +611,7 @@ dialog,
 
 #readmsg_main > pre h2 {
 	margin: 0;
+	display: inline;
 	font-size: large;
 }
 
