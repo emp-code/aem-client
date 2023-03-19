@@ -568,6 +568,7 @@ function updateAddressCounts() {
 	document.getElementById("limit_total").textContent = ((ae.getAddressCountNormal() + ae.getAddressCountShield()) + "/" + ae.getAddrPerUser()).padStart(5);
 
 	updateAddressButtons();
+	document.getElementById("getapk_result").textContent = ae.getOwnApk(document.getElementById("getapk_addr").value);
 }
 
 function addOwnAccount() {
@@ -1044,7 +1045,6 @@ function deleteAddress(addr) {
 			}
 		} else {
 			document.getElementById("getapk_addr").replaceChildren();
-			document.getElementById("btn_getapk").disabled = true;
 		}
 
 		updateAddressCounts();
@@ -1268,8 +1268,6 @@ function addAddresses() {
 	for (let i = 0; i < ae.getAddressCount(); i++) {
 		addAddress(i);
 	}
-
-	document.getElementById("btn_getapk").disabled = (ae.getAddressCountNormal() < 1);
 }
 
 function addressCreate(addr) {
@@ -1288,7 +1286,6 @@ function addressCreate(addr) {
 
 			addAddress(ae.getAddressCount() - 1);
 			if (addr !== "SHIELD") {
-				document.getElementById("btn_getapk").disabled = false;
 				document.getElementById("txt_address_create_normal").value = "";
 				document.getElementById("txt_address_create_normal").focus();
 			}
@@ -1720,7 +1717,7 @@ document.getElementById("btn_limits").onclick = function() {
 	});
 };
 
-document.getElementById("btn_getapk").onclick = function() {
+document.getElementById("getapk_addr").onchange = function() {
 	document.getElementById("getapk_result").textContent = ae.getOwnApk(document.getElementById("getapk_addr").value);
 };
 

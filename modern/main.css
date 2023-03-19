@@ -103,6 +103,14 @@ thead {
 	opacity: 0.4125;
 }
 
+output {
+	font-family: monospace;
+	white-space: break-spaces;
+	word-break: break-all;
+	display: block;
+	margin: 1em 0 1em 0;
+}
+
 #main1 table,
 #main1 td {
 	white-space: nowrap;
@@ -633,12 +641,6 @@ dialog,
 #readmsg_main > audio {
 	margin: 0 auto;
 	min-width: 90%;
-}
-
-#getapk_result {
-	font-family: monospace;
-	white-space: break-spaces;
-	word-break: break-all;
 }
 
 @media (min-width: 80em) {
