@@ -1126,7 +1126,7 @@ function AllEars(readyCallback) {
 			case 0x0A: return "br";
 			case 0x0B: return "hr";
 
-			case 0x11: return "h2";
+			case 0x11: return "strong";
 			case 0x12: return "small";
 			case 0x13: return "sub";
 			case 0x14: return "sup";

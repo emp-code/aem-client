@@ -609,9 +609,8 @@ dialog,
 	margin-bottom: 0.5em;
 }
 
-#readmsg_main > pre h2 {
+#readmsg_main > pre strong {
 	margin: 0;
-	display: inline;
 	font-size: large;
 }
 
