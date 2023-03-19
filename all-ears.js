@@ -1104,9 +1104,9 @@ function AllEars(readyCallback) {
 			if (!fullUrl) {
 				const domainEnd = url.search("[/?]");
 				const linkDomain = ((domainEnd === -1) ? url : url.slice(0, domainEnd)).toLowerCase();
-				body = body.slice(0, begin) + (isSecure? "<a href=\"https://" : "<a href=\"http://") + url + "\">" + linkIcon + "&NoBreak;" + linkDomain + "</a> " + body.slice(begin + end + 2);
+				body = body.slice(0, begin) + (isSecure? "<a rel=\"noopener\" href=\"https://" : "<a href=\"http://") + url + "\">" + linkIcon + "&NoBreak;" + linkDomain + "</a> " + body.slice(begin + end + 2);
 			} else {
-				body = body.slice(0, begin) + (isSecure? "<a href=\"https://" : "<a href=\"http://") + url + "\">" + linkIcon + "&NoBreak;" + url + "</a> " + body.slice(begin + end + 2);
+				body = body.slice(0, begin) + (isSecure? "<a rel=\"noopener\" href=\"https://" : "<a href=\"http://") + url + "\">" + linkIcon + "&NoBreak;" + url + "</a> " + body.slice(begin + end + 2);
 			}
 		}
 
