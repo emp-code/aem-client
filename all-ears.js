@@ -1099,15 +1099,14 @@ function AllEars(readyCallback) {
 			const end = body.slice(begin + 1).indexOf(needle);
 			if (end === -1) break;
 
-			let url = body.slice(begin + 1, begin + 1 + end);
-
+			const url = body.slice(begin + 1, begin + 1 + end);
+			let linkDomain;
 			if (!fullUrl) {
 				const domainEnd = url.search("[/?]");
-				const linkDomain = ((domainEnd === -1) ? url : url.slice(0, domainEnd)).toLowerCase();
-				body = body.slice(0, begin) + "<a rel=\"noopener\" href=\"http" + (isSecure? "s://" : "://") + url + "\">" + linkIcon + "&NoBreak;" + linkDomain + "</a> " + body.slice(begin + end + 2);
-			} else {
-				body = body.slice(0, begin) + "<a rel=\"noopener\" href=\"http" + (isSecure? "s://" : "://") + url + "\">" + linkIcon + "&NoBreak;" + url + "</a> " + body.slice(begin + end + 2);
+				linkDomain = ((domainEnd === -1) ? url : url.slice(0, domainEnd)).toLowerCase();
 			}
+
+			body = body.slice(0, begin) + "<a rel=\"noopener\" href=\"http" + (isSecure? "s://" : "://") + url + "\">" + linkIcon + "&NoBreak;" + (fullUrl? url : linkDomain) + "</a> " + body.slice(begin + end + 2);
 		}
 
 		return body;
