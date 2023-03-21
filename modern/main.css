@@ -601,10 +601,6 @@ dialog,
 	text-rendering: optimizeLegibility;
 }
 
-#readmsg_main > pre a {
-	word-break: break-word;
-}
-
 #readmsg_main > pre > p {
 	margin-top: 0;
 }
@@ -628,7 +624,8 @@ dialog,
 }
 
 #readmsg_main > pre td {
-	display: inline-block;
+	display: inline;
+	word-break: break-all;
 }
 
 #readmsg_main > :is(img, video, embed, iframe) {
