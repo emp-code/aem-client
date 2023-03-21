@@ -1125,6 +1125,10 @@ function setTab(isHistory, tabNum, pageNum) {
 	if (!isHistory) history.pushState({tab: tab, page: tabs[tab].cur, msg: msgDisplay}, null);
 }
 
+window.onresize = function() {
+	setTab(true, tab, tabs[tab].cur);
+}
+
 function clearWrite() {
 	setTab(false, TAB_WRITE, 0);
 
