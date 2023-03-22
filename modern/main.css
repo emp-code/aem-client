@@ -628,7 +628,6 @@ dialog,
 }
 
 #readmsg_main > pre td {
-	display: inline;
 	word-break: break-all;
 }
 
