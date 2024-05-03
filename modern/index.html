@@ -3,15 +3,10 @@
 	<head>
 		<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%20fill='%23b4783c'%3E%3Cpolygon%20points='0,4%200,20%208,12'/%3E%3Cpolygon%20points='24,4%2024,20%2016,12'/%3E%3Cpolygon%20points='2,4%2012,14%2022,4'/%3E%3Cpolygon%20points='12,16%209,13%202,20%2022,20%2015,13'/%3E%3C/svg%3E">
 		<link rel="license" href="https://www.gnu.org/licenses/gpl-3.0.html" hreflang="en-US">
-		<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/gh/emp-code/aem-client@94d668a85f58b088a9861c4c086211e152fa647b/modern/main.css" integrity="sha384-xmY8lDuUsl3muGCb18PgiB1u8cAaSTahOm7qXgd/z2cHPiWGI8XtBt3rJBdpQ0Ko" crossorigin="anonymous">
+		<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/gh/emp-code/aem-client@b76708b6d2773e7fd6f4ff34aba88e279b401ce1/modern/main.css" integrity="sha384-3d1b0sb0v5av4bKjOGVU+/HWw9sY0/blew2fqY4rwJT9Reowj8t5AdY3ED88cfNW" crossorigin="anonymous">
 
-		<meta name="aem.domain.api" content="">
+		<meta name="aem.url.api" content="">
 		<meta name="aem.domain.eml" content="AEM placeholder for email domain">
-		<meta name="aem.key.apibox" content="All-Ears Mail API BoxPubKey placeholder, replaced automatically.">
-		<meta name="aem.key.apisig" content="All-Ears Mail API SigPubKey placeholder, replaced automatically.">
-		<meta name="aem.key.dlvsig" content="All-Ears Mail Dlv SigPubKey placeholder, replaced automatically.">
-		<meta name="aem.adrslt.nrm" content="AEM Normal Addr Salt placeholder">
-		<meta name="aem.adrslt.lim" content="3;67108864">
 
 		<meta name="postvault.spk" content="">
 		<meta name="postvault.domain" content="">
@@ -34,7 +29,7 @@
 				</header>
 
 				<main>
-					<input type="password" id="txt_skey" maxlength="0" pattern="[0-9a-f]{64}" required autocomplete="current-password" autofocus>
+					<input type="password" id="txt_umk" maxlength="0" pattern="[0-9A-Za-z+\/]{43}" required autocomplete="current-password" autofocus>
 					<button type="button" id="btn_enter"></button>
 				</main>
 
@@ -220,17 +215,17 @@
 								<hr>
 
 								<div class="center">
-									<input type="text" id="txt_reg" minlength="64" maxlength="64" pattern="[0-9a-f]{64}" required autocomplete="off" placeholder="UPK (hex)">
-									<button type="button" id="btn_reg" autocomplete="off">Register</button>
+									<input type="text" id="txt_sender" minlength="26" maxlength="26" pattern="[0-9a-z]{26}" required autocomplete="off" placeholder="Message-ID">
+									<button type="button" id="btn_sender" autocomplete="off">Identify</button>
+									<p id="txt_sender_res" class="half"></p>
 								</div>
 
 								<hr>
 
 								<div class="center">
-									<p><input type="text" id="txt_sender_hash" minlength="64" maxlength="64" pattern="[0-9A-Za-z_-]{64}" required autocomplete="off" placeholder="Message-ID"></p>
-									<p><input type="text" id="txt_sender_date" required autocomplete="off" placeholder="Date"></p>
-									<p id="txt_sender_res" class="half"></p>
-									<p><button type="button" id="btn_sender" autocomplete="off">Identify sender</button></p>
+									<p><input type="text" id="txt_reg_uak" minlength="64" maxlength="64" pattern="[0-9a-f]{64}" required autocomplete="off" placeholder="UAK"></p>
+									<p><input type="text" id="txt_reg_epk" minlength="64" maxlength="64" pattern="[0-9a-f]{64}" required autocomplete="off" placeholder="EPK"></p>
+									<p><button type="button" id="btn_reg" autocomplete="off">Register</button></p>
 								</div>
 							</fieldset>
 
@@ -263,7 +258,7 @@
 						<table id="tbl_accs" hidden>
 							<thead>
 								<tr>
-									<th>UPK</th>
+									<th>User</th>
 									<th><abbr title="Mebibytes">MiB</abbr></th>
 									<th><abbr title="Normal addresses">Nrm</abbr></th>
 									<th><abbr title="Shield addresses">Shd</abbr></th>
@@ -414,9 +409,9 @@
 		</svg>
 
 		<script src="https://cdn.jsdelivr.net/gh/google/brotli@1.0.7/js/decode.min.js" integrity="sha384-D02d+8Zt5n4/7mnD+GctnXcW7NBcKHdgDsl3msmWdkOG3094pdP0ceN/4c/zChml" crossorigin="anonymous"></script>
-		<script src="https://cdn.jsdelivr.net/gh/jedisct1/libsodium.js@0.7.10/dist/browsers/sodium.js" integrity="sha384-GEJ3DUwTjXaoqVwjTaPCJN0gtk+mbUoJ7/QO/6IKrlO+P7QHrV9497Vy5q+JNp7j" crossorigin="anonymous"></script>
+		<script src="https://cdn.jsdelivr.net/gh/jedisct1/libsodium.js@0.7.13/dist/browsers-sumo/sodium.js" integrity="sha384-xE+e4s598d4A0BKvbnkYaqRYutiZTg3KzqnWK51WA6h0yoCZ3uuV52KsntFIWScg" crossorigin="anonymous"></script>
 		<script src="https://cdn.jsdelivr.net/gh/emp-code/PostVault@7a8b8d4bbb7514841e3276bf0698eb694478261f/Client/PostVault.js" integrity="sha384-DR1t+lFck1ucRYVO7RKkdwTv+Byjc4CVO/2dhGEqvZVE4fAW79oK2YX3t9fSEk1R" crossorigin="anonymous"></script>
-		<script src="https://cdn.jsdelivr.net/gh/emp-code/aem-client@94d668a85f58b088a9861c4c086211e152fa647b/all-ears.js" integrity="sha384-zfKWs6b0T5772o1QM1UCWuLEWSFo+vDvgUWf4MGHe8G40sNeuVu5r0hL10lPB1KR" crossorigin="anonymous"></script>
-		<script src="https://cdn.jsdelivr.net/gh/emp-code/aem-client@94d668a85f58b088a9861c4c086211e152fa647b/modern/main.js" integrity="sha384-3m4Q6UxpXhaWPx2ROsfmflP4fE9K32/SpDrtWg9ZDXYsLXRMi6myna2lzddA1NAt" crossorigin="anonymous"></script>
+		<script src="https://cdn.jsdelivr.net/gh/emp-code/aem-client@b76708b6d2773e7fd6f4ff34aba88e279b401ce1/all-ears.js" integrity="sha384-H9svfCv6s6QX5Jj5lQJEV9RMQe/5rFsJ4a5GP2xaYQACHTIOvOUuiYQ6L9m9DBkw" crossorigin="anonymous"></script>
+		<script src="https://cdn.jsdelivr.net/gh/emp-code/aem-client@b76708b6d2773e7fd6f4ff34aba88e279b401ce1/modern/main.js" integrity="sha384-6bY0bDIeawKPnjGNvWHlVGWXUJgj/fmou80HPT4MsBpcktGEWSXkBNBdkAQII7Sv" crossorigin="anonymous"></script>
 	</body>
 </html>

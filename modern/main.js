@@ -3,11 +3,9 @@
 sodium.ready.then(function() {
 
 let isReady = true;
-let vaultOk = null;
 
-const vault = new PostVault(function(ok) {
-	if (ok) vaultOk = false;
-});
+const vault = null;
+const vaultOk = false;
 
 const ae = new AllEars(function(ok) {
 	if (!ok) {
@@ -27,7 +25,7 @@ const ae = new AllEars(function(ok) {
 		document.getElementById("txt_pg").value = "LocalStorage inaccessible";
 	}
 
-	document.getElementById("txt_skey").maxLength = "64";
+	document.getElementById("txt_umk").maxLength = "43";
 });
 
 function TabState(cur, max, btnDele, btnUpdt) {
@@ -359,8 +357,6 @@ function displayMsg(isHistory, isInt, num) {
 		document.getElementById("readmsg_hdrfrom").replaceChildren(symbol, document.createTextNode(" " + ae.getIntMsgFrom(num)));
 
 		clearMsgFlags();
-		if (!ae.getIntMsgFlagVPad(num)) addMsgFlag("PAD", "Invalid padding");
-		if (!ae.getIntMsgFlagVSig(num)) addMsgFlag("SIG", "Invalid signature");
 		if ( ae.getIntMsgFlagE2ee(num)) addMsgFlag("E2EE", "End-to-end encrypted");
 	} else {
 		const headers = document.createElement("p");
@@ -460,8 +456,6 @@ function displayMsg(isHistory, isInt, num) {
 		}
 
 		clearMsgFlags();
-		if (!ae.getExtMsgFlagVPad(num)) addMsgFlag("PAD", "Invalid padding");
-		if (!ae.getExtMsgFlagVSig(num)) addMsgFlag("SIG", "Invalid signature");
 		if (!ae.getExtMsgFlagPExt(num)) addMsgFlag("SMTP", "The sender did not use the Extended (ESMTP) protocol");
 		if ( ae.getExtMsgFlagRare(num)) addMsgFlag("RARE", "The sender issued unusual command(s)");
 		if ( ae.getExtMsgFlagFail(num)) addMsgFlag("FAIL", "The sender issued invalid command(s)");
@@ -542,8 +536,6 @@ function displayOutMsg(isHistory, num) {
 	}
 
 	clearMsgFlags();
-	if (!ae.getOutMsgFlagVPad(num)) addMsgFlag("PAD", "Invalid padding");
-	if (!ae.getOutMsgFlagVSig(num)) addMsgFlag("SIG", "Invalid signature");
 	if ( ae.getOutMsgFlagE2ee(num)) addMsgFlag("E2EE", "End-to-end encrypted");
 
 	document.getElementById("main2").hidden = false;
@@ -568,14 +560,14 @@ function updateAddressCounts() {
 	document.getElementById("limit_total").textContent = ((ae.getAddressCountNormal() + ae.getAddressCountShield()) + "/" + ae.getAddrPerUser()).padStart(5);
 
 	updateAddressButtons();
-	document.getElementById("getapk_result").textContent = ae.getOwnApk(document.getElementById("getapk_addr").value);
+//	document.getElementById("getapk_result").textContent = ae.getOwnApk(document.getElementById("getapk_addr").value);
 }
 
 function addOwnAccount() {
 	const row = document.getElementById("tbd_accs").insertRow(-1);
 
 	let cell;
-	cell = row.insertCell(-1); cell.textContent = ae.getOwnUpk();
+	cell = row.insertCell(-1); cell.textContent = ae.uidToName(ae.getOwnUid());
 	cell = row.insertCell(-1); cell.textContent = Math.round(ae.getTotalMsgBytes() / 1048576); // MiB
 	cell = row.insertCell(-1); cell.textContent = ae.getAddressCountNormal();
 	cell = row.insertCell(-1); cell.textContent = ae.getAddressCountShield();
@@ -597,7 +589,7 @@ function addOwnAccount() {
 	btn.id = "btn_lowme";
 	btn.onclick = function() {
 		const newLevel = parseInt(row.cells[5].textContent, 10) - 1;
-		ae.Account_Update(ae.getOwnUpk(), newLevel, function(error) {
+		ae.Account_Update(ae.getOwnUid(), newLevel, function(error) {
 			if (error === 0) {
 				row.cells[5].textContent = newLevel;
 				if (newLevel === 0) {document.getElementById("btn_lowme").disabled = true;}
@@ -613,7 +605,7 @@ function addOwnAccount() {
 	btn.disabled = true;
 	btn.id = "btn_delme";
 	btn.onclick = function() {
-		ae.Account_Delete(ae.getOwnUpk(), function(error) {
+		ae.Account_Delete(ae.getOwnUid(), function(error) {
 			if (error === 0) {
 				row.remove();
 				document.getElementById("fs_users").disabled = true;
@@ -623,11 +615,11 @@ function addOwnAccount() {
 	cell.appendChild(btn);
 }
 
-function adjustLevel(pubkey, level, c) {
+function adjustLevel(uid, level, c) {
 	const fs = document.getElementById("tbl_accs");
 	fs.disabled = true;
 
-	ae.Account_Update(pubkey, level, function(error) {
+	ae.Account_Update(uid, level, function(error) {
 		fs.disabled = false;
 
 		if (error === 0) {
@@ -937,7 +929,7 @@ function showFiles() {
 		}
 
 		cell = row.insertCell(-1);
-		if (vaultOk === false) {
+/*		if (vaultOk === false) {
 			cell.textContent = "Open PostVault";
 			cell.onclick = function() {
 				tbl.style.opacity = 0.5;
@@ -952,13 +944,15 @@ function showFiles() {
 				});
 			};
 		}
-	}
+*/	}
 }
 
 function addAccountToTable(i) {
+	if (ae.getOwnUid() === ae.admin_getUserUid(i)) return;
+
 	const row = document.getElementById("tbd_accs").insertRow(-1);
 	let cell;
-	cell = row.insertCell(-1); cell.textContent = ae.admin_getUserUpk(i);
+	cell = row.insertCell(-1); cell.textContent = ae.uidToName(ae.admin_getUserUid(i));
 	cell = row.insertCell(-1); cell.textContent = Math.round(ae.admin_getUserKib(i) / 1024);
 	cell = row.insertCell(-1); cell.textContent = ae.admin_getUserNrm(i);
 	cell = row.insertCell(-1); cell.textContent = ae.admin_getUserShd(i);
@@ -968,7 +962,7 @@ function addAccountToTable(i) {
 	btn.type = "button";
 	btn.textContent = "+";
 	btn.disabled = (ae.admin_getUserLvl(i) === 3);
-	btn.onclick = function() {const c = this.parentElement.parentElement.cells; adjustLevel(c[0].textContent, parseInt(c[5].textContent, 10) + 1, c);};
+	btn.onclick = function() {const c = this.parentElement.parentElement.cells; adjustLevel(ae.admin_getUserUid(i), ae.admin_getUserLvl(i) + 1, c);};
 	cell.appendChild(btn);
 
 	cell = row.insertCell(-1); cell.textContent = ae.admin_getUserLvl(i);
@@ -978,7 +972,7 @@ function addAccountToTable(i) {
 	btn.type = "button";
 	btn.textContent = "−";
 	btn.disabled = (ae.admin_getUserLvl(i) === 0);
-	btn.onclick = function() {const c = this.parentElement.parentElement.cells; adjustLevel(c[0].textContent, parseInt(c[5].textContent, 10) - 1, c);};
+	btn.onclick = function() {const c = this.parentElement.parentElement.cells; adjustLevel(ae.admin_getUserUid(i), ae.admin_getUserLvl(i) - 1, c);};
 	cell.appendChild(btn);
 
 	cell = row.insertCell(-1);
@@ -987,7 +981,7 @@ function addAccountToTable(i) {
 	btn.textContent = "X";
 	btn.onclick = function() {
 		const tr = this.parentElement.parentElement;
-		ae.Account_Delete(tr.cells[0].textContent, function(error) {
+		ae.Account_Delete(ae.admin_getUserUid(i), function(error) {
 			if (error === 0) tr.remove(); else errorDialog(error);
 		});
 	};
@@ -1210,7 +1204,7 @@ function addAddress(num) {
 
 	let cell = row.insertCell(-1);
 	cell.textContent = addr;
-	cell.onclick = function() {navigator.clipboard.writeText(((this.textContent.length === 16) ? ae.shieldMix(this.textContent) : this.textContent) + "@" + ae.getDomainEml());};
+	cell.onclick = function() {navigator.clipboard.writeText(((this.textContent.length === 16) ? ae.shieldMix(this.textContent, 0) : this.textContent) + "@" + ae.getDomainEml());};
 
 	cell = row.insertCell(-1);
 	let el = document.createElement("input");
@@ -1494,25 +1488,32 @@ document.getElementById("btn_address_update").onclick = function() {
 };
 
 
-document.getElementById("txt_reg").onkeyup = function(event) {
+document.getElementById("txt_sender").onkeyup = function(event) {
 	if (event.key !== "Enter") return;
 	event.preventDefault();
-	document.getElementById("btn_reg").click();
+	document.getElementById("btn_sender").click();
 };
 
 document.getElementById("btn_reg").onclick = function() {
 	const btn = document.getElementById("btn_reg");
-	const txt = document.getElementById("txt_reg");
-	if (!txt.reportValidity()) return;
-	btn.disabled = true;
+	const uak = document.getElementById("txt_reg_uak");
+	const epk = document.getElementById("txt_reg_epk");
 
-	ae.Account_Create(txt.value, function(error) {
+	if (!uak.reportValidity() || !epk.reportValidity()) return;
+	btn.disabled = true;
+	uak.disabled = true;
+	epk.disabled = true;
+
+	ae.Account_Create(uak.value, epk.value, function(error) {
 		if (error === 0) {
-			addAccountToTable(ae.admin_getUserNum() - 1);
-			txt.value = "";
+			addAccountToTable(ae.admin_getUserCount() - 1);
+			uak.value = "";
+			epk.value = "";
 		} else errorDialog(error);
 
 		btn.disabled = false;
+		uak.disabled = false;
+		epk.disabled = false;
 	});
 };
 
@@ -1610,6 +1611,7 @@ document.getElementById("btn_upload").onclick = function() {
 					btn.disabled = false;
 				});
 			} else { // No vault access -> upload to All-Ears
+console.log("tf");
 				ae.Message_Upload(fileSelector.files[0].name, new Uint8Array(reader.result), function(error) {
 					if (error === 0) {
 						showFiles();
@@ -1710,7 +1712,7 @@ document.getElementById("btn_limits").onclick = function() {
 	const nrm = [parseInt(document.getElementById("lim_nrm0").value, 10), parseInt(document.getElementById("lim_nrm1").value, 10), parseInt(document.getElementById("lim_nrm2").value, 10), parseInt(document.getElementById("lim_nrm3").value, 10)];
 	const shd = [parseInt(document.getElementById("lim_shd0").value, 10), parseInt(document.getElementById("lim_shd1").value, 10), parseInt(document.getElementById("lim_shd2").value, 10), parseInt(document.getElementById("lim_shd3").value, 10)];
 
-	ae.Setting_Update(mib, nrm, shd, function(error) {
+	ae.Setting_Limits(mib, nrm, shd, function(error) {
 		btn.disabled = false;
 
 		if (error !== 0) {
@@ -1725,46 +1727,40 @@ document.getElementById("getapk_addr").onchange = function() {
 	document.getElementById("getapk_result").textContent = ae.getOwnApk(document.getElementById("getapk_addr").value);
 };
 
-document.getElementById("txt_skey").onfocus = function() {
+document.getElementById("txt_umk").onfocus = function() {
 //	document.getElementById("greeting").textContent = localStorage.greeting;
 };
 
-document.getElementById("txt_skey").onkeyup = function(event) {
+document.getElementById("txt_umk").onkeyup = function(event) {
 	if (event.key !== "Enter") return;
 	event.preventDefault();
 	document.getElementById("btn_enter").click();
 };
 
 document.getElementById("btn_enter").onclick = function() {
-	const txtSkey = document.getElementById("txt_skey");
+	const txtUmk = document.getElementById("txt_umk");
 
-	if (txtSkey.value === "") {
+	if (txtUmk.value === "") {
 		ae.reset();
 		document.getElementById("greeting").textContent = "Data cleared";
 		return;
 	}
 
-	if (!txtSkey.reportValidity()) return;
+	if (!txtUmk.reportValidity()) return;
 
 	const btn = this;
 	btn.disabled = true;
 
-	document.getElementById("txt_skey").disabled = true;
+	document.getElementById("txt_umk").disabled = true;
 
-	ae.setKeys(txtSkey.value, function(successSetKeys) {
+	ae.setKeys(txtUmk.value, function(successSetKeys) {
 		if (!successSetKeys) {
-			document.getElementById("txt_skey").disabled = false;
-			txtSkey.focus();
+			document.getElementById("txt_umk").disabled = false;
+			txtUmk.focus();
 
 			document.getElementById("greeting").textContent = "SetKeys failed";
 			btn.disabled = false;
 			return;
-		}
-
-		if (vaultOk === false) {
-			vault.setKeys(txtSkey.value, function(successPv) {
-				if (!successPv) vaultOk = null;
-			});
 		}
 
 		document.body.style.cursor = "wait";
@@ -1775,13 +1771,13 @@ document.getElementById("btn_enter").onclick = function() {
 
 			if (errorBrowse !== 0 && errorBrowse !== 0x09) {
 				document.getElementById("greeting").textContent = ae.getErrorMessage(errorBrowse) + " (0x" + errorBrowse.toString(16).padStart(2, "0").toUpperCase() + ")";
-				document.getElementById("txt_skey").disabled = false;
+				document.getElementById("txt_umk").disabled = false;
 				btn.disabled = false;
 				btn.focus();
 				return;
 			}
 
-			txtSkey.value = "";
+			txtUmk.value = "";
 			document.getElementById("div_begin").hidden = true;
 			document.getElementById("div_main").hidden = false;
 			isReady = true;
@@ -1794,7 +1790,7 @@ document.getElementById("btn_enter").onclick = function() {
 
 			ae.Account_Browse(function(errorAcc) {
 				if (errorAcc === 0) {
-					for (let i = 0; i < ae.admin_getUserNum(); i++) {addAccountToTable(i);}
+					for (let i = 0; i < ae.admin_getUserCount(); i++) {addAccountToTable(i);}
 					updateLimits();
 				} else {
 					errorDialog(errorAcc);

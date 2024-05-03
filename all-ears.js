@@ -12,44 +12,49 @@ function AllEars(readyCallback) {
 		) return readyCallback(false);
 	} catch(e) {return readyCallback(false);}
 
-	const docDomApi = document.head.querySelector("meta[name='aem.domain.api']").content;
+	const docUrlApi = document.head.querySelector("meta[name='aem.url.api']").content;
 	const docDomEml = document.head.querySelector("meta[name='aem.domain.eml']").content;
-	const docBoxApi = document.head.querySelector("meta[name='aem.key.apibox']").content;
-	const docSigApi = document.head.querySelector("meta[name='aem.key.apisig']").content;
-	const docSigDlv = document.head.querySelector("meta[name='aem.key.dlvsig']").content;
-	const docSltNrm = document.head.querySelector("meta[name='aem.adrslt.nrm']").content;
-	const docSltLim = document.head.querySelector("meta[name='aem.adrslt.lim']").content;
 
-	if (docDomApi !== "" || docDomEml !== "") {
+	if (docDomEml !== "") {
 		const domainRegex = new RegExp(/^[0-9a-z.-]{1,63}\.[0-9a-z-]{2,63}$/);
-		if ((docDomApi !== "" && !domainRegex.test(docDomApi)) || (docDomEml !== "" && !domainRegex.test(docDomEml))) return readyCallback(false);
+		if (docDomEml !== "" && !domainRegex.test(docDomEml)) return readyCallback(false);
 	}
 
-	if (!(
-	   docBoxApi && (new RegExp("^[0-9A-f]{" + (sodium.crypto_box_PUBLICKEYBYTES * 2).toString() + "}$")).test(docBoxApi)
-	&& docSigApi && (new RegExp("^[0-9A-f]{" + (sodium.crypto_sign_PUBLICKEYBYTES * 2).toString() + "}$")).test(docSigApi)
-	&& docSigDlv && (new RegExp("^[0-9A-f]{" + (sodium.crypto_sign_PUBLICKEYBYTES * 2).toString() + "}$")).test(docSigDlv)
-	&& docSltNrm && (new RegExp("^[0-9A-f]{" + (sodium.crypto_pwhash_SALTBYTES * 2).toString() + "}$")).test(docSltNrm)
-	&& docSltLim && (new RegExp("^[0-9];[0-9]+$").test(docSltLim))
-	)) return readyCallback(false);
-
 // Private constants - must match server
+	const _AEM_USERCOUNT = 4096;
+
+	// GET
 	const _AEM_API_ACCOUNT_BROWSE = 0;
-	const _AEM_API_ACCOUNT_CREATE = 1;
-	const _AEM_API_ACCOUNT_DELETE = 2;
-	const _AEM_API_ACCOUNT_UPDATE = 3;
-	const _AEM_API_ADDRESS_CREATE = 4;
-	const _AEM_API_ADDRESS_DELETE = 5;
-	const _AEM_API_ADDRESS_LOOKUP = 6;
-	const _AEM_API_ADDRESS_UPDATE = 7;
-	const _AEM_API_MESSAGE_BROWSE = 8;
-	const _AEM_API_MESSAGE_CREATE = 9;
-	const _AEM_API_MESSAGE_DELETE = 10;
-	const _AEM_API_MESSAGE_PUBLIC = 11;
-	const _AEM_API_MESSAGE_SENDER = 12;
-	const _AEM_API_MESSAGE_UPLOAD = 13;
-	const _AEM_API_PRIVATE_UPDATE = 14;
-	const _AEM_API_SETTING_LIMITS = 15;
+	const _AEM_API_ACCOUNT_DELETE = 1;
+	const _AEM_API_ACCOUNT_UPDATE = 2;
+	const _AEM_API_ADDRESS_CREATE = 3;
+	const _AEM_API_ADDRESS_DELETE = 4;
+	const _AEM_API_ADDRESS_LOOKUP = 5;
+	const _AEM_API_ADDRESS_UPDATE = 6;
+	const _AEM_API_MESSAGE_BROWSE = 7;
+	const _AEM_API_MESSAGE_DELETE = 8;
+	const _AEM_API_MESSAGE_SENDER = 9;
+	const _AEM_API_SETTING_LIMITS = 10;
+	// POST
+	const _AEM_API_ACCOUNT_CREATE = 0;
+	const _AEM_API_MESSAGE_CREATE = 1;
+	const _AEM_API_MESSAGE_PUBLIC = 2;
+	const _AEM_API_MESSAGE_UPLOAD = 3;
+	const _AEM_API_MESSAGE_VERIFY = 4;
+	const _AEM_API_PRIVATE_UPDATE = 5;
+
+	const _AEM_UAK_TYPE_URL_AUTH  = 0;
+	const _AEM_UAK_TYPE_URL_DATA = 32;
+	const _AEM_UAK_TYPE_REQ_BODY = 64;
+	const _AEM_UAK_TYPE_RES_BODY = 96;
+	const _AEM_UAK_POST = 128;
+
+	const _AEM_KDF_KEYID_UMK_UAK = new Uint8Array([0x01,0,0,0,0,0,0,0]);
+	const _AEM_KDF_KEYID_UMK_ESK = new Uint8Array([0x02,0,0,0,0,0,0,0]);
+	const _AEM_KDF_KEYID_UMK_EHK = new Uint8Array([0x03,0,0,0,0,0,0,0]);
+	const _AEM_KDF_KEYID_UMK_PFK = new Uint8Array([0x04,0,0,0,0,0,0,0]);
+	const _AEM_KDF_KEYID_UAK_UID = new Uint8Array([0x10,0,0,0,0,0,0,0]);
+	const _AEM_KDF_KEYID_UAK_EAK = new Uint8Array([0x11,0,0,0,0,0,0,0]);
 
 	const _AEM_ADDR_FLAG_SHIELD = 128;
 	// 64 unused
@@ -61,25 +66,20 @@ function AllEars(readyCallback) {
 	const _AEM_ADDR_FLAG_ACCINT =   1;
 	const _AEM_ADDR_FLAGS_DEFAULT = (_AEM_ADDR_FLAG_ACCEXT | _AEM_ADDR_FLAG_ALLVER | _AEM_ADDR_FLAG_ATTACH);
 
-	const _AEM_FLAG_UINFO = 2;
 	const _AEM_FLAG_NEWER = 1;
+	const _AEM_FLAG_UINFO = 2;
 
 	const _AEM_ADDR32_CHARS = "0123456789abcdefghjkmnpqrstuwxyz";
 	const _AEM_ADDRESSES_PER_USER = 31;
-	const _AEM_LEN_PRIVATE = 4096 - sodium.crypto_box_PUBLICKEYBYTES - 1 - (_AEM_ADDRESSES_PER_USER * 9);
+	const _AEM_LEN_PRIVATE = 4523;
 	const _AEM_MSG_MINBLOCKS = 12;
 	const _AEM_MSG_MINSIZE = _AEM_MSG_MINBLOCKS * 16;
 	const _AEM_API_BOX_SIZE_MAX = 1048635; // (((2^16 - 1) + 12) * 16) - 117
 	const _AEM_USER_MAXLEVEL = 3;
+	const _X25519_PKBYTES = 32;
 
-	const _AEM_DOMAIN_API = docDomApi? docDomApi : document.domain;
+	const _AEM_APIURL = docUrlApi? docUrlApi : "https://" + document.domain + ":302";
 	const _AEM_DOMAIN_EML = docDomEml? docDomEml : document.domain;
-	const _AEM_API_BOXKEY = sodium.from_hex(docBoxApi);
-	const _AEM_API_SIGKEY = sodium.from_hex(docSigApi);
-	const _AEM_DLV_SIGKEY = sodium.from_hex(docSigDlv);
-	const _AEM_SALT_NORMAL = sodium.from_hex(docSltNrm);
-	const _AEM_OLIM_NORMAL = parseInt(docSltLim.substr(0,1));
-	const _AEM_MLIM_NORMAL = parseInt(docSltLim.substr(2));
 
 	const _AEM_EMAIL_CERT_MATCH_HDRFR = 96;
 	const _AEM_EMAIL_CERT_MATCH_ENVFR = 64;
@@ -94,16 +94,25 @@ function AllEars(readyCallback) {
 	const _AEM_EMAIL_CERT_RSA1K =  4;
 
 // Private variables
+	let _addrNormal_salt;
+	let _addrNormal_olim;
+	let _addrNormal_mlim;
+
 	const _maxStorage = [];
 	const _maxNormalA = [];
 	const _maxShieldA = [];
 
-	// Secrets: Only for internal use by this library
-	let __SECRET_own_usk; // USK (User Secret Key)
-	let __SECRET_own_kxHash; // For E2EE IntMsg
-	let __SECRET_own_symmetric; // Key used for client-side encryption: the private data field, uploaded files, etc
+	// User keys shared with the Server
+	let _own_uak; // User Access Key
+	let _own_eak; // Envelope Access Key
 
-	// Non-secret user data
+	// Private user keys
+	let _own_esk; // Envelope Secret Key
+	let _own_ehk; // Envelope Hidden Key
+	let _own_pfk; // Private Field Key
+
+	// Other user data
+	let _own_uid = 0;
 	let _own_upk = 0;
 	let _own_level = 0;
 	const _own_addr = [];
@@ -124,7 +133,7 @@ function AllEars(readyCallback) {
 	const _contactNote = [];
 	let _privateExtra = "";
 
-	const _admin_userUpk = [];
+	const _admin_userUid = [];
 	const _admin_userKib = [];
 	const _admin_userNrm = [];
 	const _admin_userShd = [];
@@ -143,9 +152,7 @@ function AllEars(readyCallback) {
 		this.sgnTo = [];
 	}
 
-	function _ExtMsg(validPad, validSig, id, ts, hdrTs, hdrTz, ip, cc, cs, tls, esmtp, protV, inval, rares, attach, greetDomainIp, ipBlacklisted, dkimFail, dkim, greet, rdns, auSys, envFrom, hdrFrom, dnFrom, envTo, hdrTo, dnTo, hdrRt, dnRt, hdrId, headers, subj, body) {
-		this.validPad = validPad;
-		this.validSig = validSig;
+	function _ExtMsg(id, ts, hdrTs, hdrTz, ip, cc, cs, tls, esmtp, protV, inval, rares, attach, greetDomainIp, ipBlacklisted, dkimFail, dkim, greet, rdns, auSys, envFrom, hdrFrom, dnFrom, envTo, hdrTo, dnTo, hdrRt, dnRt, hdrId, headers, subj, body) {
 		this.id = id;
 		this.ts = ts;
 		this.hdrTs = hdrTs;
@@ -180,9 +187,7 @@ function AllEars(readyCallback) {
 		this.body = body;
 	}
 
-	function _IntMsg(validPad, validSig, id, ts, isE2ee, fromLv, apk, from, to, title, body) {
-		this.validPad = validPad;
-		this.validSig = validSig;
+	function _IntMsg(id, ts, isE2ee, fromLv, apk, from, to, title, body) {
 		this.id = id;
 		this.ts = ts;
 		this.isE2ee = isE2ee;
@@ -194,10 +199,8 @@ function AllEars(readyCallback) {
 		this.body = body;
 	}
 
-	function _OutMsg_Ext(validPad, validSig, id, ts, ip, cc, to, from, subj, body, mxDom, greet, tlsCs, tlsVer, attach) {
+	function _OutMsg_Ext(id, ts, ip, cc, to, from, subj, body, mxDom, greet, tlsCs, tlsVer, attach) {
 		this.isInt = false;
-		this.validPad = validPad;
-		this.validSig = validSig;
 		this.id = id;
 		this.ts = ts;
 		this.ip = ip;
@@ -213,10 +216,8 @@ function AllEars(readyCallback) {
 		this.attach = attach;
 	}
 
-	function _OutMsg_Int(validPad, validSig, id, ts, isE2ee, to, from, subj, body) {
+	function _OutMsg_Int(id, ts, isE2ee, to, from, subj, body) {
 		this.isInt = true;
-		this.validPad = validPad;
-		this.validSig = validSig;
 		this.id = id;
 		this.ts = ts;
 		this.isE2ee = isE2ee;
@@ -241,75 +242,96 @@ function AllEars(readyCallback) {
 		this.flags = flags;
 	}
 
-	const _fetchBinary = function(postData, callback) {
-		fetch((_AEM_DOMAIN_API.endsWith(".onion") ? "http://" : "https://") + _AEM_DOMAIN_API + ":302/api", {
-			method: "POST",
-			cache: "no-store",
-			credentials: "omit",
-			headers: new Headers({
-				"Accept": "",
-				"Accept-Language": ""
-			}),
-			mode: "cors",
-			redirect: "error",
-			referrer: "",
-			referrerPolicy: "no-referrer",
-			body: postData
-		}).then(function(response) {
-			switch ((response.statusText === "aem") ? response.status : -1) {
-				case 200: return response.arrayBuffer();
-				case 400: callback(0x16); return null;
-				case 403: callback(0x17); return null;
-				case 499: callback(0x18); return null;
-				case 500: callback(0x19); return null;
-				default:  callback(0x20); return null;
-			}
-		}).then(function(ab) {
-			if (ab) callback(0, new Uint8Array(ab));
-		}).catch(() => {
-			callback(0x03);
-		});
+	const _getBinTs = function() {
+		const ts = BigInt(Date.now());
+
+		return new Uint8Array([
+			Number(ts & 255n),
+			Number((ts >> 8n) & 255n),
+			Number((ts >> 16n) & 255n),
+			Number((ts >> 24n) & 255n),
+			Number((ts >> 32n) & 255n)
+		]);
+	}
+
+	const _aem_kdf = function(size, nonce, key) {
+		return sodium.crypto_stream_chacha20(size, key, nonce);
+	}
+
+	const _uak_derive = function(binTs, post, type) {
+		const nonce = new Uint8Array(8);
+		nonce.set(binTs);
+		nonce[5] = (post? _AEM_UAK_POST : 0) | type;
+
+		return _aem_kdf(32, nonce, _own_uak);
+	}
+
+	const _fetchBinary = async function(urlBase, postData, callback) {
+		let r;
+		try {
+			r = await fetch(_AEM_APIURL + "/" + sodium.to_base64(urlBase, sodium.base64_variants.URLSAFE), {
+				method: postData? "POST" : "GET",
+				credentials: "omit",
+				headers: new Headers({
+					"Accept": "",
+					"Accept-Language": ""
+				}),
+				mode: "cors",
+				redirect: "error",
+				referrer: "",
+				referrerPolicy: "no-referrer",
+				body: (typeof(postData) === "object") ? postData : null
+			});
+		} catch(e) {callback(0x02);}
+
+		callback(r? ((r.status === 200) ? new Uint8Array(await r.arrayBuffer()) : r.status) : 0x02);
 	};
 
-	const _fetchEncrypted = function(apiCmd, clearU8, callback) {
-		if (typeof(apiCmd) !== "number" || apiCmd < 0 || apiCmd > 255 || typeof(clearU8) !== "object" || clearU8.length > _AEM_API_BOX_SIZE_MAX) {
-			callback(0x04);
-			return;
+	const _fetchEncrypted = async function(cmd, urlData, postData, callback) {
+		await new Promise(resolve => setTimeout(resolve, 1)); // Ensure requests are never made within the same millisecond
+
+		// Create one-use keys
+		const binTs = _getBinTs();
+		const auth_key = _uak_derive(binTs, postData? true:false, _AEM_UAK_TYPE_URL_AUTH);
+		const data_key = _uak_derive(binTs, postData? true:false, _AEM_UAK_TYPE_URL_DATA);
+
+		// Create URL Base
+		const urlBase = new Uint8Array(48);
+		urlBase.set(binTs);
+		urlBase[5] = _own_uid & 255; // First 8 bits of UID
+		urlBase[6] = (_own_uid >> 8) | ((cmd ^ (data_key[0] & 15)) << 4); // Last 4 bits of UID; Encrypted: CMD
+		urlBase[7] = data_key[1] // Flags, currently unused
+
+		for (let i = 0; i < 24; i++) {
+			if (i < urlData.length) {
+				urlBase[8 + i] = urlData[i] ^ data_key[2 + i];
+			} else {
+				urlBase[8 + i] = data_key[2 + i];
+			}
 		}
 
-		// postBox: clearU8 encrypted
-		const nonce = new Uint8Array(sodium.crypto_box_NONCEBYTES);
-		window.crypto.getRandomValues(nonce);
-		nonce.set(new Uint8Array(new Uint32Array([Math.round(Date.now() / 1000)]).buffer));
+		urlBase.set(sodium.crypto_onetimeauth(urlBase.slice(5, 32), auth_key), 32);
 
-		const postBox = sodium.crypto_box_easy(clearU8, nonce, _AEM_API_BOXKEY, __SECRET_own_usk);
+		let post = null;
+		if (postData && (typeof(postData) === "object")) {
+			post = postData;
+			// TODO
+		}
 
-		// sealBox: apiCmd + UPK + Nonce for postBox
-		const sealClear = new Uint8Array(1 + sodium.crypto_box_PUBLICKEYBYTES + sodium.crypto_box_NONCEBYTES);
-		sealClear[0] = apiCmd;
-		sealClear.set(nonce, 1);
-		sealClear.set(_own_upk, 1 + sodium.crypto_box_NONCEBYTES);
-		const sealBox = sodium.crypto_box_seal(sealClear, _AEM_API_BOXKEY);
+		_fetchBinary(urlBase, post, async function(result) {
+			if (typeof(result) === "number") {callback(result); return;}
 
-		// postMsg: sealBox + postBox
-		const postMsg = new Uint8Array(sealBox.length + postBox.length);
-		postMsg.set(sealBox);
-		postMsg.set(postBox, sealBox.length);
+			let dec;
+			try {
+				dec = await window.crypto.subtle.decrypt(
+					{name: "AES-GCM", iv: new Uint8Array(12)},
+					await window.crypto.subtle.importKey("raw", _uak_derive(binTs, postData? true:false, _AEM_UAK_TYPE_RES_BODY), {"name": "AES-GCM"}, false, ["decrypt"]),
+					result);
+			} catch(e) {callback(0x04);}
 
-		_fetchBinary(postMsg, function(ret, encData) {
-			if (ret !== 0) {callback(ret); return;}
-
-			let decData;
-			try {decData = sodium.crypto_box_open_easy(encData.slice(sodium.crypto_box_NONCEBYTES), encData.slice(0, sodium.crypto_box_NONCEBYTES), _AEM_API_BOXKEY, __SECRET_own_usk);}
-			catch(e) {callback(0x05); return;}
-
-			if (decData.length > 33) {callback(0, decData); return;} // Long response
-			if (decData.length !== 33) {callback(0x06, decData); return;}
-
-			// Short response
-			if (decData[0] > 32) callback(decData[0]); // Error
-			else if (decData[0] === 0) callback(0, null); // No-content ok
-			else callback(0, decData.slice(1, 1 + decData[0]));
+			let u8 = new Uint8Array(dec);
+			u8 = u8.slice(1, u8.length - u8[0]);
+			callback(u8);
 		});
 	};
 
@@ -902,6 +924,7 @@ function AllEars(readyCallback) {
 	const _parseUinfo = function(browseData) {
 		_own_level = browseData[0] & 3;
 
+		// TODO empty arrays
 		for (let i = 0; i < 4; i++) {
 			if (i === _own_level) {
 				_maxStorage.push(browseData[1]);
@@ -917,36 +940,33 @@ function AllEars(readyCallback) {
 
 		// Addresses
 		let offset = 4;
-		for (let i = 0; i < (browseData[0] >> 3); i++) {
+		for (let i = 0; i < (browseData[0] >> 2); i++) {
 			const hash = browseData.slice(offset, offset + 8);
 			_own_addr.push(new _Address(hash, null, browseData[offset + 8]));
 			offset += 9;
 		}
 
 		// Private field
-		const privNonce = browseData.slice(offset, offset + sodium.crypto_secretbox_NONCEBYTES);
-		const privData_enc = browseData.slice(offset + sodium.crypto_secretbox_NONCEBYTES, offset + _AEM_LEN_PRIVATE);
-
-		let privData = "0";
-		privData_enc.forEach(function(n) {
-			if (n !== 0) {
-				privData = null;
-				return;
-			}
-		});
-
-		if (privData === "0") return offset + _AEM_LEN_PRIVATE; // All zeroes = newly created, no data
-
-		try {privData = sodium.crypto_secretbox_open_easy(privData_enc, privNonce, __SECRET_own_symmetric);}
-		catch(e) {return -(offset + _AEM_LEN_PRIVATE);}
-
+		if (sodium.is_zero(browseData.slice(offset, offset + _AEM_LEN_PRIVATE))) return offset + _AEM_LEN_PRIVATE; // Private data field not set
+		const pd = sodium.crypto_stream_chacha20_xor(
+			browseData.slice(offset + sodium.crypto_stream_chacha20_NONCEBYTES, offset + _AEM_LEN_PRIVATE - sodium.crypto_stream_chacha20_NONCEBYTES),
+			browseData.slice(offset, offset + sodium.crypto_stream_chacha20_NONCEBYTES),
+			_own_pfk
+		);
 		offset += _AEM_LEN_PRIVATE;
 
+		_addrNormal_salt = browseData.slice(offset, offset + sodium.crypto_pwhash_SALTBYTES);
+		offset += sodium.crypto_pwhash_SALTBYTES;
+		_addrNormal_olim = browseData[offset];
+		offset++;
+		_addrNormal_mlim = new Uint32Array(browseData.slice(offset, offset + 4).buffer)[0];
+		offset += 4;
+
 		// Private - Address data
-		for (let i = 0; i < privData[0]; i++) {
+		for (let i = 0; i < pd[0]; i++) {
 			const start = 1 + (i * 18);
-			const hash = privData.slice(start, start + 8);
-			const addr32 = privData.slice(start + 8, start + 18);
+			const hash = pd.slice(start, start + 8);
+			const addr32 = pd.slice(start + 8, start + 18);
 
 			for (let j = 0; j < _own_addr.length; j++) {
 				let wasFound = true;
@@ -966,38 +986,38 @@ function AllEars(readyCallback) {
 		}
 
 		// Private - Contacts
-		let privOffset = 1 + (privData[0] * 18);
-		const contactCount = privData[privOffset];
+		let privOffset = 1 + (pd[0] * 18);
+		const contactCount = pd[privOffset];
 		privOffset++;
 
 		for (let i = 0; i < contactCount; i++) {
-			let con = privData.slice(privOffset);
+			let con = pd.slice(privOffset);
 			let end = con.indexOf(10); // 10=LF
 			if (end === -1) break;
-			_contactMail[i] = sodium.to_string(con.slice(0, end));
+			try {_contactMail[i] = sodium.to_string(con.slice(0, end));} catch(e) {}
 			privOffset += end + 1;
 
-			con = privData.slice(privOffset);
+			con = pd.slice(privOffset);
 			end = con.indexOf(10);
 			if (end === -1) break;
-			_contactName[i] = sodium.to_string(con.slice(0, end));
+			try {_contactName[i] = sodium.to_string(con.slice(0, end));} catch(e) {}
 			privOffset += end + 1;
 
-			con = privData.slice(privOffset);
+			con = pd.slice(privOffset);
 			end = con.indexOf(10);
 			if (end === -1) break;
-			_contactNote[i] = sodium.to_string(con.slice(0, end));
+			try {_contactNote[i] = sodium.to_string(con.slice(0, end));} catch(e) {}
 			privOffset += end + 1;
 		}
 
-		const extra = privData.slice(privOffset);
+		const extra = pd.slice(privOffset);
 		const zeroIndex = extra.indexOf(0);
-		_privateExtra = sodium.to_string((zeroIndex === -1) ? extra : extra.slice(0, zeroIndex));
+		try {_privateExtra = sodium.to_string((zeroIndex === -1) ? extra : extra.slice(0, zeroIndex));} catch(e) {}
 
 		return offset;
 	};
 
-	const _addOutMsg = function(msgData, validPad, validSig, msgId, msgTs, msgTs_bin, newest) {
+	const _addOutMsg = function(msgData, msgId, msgTs, msgTs_bin, newest) {
 		const lenSb = msgData[0] & 127;
 
 		let newMsg;
@@ -1021,9 +1041,13 @@ function AllEars(readyCallback) {
 			const msgMx = sodium.to_string(msgData.slice(os, os + lenMx)); os += lenMx;
 			const msgGr = sodium.to_string(msgData.slice(os, os + lenGr)); os += lenGr;
 			const msgSb = sodium.to_string(msgData.slice(os, os + lenSb)); os += lenSb;
-			const msgBd = sodium.to_string(msgData.slice(os));
+			try {
+				msgBd = sodium.to_string(msgData.slice(os));
+			} catch(e) {
+				msgBd = "(error)";
+			}
 
-			newMsg = new _OutMsg_Ext(validPad, validSig, msgId, msgTs, msgIp, msgCc, msgTo, msgFr, msgSb, msgBd, msgMx, msgGr, msgCs, msgTlsVer, msgAttach);
+			newMsg = new _OutMsg_Ext(msgId, msgTs, msgIp, msgCc, msgTo, msgFr, msgSb, msgBd, msgMx, msgGr, msgCs, msgTlsVer, msgAttach);
 		} else { // Internal message
 			const isE2ee       = (msgData[1] & 64) !== 0;
 			const isFromShield = (msgData[1] &  8) !== 0;
@@ -1034,18 +1058,7 @@ function AllEars(readyCallback) {
 
 			let msgBin;
 			if (isE2ee) {
-				const nonce = new Uint8Array(sodium.crypto_secretbox_NONCEBYTES);
-				nonce.fill(0);
-				nonce.set(msgTs_bin);
-
-				const addr32_from = msgData.slice(2, 12);
-				const recv_pubkey = msgData.slice(22, 22 + sodium.crypto_kx_PUBLICKEYBYTES);
-
-				const kxKeys = sodium.crypto_kx_seed_keypair(sodium.crypto_generichash(sodium.crypto_kx_SEEDBYTES, addr32_from, __SECRET_own_kxHash));
-				const sessionKeys = sodium.crypto_kx_client_session_keys(kxKeys.publicKey, kxKeys.privateKey, recv_pubkey);
-
-				msgBin = msgData.slice(22 + sodium.crypto_kx_PUBLICKEYBYTES);
-				msgBin = sodium.crypto_secretbox_open_easy(msgBin, nonce, sessionKeys.sharedTx);
+				// TODO
 			} else {
 				msgBin = msgData.slice(22);
 			}
@@ -1070,7 +1083,7 @@ function AllEars(readyCallback) {
 				}
 			}
 
-			newMsg = new _OutMsg_Int(validPad, validSig, msgId, msgTs, isE2ee, msgTo, msgFr, msgSb, msgBd);
+			newMsg = new _OutMsg_Int(msgId, msgTs, isE2ee, msgTo, msgFr, msgSb, msgBd);
 		}
 
 		if (newest) {
@@ -1106,7 +1119,7 @@ function AllEars(readyCallback) {
 				linkDomain = ((domainEnd === -1) ? url : url.slice(0, domainEnd)).toLowerCase();
 			}
 
-			body = body.slice(0, begin) + "<a rel=\"noopener\" href=\"http" + (isSecure? "s://" : "://") + url + "\">" + linkIcon + "&NoBreak;" + (fullUrl? url : linkDomain) + "</a> " + body.slice(begin + end + 2);
+			body = body.slice(0, begin) + "<a rel=\"noopener\" href=\"http" + (isSecure? "s://" : "://") + url + "\">" + linkIcon + "&NoBreak;" + (fullUrl? url : linkDomain) + "</a>" + body.slice(begin + end + 2);
 		}
 
 		return body;
@@ -1178,23 +1191,17 @@ function AllEars(readyCallback) {
 		return textBody.replaceAll(/[\x05-\x09\x0c-\x15\x18-\x1c]/g, "").replaceAll(/[\x1d\x1e\x1f]/g, "\n").replaceAll("\x0B", "---\n---").replaceAll("\x16", "*").replaceAll("\x17", "_");
 	};
 
-	const _addMessage = function(msgData, msgSize, msgId) {
+	const _addMessage = function(msgData, msgId) {
 		const msgInfo = msgData[0];
 		const padAmount = msgInfo & 15;
 
-		const padA = msgData.slice(msgData.length - sodium.crypto_sign_BYTES - padAmount, msgData.length - sodium.crypto_sign_BYTES);
-		const padB = sodium.randombytes_buf_deterministic(padAmount, msgData.slice(0, 32), null); // 32=sodium.randombytes_SEEDBYTES
-		const validPad = (padA && padB && padA.length === padB.length && _arraysEqual(padA, padB));
-		const validSig = sodium.crypto_sign_verify_detached(msgData.slice(msgData.length - sodium.crypto_sign_BYTES), msgData.slice(0, msgData.length - sodium.crypto_sign_BYTES), ((msgInfo & 48) == 0) ? _AEM_DLV_SIGKEY : _AEM_API_SIGKEY);
-
-		const msgTs_bin = msgData.slice(1, 5);
-		const msgTs = new Uint32Array(msgTs_bin.buffer)[0];
+		const msgTs = new Uint32Array(msgData.slice(1, 5).buffer)[0];
 		if (msgTs > _newestMsgTs) {
 			_newestMsgId = msgId;
 			_newestMsgTs = msgTs;
 		}
 
-		msgData = msgData.slice(5, msgData.length - padAmount - sodium.crypto_sign_BYTES);
+		msgData = msgData.slice(5, msgData.length - padAmount);
 
 		switch (msgInfo & 48) {
 			case 0: { // ExtMsg
@@ -1291,9 +1298,9 @@ function AllEars(readyCallback) {
 					const msgHeaders = (headersEnd > 0) ? body.slice(0, headersEnd) : "";
 					const msgBody = body.slice(headersEnd + 1);
 
-					_extMsg.push(new _ExtMsg(validPad, validSig, msgId, msgTs, msgHdrTs, msgHdrTz, msgIp, msgCc, msgCs, msgTls, msgEsmtp, msgProtV, msgInval, msgRares, msgAttach, msgGrDom, msgIpBlk, dkimFail, msgDkim, msgGreet, msgRvDns, msgAuSys, msgEnvFr, msgHdrFr, msgDnFr, msgEnvTo, msgHdrTo, msgDnTo, msgRplTo, msgDnRt, msgMsgId, msgHeaders, msgSbjct, msgBody));
+					_extMsg.push(new _ExtMsg(msgId, msgTs, msgHdrTs, msgHdrTz, msgIp, msgCc, msgCs, msgTls, msgEsmtp, msgProtV, msgInval, msgRares, msgAttach, msgGrDom, msgIpBlk, dkimFail, msgDkim, msgGreet, msgRvDns, msgAuSys, msgEnvFr, msgHdrFr, msgDnFr, msgEnvTo, msgHdrTo, msgDnTo, msgRplTo, msgDnRt, msgMsgId, msgHeaders, msgSbjct, msgBody));
 				} catch(e) {
-					_extMsg.push(new _ExtMsg(validPad, validSig, msgId, msgTs, msgHdrTs, msgHdrTz, msgIp, msgCc, msgCs, msgTls, msgEsmtp, msgProtV, msgInval, msgRares, msgAttach, msgGrDom, msgIpBlk, dkimFail, null, "", "", "", "", "", "", "", "", "", "", "", "", "", "Failed decompression", "Size: " + msgData.length));
+					_extMsg.push(new _ExtMsg(msgId, msgTs, msgHdrTs, msgHdrTz, msgIp, msgCc, msgCs, msgTls, msgEsmtp, msgProtV, msgInval, msgRares, msgAttach, msgGrDom, msgIpBlk, dkimFail, null, "", "", "", "", "", "", "", "", "", "", "", "", "", "Failed decompression", "Size: " + msgData.length));
 				}
 			break;}
 
@@ -1303,86 +1310,69 @@ function AllEars(readyCallback) {
 				if (msgType >= 128) { // 192: System, 128: Public
 					// 32/16/8/4/2/1 unused
 
-					const bodyAndTitle = sodium.to_string(msgData.slice(1));
+					let bodyAndTitle;
+					try {
+						bodyAndTitle = sodium.to_string(msgData.slice(1));
+					} catch(e) {bodyAndTitle = "(error)\nError decoding message: " + e;}
+
 					const separator = bodyAndTitle.indexOf("\n");
-					_intMsg.push(new _IntMsg(validPad, validSig, msgId, msgTs, false, 3, null, (msgType === 192) ? "system" : "public", "", bodyAndTitle.slice(0, separator), bodyAndTitle.slice(separator + 1)));
+					_intMsg.push(new _IntMsg(msgId, msgTs, false, 3, null, (msgType === 192) ? "system" : "public", "", bodyAndTitle.slice(0, separator), bodyAndTitle.slice(separator + 1)));
 					break;
 				}
 
-				// User-to-user message; 64: E2EE, 0: Non-E2EE
-				// 32/16 unused
-				const msgEncrypted  = (msgData[0] & 64) !== 0;
 				const msgFromShield = (msgData[0] &  8) !== 0;
 				const msgToShield   = (msgData[0] &  4) !== 0;
 				const msgFromLv = msgData[0] & 3;
 
 				const msgFrom = _addr32_decode(msgData.slice( 1, 11), msgFromShield);
 				const msgTo   = _addr32_decode(msgData.slice(11, 21), msgToShield);
-				const msgApk  = msgData.slice(21, 21 + sodium.crypto_kx_PUBLICKEYBYTES);
+//				const msgApk  = msgData.slice(21, 21 + 32);
 
-				const msgTitleLen = msgData[21 + sodium.crypto_kx_PUBLICKEYBYTES] & 127; // 128 unused
-				const msgBox = msgData.slice(22 + sodium.crypto_kx_PUBLICKEYBYTES);
-
-				let msgBin;
-				let msgTitle;
-				let msgBody;
-
+				const msgBin = msgData.slice(21 + 32);
+				let msgTxt;
 				try {
-					if (msgEncrypted) {
-						const nonce = new Uint8Array(sodium.crypto_secretbox_NONCEBYTES);
-						nonce.fill(0);
-						nonce.set(msgTs_bin);
+					msgTxt = sodium.to_string(msgBin);
+				} catch(e) {msgTxt = "(error)\nError decoding message: " + e}
 
-						const addr32_to = msgData.slice(11, 21);
+				const sep = msgTxt.indexOf('\n');
+				const msgSubj = msgTxt.slice(0, sep);
+				const msgBody = msgTxt.slice(sep);
 
-						const kxKeys = sodium.crypto_kx_seed_keypair(sodium.crypto_generichash(sodium.crypto_kx_SEEDBYTES, addr32_to, __SECRET_own_kxHash));
-						const sessionKeys = sodium.crypto_kx_server_session_keys(kxKeys.publicKey, kxKeys.privateKey, msgApk);
-						msgBin = sodium.crypto_secretbox_open_easy(msgBox, nonce, sessionKeys.sharedRx);
-					} else {
-						msgBin = msgBox;
-					}
-
-					msgTitle = sodium.to_string(msgBin.slice(0, msgTitleLen));
-					msgBody = sodium.to_string(msgBin.slice(msgTitleLen));
-				} catch(e) {
-					msgTitle = "(error)";
-					msgBody = e.message;
-				}
-
-				_intMsg.push(new _IntMsg(validPad, validSig, msgId, msgTs, msgEncrypted, msgFromLv, msgApk, msgFrom, msgTo, msgTitle, msgBody));
+				_intMsg.push(new _IntMsg(msgId, msgTs, false, msgFromLv, null, msgFrom, msgTo, msgSubj, msgBody));
 			break;}
 
 			case 32: { // UplMsg (Email attachment, or uploaded file)
-				let msgTitle;
+				let msgFn;
 				let msgBody;
 				let msgParent = null;
 
-				try {
-					// Uploaded file, additional symmetric encryption
-					const dec = sodium.crypto_secretbox_open_easy(msgData.slice(sodium.crypto_secretbox_NONCEBYTES), msgData.slice(0, sodium.crypto_secretbox_NONCEBYTES), __SECRET_own_symmetric);
-					msgTitle = sodium.to_string(dec.slice(1, 2 + dec[0]));
-					msgBody = dec.slice(2 + dec[0]);
-				} catch(e) {
+				if ((msgData[0] & 128) !== 0) {
 					// Email attachment, no additional encryption
 					msgParent = msgData.slice(1, 17);
-					msgTitle = sodium.to_string(msgData.slice(17, 18 + msgData[0])); // +1
-					msgBody = msgData.slice(18 + msgData[0]);
+					msgFn = sodium.to_string(msgData.slice(17, 18 + (msgData[0] & 127)));
+					msgBody = msgData.slice(18 + (msgData[0] & 127));
+				} else {
+					// Uploaded file
+					try {
+						msgFn = sodium.to_string(msgData.slice(1, 2 + (msgData[0])));
+					} catch(e) {msgFn = "error";}
+					msgBody = msgData.slice(2 + msgData[0]);
 				}
 
-				if (msgTitle.endsWith(".br")) {
+				if (msgFn.endsWith(".br")) {
 					try {
 						msgBody = new Uint8Array(window.BrotliDecode(new Int8Array(msgBody)));
-						msgTitle = msgTitle.replace(/\.br$/, "");
+						msgFn = msgTitle.replace(/\.br$/, "");
 					} catch(e) {
 						msgBody = "Failed decompression";
 					}
 				}
 
-				_uplMsg.push(new _UplMsg(msgId, msgTs, msgTitle, msgBody, msgParent, msgSize / 16));
+				_uplMsg.push(new _UplMsg(msgId, msgTs, msgFn, msgBody, msgParent, msgBody.length / 16));
 			break;}
 
 			case 48: // OutMsg (Delivery report for sent message)
-				_addOutMsg(msgData, validPad, validSig, msgId, msgTs, msgTs_bin, false);
+				_addOutMsg(msgData, msgId, msgTs, msgTs_bin, false);
 			break;
 		}
 
@@ -1406,7 +1396,7 @@ function AllEars(readyCallback) {
 		_contactName.splice(0);
 		_contactNote.splice(0);
 
-		_admin_userUpk.splice(0);
+		_admin_userUid.splice(0);
 		_admin_userKib.splice(0);
 		_admin_userNrm.splice(0);
 		_admin_userShd.splice(0);
@@ -1451,8 +1441,9 @@ function AllEars(readyCallback) {
 	this.getAddressCountNormal = function() {return _getAddressCount(false);};
 	this.getAddressCountShield = function() {return _getAddressCount(true);};
 
+	this.uidToName = function(uid) {return String.fromCharCode(97 + (uid & 15)) + String.fromCharCode(97 + ((uid >> 4) & 15)) + String.fromCharCode(97 + ((uid >> 8) & 15));};
 	this.isUserAdmin = function() {return (_own_level === _AEM_USER_MAXLEVEL);};
-	this.getOwnUpk = function() {return sodium.to_hex(_own_upk);};
+	this.getOwnUid = function() {return _own_uid;};
 	this.getOwnLevel = function() {return _own_level;};
 	this.getLimitStorage = function(lvl) {if(typeof(lvl)!=="number"){return;} return _maxStorage[lvl];};
 	this.getLimitNormalA = function(lvl) {if(typeof(lvl)!=="number"){return;} return _maxNormalA[lvl];};
@@ -1507,8 +1498,6 @@ function AllEars(readyCallback) {
 		return _htmlCetTags(html);
 	};
 
-	this.getExtMsgFlagVPad = function(num) {if(typeof(num)!=="number"){return;} return _extMsg[num].validPad;};
-	this.getExtMsgFlagVSig = function(num) {if(typeof(num)!=="number"){return;} return _extMsg[num].validSig;};
 	this.getExtMsgFlagPExt = function(num) {if(typeof(num)!=="number"){return;} return _extMsg[num].esmtp;};
 	this.getExtMsgFlagRare = function(num) {if(typeof(num)!=="number"){return;} return _extMsg[num].rares;};
 	this.getExtMsgFlagFail = function(num) {if(typeof(num)!=="number"){return;} return _extMsg[num].inval;};
@@ -1673,8 +1662,6 @@ function AllEars(readyCallback) {
 	this.getIntMsgTitle  = function(num) {if(typeof(num)!=="number"){return;} return _intMsg[num].title;};
 	this.getIntMsgBody   = function(num) {if(typeof(num)!=="number"){return;} return _intMsg[num].body;};
 
-	this.getIntMsgFlagVPad = function(num) {if(typeof(num)!=="number"){return;} return _intMsg[num].validPad;};
-	this.getIntMsgFlagVSig = function(num) {if(typeof(num)!=="number"){return;} return _intMsg[num].validSig;};
 	this.getIntMsgFlagE2ee = function(num) {if(typeof(num)!=="number"){return;} return _intMsg[num].isE2ee;};
 
 	this.getUplMsgCount = function() {return _uplMsg.length;};
@@ -1711,11 +1698,9 @@ function AllEars(readyCallback) {
 	this.getOutMsgAttach = function(num) {if(typeof(num)!=="number"){return;} return _outMsg[num].attach;};
 
 	this.getOutMsgFlagE2ee = function(num) {if(typeof(num)!=="number"){return;} return _outMsg[num].isE2ee;};
-	this.getOutMsgFlagVPad = function(num) {if(typeof(num)!=="number"){return;} return _outMsg[num].validPad;};
-	this.getOutMsgFlagVSig = function(num) {if(typeof(num)!=="number"){return;} return _outMsg[num].validSig;};
 
-	this.admin_getUserNum = function() {return _admin_userUpk.length;};
-	this.admin_getUserUpk = function(num) {if(typeof(num)!=="number"){return;} return _admin_userUpk[num];};
+	this.admin_getUserCount = function() {return _admin_userUid.length;};
+	this.admin_getUserUid = function(num) {if(typeof(num)!=="number"){return;} return _admin_userUid[num];};
 	this.admin_getUserKib = function(num) {if(typeof(num)!=="number"){return;} return _admin_userKib[num];};
 	this.admin_getUserNrm = function(num) {if(typeof(num)!=="number"){return;} return _admin_userNrm[num];};
 	this.admin_getUserShd = function(num) {if(typeof(num)!=="number"){return;} return _admin_userShd[num];};
@@ -1760,83 +1745,84 @@ function AllEars(readyCallback) {
 	};
 
 	this.setPrivateExtra = function(newData) {if(typeof(newData)!=="string"){return;}
-		if (sodium.from_string(newData).length > this.getPrivateExtraSpaceMax()) return 0x13;
+		if (sodium.from_string(newData).length > this.getPrivateExtraSpaceMax()) return 0x07;
 		_privateExtra = newData;
 		return 0;
 	};
 
-	this.setKeys = function(skey_hex, callback) {if(typeof(skey_hex)!=="string" || typeof(callback)!=="function"){return;}
-		if (skey_hex.length !== sodium.crypto_box_SECRETKEYBYTES * 2) {
+	this.setKeys = function(umk_b64, callback) {if(typeof(umk_b64)!=="string" || typeof(callback)!=="function"){return;}
+		if (umk_b64.length !== 43) {
 			callback(false);
 			return;
 		}
 
-		const boxSeed = sodium.crypto_kdf_derive_from_key(sodium.crypto_box_SEEDBYTES, 1, "AEM-Usr0", sodium.from_hex(skey_hex));
-		const boxKeys = sodium.crypto_box_seed_keypair(boxSeed);
-
-		_own_upk = boxKeys.publicKey;
-		__SECRET_own_usk = boxKeys.privateKey;
-		__SECRET_own_kxHash = sodium.crypto_kdf_derive_from_key(sodium.crypto_generichash_KEYBYTES, 4, "AEM-Usr0", sodium.from_hex(skey_hex));
-		__SECRET_own_symmetric = sodium.crypto_kdf_derive_from_key(sodium.crypto_secretbox_KEYBYTES, 5, "AEM-Usr0", sodium.from_hex(skey_hex));
-
-		if (!_own_upk || !__SECRET_own_usk || !__SECRET_own_kxHash || !__SECRET_own_symmetric) {
-			_own_upk = null;
-			__SECRET_own_usk = null;
-			__SECRET_own_kxHash = null;
-			__SECRET_own_symmetric = null;
+		let umk;
+		try {
+			umk = sodium.from_base64(umk_b64, sodium.base64_variants.ORIGINAL_NO_PADDING);
+		} catch(e) {
 			callback(false);
 			return;
 		}
+
+		_own_uak = _aem_kdf(32, _AEM_KDF_KEYID_UMK_UAK, umk);
+		_own_eak = _aem_kdf(32, _AEM_KDF_KEYID_UAK_EAK, _own_uak);
+		_own_esk = _aem_kdf(32, _AEM_KDF_KEYID_UMK_ESK, umk);
+		_own_ehk = _aem_kdf(32, _AEM_KDF_KEYID_UMK_EHK, umk);
+		_own_pfk = _aem_kdf(32, _AEM_KDF_KEYID_UMK_PFK, umk);
+		_own_uid = new Uint16Array(_aem_kdf(2, _AEM_KDF_KEYID_UAK_UID, _own_uak).buffer)[0] & 4095;
 
 		callback(true);
 	};
 
 	// API functions
 	this.Account_Browse = function(callback) {if(typeof(callback)!=="function"){return;}
-		if (_own_level !== _AEM_USER_MAXLEVEL) {callback(0x02); return;}
-
-		_fetchEncrypted(_AEM_API_ACCOUNT_BROWSE, new Uint8Array([0]), function(fetchErr, browseData) {
-			if (fetchErr !== 0 || browseData === null) {callback(fetchErr); return;}
-			if (!browseData || browseData.length < 35) {callback(0x07); return;}
+		_fetchEncrypted(_AEM_API_ACCOUNT_BROWSE, new Uint8Array([0]), null, function(response) {
+			if (typeof(response) === "number") {callback(response); return;}
+			if (response.length === 1) {callback(response[0]); return;}
 
 			_maxStorage.splice(0);
 			_maxNormalA.splice(0);
 			_maxShieldA.splice(0);
 
 			for (let i = 0; i < 4; i++) {
-				_maxStorage.push(browseData[(i * 3) + 0]);
-				_maxNormalA.push(browseData[(i * 3) + 1]);
-				_maxShieldA.push(browseData[(i * 3) + 2]);
+				_maxStorage.push(response[(i * 3) + 0]);
+				_maxNormalA.push(response[(i * 3) + 1]);
+				_maxShieldA.push(response[(i * 3) + 2]);
 			}
 
 			let offset = 12;
-			const userCount = new Uint32Array(browseData.slice(offset, offset + 4).buffer)[0];
-			offset += 4;
 
-			for (let i = 0; i < userCount; i++) {
-				const s = browseData.slice(offset, offset + 35);
-				const u16 = new Uint16Array(s.slice(0, 2).buffer)[0];
+			for (let uid = 0; uid < _AEM_USERCOUNT; uid++) {
+				const u32 = new Uint32Array(response.slice(offset, offset + 4).buffer)[0];
 
-				_admin_userUpk.push(sodium.to_hex(s.slice(3)));
-				_admin_userKib.push((s[2] | ((u16 >> 4) & 3840)) * 64);
-				_admin_userLvl.push(u16 & 3);
-				_admin_userNrm.push((u16 >> 2) & 31);
-				_admin_userShd.push((u16 >> 7) & 31);
+				if (u32 !== 0) {
+					_admin_userUid.push(uid);
+					_admin_userLvl.push(u32 & 3);
+					_admin_userNrm.push((u32 >> 2) & 31);
+					_admin_userShd.push((u32 >> 7) & 31);
+					_admin_userKib.push(u32 >> 12);
+				}
 
-				offset += 35;
+				offset += 4;
 			}
 
 			callback(0);
 		});
 	};
 
-	this.Account_Create = function(pk_hex, callback) {if(typeof(pk_hex)!=="string" || typeof(callback)!=="function"){return;}
-		if (_own_level !== _AEM_USER_MAXLEVEL) {callback(0x02); return;}
+	this.Account_Create = function(uak_hex, epk_hex, callback) {if(typeof(uak_hex)!=="string" || uak_hex.length!==64 || typeof(epk_hex)!=="string" || epk_hex.length!==64 || typeof(callback)!=="function"){return;}
+		let data = new Uint8Array(64);
+		data.set(sodium.from_hex(uak_hex));
+		data.set(sodium.from_hex(epk_hex), 32);
 
-		_fetchEncrypted(_AEM_API_ACCOUNT_CREATE, sodium.from_hex(pk_hex), function(fetchErr) {
-			if (fetchErr) {callback(fetchErr); return;}
+		_fetchEncrypted(_AEM_API_ACCOUNT_CREATE, new Uint8Array([0]), data, function(response) {
+			if (typeof(response) === "number") {callback(response); return;}
+			if (response.length !== 1) {callback(0x04); return;}
+			if (response[0] !== 0x00) {callback(response[0]); return;}
 
-			_admin_userUpk.push(pk_hex);
+			const new_uid = new Uint16Array(_aem_kdf(2, _AEM_KDF_KEYID_UAK_UID, sodium.from_hex(uak_hex)).buffer)[0] & 4095;
+
+			_admin_userUid.push(new_uid);
 			_admin_userLvl.push(0);
 			_admin_userKib.push(0);
 			_admin_userNrm.push(0);
@@ -1846,20 +1832,22 @@ function AllEars(readyCallback) {
 		});
 	};
 
-	this.Account_Delete = function(pk_hex, callback) {if(typeof(pk_hex)!=="string" || typeof(callback)!=="function"){return;}
-		_fetchEncrypted(_AEM_API_ACCOUNT_DELETE, sodium.from_hex(pk_hex), function(fetchErr) {
-			if (fetchErr) {callback(fetchErr); return;}
+	this.Account_Delete = function(uid, callback) {if(typeof(uid)!=="number" || typeof(callback)!=="function"){return;}
+		_fetchEncrypted(_AEM_API_ACCOUNT_DELETE, new Uint8Array(new Uint16Array([uid]).buffer), null, function(response) {
+			if (typeof(response) === "number") {callback(response); return;}
+			if (response.length !== 1) {callback(0x4D); return;}
+			if (response[0] !== 0) {callback(response[0]); return;}
 
 			let num = -1;
-			for (let i = 0; i < _admin_userUpk.length; i++) {
-				if (pk_hex === _admin_userUpk[i]) {
+			for (let i = 0; i < _admin_userUid.length; i++) {
+				if (uid === _admin_userUid[i]) {
 					num = i;
 					break;
 				}
 			}
 
 			if (num >= 0) {
-				_admin_userUpk.splice(num, 1);
+				_admin_userUid.splice(num, 1);
 				_admin_userLvl.splice(num, 1);
 				_admin_userKib.splice(num, 1);
 				_admin_userNrm.splice(num, 1);
@@ -1870,64 +1858,73 @@ function AllEars(readyCallback) {
 		});
 	};
 
-	this.Account_Update = function(pk_hex, level, callback) {if(typeof(pk_hex)!=="string" || typeof(level)!=="number" || typeof(callback)!=="function"){return;}
-		if (level < 0 || level > _AEM_USER_MAXLEVEL) {callback(0x02); return;}
+	this.Account_Update = function(uid, level, callback) {if(typeof(uid)!=="number" || typeof(level)!=="number" || typeof(callback)!=="function"){return;}
+		if (level < 0 || level > _AEM_USER_MAXLEVEL) {callback(0x01); return;}
 
-		const upData = new Uint8Array(33);
-		upData[0] = level;
-		upData.set(sodium.from_hex(pk_hex), 1);
+		const data = new Uint8Array(3);
+		data.set(new Uint8Array(new Uint16Array([uid]).buffer));
+		data[2] = level;
 
-		_fetchEncrypted(_AEM_API_ACCOUNT_UPDATE, upData, function(fetchErr) {
-			if (fetchErr) {callback(fetchErr); return;}
+		_fetchEncrypted(_AEM_API_ACCOUNT_UPDATE, data, null, function(response) {
+			if (typeof(response) === "number") {callback(response); return;}
+			if (response.length !== 1) {callback(0x4D); return;}
+			if (response[0] !== 0) {callback(response[0]); return;}
 
-			if (pk_hex === sodium.to_hex(_own_upk)) { // Updated own account
+			if (uid === _own_uid) { // Updated own account
 				_own_level = level;
 				callback(0);
 				return;
 			}
 
 			let num = -1;
-			for (let i = 0; i < _admin_userUpk.length; i++) {
-				if (pk_hex === _admin_userUpk[i]) {
+			for (let i = 0; i < _admin_userUid.length; i++) {
+				if (uid === _admin_userUid[i]) {
 					num = i;
 					break;
 				}
 			}
 
-			if (num >= 0)
-				_admin_userLvl[num] = level;
-
+			if (num >= 0) _admin_userLvl[num] = level;
 			callback(0);
 		});
 	};
 
 	this.Address_Create = function(addr, callback) {if(typeof(addr)!=="string" || typeof(callback)!=="function"){return;}
-		if (this.getPrivateExtraSpaceMax() - this.getPrivateExtraSpace() < 18) {callback(0x14); return;}
+		if (this.getPrivateExtraSpaceMax() - this.getPrivateExtraSpace() < 18) {callback(0x09); return;}
 
 		if (addr === "SHIELD") {
-			_fetchEncrypted(_AEM_API_ADDRESS_CREATE, sodium.from_string("SHIELD"), function(fetchErr, byteArray) {
-				if (fetchErr) {callback(fetchErr); return;}
-				_own_addr.push(new _Address(byteArray.slice(0, 8), byteArray.slice(8, 18), _AEM_ADDR_FLAG_SHIELD | _AEM_ADDR_FLAGS_DEFAULT));
+			_fetchEncrypted(_AEM_API_ADDRESS_CREATE, new Uint8Array([0]), null, function(response) {
+				if (typeof(response) === "number") {callback(response); return;}
+				if (response.length !== 18) {callback(0x4D); return;}
+
+				_own_addr.push(new _Address(response.slice(0, 8), response.slice(8, 18), _AEM_ADDR_FLAG_SHIELD | _AEM_ADDR_FLAGS_DEFAULT));
 				callback(0);
 			});
 		} else {
 			const addr32 = _addr32_encode(addr);
-			if (!addr32) {callback(0x08); return;}
+			if (!addr32) {callback(0x11); return;}
 
-			const full = sodium.crypto_pwhash(16, addr32, _AEM_SALT_NORMAL, _AEM_OLIM_NORMAL, _AEM_MLIM_NORMAL, sodium.crypto_pwhash_ALG_ARGON2ID13);
-			const hash = new Uint8Array([
-				full[0] ^ full[8],
-				full[1] ^ full[9],
-				full[2] ^ full[10],
-				full[3] ^ full[11],
-				full[4] ^ full[12],
-				full[5] ^ full[13],
-				full[6] ^ full[14],
-				full[7] ^ full[15]
-			]);
+			let hash;
+			if (_addrNormal_olim === 0) {
+				hash = sodium.crypto_shorthash(addr32, _addrNormal_salt);
+			} else {
+				const full = sodium.crypto_pwhash(16, addr32, _addrNormal_salt, _addrNormal_olim, _addrNormal_mlim, sodium.crypto_pwhash_ALG_ARGON2ID13);
+				hash = new Uint8Array([
+					full[0] ^ full[8],
+					full[1] ^ full[9],
+					full[2] ^ full[10],
+					full[3] ^ full[11],
+					full[4] ^ full[12],
+					full[5] ^ full[13],
+					full[6] ^ full[14],
+					full[7] ^ full[15]
+				]);
+			}
 
-			_fetchEncrypted(_AEM_API_ADDRESS_CREATE, hash, function(fetchErr) {
-				if (fetchErr) {callback(fetchErr); return;}
+			_fetchEncrypted(_AEM_API_ADDRESS_CREATE, hash, null, function(response) {
+				if (typeof(response) === "number") {callback(response); return;}
+				if (response.length !== 1) {callback(0x4D); return;}
+				if (response[0] !== 0) {callback(response[0]); return;}
 
 				_own_addr.push(new _Address(hash, addr32, _AEM_ADDR_FLAGS_DEFAULT));
 				callback(0);
@@ -1936,8 +1933,10 @@ function AllEars(readyCallback) {
 	};
 
 	this.Address_Delete = function(num, callback) {if(typeof(num)!=="number" || typeof(callback)!=="function"){return;}
-		_fetchEncrypted(_AEM_API_ADDRESS_DELETE, _own_addr[num].hash, function(fetchErr) {
-			if (fetchErr) {callback(fetchErr); return;}
+		_fetchEncrypted(_AEM_API_ADDRESS_DELETE, _own_addr[num].hash, null, function(response) {
+			if (typeof(response) === "number") {callback(response); return;}
+			if (response.length !== 1) {callback(0x4D); return;}
+			if (response[0] !== 0) {callback(response[0]); return;}
 
 			_own_addr.splice(num, 1);
 			callback(0);
@@ -1951,14 +1950,37 @@ function AllEars(readyCallback) {
 	};
 
 	this.Address_Update = function(callback) {if(typeof(callback)!=="function"){return;}
-		const data = new Uint8Array(_own_addr.length * 9);
+		const x = new Uint8Array(31);
+		_own_addr.forEach(function(adr, n) {x[n] = adr.flags;});
 
-		for (let i = 0; i < _own_addr.length; i++) {
-			data.set(_own_addr[i].hash, (i * 9));
-			data[(i * 9) + 8] = _own_addr[i].flags;
-		}
+		const data = new Uint8Array([
+			(x[0]  & 63) | ((x[1]  & 48) << 2),
+			(x[1]  & 15) | ((x[2]  & 60) << 2),
+			(x[2]  &  3) | ((x[3]  & 63) << 2),
+			(x[4]  & 63) | ((x[5]  & 48) << 2),
+			(x[5]  & 15) | ((x[6]  & 60) << 2),
+			(x[6]  &  3) | ((x[7]  & 63) << 2),
+			(x[8]  & 63) | ((x[9]  & 48) << 2),
+			(x[9]  & 15) | ((x[10] & 60) << 2),
+			(x[10] &  3) | ((x[11] & 63) << 2),
+			(x[12] & 63) | ((x[13] & 48) << 2),
+			(x[13] & 15) | ((x[14] & 60) << 2),
+			(x[14] &  3) | ((x[15] & 63) << 2),
+			(x[16] & 63) | ((x[17] & 48) << 2),
+			(x[17] & 15) | ((x[18] & 60) << 2),
+			(x[18] &  3) | ((x[19] & 63) << 2),
+			(x[20] & 63) | ((x[21] & 48) << 2),
+			(x[21] & 15) | ((x[22] & 60) << 2),
+			(x[22] &  3) | ((x[23] & 63) << 2),
+			(x[24] & 63) | ((x[25] & 48) << 2),
+			(x[25] & 15) | ((x[26] & 60) << 2),
+			(x[26] &  3) | ((x[27] & 63) << 2),
+			(x[28] & 63) | ((x[29] & 48) << 2),
+			(x[29] & 15) | ((x[30] & 60) << 2),
+			(x[30] &  3) // Last 6 bits unused
+		]);
 
-		_fetchEncrypted(_AEM_API_ADDRESS_UPDATE, data, function(fetchErr) {callback(fetchErr);});
+		_fetchEncrypted(_AEM_API_ADDRESS_UPDATE, data, null, function(status) {callback(status);});
 	};
 
 	this.Message_Browse = function(newest, u_info, callback) {if(typeof(newest)!=="boolean" || typeof(u_info)!=="boolean" || typeof(callback)!=="function"){return;}
@@ -1972,17 +1994,14 @@ function AllEars(readyCallback) {
 		} else fetchId = new Uint8Array([u_info? _AEM_FLAG_UINFO : 0]);
 
 		let privateFail = false;
-		_fetchEncrypted(_AEM_API_MESSAGE_BROWSE, fetchId, function(fetchErr, browseData) {
-			if (fetchErr !== 0) {callback(fetchErr); return;}
+		_fetchEncrypted(_AEM_API_MESSAGE_BROWSE, fetchId, null, function(browseData) {
+			if (typeof(browseData) !== "object") {callback(browseData); return;}
 
 			if (u_info) {
-				if (browseData.length < 1000) {callback(0x07); return;}
+				if (browseData.length < _AEM_LEN_PRIVATE) {callback(0x04); return;}
 				const uinfo_bytes = _parseUinfo(browseData);
-				browseData = browseData.slice(Math.abs(uinfo_bytes));
-				if (uinfo_bytes < 0) privateFail = true;
+				browseData = browseData.slice(uinfo_bytes);
 			}
-
-			if (browseData.length <= 6) {callback(0); return;} // No messages or error getting messages
 
 			_totalMsgCount = new Uint16Array(browseData.slice(0, 2).buffer)[0];
 			_totalMsgBytes = new Uint32Array(browseData.slice(2, 6).buffer)[0] * 16;
@@ -1991,30 +2010,33 @@ function AllEars(readyCallback) {
 			let prevTs = 1577836800; // 2020-01-01
 
 			while (offset < browseData.length) {
-				const msgBytes = (new Uint16Array(browseData.slice(offset, offset + 2).buffer)[0] + _AEM_MSG_MINBLOCKS) * 16;
+				const envBlocks = new Uint16Array(browseData.slice(offset, offset + 2).buffer)[0];
+				const envBytes = (envBlocks + _AEM_MSG_MINBLOCKS) * 16;
 				offset += 2;
+				const envData = browseData.slice(offset, offset + envBytes);
+				const msgId = envData.slice(0, 16);
 
-				const msgEnc = browseData.slice(offset, offset + msgBytes);
+ 				// Create the base for the hash
+				const base = new Uint8Array(sodium.crypto_scalarmult_BYTES + _X25519_PKBYTES + 2);
+				base.set(sodium.crypto_scalarmult(_own_esk, envData.slice(0, _X25519_PKBYTES))); // Recreate the shared secret - this step cannot be done by the server
+				base.set(sodium.crypto_scalarmult_base(_own_esk), sodium.crypto_scalarmult_BYTES);
+				base.set(new Uint8Array(new Uint16Array([envBlocks]).buffer), sodium.crypto_scalarmult_BYTES + _X25519_PKBYTES);
 
-				const msgId = msgEnc.slice(0, 16);
-				if (_msgExists(msgId)) {
+				// Create the key and nonce, and retrieve the Message from the Envelope
+				const env_KeyNonce = sodium.crypto_generichash(sodium.crypto_stream_chacha20_KEYBYTES + sodium.crypto_stream_chacha20_NONCEBYTES, base);
+				const envDec = sodium.crypto_stream_chacha20_xor(envData.slice(_X25519_PKBYTES), env_KeyNonce.slice(sodium.crypto_stream_chacha20_KEYBYTES), env_KeyNonce.slice(0, sodium.crypto_stream_chacha20_KEYBYTES));
+
+				const msgSig = envDec.slice(0, 16);
+				const msgData = envDec.slice(16);
+
+				if (_msgExists(msgSig)) {
 					offset += msgBytes;
 					continue;
 				}
 
-				_readyMsgBytes += msgBytes;
-
-				let msgData;
-				try {msgData = sodium.crypto_box_seal_open(msgEnc, _own_upk, __SECRET_own_usk);}
-				catch(e) {
-					prevTs--; // The server sends messages from newest to oldest -> this message is older than the previous one -> lower timestamp
-					_intMsg.push(new _IntMsg(true, true, msgId, prevTs, false, 3, null, "system", "", "Failed decrypting: " + offset + "/" + browseData.length + " (size: " + msgEnc.length + ")", e));
-					offset += msgBytes;
-					continue;
-				}
-
-				prevTs = _addMessage(msgData, msgBytes, msgId);
-				offset += msgBytes;
+				prevTs = _addMessage(msgData, msgId);
+				_readyMsgBytes += envBytes;
+				offset += envBytes;
 			}
 
 			_extMsg.sort((a, b) => (a.ts < b.ts) ? 1 : -1);
@@ -2022,12 +2044,12 @@ function AllEars(readyCallback) {
 			_uplMsg.sort((a, b) => (a.ts < b.ts) ? 1 : -1);
 			_outMsg.sort((a, b) => (a.ts < b.ts) ? 1 : -1);
 
-			callback(privateFail? 0x09 : 0);
+			callback(0);
 		});
 	};
 
-	this.Message_Create = function(title, body, addr_from, addr_to, replyId, to_apk, callback) {if(typeof(title)!=="string" || typeof(body)!=="string" || typeof(addr_from)!=="string" || typeof(addr_to)!=="string" || typeof(callback)!=="function"){return;}
-		if (addr_to.indexOf("@") >= 0) { // Email
+	this.Message_Create = function(subject, body, addr_from, addr_to, replyId, to_apk, callback) {if(typeof(subject)!=="string" || typeof(body)!=="string" || typeof(addr_from)!=="string" || typeof(addr_to)!=="string" || typeof(callback)!=="function"){return;}
+		if (addr_to.indexOf("@") > 0) { // Email
 			if (replyId === null) {
 				replyId = "";
 			} else if (typeof(replyId) !== "string") {
@@ -2035,119 +2057,61 @@ function AllEars(readyCallback) {
 				return;
 			}
 
-			// First byte is title length for internal messages, values over 127 are treated as email
-			const bin = sodium.from_string("x" + addr_from + "\n" + addr_to + "\n" + replyId + "\n" + title + "\n" + body);
-			bin[0] = 0xFF;
+			const src = sodium.from_string(addr_from + "\n" + addr_to + "\n" + replyId + "\n" + subject + "\n" + body);
 
-			_fetchEncrypted(_AEM_API_MESSAGE_CREATE, bin, function(fetchErr, msgReport) {
-				if (fetchErr === 0 && (msgReport[16] & 48) === 48) _addOutMsg(msgReport.slice(21), true, true, msgReport.slice(0, 16), new Uint32Array(msgReport.slice(17, 21).buffer)[0], msgReport.slice(17, 21), true);
-				callback(fetchErr);
-			});
+			// TODO: email support
 			return;
 		}
 
-		// Internal mail
-		const isE2ee = (to_apk && to_apk.constructor === Uint8Array && to_apk.length === sodium.crypto_kx_PUBLICKEYBYTES);
-		const msgTs = new Uint8Array(isE2ee? (new Uint32Array([Math.round(Date.now() / 1000) + 2]).buffer) : [0,0,0,0]); // +2 to account for connection delay
-		if (!isE2ee && (title.length + body.length) < 38) body = body.padEnd(38 - title.length, "\0"); // Minimum message size: 177-48-64-5-1-32-10-10-1 = 6; -32 does not apply for DR, hence 38
-
+		// Internal mail; TODO: E2EE support
 		const addr32_from = _addr32_encode(addr_from);
-		if (!addr32_from) {callback(0x08); return;}
+		if (!addr32_from) {callback(0x11); return;}
 
 		const addr32_to = _addr32_encode(addr_to);
-		if (!addr32_to) {callback(0x08); return;}
+		if (!addr32_to) {callback(0x11); return;}
 
-		const kxKeys = sodium.crypto_kx_seed_keypair(sodium.crypto_generichash(sodium.crypto_kx_SEEDBYTES, addr32_from, __SECRET_own_kxHash));
-		let msgBox;
+		const url = new Uint8Array(24);
+		url.set(addr32_from);
+		url.set(addr32_to, 10);
+		url[20]  = (addr_from.length === 16) ? 128 : 0;
+		url[20] |= (addr_to.length   === 16) ?  64 : 0;
+		url[21] = 0x01;
+		url[22] = 0x02;
+		url[23] = 0x03;
 
-		if (isE2ee) {
-			const nonce = new Uint8Array(sodium.crypto_secretbox_NONCEBYTES);
-			nonce.fill(0);
-			nonce.set(msgTs);
-
-			const sessionKeys = sodium.crypto_kx_client_session_keys(kxKeys.publicKey, kxKeys.privateKey, to_apk);
-			msgBox = sodium.crypto_secretbox_easy(sodium.from_string(title + body), nonce, sessionKeys.sharedTx);
-		} else {
-			msgBox = sodium.from_string(title + body);
-		}
-
-		const final = new Uint8Array((sodium.crypto_kx_PUBLICKEYBYTES * 2) + 26 + msgBox.length); // 1+4+10+10+1=26
-		final.fill(0);
-
-		// 128/32/16 unused
-		final[0] = isE2ee? 64 : 0;
-		if (addr_from.length === 16) final[0] |= 8;
-		if (addr_to.length   === 16) final[0] |= 4;
-		// Server sets sender level (0-3)
-
-		if (isE2ee) final.set(to_apk, 1);
-		final.set(msgTs, 1 + sodium.crypto_kx_PUBLICKEYBYTES);
-
-		final.set(addr32_from, sodium.crypto_kx_PUBLICKEYBYTES + 5);
-		final.set(addr32_to, sodium.crypto_kx_PUBLICKEYBYTES + 15);
-		final.set(kxKeys.publicKey, sodium.crypto_kx_PUBLICKEYBYTES + 25);
-
-		final[(sodium.crypto_kx_PUBLICKEYBYTES * 2) + 25] = title.length;
-		final.set(msgBox, (sodium.crypto_kx_PUBLICKEYBYTES * 2) + 26);
-
-		_fetchEncrypted(_AEM_API_MESSAGE_CREATE, final, function(fetchErr, msgReport) {
-			if (fetchErr === 0 && (msgReport[16] & 48) === 48) _addOutMsg(msgReport.slice(21), true, true, msgReport.slice(0, 16), new Uint32Array(msgReport.slice(17, 21).buffer)[0], msgReport.slice(17, 21), true);
-			callback(fetchErr);
+		const post = sodium.from_string(subject + '\n' + body);
+		_fetchEncrypted(_AEM_API_MESSAGE_CREATE, url, post, function(response) {
+			if (typeof(response) === "number") {callback(response); return;}
+			if (response.length === 1) {callback(response[0]); return;}
+			callback(0x04);
 		});
 	};
 
-	this.Message_Delete = function(hexIds, callback) {if(typeof(callback)!=="function"){return;}
-		if (typeof(hexIds) === "string") {
-			if (hexIds === "ALL") {
-				return _fetchEncrypted(_AEM_API_MESSAGE_DELETE, new Uint8Array([0]), function(fetchErr) {
-					if (fetchErr) {callback(fetchErr); return;}
-					_newestMsgTs = 0;
-					callback(0);
-					return;
-				});
-			}
+	this.Message_Delete = function(hexId, callback) {if(typeof(callback)!=="function"){return;}
+		if (hexId.length !== 32) {callback(0x01); return;}
+		const delId = sodium.from_hex(hexId);
 
-			hexIds = [hexIds];
-		} else if (typeof(hexIds) !== "object") {
-			callback(0x01);
+		if (_arraysEqual(_getOldestMsgId(), delId)) {
+			callback(0x10);
 			return;
 		}
 
-		const delCount = hexIds.length;
+		_fetchEncrypted(_AEM_API_MESSAGE_DELETE, delId, null, function(response) {
+			if (typeof(response) === "number") {callback(response); return;}
+			if (response.length !== 1) {callback(0x4D); return;}
+			if (response[0] !== 0) {callback(response[0]); return;}
 
-		let data = new Uint8Array(delCount * 16);
-		const oldestId = _getOldestMsgId();
+			[_extMsg, _intMsg, _uplMsg, _outMsg].forEach(function(msgSet) {
+				for (let j = 0; j < msgSet.length; j++) {
+					let matches = true;
 
-		for (let i = 0; i < hexIds.length; i++) {
-			const id = sodium.from_hex(hexIds[i]);
-			if (id.length !== 16) {callback(0x01); return;}
-
-			if (_arraysEqual(oldestId, id)) {
-				callback(0x15);
-				return;
-			}
-
-			data.set(id, i * 16);
-		}
-
-		_fetchEncrypted(_AEM_API_MESSAGE_DELETE, data, function(fetchErr) {
-			if (fetchErr) {callback(fetchErr); return;}
-
-			for (let i = 0; i < hexIds.length; i++) {
-				const id = sodium.from_hex(hexIds[i]);
-
-				[_extMsg, _intMsg, _uplMsg, _outMsg].forEach(function(msgSet) {
-					for (let j = 0; j < msgSet.length; j++) {
-						let matches = true;
-
-						for (let k = 0; k < 16; k++) {
-							if (id[k] !== msgSet[j].id[k]) {matches = false; break;}
-						}
-
-						if (matches) {msgSet.splice(j, 1); j--;}
+					for (let k = 0; k < 16; k++) {
+						if (id[k] !== msgSet[j].id[k]) {matches = false; break;}
 					}
-				});
-			}
+
+					if (matches) {msgSet.splice(j, 1); j--;}
+				}
+			});
 
 			callback(0);
 		});
@@ -2155,7 +2119,7 @@ function AllEars(readyCallback) {
 
 	this.Message_Public = function(title, body, callback) {if(typeof(title)!=="string" || typeof(body)!=="string" || typeof(callback)!=="function"){return;}
 		const binMsg = sodium.from_string(title + "\n" + body);
-		if (binMsg.length < 59) {callback(0x10); return;} // 59 = 177-48-64-5-1
+		if (binMsg.length < 59) {callback(0x06); return;} // 59 = 177-48-64-5-1
 
 		_fetchEncrypted(_AEM_API_MESSAGE_PUBLIC, binMsg, function(fetchErr, newMsgId) {
 			if (fetchErr) {callback(fetchErr); return;}
@@ -2188,37 +2152,30 @@ function AllEars(readyCallback) {
 		});
 	};
 
-	this.Message_Upload = function(title, body, callback) {if(typeof(title)!=="string" || (typeof(body)!=="string" && body.constructor!==Uint8Array) || typeof(callback)!=="function"){return;}
-		if (typeof(title) !== "string" || title.length < 1 || body.length < 1) {callback(0x01); return;}
+	this.Message_Upload = function(filename, body, callback) {if(typeof(filename)!=="string" || (typeof(body)!=="string" && body.constructor!==Uint8Array) || typeof(callback)!=="function"){return;}
+		if (typeof(filename) !== "string" || filename.length < 1 || body.length < 1) {callback(0x01); return;}
 
-		const u8title = sodium.from_string(title);
-		if (u8title.length > 256) {callback(0x11); return;}
+		const u8fn = sodium.from_string(filename);
+		if (u8fn.length > 128) {callback(0x04); return;}
 		const u8body = (typeof(body) === "string") ? sodium.from_string(body) : body;
 
-		const lenData = 1 + u8title.length + u8body.length;
-		if (lenData + sodium.crypto_secretbox_NONCEBYTES + sodium.crypto_secretbox_MACBYTES > _AEM_API_BOX_SIZE_MAX) {callback(0x12); return;}
+		const lenData = u8fn.length + u8body.length;
+		if (lenData > _AEM_API_BOX_SIZE_MAX) {callback(0x07); return;}
 
 		const u8data = new Uint8Array(lenData);
-		u8data[0] = u8title.length - 1;
+		u8data.set(u8fn);
+		u8data.set(u8body, u8fn.length);
 
-		u8data.set(u8title, 1);
-		u8data.set(u8body, 1 + u8title.length);
+		// TODO client-side encryption
 
-		const nonce = new Uint8Array(sodium.crypto_secretbox_NONCEBYTES);
-		window.crypto.getRandomValues(nonce);
+		_fetchEncrypted(_AEM_API_MESSAGE_UPLOAD, new Uint8Array([u8fn.length - 1]), u8data, function(response) {
+			if (typeof(response) === "number") {callback(response); return;}
+			if (response.length !== 1) {callback(0x4D); return;}
+			if (response[0] !== 0) {callback(response[0]); return;}
 
-		const sbox = sodium.crypto_secretbox_easy(u8data, nonce, __SECRET_own_symmetric);
+			_uplMsg.unshift(new _UplMsg(/*newMsgId*/null, Date.now() / 1000, filename, u8body, null, u8data.length / 16));
 
-		const final = new Uint8Array(nonce.length + sbox.length);
-		final.set(nonce);
-		final.set(sbox, sodium.crypto_secretbox_NONCEBYTES);
-
-		_fetchEncrypted(_AEM_API_MESSAGE_UPLOAD, final, function(fetchErr, newMsgId) {
-			if (fetchErr) {callback(fetchErr); return;}
-
-			_uplMsg.unshift(new _UplMsg(newMsgId, Date.now() / 1000, title, u8body, null, (final.length + sodium.crypto_box_SEALBYTES) / 16));
-
-			let x = final.length + 117; // 5 (info + ts) + 64 (sig) + 48 (sealed box)
+			let x = u8data.length + 53; // 5 (info + ts) + 48 (Envelope)
 			if (x % 16 !== 0) x+= (16 - (x % 16));
 			_totalMsgBytes += x;
 			_readyMsgBytes += x;
@@ -2228,11 +2185,13 @@ function AllEars(readyCallback) {
 	};
 
 	this.Private_Update = function(callback) {if(typeof(callback)!=="function"){return;}
-		const privData = new Uint8Array(_AEM_LEN_PRIVATE - sodium.crypto_secretbox_NONCEBYTES - sodium.crypto_secretbox_MACBYTES);
-		privData.fill(0);
-		privData[0] = _own_addr.length;
+		// 64-bit nonce for the Private Field is considered sufficient since it's overwritten each time, and it's only available to AEM-Account
+		const privData = new Uint8Array(_AEM_LEN_PRIVATE);
+		privData.set(window.crypto.getRandomValues(new Uint8Array(sodium.crypto_stream_chacha20_NONCEBYTES)));
+		let offset = sodium.crypto_stream_chacha20_NONCEBYTES;
 
-		let offset = 1;
+		privData[offset] = _own_addr.length;
+		offset++;
 
 		for (let i = 0; i < _own_addr.length; i++) {
 			privData.set(_own_addr[i].hash, offset);
@@ -2258,21 +2217,14 @@ function AllEars(readyCallback) {
 			offset += cNote.length;
 		}
 
-		privData.set(sodium.from_string(_privateExtra), offset);
+		privData.set(sodium.from_string(_privateExtra).slice(0, _AEM_LEN_PRIVATE - offset), offset);
 
-		const nonce = new Uint8Array(sodium.crypto_secretbox_NONCEBYTES);
-		window.crypto.getRandomValues(nonce);
-
-		const sbox = sodium.crypto_secretbox_easy(privData, nonce, __SECRET_own_symmetric);
-
-		const final = new Uint8Array(nonce.length + sbox.length);
-		final.set(nonce);
-		final.set(sbox, sodium.crypto_secretbox_NONCEBYTES);
-
-		_fetchEncrypted(_AEM_API_PRIVATE_UPDATE, final, function(fetchErr) {callback(fetchErr);});
+		const enc = sodium.crypto_stream_chacha20_xor(privData.slice(sodium.crypto_stream_chacha20_NONCEBYTES), privData.slice(0, sodium.crypto_stream_chacha20_NONCEBYTES), _own_pfk);
+		privData.set(enc, sodium.crypto_stream_chacha20_NONCEBYTES);
+		_fetchEncrypted(_AEM_API_PRIVATE_UPDATE, new Uint8Array([0]), privData, function(status) {callback(status);});
 	};
 
-	this.Setting_Update = function(mib, nrm, shd, callback) {if(typeof(mib)!=="object" || typeof(nrm)!=="object" || typeof(shd)!=="object" || typeof(callback)!=="function"){return;}
+	this.Setting_Limits = function(mib, nrm, shd, callback) {if(typeof(mib)!=="object" || typeof(nrm)!=="object" || typeof(shd)!=="object" || typeof(callback)!=="function"){return;}
 		const data = new Uint8Array([
 			mib[0], nrm[0], shd[0],
 			mib[1], nrm[1], shd[1],
@@ -2280,7 +2232,7 @@ function AllEars(readyCallback) {
 			mib[3], nrm[3], shd[3]
 		]);
 
-		_fetchEncrypted(_AEM_API_SETTING_LIMITS, data, function(fetchErr) {
+		_fetchEncrypted(_AEM_API_SETTING_LIMITS, data, null, function(fetchErr) {
 			if (fetchErr === 0) {
 				for (let i = 0; i < 4; i++) {
 					_maxStorage[i] = mib[i];
@@ -2294,7 +2246,7 @@ function AllEars(readyCallback) {
 	};
 
 	// Extras
-	this.shieldMix = function(addr) {if(typeof(addr)!=="string"){return;}
+	this.shieldMix = function(addr, extreme) {if(typeof(addr)!=="string"){return;}
 		let newAddr = "";
 
 		for (let i = 0; i < 16; i++) {
@@ -2311,6 +2263,8 @@ function AllEars(readyCallback) {
 				default:
 					newAddr += (Math.random() > 0.5) ? addr.charAt(i).toLowerCase() : addr.charAt(i).toUpperCase();
 			}
+
+			if (typeof(extreme) === "number" && extreme > 0 && extreme < 1 && Math.random() < extreme) newAddr += ".-_$+%=".charAt(Math.floor(Math.random() * 7));
 		}
 
 		const n = Math.floor(Math.random() * 16);
@@ -2323,53 +2277,43 @@ function AllEars(readyCallback) {
 
 	this.getErrorMessage = function(err) {if(typeof(err)!=="number"){return;}
 		switch (err) {
-			// 0x01-0x20	Client-side error codes
+			// 400+ Unauthenticated
+			case 403: return "Authentication failed";
+			case 404: return "Internal server error";
+
+			// 0x00: OK
+
+			// 0x01-0x1F	Client
 			case 0x01: return "Invalid input";
-			case 0x02: return "Only administrators may perform this action";
+			case 0x02: return "Connection failure";
 			case 0x03: return "Failed connecting to server";
-			case 0x04: return "Invalid input to _fetchEncrypted";
-			case 0x05: return "Failed decrypting response from server";
-			case 0x06: return "Invalid response length";
-			case 0x07: return "Server responded with invalid data";
-			case 0x08: return "Addr32 encoding failed";
-			case 0x09: return "Private data field corrupted";
+			case 0x04: return "Invalid response from server";
+			case 0x05: return "Failed decrypting response";
+			case 0x06: return "Name too long";
+			case 0x07: return "Contents too large";
+			case 0x08: return "Contents too small";
+			case 0x09: return "Private-field out of space";
+			case 0x10: return "Cannot delete oldest message";
+			case 0x11: return "Invalid address";
+			case 0x12: return "Invalid private-field";
 
-			case 0x10: return "Message too short";
-			case 0x11: return "Name too long";
-			case 0x12: return "File too large";
-			case 0x13: return "Private-field extra content too long";
-			case 0x14: return "Private-field out of space";
-			case 0x15: return "Cannot delete oldest message";
-
-			case 0x16: return "Server failed decrypt"; // 400
-			case 0x17: return "No such account"; // 403
-			case 0x18: return "Time mismatch"; // 499
-			case 0x19: return "Server error"; // 500
-			case 0x20: return "Response code invalid";
-
-			// 0x21-0x2F	Generic
-			case 0x21: return ["FORMAT",    "Invalid format"];
-			case 0x22: return ["ADMINONLY", "Only administrators can perform this action"];
-			case 0x23: return ["MISC",      "Unknown error"];
-			case 0x24: return ["INTERNAL",  "Internal server error"];
-			case 0x25: return ["TODO",      "Functionality missing - in development"];
-			case 0x26: return ["FIXME",     "Unexpected error encountered"];
-			case 0x27: return ["CMD",       "No such API command"];
-			case 0x28: return ["ENC_RESP",  "Server failed encrypting response"];
+			// 0xA0-0xAF	Basic
+			case 0xA0: return ["INTERNAL", "Internal server error"];
+			case 0xA1: return ["CMD",      "Invalid API command"];
+			case 0xA2: return ["PARAM",    "Invalid API parameters"];
+			case 0xA3: return ["LEVEL",    "Insufficient account level"];
 
 			// 0xC0-0xC9	Account
-			case 0xC0: return ["ACCOUNT_CREATE_EXIST",     "Account already exists"];
-			case 0xC1: return ["ACCOUNT_DELETE_NOSTORAGE", "Account data was deleted, but deleting message data failed due to an internal error"];
-			case 0xC2: return ["ACCOUNT_DELETE_NOTEXIST",  "Account not found"];
-			case 0xC3: return ["ACCOUNT_DELETE_NOMASTER",  "The Master Administrator account cannot be deleted"];
+			case 0xC0: return ["ACCOUNT_CREATE_EXIST",        "Account already exists"];
+			case 0xC1: return ["ACCOUNT_DELETE_NOTEXIST",     "Account not found"];
+			case 0xC2: return ["ACCOUNT_DELETE_FORBIDMASTER", "The Master Administrator cannot be deleted or demoted"];
+			case 0xC3: return ["ACCOUNT_DELETE_NOSTORAGE",    "Account data was deleted, but deleting message data failed due to an internal error"];
 
 			// 0xDA-0xDF	Address/Create|Delete|Update
 			case 0xDA: return ["ADDRESS_CREATE_INUSE",     "Address already taken"];
 			case 0xDB: return ["ADDRESS_CREATE_ATLIMIT",   "Limit reached - unable to register additional addresses"];
 			case 0xDC: return ["ADDRESS_DELETE_SOMEFOUND", "Delete successful, but some addresses were not found"];
 			case 0xDD: return ["ADDRESS_DELETE_NONEFOUND", "No such address(es)"];
-			case 0xDE: return ["ADDRESS_UPDATE_SOMEFOUND", "Partial success - some addresses not found"];
-			case 0xDF: return ["ADDRESS_UPDATE_NONEFOUND", "No update performed - address(es) not found"];
 
 			// 0xE0-0xE9	Message/Create
 			case 0xE0: return ["MESSAGE_CREATE_EXT_MINLEVEL", "Account level too low"];
@@ -2382,6 +2326,8 @@ function AllEars(readyCallback) {
 			case 0xE7: return ["MESSAGE_CREATE_EXT_BDY_SIZE", "Body too long or short"];
 			case 0xE8: return ["MESSAGE_CREATE_EXT_BDY_LONG", "Body exceeds line-length limit"];
 			case 0xE9: return ["MESSAGE_CREATE_EXT_MYDOMAIN", "Remove @" + _AEM_DOMAIN_EML + " to send internally"];
+			case 0xEE: return ["MESSAGE_CREATE_INT_OWN_ADDR", "Own address invalid"];
+			case 0xEF: return ["MESSAGE_CREATE_INT_REC_DENY", "Message denied by receiver"];
 
 			// 0xF0-0xF9	Message/Create sendMail()
 			case 0xF0: return ["MESSAGE_CREATE_SENDMAIL_GREET", "Failed greeting receiver server"];
