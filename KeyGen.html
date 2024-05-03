@@ -2,55 +2,210 @@
 <html>
 	<head>
 		<meta charset="utf-8">
-		<meta http-equiv="Content-Security-Policy" content="script-src 'sha256-+L7buAGwCvSdUBPHPv5SgmzJ5Zf44V1BaaJW35mIouE=' 'unsafe-eval' https://cdn.jsdelivr.net/gh/jedisct1/libsodium.js@0.7.10/dist/browsers/sodium.js; style-src 'sha256-eHbv0C79pfxb6CpwQ/jarTIT2igrfptPpJraHx5zfsM='; base-uri 'none'; child-src 'none'; connect-src 'none'; default-src 'none'; font-src 'none'; form-action 'none'; frame-src 'none'; img-src 'none'; manifest-src 'none'; media-src 'none'; object-src 'none'; prefetch-src 'none'; worker-src 'none';">
-		<meta name="referrer" content="no-referrer">
 		<meta name="viewport" content="width=device-width, initial-scale=1">
 
 		<style>
-			body, input {
+			html, input {
 				text-align: center;
 			}
 
-			input {
+			input, #user_name, #user_name2 {
 				font-family: monospace, monospace;
 			}
 
-			@media (prefers-color-scheme: dark) {
-				body, input, button {
-					background: #000;
-					color: #aaa;
-				}
+			body, input {
+				background: #000;
+				color: #bbb;
+			}
+
+			button {
+				background: #000;
+				padding: 0.25em 0.5em 0.25em 0.5em;
+			}
+
+			button:enabled {
+				cursor: pointer;
+			}
+
+			#div_one {
+			}
+
+			#div_gen {
+				background: #121010;
+				border-radius: 0.5em;
+				border: 0.25em solid #422;
+				width: fit-content;
+				margin: auto;
+				padding: 1em;
+			}
+
+			#div_gen_btn {
+				margin-top: 1em;
+				margin-bottom: 1em;
+			}
+
+			#agree {
+				margin-top: 1em;
+				line-height: 2em;
+			}
+
+			#btn_ready {
+				display: block;
+				margin: 1em auto;
+				line-height: 2em;
+				font-size: 1em;
+				color: #bbb;
+			}
+
+			#btn_cpy, #btn_shw {
+				color: #ccc;
+				font-family: monospace, monospace;
+			}
+
+			#btn_gen {
+				margin-left: 1em;
+				margin-right: 1em;
+
+				padding: 0.25em;
+				font-size: large;
+				color: #bbb;
+			}
+
+			#btn_cpy_uak, #btn_cpy_epk {
+				color: #bbb;
+			}
+
+			#btn_cpy_uak {
+				margin-right: 1em;
+			}
+
+			#btn_cpy_epk {
+				margin-left: 1em;
 			}
 		</style>
 
-		<title>Key generator for All-Ears Mail</title>
+		<title>All-Ears Mail Account Creator</title>
 	</head>
 	<body>
-		<p>
-			<button type="button" autofocus>Generate keys</button>
-		</p>
+		<div id="div_one">
+			<div id="div_gen">
+				Your name: <span id="user_uid">---</span>
 
-		<p>
-			Public (for account creation):<br>
-			<input type="text" readonly="readonly" size="64" id="pkey">
-		</p>
+				<div id="div_gen_btn">
+					<button type="button" id="btn_shw" disabled autocomplete="off">Show</button> <button type="button" id="btn_gen" autofocus>Generate</button> <button type="button" id="btn_cpy" disabled autocomplete="off">Copy</button>
+				</div>
 
-		<p>
-			Secret (for using All-Ears):<br>
-			<input type="text" readonly="readonly" size="64" id="skey">
-		</p>
+				Your User Master Key (UMK):
+				<br>
+				<input type="password" readonly="readonly" size="43" id="user_umk" placeholder="Press Generate" autocomplete="off">
+				<br>
+				<b style="color: #b44;">Never share this key with anyone.</b>
+			</div>
 
-		<script src="https://cdn.jsdelivr.net/gh/jedisct1/libsodium.js@0.7.10/dist/browsers/sodium.js" integrity="sha384-GEJ3DUwTjXaoqVwjTaPCJN0gtk+mbUoJ7/QO/6IKrlO+P7QHrV9497Vy5q+JNp7j" crossorigin="anonymous"></script>
+				<p>
+				If you lose your UMK, you will <b>never be able to access</b> your account again.
+				<br>
+				If anyone else discovers your UMK, they will gain <b>irrevocable full access</b> to your account.
+				</p>
+
+				<button id="btn_ready" disabled autocomplete="off">I have stored my UMK in a safe way</button>
+			</div>
+		</div>
+
+		<div id="div_two" hidden>
+			<p>
+				Your name will be: <span id="user_uid2">---</span>
+			</p>
+
+			<p>
+				<b style="color:red;">Never share your User Master Key (UMK) with anyone.</b>
+			</p>
+
+			<hr>
+
+			<p>To register your account, an administrator needs two different keys from you:</p>
+
+			<p>
+				Your User Access Key (UAK):
+				<br>
+				<input type="text" readonly="readonly" size="64" id="user_uak">
+			</p>
+
+			<p>
+				Your Envelope Public Key (EPK):
+				<br>
+				<input type="text" readonly="readonly" size="64" id="user_epk">
+			</p>
+
+			<p>
+				<button id="btn_cpy_uak">Copy UAK</button>
+				<button id="btn_cpy_epk">Copy EPK</button>
+			</p>
+
+			<p><b style="color:lightgreen;">Only share these two keys with an administrator.</b></p>
+
+			<p>They are only needed for creating your account.</p>
+
+			<p>Do not store or share them unnecessarily.</p>
+		</div>
+
+		<script src="https://cdn.jsdelivr.net/gh/jedisct1/libsodium.js@0.7.13/dist/browsers-sumo/sodium.js" integrity="sha384-xE+e4s598d4A0BKvbnkYaqRYutiZTg3KzqnWK51WA6h0yoCZ3uuV52KsntFIWScg" crossorigin="anonymous"></script>
 
 		<script>
 			sodium.ready.then(function() {
-				document.getElementsByTagName("button")[0].onclick = function() {
-					const newKey = sodium.crypto_kdf_keygen();
-					const boxSeed = sodium.crypto_kdf_derive_from_key(sodium.crypto_box_SEEDBYTES, 1, "AEM-Usr0", newKey);
-					const boxKeys = sodium.crypto_box_seed_keypair(boxSeed);
+				const _AEM_KDF_KEYID_UMK_UAK = new Uint8Array([0x01,0,0,0,0,0,0,0]);
+				const _AEM_KDF_KEYID_UMK_ESK = new Uint8Array([0x02,0,0,0,0,0,0,0]);
+				const _AEM_KDF_KEYID_UAK_UID = new Uint8Array([0x10,0,0,0,0,0,0,0]);
 
-					document.getElementById("pkey").value = sodium.to_hex(boxKeys.publicKey);
-					document.getElementById("skey").value = sodium.to_hex(newKey);
+				const _aem_kdf = function(size, nonce, key) {
+					return sodium.crypto_stream_chacha20(size, key, nonce);
+				}
+
+				document.getElementById("btn_gen").onclick = function() {
+					const umk = window.crypto.getRandomValues(new Uint8Array(32));
+					const uak = _aem_kdf(32, _AEM_KDF_KEYID_UMK_UAK, umk);
+					const esk = _aem_kdf(32, _AEM_KDF_KEYID_UMK_ESK, umk);
+					const epk = sodium.crypto_scalarmult_base(esk);
+					const uid = new Uint16Array(_aem_kdf(2, _AEM_KDF_KEYID_UAK_UID, uak).buffer)[0] & 4095;
+					if (uid === 0) return document.getElementById("btn_gen").onclick();
+
+					document.getElementById("user_uid").textContent = String.fromCharCode(97 + (uid & 15)) + String.fromCharCode(97 + ((uid >> 4) & 15)) + String.fromCharCode(97 + ((uid >> 8) & 15));
+					document.getElementById("user_umk").value = sodium.to_base64(umk, sodium.base64_variants.ORIGINAL_NO_PADDING);
+					document.getElementById("user_uak").value = sodium.to_hex(uak);
+					document.getElementById("user_epk").value = sodium.to_hex(epk);
+
+					document.getElementById("btn_ready").disabled = false;
+					document.getElementById("btn_shw").disabled = false;
+					document.getElementById("btn_cpy").disabled = false;
+				}
+
+				document.getElementById("btn_ready").onclick = function() {
+					document.getElementById("user_umk").value = "";
+					document.getElementById("user_uid2").textContent = document.getElementById("user_uid").textContent;
+					document.getElementById("div_one").hidden = true;
+					document.getElementById("div_two").hidden = false;
+				}
+
+				document.getElementById("btn_cpy").onclick = function() {
+					navigator.clipboard.writeText(document.getElementById("user_umk").value);
+				}
+
+				document.getElementById("btn_cpy_uak").onclick = function() {
+					navigator.clipboard.writeText(document.getElementById("user_uak").value);
+				}
+
+				document.getElementById("btn_cpy_epk").onclick = function() {
+					navigator.clipboard.writeText(document.getElementById("user_epk").value);
+				}
+
+				document.getElementById("btn_shw").onclick = function() {
+					if (document.getElementById("btn_shw").textContent === "Show") {
+						document.getElementById("btn_shw").textContent = "Hide";
+						document.getElementById("user_umk").type = "text";
+					} else {
+						document.getElementById("btn_shw").textContent = "Show";
+						document.getElementById("user_umk").type = "password";
+					}
 				}
 			});
 		</script>
