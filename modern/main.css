@@ -299,6 +299,7 @@ nav > button:enabled:focus {
 
 .mid {
 	background: #080a08;
+	overflow: auto;
 }
 
 .mid button {
