@@ -1611,7 +1611,6 @@ document.getElementById("btn_upload").onclick = function() {
 					btn.disabled = false;
 				});
 			} else { // No vault access -> upload to All-Ears
-console.log("tf");
 				ae.Message_Upload(fileSelector.files[0].name, new Uint8Array(reader.result), function(error) {
 					if (error === 0) {
 						showFiles();
