@@ -1,14 +1,6 @@
 # All-Ears Mail - Clients #
 
-## Status ##
-
-[![CodeFactor](https://www.codefactor.io/repository/github/emp-code/aem-client/badge)](https://www.codefactor.io/repository/github/emp-code/aem-client)
-
-[![Codacy Badge](https://app.codacy.com/project/badge/Grade/47c25a7e9599408b97460648999c016e)](https://www.codacy.com/gh/emp-code/aem-client/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=emp-code/aem-client&amp;utm_campaign=Badge_Grade)
-
-[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/emp-code/aem-client/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/emp-code/aem-client/?branch=master)
-
-[![Codiga](https://api.codiga.io/project/11148/score/svg)](https://app.codiga.io/public/project/11148/aem-client/dashboard)
+[![CodeFactor](https://www.codefactor.io/repository/github/emp-code/aem-client/badge)](https://www.codefactor.io/repository/github/emp-code/aem-client) [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/emp-code/aem-client/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/emp-code/aem-client/?branch=master)
 
 ## Web ##
 
