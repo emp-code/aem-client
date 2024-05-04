@@ -14,7 +14,7 @@
 
 The JavaScript library, *all-ears.js*, is made for web clients.
 
-The <meta> tag aem.url.api specifies the URL of the All-Ears Mail API. If left blank, the library assumes the API operates at the current domain with the default port.
+The `<meta>` tag aem.url.api specifies the URL of the All-Ears Mail API. If left blank, the library assumes the API operates at the current domain with the default port.
 
 --
 
