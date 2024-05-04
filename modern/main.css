@@ -410,6 +410,7 @@ dialog,
 #write2_body {
 	opacity: 0.55;
 	white-space: pre-wrap;
+	overflow-wrap: anywhere;
 }
 
 #write2_send,
