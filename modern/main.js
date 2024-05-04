@@ -1451,7 +1451,7 @@ document.getElementById("btn_address_create_normal").onclick = function() {
 	const txtNewAddr = document.getElementById("txt_address_create_normal");
 	if (!txtNewAddr.reportValidity()) return;
 
-	addressCreate(txtNewAddr.value);
+	addressCreate(txtNewAddr.value.toLowerCase());
 };
 
 document.getElementById("txt_address_create_normal").onkeyup = function(event) {

@@ -500,6 +500,10 @@ dialog,
 	font-size: 1em;
 }
 
+#txt_address_create_normal {
+	text-transform: lowercase;
+}
+
 #div_acc > table {
 	border: 0;
 	margin: 0 auto;
