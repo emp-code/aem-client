@@ -1191,7 +1191,7 @@ function AllEars(readyCallback) {
 		return textBody.replaceAll(/[\x05-\x09\x0c-\x15\x18-\x1c]/g, "").replaceAll(/[\x1d\x1e\x1f]/g, "\n").replaceAll("\x0B", "---\n---").replaceAll("\x16", "*").replaceAll("\x17", "_");
 	};
 
-	const _addMessage = function(msgData, msgId) {
+	const _addMessage = async function(msgData, msgId) {
 		const msgInfo = msgData[0];
 		const padAmount = msgInfo & 15;
 
@@ -1353,10 +1353,19 @@ function AllEars(readyCallback) {
 					msgBody = msgData.slice(18 + (msgData[0] & 127));
 				} else {
 					// Uploaded file
+					const nonce = new Uint8Array(16);
+					nonce.set(msgData.slice(msgData.length - 12));
+
+					const dec = new Uint8Array(await window.crypto.subtle.decrypt(
+						{name: "AES-CTR", counter: nonce, length: 32},
+						await window.crypto.subtle.importKey("raw", _own_ehk, {"name": "AES-CTR"}, false, ["decrypt"]),
+						msgData.slice(0, msgData.length - 12)
+					));
+
 					try {
-						msgFn = sodium.to_string(msgData.slice(1, 2 + (msgData[0])));
+						msgFn = sodium.to_string(dec.slice(1, 1 + (dec[0] & 127)));
 					} catch(e) {msgFn = "error";}
-					msgBody = msgData.slice(2 + msgData[0]);
+					msgBody = dec.slice(1 + dec[0]);
 				}
 
 				if (msgFn.endsWith(".br")) {
@@ -2152,24 +2161,34 @@ function AllEars(readyCallback) {
 		});
 	};
 
-	this.Message_Upload = function(filename, body, callback) {if(typeof(filename)!=="string" || (typeof(body)!=="string" && body.constructor!==Uint8Array) || typeof(callback)!=="function"){return;}
+	this.Message_Upload = async function(filename, body, callback) {if(typeof(filename)!=="string" || (typeof(body)!=="string" && body.constructor!==Uint8Array) || typeof(callback)!=="function"){return;}
 		if (filename.length < 1) {callback(0x01); return;}
 
 		const u8fn = sodium.from_string(filename);
 		if (u8fn.length > 128) {callback(0x04); return;}
 		const u8body = (typeof(body) === "string") ? sodium.from_string(body) : body;
 
-		const lenData = u8fn.length + u8body.length;
-		if (lenData + 1 > _AEM_MSG_SRC_MAXSIZE) {callback(0x07); return;} // 1 byte added server-side
+		const lenData = 12 + u8fn.length + u8body.length;
+		if (lenData + 1 > _AEM_MSG_SRC_MAXSIZE) {callback(0x07); return;} // 1 added server-side
 		if (lenData + 1 < _AEM_MSG_SRC_MINSIZE) {callback(0x08); return;}
 
-		const u8data = new Uint8Array(lenData);
-		u8data.set(u8fn);
-		u8data.set(u8body, u8fn.length);
+		const u8data = new Uint8Array(1 + lenData - 12);
+		u8data[0] = u8fn.length;
+		u8data.set(u8fn, 1);
+		u8data.set(u8body, 1 + u8fn.length);
 
-		// TODO client-side encryption
+		const nonce = new Uint8Array(16);
+		nonce.set(window.crypto.getRandomValues(new Uint8Array(12)));
 
-		_fetchEncrypted(_AEM_API_MESSAGE_UPLOAD, new Uint8Array([u8fn.length - 1]), u8data, function(response) {
+		const encData = new Uint8Array(u8data.length + 12);
+		encData.set(new Uint8Array(await window.crypto.subtle.encrypt(
+			{name: "AES-CTR", counter: nonce, length: 32},
+			await window.crypto.subtle.importKey("raw", _own_ehk, {"name": "AES-CTR"}, false, ["encrypt"]),
+			u8data)
+		));
+		encData.set(nonce.slice(0, 12), u8data.length);
+
+		_fetchEncrypted(_AEM_API_MESSAGE_UPLOAD, new Uint8Array([encData[0] & 127]), encData.slice(1), function(response) {
 			if (typeof(response) === "number") {callback(response); return;}
 			if (response.length !== 1) {callback(0x04); return;}
 			if (response[0] !== 0) {callback(response[0]); return;}
