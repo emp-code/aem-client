@@ -73,8 +73,8 @@ function AllEars(readyCallback) {
 	const _AEM_ADDRESSES_PER_USER = 31;
 	const _AEM_LEN_PRIVATE = 4523;
 	const _AEM_MSG_MINBLOCKS = 12;
-	const _AEM_MSG_MINSIZE = _AEM_MSG_MINBLOCKS * 16;
-	const _AEM_API_BOX_SIZE_MAX = 1048635; // (((2^16 - 1) + 12) * 16) - 117
+	const _AEM_MSG_SRC_MAXSIZE = 1048699; // ((2^16 - 1) + 12) * 16 - 48 - 5; 1MiB + 123B
+	const _AEM_MSG_SRC_MINSIZE = 124;
 	const _AEM_USER_MAXLEVEL = 3;
 	const _X25519_PKBYTES = 32;
 
@@ -2153,14 +2153,15 @@ function AllEars(readyCallback) {
 	};
 
 	this.Message_Upload = function(filename, body, callback) {if(typeof(filename)!=="string" || (typeof(body)!=="string" && body.constructor!==Uint8Array) || typeof(callback)!=="function"){return;}
-		if (typeof(filename) !== "string" || filename.length < 1 || body.length < 1) {callback(0x01); return;}
+		if (filename.length < 1) {callback(0x01); return;}
 
 		const u8fn = sodium.from_string(filename);
 		if (u8fn.length > 128) {callback(0x04); return;}
 		const u8body = (typeof(body) === "string") ? sodium.from_string(body) : body;
 
 		const lenData = u8fn.length + u8body.length;
-		if (lenData > _AEM_API_BOX_SIZE_MAX) {callback(0x07); return;}
+		if (lenData + 1 > _AEM_MSG_SRC_MAXSIZE) {callback(0x07); return;} // 1 byte added server-side
+		if (lenData + 1 < _AEM_MSG_SRC_MINSIZE) {callback(0x08); return;}
 
 		const u8data = new Uint8Array(lenData);
 		u8data.set(u8fn);
