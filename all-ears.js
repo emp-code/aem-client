@@ -2298,8 +2298,10 @@ function AllEars(readyCallback) {
 	this.getErrorMessage = function(err) {if(typeof(err)!=="number"){return;}
 		switch (err) {
 			// 400+ Unauthenticated
+			case 400: return "Bad request";
 			case 403: return "Authentication failed";
-			case 404: return "Internal server error";
+			case 404: return "Connection error";
+			case 500: return "Internal server error";
 
 			// 0x00: OK
 
