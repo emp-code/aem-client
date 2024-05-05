@@ -1835,7 +1835,7 @@ function AllEars(readyCallback) {
 	this.Account_Delete = function(uid, callback) {if(typeof(uid)!=="number" || typeof(callback)!=="function"){return;}
 		_fetchEncrypted(_AEM_API_ACCOUNT_DELETE, new Uint8Array(new Uint16Array([uid]).buffer), null, function(response) {
 			if (typeof(response) === "number") {callback(response); return;}
-			if (response.length !== 1) {callback(0x4D); return;}
+			if (response.length !== 1) {callback(0x04); return;}
 			if (response[0] !== 0) {callback(response[0]); return;}
 
 			let num = -1;
@@ -1867,7 +1867,7 @@ function AllEars(readyCallback) {
 
 		_fetchEncrypted(_AEM_API_ACCOUNT_UPDATE, data, null, function(response) {
 			if (typeof(response) === "number") {callback(response); return;}
-			if (response.length !== 1) {callback(0x4D); return;}
+			if (response.length !== 1) {callback(0x04); return;}
 			if (response[0] !== 0) {callback(response[0]); return;}
 
 			if (uid === _own_uid) { // Updated own account
@@ -1895,7 +1895,7 @@ function AllEars(readyCallback) {
 		if (addr === "SHIELD") {
 			_fetchEncrypted(_AEM_API_ADDRESS_CREATE, new Uint8Array([0]), null, function(response) {
 				if (typeof(response) === "number") {callback(response); return;}
-				if (response.length !== 18) {callback(0x4D); return;}
+				if (response.length !== 18) {callback(0x04); return;}
 
 				_own_addr.push(new _Address(response.slice(0, 8), response.slice(8, 18), _AEM_ADDR_FLAG_SHIELD | _AEM_ADDR_FLAGS_DEFAULT));
 				callback(0);
@@ -1923,7 +1923,7 @@ function AllEars(readyCallback) {
 
 			_fetchEncrypted(_AEM_API_ADDRESS_CREATE, hash, null, function(response) {
 				if (typeof(response) === "number") {callback(response); return;}
-				if (response.length !== 1) {callback(0x4D); return;}
+				if (response.length !== 1) {callback(0x04); return;}
 				if (response[0] !== 0) {callback(response[0]); return;}
 
 				_own_addr.push(new _Address(hash, addr32, _AEM_ADDR_FLAGS_DEFAULT));
@@ -1935,7 +1935,7 @@ function AllEars(readyCallback) {
 	this.Address_Delete = function(num, callback) {if(typeof(num)!=="number" || typeof(callback)!=="function"){return;}
 		_fetchEncrypted(_AEM_API_ADDRESS_DELETE, _own_addr[num].hash, null, function(response) {
 			if (typeof(response) === "number") {callback(response); return;}
-			if (response.length !== 1) {callback(0x4D); return;}
+			if (response.length !== 1) {callback(0x04); return;}
 			if (response[0] !== 0) {callback(response[0]); return;}
 
 			_own_addr.splice(num, 1);
@@ -2098,7 +2098,7 @@ function AllEars(readyCallback) {
 
 		_fetchEncrypted(_AEM_API_MESSAGE_DELETE, delId, null, function(response) {
 			if (typeof(response) === "number") {callback(response); return;}
-			if (response.length !== 1) {callback(0x4D); return;}
+			if (response.length !== 1) {callback(0x04); return;}
 			if (response[0] !== 0) {callback(response[0]); return;}
 
 			[_extMsg, _intMsg, _uplMsg, _outMsg].forEach(function(msgSet) {
@@ -2171,7 +2171,7 @@ function AllEars(readyCallback) {
 
 		_fetchEncrypted(_AEM_API_MESSAGE_UPLOAD, new Uint8Array([u8fn.length - 1]), u8data, function(response) {
 			if (typeof(response) === "number") {callback(response); return;}
-			if (response.length !== 1) {callback(0x4D); return;}
+			if (response.length !== 1) {callback(0x04); return;}
 			if (response[0] !== 0) {callback(response[0]); return;}
 
 			_uplMsg.unshift(new _UplMsg(/*newMsgId*/null, Date.now() / 1000, filename, u8body, null, u8data.length / 16));
@@ -2302,7 +2302,12 @@ function AllEars(readyCallback) {
 			case 0xA0: return ["INTERNAL", "Internal server error"];
 			case 0xA1: return ["CMD",      "Invalid API command"];
 			case 0xA2: return ["PARAM",    "Invalid API parameters"];
-			case 0xA3: return ["LEVEL",    "Insufficient account level"];
+			case 0xA3: return ["POST",     "Invalid POST body size"];
+			case 0xA4: return ["RECV",     "Failed sending POST body"];
+			case 0xA5: return ["LEVEL",    "Insufficient account level"];
+
+			// 0xB0-0xBF	General
+			case 0xB0: return ["MESSAGE_DELETE_NOTFOUND",     "Failed deleting message: not found"];
 
 			// 0xC0-0xC9	Account
 			case 0xC0: return ["ACCOUNT_CREATE_EXIST",        "Account already exists"];
