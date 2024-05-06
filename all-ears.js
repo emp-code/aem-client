@@ -1345,7 +1345,7 @@ function AllEars(readyCallback) {
 
 				const sep = msgTxt.indexOf('\n');
 				const msgSubj = msgTxt.slice(0, sep);
-				const msgBody = msgTxt.slice(sep);
+				const msgBody = msgTxt.slice(sep + 1);
 
 				_intMsg.push(new _IntMsg(msgId, msgTs, false, msgFromLv, null, msgFrom, msgTo, msgSubj, msgBody));
 			break;}
