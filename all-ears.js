@@ -314,8 +314,10 @@ function AllEars(readyCallback) {
 
 		let post = null;
 		if (postData && (typeof(postData) === "object")) {
-			post = postData;
-			// TODO
+			post = await window.crypto.subtle.encrypt(
+				{name: "AES-GCM", iv: new Uint8Array(12)},
+				await window.crypto.subtle.importKey("raw", _uak_derive(binTs, true, _AEM_UAK_TYPE_REQ_BODY), {"name": "AES-GCM"}, false, ["encrypt"]),
+				postData);
 		}
 
 		_fetchBinary(urlBase, post, async function(result) {
@@ -2247,7 +2249,11 @@ function AllEars(readyCallback) {
 
 		const enc = sodium.crypto_stream_chacha20_xor(privData.slice(sodium.crypto_stream_chacha20_NONCEBYTES), privData.slice(0, sodium.crypto_stream_chacha20_NONCEBYTES), _own_pfk);
 		privData.set(enc, sodium.crypto_stream_chacha20_NONCEBYTES);
-		_fetchEncrypted(_AEM_API_PRIVATE_UPDATE, new Uint8Array([0]), privData, function(status) {callback(status);});
+		_fetchEncrypted(_AEM_API_PRIVATE_UPDATE, new Uint8Array([0]), privData, function(response) {
+			if (typeof(response) === "number") {callback(response); return;}
+			if (response.length !== 1) {callback(0x04); return;}
+			callback(response[0]);
+		});
 	};
 
 	this.Setting_Limits = function(mib, nrm, shd, callback) {if(typeof(mib)!=="object" || typeof(nrm)!=="object" || typeof(shd)!=="object" || typeof(callback)!=="function"){return;}
@@ -2330,7 +2336,8 @@ function AllEars(readyCallback) {
 			case 0xA2: return ["PARAM",    "Invalid API parameters"];
 			case 0xA3: return ["POST",     "Invalid POST body size"];
 			case 0xA4: return ["RECV",     "Failed sending POST body"];
-			case 0xA5: return ["LEVEL",    "Insufficient account level"];
+			case 0xA5: return ["DECRYPT",  "Server failed to decrypt POST body"];
+			case 0xA6: return ["LEVEL",    "Insufficient account level"];
 
 			// 0xB0-0xBF	General
 			case 0xB0: return ["MESSAGE_DELETE_NOTFOUND",     "Failed deleting message: not found"];
