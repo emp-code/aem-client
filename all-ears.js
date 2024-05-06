@@ -928,7 +928,7 @@ function AllEars(readyCallback) {
 			_own_pfk
 		);
 
-		// Private - Address data
+		// Address data
 		for (let i = 0; i < pd[0]; i++) {
 			const start = 1 + (i * 18);
 			const hash = pd.slice(start, start + 8);
@@ -951,7 +951,7 @@ function AllEars(readyCallback) {
 			}
 		}
 
-		// Private - Contacts
+		// Contacts
 		let privOffset = 1 + (pd[0] * 18);
 		const contactCount = pd[privOffset];
 		privOffset++;
@@ -976,6 +976,7 @@ function AllEars(readyCallback) {
 			privOffset += end + 1;
 		}
 
+		// Extra
 		const extra = pd.slice(privOffset);
 		const zeroIndex = extra.indexOf(0);
 		try {_privateExtra = sodium.to_string((zeroIndex === -1) ? extra : extra.slice(0, zeroIndex));} catch(e) {}
