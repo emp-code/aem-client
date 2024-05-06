@@ -921,46 +921,12 @@ function AllEars(readyCallback) {
 		return "Error";
 	};
 
-	const _parseUinfo = function(browseData) {
-		_own_level = browseData[0] & 3;
-
-		// TODO empty arrays
-		for (let i = 0; i < 4; i++) {
-			if (i === _own_level) {
-				_maxStorage.push(browseData[1]);
-				_maxNormalA.push(browseData[2]);
-				_maxShieldA.push(browseData[3]);
-			} else {
-				// Unknown
-				_maxStorage.push(0);
-				_maxNormalA.push(0);
-				_maxShieldA.push(0);
-			}
-		}
-
-		// Addresses
-		let offset = 4;
-		for (let i = 0; i < (browseData[0] >> 2); i++) {
-			const hash = browseData.slice(offset, offset + 8);
-			_own_addr.push(new _Address(hash, null, browseData[offset + 8]));
-			offset += 9;
-		}
-
-		// Private field
-		if (sodium.is_zero(browseData.slice(offset, offset + _AEM_LEN_PRIVATE))) return offset + _AEM_LEN_PRIVATE; // Private data field not set
+	const _parsePrivate = function(pdEnc) {
 		const pd = sodium.crypto_stream_chacha20_xor(
-			browseData.slice(offset + sodium.crypto_stream_chacha20_NONCEBYTES, offset + _AEM_LEN_PRIVATE - sodium.crypto_stream_chacha20_NONCEBYTES),
-			browseData.slice(offset, offset + sodium.crypto_stream_chacha20_NONCEBYTES),
+			pdEnc.slice(sodium.crypto_stream_chacha20_NONCEBYTES, _AEM_LEN_PRIVATE - sodium.crypto_stream_chacha20_NONCEBYTES),
+			pdEnc.slice(0, sodium.crypto_stream_chacha20_NONCEBYTES),
 			_own_pfk
 		);
-		offset += _AEM_LEN_PRIVATE;
-
-		_addrNormal_salt = browseData.slice(offset, offset + sodium.crypto_pwhash_SALTBYTES);
-		offset += sodium.crypto_pwhash_SALTBYTES;
-		_addrNormal_olim = browseData[offset];
-		offset++;
-		_addrNormal_mlim = new Uint32Array(browseData.slice(offset, offset + 4).buffer)[0];
-		offset += 4;
 
 		// Private - Address data
 		for (let i = 0; i < pd[0]; i++) {
@@ -1013,6 +979,46 @@ function AllEars(readyCallback) {
 		const extra = pd.slice(privOffset);
 		const zeroIndex = extra.indexOf(0);
 		try {_privateExtra = sodium.to_string((zeroIndex === -1) ? extra : extra.slice(0, zeroIndex));} catch(e) {}
+	}
+
+	const _parseUinfo = function(browseData) {
+		_own_level = browseData[0] & 3;
+
+		// TODO empty arrays
+		for (let i = 0; i < 4; i++) {
+			if (i === _own_level) {
+				_maxStorage.push(browseData[1]);
+				_maxNormalA.push(browseData[2]);
+				_maxShieldA.push(browseData[3]);
+			} else {
+				// Unknown
+				_maxStorage.push(0);
+				_maxNormalA.push(0);
+				_maxShieldA.push(0);
+			}
+		}
+
+		// Addresses
+		let offset = 4;
+		for (let i = 0; i < (browseData[0] >> 2); i++) {
+			const hash = browseData.slice(offset, offset + 8);
+			_own_addr.push(new _Address(hash, null, browseData[offset + 8]));
+			offset += 9;
+		}
+
+		// Private field
+		if (!sodium.is_zero(browseData.slice(offset, offset + _AEM_LEN_PRIVATE))) {
+			_parsePrivate(browseData.slice(offset, offset + _AEM_LEN_PRIVATE));
+		}
+
+		offset += _AEM_LEN_PRIVATE;
+
+		_addrNormal_salt = browseData.slice(offset, offset + sodium.crypto_pwhash_SALTBYTES);
+		offset += sodium.crypto_pwhash_SALTBYTES;
+		_addrNormal_olim = browseData[offset];
+		offset++;
+		_addrNormal_mlim = new Uint32Array(browseData.slice(offset, offset + 4).buffer)[0];
+		offset += 4;
 
 		return offset;
 	};
