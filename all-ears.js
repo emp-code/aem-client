@@ -2009,7 +2009,6 @@ function AllEars(readyCallback) {
 			fetchId.set(newest? _newestMsgId : _getOldestMsgId(), 1);
 		} else fetchId = new Uint8Array([u_info? _AEM_FLAG_UINFO : 0]);
 
-		let privateFail = false;
 		_fetchEncrypted(_AEM_API_MESSAGE_BROWSE, fetchId, null, function(browseData) {
 			if (typeof(browseData) !== "object") {callback(browseData); return;}
 
