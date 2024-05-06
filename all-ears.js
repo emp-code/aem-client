@@ -2317,7 +2317,6 @@ function AllEars(readyCallback) {
 			case 0x09: return "Private-field out of space";
 			case 0x10: return "Cannot delete oldest message";
 			case 0x11: return "Invalid address";
-			case 0x12: return "Invalid private-field";
 
 			// 0xA0-0xAF	Basic
 			case 0xA0: return ["INTERNAL", "Internal server error"];
