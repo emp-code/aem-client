@@ -1329,8 +1329,8 @@ function AllEars(readyCallback) {
 					break;
 				}
 
-				const msgFromShield = (msgData[0] &  8) !== 0;
-				const msgToShield   = (msgData[0] &  4) !== 0;
+				const msgFromShield = (msgData[0] & 8) !== 0;
+				const msgToShield   = (msgData[0] & 4) !== 0;
 				const msgFromLv = msgData[0] & 3;
 
 				const msgFrom = _addr32_decode(msgData.slice( 1, 11), msgFromShield);
