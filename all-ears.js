@@ -338,7 +338,7 @@ function AllEars(readyCallback) {
 	};
 
 	const _addr32_encode = function(srcTxt) {
-		srcTxt = srcTxt.toLowerCase().replace("o", "0").replace("i", "1").replace("l", "1").replace("v", "w");
+		srcTxt = srcTxt.toLowerCase().replaceAll("o", "0").replaceAll("i", "1").replaceAll("l", "1").replaceAll("v", "w");
 
 		let lenSrc = 0;
 		const src = new Uint8Array(16);
