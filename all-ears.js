@@ -354,7 +354,7 @@ function AllEars(readyCallback) {
 			if (lenSrc == 16) break;
 		}
 
-		const abc = new Uint8Array([
+		return new Uint8Array([
 			((lenSrc == 16) ? (128 | (src[15] << 3)) : (lenSrc << 3)) | (src[0] >> 2),
 
 			(src[0]  << 6) | (src[1]  << 1) | (src[2] >> 4),
@@ -368,8 +368,6 @@ function AllEars(readyCallback) {
 			(src[11] << 7) | (src[12] << 2) | (src[13] >> 3),
 			(src[13] << 5) |  src[14]
 		]);
-
-		return abc;
 	};
 
 	const _addr32_decode = function(x) {
