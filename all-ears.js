@@ -337,75 +337,63 @@ function AllEars(readyCallback) {
 		});
 	};
 
-	const _getBit = function(src, bitNum) {
-		const bit = bitNum % 8;
-		const byte = (bitNum - bit) / 8;
+	const _addr32_encode = function(srcTxt) {
+		srcTxt = srcTxt.toLowerCase().replace("o", "0").replace("i", "1").replace("l", "1").replace("v", "w");
 
-		return ((1 & (src[byte] >> (7 - bit))) === 1);
-	};
+		let lenSrc = 0;
+		const src = new Uint8Array(16);
+		for (let i = 0; i < srcTxt.length; i++) {
+			for (let j = 0; j < 32; j++) {
+				if (srcTxt[i] === _AEM_ADDR32_CHARS[j]) {
+					src[lenSrc] = j;
+					lenSrc++;
+					break;
+				}
+			}
 
-	const _setBit = function(src, bitNum) {
-		const bit = bitNum % 8;
-		const byte = (bitNum - bit) / 8;
-
-		src[byte] |= 1 << (7 - bit);
-	};
-
-	const _addr32_decode = function(byteArray, is_shd) {
-		if (!byteArray || byteArray.length !== 10) return "???";
-
-		const len = is_shd ? 16 : (byteArray[0] & 248) >> 3; // First five bits (128+64+32+16+8=248) store length for Normal addresses
-
-		let decoded = "";
-
-		for (let i = 0; i < len; i++) {
-			let num = 0;
-			const skipBits = (is_shd ? i : i + 1) * 5;
-
-			if (_getBit(byteArray, skipBits + 0)) num += 16;
-			if (_getBit(byteArray, skipBits + 1)) num +=  8;
-			if (_getBit(byteArray, skipBits + 2)) num +=  4;
-			if (_getBit(byteArray, skipBits + 3)) num +=  2;
-			if (_getBit(byteArray, skipBits + 4)) num +=  1;
-
-			decoded += _AEM_ADDR32_CHARS[num];
+			if (lenSrc == 16) break;
 		}
 
-		return decoded;
+		const abc = new Uint8Array([
+			((lenSrc == 16) ? (128 | (src[15] << 3)) : (lenSrc << 3)) | (src[0] >> 2),
+
+			(src[0]  << 6) | (src[1]  << 1) | (src[2] >> 4),
+			(src[2]  << 4) | (src[3]  >> 1),
+			(src[3]  << 7) | (src[4]  << 2) | (src[5] >> 3),
+			(src[5]  << 5) |  src[6],
+
+			(src[7]  << 3) | (src[8]  >> 2),
+			(src[8]  << 6) | (src[9]  << 1) | (src[10] >> 4),
+			(src[10] << 4) | (src[11] >> 1),
+			(src[11] << 7) | (src[12] << 2) | (src[13] >> 3),
+			(src[13] << 5) |  src[14]
+		]);
+
+		return abc;
 	};
 
-	const _addr32_charToUint5 = function(c) {
-		for (let i = 0; i < 32; i++) {
-			if (c === _AEM_ADDR32_CHARS[i]) return i;
-		}
+	const _addr32_decode = function(x) {
+		const c = _AEM_ADDR32_CHARS;
 
-		if (c === "o") return 0; // 0
-		if (c === "i" || c === "l") return 1; // 1
-		if (c === "v") return 28; // w
+		const dec =
+		  c[((x[0] & 7) << 2) | (x[1] >> 6)]
+		+ c[(x[1] & 62) >> 1]
+		+ c[((x[1] & 1) << 4) | (x[2] >> 4)]
+		+ c[((x[2] & 15) << 1) | (x[3] >> 7)]
+		+ c[(x[3] >> 2) & 31]
+		+ c[((x[3] & 3) << 3) | (x[4] >> 5)]
+		+ c[x[4] & 31]
 
-		return -1;
-	};
+		+ c[x[5] >> 3]
+		+ c[((x[5] & 7) << 2) | (x[6] >> 6)]
+		+ c[(x[6] & 62) >> 1]
+		+ c[((x[6] & 1) << 4) | (x[7] >> 4)]
+		+ c[((x[7] & 15) << 1) | (x[8] >> 7)]
+		+ c[(x[8] >> 2) & 31]
+		+ c[((x[8] & 3) << 3) | (x[9] >> 5)]
+		+ c[x[9] & 31];
 
-	// Only for Normal, not Shield addresses
-	const _addr32_encode = function(source) {
-		if (source.length < 1 || source.length > 15) return null;
-
-		let encoded = new Uint8Array(10);
-		encoded[0] = source.length << 3; // First five bits store length
-
-		for (let i = 0; i < source.length; i++) {
-			const skipBits = (i + 1) * 5;
-
-			let num = _addr32_charToUint5(source[i]);
-			if (num < 0) return null;
-			if (num >= 16) {_setBit(encoded, skipBits + 0); num -= 16;}
-			if (num >=  8) {_setBit(encoded, skipBits + 1); num -=  8;}
-			if (num >=  4) {_setBit(encoded, skipBits + 2); num -=  4;}
-			if (num >=  2) {_setBit(encoded, skipBits + 3); num -=  2;}
-			if (num >=  1) {_setBit(encoded, skipBits + 4); num -=  1;}
-		}
-
-		return encoded;
+		return ((x[0] >> 3) < 16) ? dec.slice(0, x[0] >> 3) : dec + c[x[0] >> 3];
 	};
 
 	const _getAddressCount = function(isShield) {
@@ -1058,12 +1046,9 @@ function AllEars(readyCallback) {
 
 			newMsg = new _OutMsg_Ext(msgId, msgTs, msgIp, msgCc, msgTo, msgFr, msgSb, msgBd, msgMx, msgGr, msgCs, msgTlsVer, msgAttach);
 		} else { // Internal message
-			const isE2ee       = (msgData[1] & 64) !== 0;
-			const isFromShield = (msgData[1] &  8) !== 0;
-			const isToShield   = (msgData[1] &  4) !== 0;
-
-			const msgFr = _addr32_decode(msgData.slice(2, 12), isFromShield);
-			const msgTo = _addr32_decode(msgData.slice(12, 22), isToShield);
+			const isE2ee = (msgData[1] & 64) !== 0;
+			const msgFr = _addr32_decode(msgData.slice(2, 12));
+			const msgTo = _addr32_decode(msgData.slice(12, 22));
 
 			let msgBin;
 			if (isE2ee) {
@@ -1315,9 +1300,10 @@ function AllEars(readyCallback) {
 
 			case 16: { // IntMsg
 				const msgType = msgData[0] & 192;
+				// 32/16/8/4 unused
 
 				if (msgType >= 128) { // 192: System, 128: Public
-					// 32/16/8/4/2/1 unused
+					// 2/1 unused
 
 					let bodyAndTitle;
 					try {
@@ -1329,12 +1315,9 @@ function AllEars(readyCallback) {
 					break;
 				}
 
-				const msgFromShield = (msgData[0] & 8) !== 0;
-				const msgToShield   = (msgData[0] & 4) !== 0;
 				const msgFromLv = msgData[0] & 3;
-
-				const msgFrom = _addr32_decode(msgData.slice( 1, 11), msgFromShield);
-				const msgTo   = _addr32_decode(msgData.slice(11, 21), msgToShield);
+				const msgFrom = _addr32_decode(msgData.slice( 1, 11));
+				const msgTo   = _addr32_decode(msgData.slice(11, 21));
 //				const msgApk  = msgData.slice(21, 21 + 32);
 
 				const msgBin = msgData.slice(21 + 32);
@@ -1440,7 +1423,7 @@ function AllEars(readyCallback) {
 	this.getLevelMax = function() {return _AEM_USER_MAXLEVEL;};
 	this.getAddrPerUser = function() {return _AEM_ADDRESSES_PER_USER;};
 
-	this.getAddress = function(num) {if(typeof(num)!=="number"){return;} return _addr32_decode(_own_addr[num].addr32, (_own_addr[num].flags & _AEM_ADDR_FLAG_SHIELD) !== 0);};
+	this.getAddress = function(num) {if(typeof(num)!=="number"){return;} return _addr32_decode(_own_addr[num].addr32);};
 	this.getAddressOrigin = function(num) {if(typeof(num)!=="number"){return;} return (_own_addr[num].flags & _AEM_ADDR_FLAG_ORIGIN) !== 0;};
 	this.getAddressSecure = function(num) {if(typeof(num)!=="number"){return;} return (_own_addr[num].flags & _AEM_ADDR_FLAG_SECURE) !== 0;};
 	this.getAddressAttach = function(num) {if(typeof(num)!=="number"){return;} return (_own_addr[num].flags & _AEM_ADDR_FLAG_ATTACH) !== 0;};
