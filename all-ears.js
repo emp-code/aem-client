@@ -12,16 +12,10 @@ function AllEars(readyCallback) {
 		) return readyCallback(false);
 	} catch(e) {return readyCallback(false);}
 
-	const docUrlApi = document.head.querySelector("meta[name='aem.url.api']").content;
-	const docDomEml = document.head.querySelector("meta[name='aem.domain.eml']").content;
-
-	if (docDomEml !== "") {
-		const domainRegex = new RegExp(/^[0-9a-z.-]{1,63}\.[0-9a-z-]{2,63}$/);
-		if (docDomEml !== "" && !domainRegex.test(docDomEml)) return readyCallback(false);
-	}
-
 // Private constants - must match server
+	const _AEM_APIURL = document.head.querySelector("meta[name='aem.url.api']").content? document.head.querySelector("meta[name='aem.url.api']").content : "https://" + document.domain + ":302";
 	const _AEM_USERCOUNT = 4096;
+	const _AEM_MAXLEN_OURDOMAIN = 32;
 
 	// GET
 	const _AEM_API_ACCOUNT_BROWSE = 0;
@@ -78,9 +72,6 @@ function AllEars(readyCallback) {
 	const _AEM_USER_MAXLEVEL = 3;
 	const _X25519_PKBYTES = 32;
 
-	const _AEM_APIURL = docUrlApi? docUrlApi : "https://" + document.domain + ":302";
-	const _AEM_DOMAIN_EML = docDomEml? docDomEml : document.domain;
-
 	const _AEM_EMAIL_CERT_MATCH_HDRFR = 96;
 	const _AEM_EMAIL_CERT_MATCH_ENVFR = 64;
 	const _AEM_EMAIL_CERT_MATCH_GREET = 32;
@@ -94,6 +85,8 @@ function AllEars(readyCallback) {
 	const _AEM_EMAIL_CERT_RSA1K =  4;
 
 // Private variables
+	let _ourDomain = "unknown";
+
 	let _addrNormal_salt;
 	let _addrNormal_olim;
 	let _addrNormal_mlim;
@@ -1009,6 +1002,9 @@ function AllEars(readyCallback) {
 		_addrNormal_mlim = new Uint32Array(browseData.slice(offset, offset + 4).buffer)[0];
 		offset += 4;
 
+		_ourDomain = sodium.to_string(browseData.slice(offset, offset + _AEM_MAXLEN_OURDOMAIN));
+		offset += _AEM_MAXLEN_OURDOMAIN;
+
 		return offset;
 	};
 
@@ -1266,7 +1262,7 @@ function AllEars(readyCallback) {
 						o += lenDkimDomain[i];
 					}
 
-					const msgEnvTo = d.decode(msgBodyU8.slice(o, o + lenEnvTo)) + "@" + _AEM_DOMAIN_EML; o += lenEnvTo;
+					const msgEnvTo = d.decode(msgBodyU8.slice(o, o + lenEnvTo)) + "@" + _ourDomain; o += lenEnvTo;
 					const    hdrTo = d.decode(msgBodyU8.slice(o, o + lenHdrTo)); o+= lenHdrTo;
 					const msgGreet = d.decode(msgBodyU8.slice(o, o + lenGreet)); o+= lenGreet;
 					const msgRvDns = d.decode(msgBodyU8.slice(o, o + lenRvDns)); o+= lenRvDns;
@@ -1417,7 +1413,7 @@ function AllEars(readyCallback) {
 	};
 
 	this.getDomainApi = function() {return _AEM_DOMAIN_API;};
-	this.getDomainEml = function() {return _AEM_DOMAIN_EML;};
+	this.getDomainEml = function() {return _ourDomain;};
 	this.getLevelMax = function() {return _AEM_USER_MAXLEVEL;};
 	this.getAddrPerUser = function() {return _AEM_ADDRESSES_PER_USER;};
 
@@ -1527,7 +1523,7 @@ function AllEars(readyCallback) {
 	this.exportExtMsg = function(num) {if(typeof(num)!=="number"){return;}
 		return "Return-Path: <" + _extMsg[num].envFrom + ">"
 		+ "\r\nReceived: from " + _extMsg[num].greet +" (" + this.getExtMsgRdns(num) + " [" + this.getExtMsgIp(num) + "])"
-			+ " by " + _AEM_DOMAIN_EML
+			+ " by " + _ourDomain
 			+ " with " + (_extMsg[num].esmtp ? "E" : "") + "SMTP" + (_extMsg[num].tls ? "S" : "")
 			+ " id " + sodium.to_base64(_extMsg[num].id, sodium.base64_variants.URLSAFE_NO_PADDING)
 			+ " for <" + _extMsg[num].envTo + ">; "
@@ -1550,11 +1546,11 @@ function AllEars(readyCallback) {
 		return "Content-Transfer-Encoding: 8bit"
 		+ "\r\nContent-Type: text/plain; charset=utf-8"
 		+ "\r\nDate: " + new Date(_intMsg[num].ts * 1000).toUTCString().slice(0, 26) + "+0000"
-		+ "\r\nFrom: " + _intMsg[num].from + "@" + _AEM_DOMAIN_EML
+		+ "\r\nFrom: " + _intMsg[num].from + "@" + _ourDomain
 		+ "\r\nMIME-Version: 1.0"
-		+ "\r\nMessage-ID: <" + sodium.to_hex(_intMsg[num].id) + "@int." + _AEM_DOMAIN_EML + ">"
+		+ "\r\nMessage-ID: <" + sodium.to_hex(_intMsg[num].id) + "@int." + _ourDomain + ">"
 		+ "\r\nSubject: " + _intMsg[num].title
-		+ (_intMsg[num].to? ("\r\nTo: " + _intMsg[num].to + "@" + _AEM_DOMAIN_EML) : "")
+		+ (_intMsg[num].to? ("\r\nTo: " + _intMsg[num].to + "@" + _ourDomain) : "")
 		+ "\r\n\r\n" + _intMsg[num].body.replaceAll("\n", "\r\n")
 		+ "\r\n";
 	};
@@ -1601,8 +1597,8 @@ function AllEars(readyCallback) {
 		const el = document.createElement("iframe");
 		el.hidden = true;
 		document.body.appendChild(el);
-		el.contentWindow.document.body.innerHTML = "<pre>Date: " + msgDate + "\nFrom: " + _intMsg[num].from + "@" + _AEM_DOMAIN_EML
-			+ (_intMsg[num].to? ("\n  To: " + _intMsg[num].to + "@" + _AEM_DOMAIN_EML) : "")
+		el.contentWindow.document.body.innerHTML = "<pre>Date: " + msgDate + "\nFrom: " + _intMsg[num].from + "@" + _ourDomain
+			+ (_intMsg[num].to? ("\n  To: " + _intMsg[num].to + "@" + _ourDomain) : "")
 			+ "</pre><h1>" + _intMsg[num].title + "</h1>" + this.getIntMsgBody(num).replaceAll("\n", "<br>");
 
 		el.contentWindow.print();
@@ -1619,8 +1615,8 @@ function AllEars(readyCallback) {
 		const msgDate = new Date((_intMsg[num].ts * 1000) + ((new Date().getTimezoneOffset()) * -60000)).toISOString().slice(0, 19).replace("T", " ");
 		const msg = "<!doctype html><html><body>\n<pre>"
 			+ "\nDate: " + msgDate
-			+ "\nFrom: " + _intMsg[num].from + "@" + _AEM_DOMAIN_EML
-			+ (_intMsg[num].to? ("\n  To: " + _intMsg[num].to + "@" + _AEM_DOMAIN_EML) : "")
+			+ "\nFrom: " + _intMsg[num].from + "@" + _ourDomain
+			+ (_intMsg[num].to? ("\n  To: " + _intMsg[num].to + "@" + _ourDomain) : "")
 			+ "\n</pre>\n<h1>" + _intMsg[num].title + "</h1>\n<p>\n"
 			+ this.getIntMsgBody(num).replaceAll("\n", "<br>") + "\n</p>\n</body></html>";
 
@@ -1637,7 +1633,7 @@ function AllEars(readyCallback) {
 		const msgDate = new Date((_intMsg[num].ts * 1000) + ((new Date().getTimezoneOffset()) * -60000)).toISOString().slice(0, 19).replace("T", " ");
 		const msg = "Date: " + msgDate
 			+ "\nFrom: " + _intMsg[num].from
-			+ (_intMsg[num].to? ("@" + _AEM_DOMAIN_EML + "\nTo: " + _intMsg[num].to + "@" + _AEM_DOMAIN_EML) : "")
+			+ (_intMsg[num].to? ("@" + _ourDomain + "\nTo: " + _intMsg[num].to + "@" + _ourDomain) : "")
 			+ "\nSubject: " + _intMsg[num].title
 			+ "\n\n" + this.getIntMsgBody(num, true);
 
@@ -2345,7 +2341,7 @@ function AllEars(readyCallback) {
 			case 0xE6: return ["MESSAGE_CREATE_EXT_BDY_CTRL", "Body must not contain control characters"];
 			case 0xE7: return ["MESSAGE_CREATE_EXT_BDY_SIZE", "Body too long or short"];
 			case 0xE8: return ["MESSAGE_CREATE_EXT_BDY_LONG", "Body exceeds line-length limit"];
-			case 0xE9: return ["MESSAGE_CREATE_EXT_MYDOMAIN", "Remove @" + _AEM_DOMAIN_EML + " to send internally"];
+			case 0xE9: return ["MESSAGE_CREATE_EXT_MYDOMAIN", "Remove @" + _ourDomain + " to send internally"];
 			case 0xEE: return ["MESSAGE_CREATE_INT_OWN_ADDR", "Own address invalid"];
 			case 0xEF: return ["MESSAGE_CREATE_INT_REC_DENY", "Message denied by receiver"];
 
