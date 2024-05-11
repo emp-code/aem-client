@@ -1002,7 +1002,7 @@ function AllEars(readyCallback) {
 		_addrNormal_mlim = new Uint32Array(browseData.slice(offset, offset + 4).buffer)[0];
 		offset += 4;
 
-		_ourDomain = sodium.to_string(browseData.slice(offset, offset + _AEM_MAXLEN_OURDOMAIN));
+		_ourDomain = sodium.to_string(browseData.slice(offset, offset + _AEM_MAXLEN_OURDOMAIN)).replaceAll("\0", "");
 		offset += _AEM_MAXLEN_OURDOMAIN;
 
 		return offset;
