@@ -1975,7 +1975,11 @@ function AllEars(readyCallback) {
 			(x[30] &  3) // Last 6 bits unused
 		]);
 
-		_fetchEncrypted(_AEM_API_ADDRESS_UPDATE, data, null, function(status) {callback(status);});
+		_fetchEncrypted(_AEM_API_ADDRESS_UPDATE, data, null, function(response) {
+			if (typeof(response) === "number") {callback(response); return;}
+			if (response.length !== 1) {callback(0x04); return;}
+			callback(response[0]);
+		});
 	};
 
 	this.Message_Browse = function(newest, u_info, callback) {if(typeof(newest)!=="boolean" || typeof(u_info)!=="boolean" || typeof(callback)!=="function"){return;}
