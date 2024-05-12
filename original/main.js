@@ -183,8 +183,6 @@ function addMessages() {
 	let numExt = 0;
 	let numInt = 0;
 
-	//TODO handle sent messages separately
-
 	for (let i = 0; i < (page * 20) + 20; i++) {
 		const tsInt = (numInt < maxInt) ? ae.getIntMsgTime(numInt) : 0;
 		const tsExt = (numExt < maxExt) ? ae.getExtMsgTime(numExt) : 0;
@@ -550,13 +548,13 @@ document.getElementById("btn_inbox_next").onclick = function() {
 };
 
 document.getElementById("btn_enter").onclick = function() {
-	const txtSkey = document.getElementById("txt_skey");
-	if (!txtSkey.reportValidity()) return;
+	const txtUmk = document.getElementById("txt_umk");
+	if (!txtUmk.reportValidity()) return;
 
 	const btn = this;
 	btn.disabled = true;
 
-	ae.setKeys(txtSkey.value, function(success) {
+	ae.setKeys(txtUmk.value, function(success) {
 		if (!success) {
 			document.getElementById("begin_message").hidden = false;
 			document.getElementById("begin_message").textContent = "Error: Invalid key format";
@@ -572,7 +570,7 @@ document.getElementById("btn_enter").onclick = function() {
 				return;
 			}
 
-			txtSkey.value = "";
+			txtUmk.value = "";
 			reloadInterface();
 			document.getElementById("btn_refresh").click();
 		});
@@ -799,7 +797,7 @@ btns[0].onclick = function() {navNotesMenu(0);};
 btns[1].onclick = function() {navNotesMenu(1);};
 btns[2].onclick = function() {navNotesMenu(2);};
 
-document.getElementById("txt_skey").onkeyup = function(e) {
+document.getElementById("txt_umk").onkeyup = function(e) {
 	if (e.key === "Enter") document.getElementById("btn_enter").click();
 };
 
