@@ -222,7 +222,7 @@
 					<table>
 						<thead>
 							<tr>
-								<th>Public key</th>
+								<th>User</th>
 								<th><abbr title="Mebibyte">MiB</abbr></th>
 								<th><abbr title="Normal address count">Nrm</abbr></th>
 								<th><abbr title="Shield address count">Shd</abbr></th>
@@ -236,8 +236,11 @@
 					</table>
 
 					<div class="topmargin">
-						<input id="txt_newacc_pkey" type="text" class="mono" size="64" maxlength="64" required pattern="[0-9a-f]{64}" autocomplete="off" placeholder="Public key in hex">
-						<button type="button" autocomplete="off" id="btn_admin_addaccount">Add</button>
+						<input type="text" id="txt_reg_uak" minlength="64" maxlength="64" pattern="[0-9a-f]{64}" required autocomplete="off" placeholder="UAK" class="mono">
+						<br>
+						<input type="text" id="txt_reg_epk" minlength="64" maxlength="64" pattern="[0-9a-f]{64}" required autocomplete="off" placeholder="EPK" class="mono">
+						<br>
+						<button type="button" autocomplete="off" id="btn_admin_reg">Register</button>
 					</div>
 				</div>
 
