@@ -1397,16 +1397,6 @@ function AllEars(readyCallback) {
 		_admin_userShd.splice(0);
 		_admin_userLvl.splice(0);
 
-		if (_own_upk) sodium.memzero(_own_upk);
-		if (__SECRET_own_usk) sodium.memzero(__SECRET_own_usk);
-		if (__SECRET_own_kxHash) sodium.memzero(__SECRET_own_kxHash);
-		if (__SECRET_own_symmetric) sodium.memzero(__SECRET_own_symmetric);
-
-		_own_upk = null;
-		__SECRET_own_usk = null;
-		__SECRET_own_kxHash = null;
-		__SECRET_own_symmetric = null;
-
 		_totalMsgCount = 0;
 		_totalMsgBytes = 0;
 		_readyMsgBytes = 0;
@@ -1445,12 +1435,7 @@ function AllEars(readyCallback) {
 	this.getLimitShieldA = function(lvl) {if(typeof(lvl)!=="number"){return;} return _maxShieldA[lvl];};
 
 	this.getOwnApk = function(addr) {if (typeof(addr)!=="string"){return;}
-		try {
-			const kxKeys = sodium.crypto_kx_seed_keypair(sodium.crypto_generichash(sodium.crypto_kx_SEEDBYTES, _addr32_encode(addr), __SECRET_own_kxHash));
-			return sodium.to_base64(kxKeys.publicKey, sodium.base64_variants.ORIGINAL_NO_PADDING);
-		} catch(e) {
-			return "(error)".padEnd(43);
-		}
+		//TODO
 	};
 
 	this.getTotalMsgCount = function() {return _totalMsgCount;};
