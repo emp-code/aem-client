@@ -1357,7 +1357,7 @@ function AllEars(readyCallback) {
 				if (msgFn.endsWith(".br")) {
 					try {
 						msgBody = new Uint8Array(window.BrotliDecode(new Int8Array(msgBody)));
-						msgFn = msgTitle.replace(/\.br$/, "");
+						msgFn = msgFn.slice(0, msgFn.length - 3);
 					} catch(e) {
 						msgBody = "Failed decompression";
 					}
