@@ -1340,18 +1340,18 @@ function AllEars(readyCallback) {
 				} else {
 					// Uploaded file
 					const nonce = new Uint8Array(16);
-					nonce.set(msgData.slice(msgData.length - 12));
-
+					nonce.set(msgData.slice(1, 13));
 					const dec = new Uint8Array(await window.crypto.subtle.decrypt(
 						{name: "AES-CTR", counter: nonce, length: 32},
 						await window.crypto.subtle.importKey("raw", _own_ehk, {"name": "AES-CTR"}, false, ["decrypt"]),
-						msgData.slice(0, msgData.length - 12)
+						msgData
 					));
 
+					const lenFn = (dec[0] & 127) + 1;
 					try {
-						msgFn = sodium.to_string(dec.slice(1, 1 + (dec[0] & 127)));
+						msgFn = sodium.to_string(dec.slice(13, 13 + lenFn));
 					} catch(e) {msgFn = "error";}
-					msgBody = dec.slice(1 + dec[0]);
+					msgBody = dec.slice(13 + lenFn);
 				}
 
 				if (msgFn.endsWith(".br")) {
@@ -1367,7 +1367,7 @@ function AllEars(readyCallback) {
 			break;}
 
 			case 48: // OutMsg (Delivery report for sent message)
-				_addOutMsg(msgData, msgId, msgTs, msgTs_bin, false);
+//				_addOutMsg(msgData, msgId, msgTs, msgTs_bin, false);
 			break;
 		}
 
@@ -2142,38 +2142,37 @@ function AllEars(readyCallback) {
 		if (u8fn.length > 128) {callback(0x04); return;}
 		const u8body = (typeof(body) === "string") ? sodium.from_string(body) : body;
 
-		const lenData = 12 + u8fn.length + u8body.length;
-		if (lenData + 1 > _AEM_MSG_SRC_MAXSIZE) {callback(0x07); return;} // 1 added server-side
-		if (lenData + 1 < _AEM_MSG_SRC_MINSIZE) {callback(0x08); return;}
+		const lenData = 13 + u8fn.length + u8body.length;
+		if (lenData > _AEM_MSG_SRC_MAXSIZE) {callback(0x07); return;}
+		if (lenData < _AEM_MSG_SRC_MINSIZE) {callback(0x08); return;}
 
-		const u8data = new Uint8Array(1 + lenData - 12);
-		u8data[0] = u8fn.length;
-		u8data.set(u8fn, 1);
-		u8data.set(u8body, 1 + u8fn.length);
+		const rawData = new Uint8Array(13 + u8fn.length + u8body.length);
+		rawData[0] = u8fn.length - 1;
+		// 12 byte nonce
+		rawData.set(u8fn, 13);
+		rawData.set(u8body, 13 + u8fn.length);
 
 		const nonce = new Uint8Array(16);
 		nonce.set(window.crypto.getRandomValues(new Uint8Array(12)));
 
-		const encData = new Uint8Array(u8data.length + 12);
-		encData.set(new Uint8Array(await window.crypto.subtle.encrypt(
+		const encData = new Uint8Array(await window.crypto.subtle.encrypt(
 			{name: "AES-CTR", counter: nonce, length: 32},
 			await window.crypto.subtle.importKey("raw", _own_ehk, {"name": "AES-CTR"}, false, ["encrypt"]),
-			u8data)
-		));
-		encData.set(nonce.slice(0, 12), u8data.length);
+			rawData)
+		);
+		encData.set(nonce.slice(0, 12), 1);
 
-		_fetchEncrypted(_AEM_API_MESSAGE_UPLOAD, new Uint8Array([encData[0] & 127]), encData.slice(1), function(response) {
+		_fetchEncrypted(_AEM_API_MESSAGE_UPLOAD, encData.slice(0, 24), encData.slice(24), function(response) {
 			if (typeof(response) === "number") {callback(response); return;}
 			if (response.length !== 1) {callback(0x04); return;}
 			if (response[0] !== 0) {callback(response[0]); return;}
 
-			_uplMsg.unshift(new _UplMsg(/*newMsgId*/null, Date.now() / 1000, filename, u8body, null, u8data.length / 16));
-
-			let x = u8data.length + 53; // 5 (info + ts) + 48 (Envelope)
+			let x = encData.length + 53; // 5 (info + ts) + 48 (Envelope)
 			if (x % 16 !== 0) x+= (16 - (x % 16));
 			_totalMsgBytes += x;
 			_readyMsgBytes += x;
 
+			_uplMsg.unshift(new _UplMsg(/*newMsgId*/null, Date.now() / 1000, filename, u8body, null, x / 16));
 			callback(0);
 		});
 	};
