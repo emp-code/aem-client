@@ -2240,6 +2240,9 @@ function AllEars(readyCallback) {
 		pd.set(sodium.from_string(_privateExtra).slice(0, _AEM_LEN_PRIVATE - offset), offset);
 
 		// Use the Private Field Key to derive two key-nonce sets: one for us, and one for the server
+		_own_privateNonce++;
+		if (_own_privateNonce >= Math.pow(2, 32)) _own_privateNonce = 0;
+
 		const pfk_nonce = new Uint8Array(8);
 		pfk_nonce.set(new Uint8Array(new Uint32Array([_own_privateNonce]).buffer));
 
