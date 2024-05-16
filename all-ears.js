@@ -104,6 +104,8 @@ function AllEars(readyCallback) {
 	let _own_ehk; // Envelope Hidden Key
 	let _own_pfk; // Private Field Key
 
+	let _own_privateNonce = null;
+
 	// Other user data
 	let _own_uid = 0;
 	let _own_upk = 0;
@@ -902,12 +904,39 @@ function AllEars(readyCallback) {
 		return "Error";
 	};
 
-	const _parsePrivate = function(pdEnc) {
-		const pd = sodium.crypto_stream_chacha20_xor(
-			pdEnc.slice(sodium.crypto_stream_chacha20_NONCEBYTES, _AEM_LEN_PRIVATE - sodium.crypto_stream_chacha20_NONCEBYTES),
-			pdEnc.slice(0, sodium.crypto_stream_chacha20_NONCEBYTES),
-			_own_pfk
+	const _parsePrivate = async function(pdEnc) {
+		// Derive the two key-nonce sets
+		const pfk_nonce = new Uint8Array(8);
+		pfk_nonce.set(pdEnc.slice(0, 4));
+
+		const kn_client = _aem_kdf(44, pfk_nonce, _own_pfk);
+		pfk_nonce[7] = 1;
+		const kn_server = _aem_kdf(44, pfk_nonce, _own_pfk);
+
+		// Decrypt the server's ChaCha20 encryption
+		let pdAes = sodium.crypto_stream_chacha20_ietf_xor(
+			pdEnc.slice(4),
+			kn_server.slice(0, 12),
+			kn_server.slice(12, 44)
 		);
+
+		// Decrypt and authenticate our AES256-GCM encryption
+		let pd;
+		try {
+			pd = new Uint8Array(await window.crypto.subtle.decrypt(
+				{name: "AES-GCM", iv: kn_client.slice(0, 12)},
+				await window.crypto.subtle.importKey("raw", kn_client.slice(12), {"name": "AES-GCM"}, false, ["decrypt"]),
+				pdAes
+			));
+		} catch(e) {
+			// Private field unset/corrupted, set a random starting nonce
+			_own_privateNonce = Math.floor(Math.random() * (Math.pow(2, 32) - 1));
+			return;
+		}
+
+		// Set new nonce
+		_own_privateNonce = new Uint32Array(pdEnc.slice(0, 4).buffer)[0] + 1;
+		if (_own_privateNonce >= Math.pow(2, 32)) _own_privateNonce = 0;
 
 		// Address data
 		for (let i = 0; i < pd[0]; i++) {
@@ -960,10 +989,10 @@ function AllEars(readyCallback) {
 		// Extra
 		const extra = pd.slice(privOffset);
 		const zeroIndex = extra.indexOf(0);
-		try {_privateExtra = sodium.to_string((zeroIndex === -1) ? extra : extra.slice(0, zeroIndex));} catch(e) {}
+		try {_privateExtra = sodium.to_string((zeroIndex === -1) ? extra : extra.slice(0, zeroIndex));} catch(e) {_privateExtra = "(error)";}
 	}
 
-	const _parseUinfo = function(browseData) {
+	const _parseUinfo = async function(browseData) {
 		_own_level = browseData[0] & 3;
 
 		// TODO empty arrays
@@ -989,10 +1018,7 @@ function AllEars(readyCallback) {
 		}
 
 		// Private field
-		if (!sodium.is_zero(browseData.slice(offset, offset + _AEM_LEN_PRIVATE))) {
-			_parsePrivate(browseData.slice(offset, offset + _AEM_LEN_PRIVATE));
-		}
-
+		await _parsePrivate(browseData.slice(offset, offset + _AEM_LEN_PRIVATE));
 		offset += _AEM_LEN_PRIVATE;
 
 		_addrNormal_salt = browseData.slice(offset, offset + sodium.crypto_pwhash_SALTBYTES);
@@ -1977,12 +2003,12 @@ function AllEars(readyCallback) {
 			fetchId.set(newest? _newestMsgId : _getOldestMsgId(), 1);
 		} else fetchId = new Uint8Array([u_info? _AEM_FLAG_UINFO : 0]);
 
-		_fetchEncrypted(_AEM_API_MESSAGE_BROWSE, fetchId, null, function(browseData) {
+		_fetchEncrypted(_AEM_API_MESSAGE_BROWSE, fetchId, null, async function(browseData) {
 			if (typeof(browseData) !== "object") {callback(browseData); return;}
 
 			if (u_info) {
 				if (browseData.length < _AEM_LEN_PRIVATE) {callback(0x04); return;}
-				const uinfo_bytes = _parseUinfo(browseData);
+				const uinfo_bytes = await _parseUinfo(browseData);
 				browseData = browseData.slice(uinfo_bytes);
 			}
 
@@ -2177,22 +2203,22 @@ function AllEars(readyCallback) {
 		});
 	};
 
-	this.Private_Update = function(callback) {if(typeof(callback)!=="function"){return;}
-		// 64-bit nonce for the Private Field is considered sufficient since it's overwritten each time, and it's only available to AEM-Account
-		const privData = new Uint8Array(_AEM_LEN_PRIVATE);
-		privData.set(window.crypto.getRandomValues(new Uint8Array(sodium.crypto_stream_chacha20_NONCEBYTES)));
-		let offset = sodium.crypto_stream_chacha20_NONCEBYTES;
+	this.Private_Update = async function(callback) {if(typeof(callback)!=="function"){return;}
+		if (typeof(_own_privateNonce) !== "number") {callback(0x12); return;}
 
-		privData[offset] = _own_addr.length;
-		offset++;
+		// Create the data field
+		const pd = new Uint8Array(_AEM_LEN_PRIVATE - 20); // 16 MAC + 4 Nonce
+
+		pd[0] = _own_addr.length;
+		let offset = 1;
 
 		for (let i = 0; i < _own_addr.length; i++) {
-			privData.set(_own_addr[i].hash, offset);
-			privData.set(_own_addr[i].addr32, offset + 8);
+			pd.set(_own_addr[i].hash, offset);
+			pd.set(_own_addr[i].addr32, offset + 8);
 			offset += 18;
 		}
 
-		privData[offset] = _contactMail.length;
+		pd[offset] = _contactMail.length;
 		offset++;
 
 		for (let i = 0; i < _contactMail.length; i++) {
@@ -2200,21 +2226,41 @@ function AllEars(readyCallback) {
 			const cName = sodium.from_string(_contactName[i] + "\n");
 			const cNote = sodium.from_string(_contactNote[i] + "\n");
 
-			privData.set(cMail, offset);
+			pd.set(cMail, offset);
 			offset += cMail.length;
 
-			privData.set(cName, offset);
+			pd.set(cName, offset);
 			offset += cName.length;
 
-			privData.set(cNote, offset);
+			pd.set(cNote, offset);
 			offset += cNote.length;
 		}
 
-		privData.set(sodium.from_string(_privateExtra).slice(0, _AEM_LEN_PRIVATE - offset), offset);
+		pd.set(sodium.from_string(_privateExtra).slice(0, _AEM_LEN_PRIVATE - offset), offset);
 
-		const enc = sodium.crypto_stream_chacha20_xor(privData.slice(sodium.crypto_stream_chacha20_NONCEBYTES), privData.slice(0, sodium.crypto_stream_chacha20_NONCEBYTES), _own_pfk);
-		privData.set(enc, sodium.crypto_stream_chacha20_NONCEBYTES);
-		_fetchEncrypted(_AEM_API_PRIVATE_UPDATE, new Uint8Array([0]), privData, function(response) {
+		// Use the Private Field Key to derive two key-nonce sets: one for us, and one for the server
+		const pfk_nonce = new Uint8Array(8);
+		pfk_nonce.set(new Uint8Array(new Uint32Array([_own_privateNonce]).buffer));
+
+		const kn_client = _aem_kdf(44, pfk_nonce, _own_pfk);
+		pfk_nonce[7] = 1;
+		const kn_server = _aem_kdf(44, pfk_nonce, _own_pfk);
+
+		// Client-side encryption
+		const encData = new Uint8Array(await window.crypto.subtle.encrypt(
+			{name: "AES-GCM", iv: kn_client.slice(0, 12)},
+			await window.crypto.subtle.importKey("raw", kn_client.slice(12), {"name": "AES-GCM"}, false, ["encrypt"]),
+			pd
+		));
+
+		// POST data includes the key-nonce set for the server (not stored) and the 32-bit nonce (stored)
+		const post = new Uint8Array(48 + encData.length);
+		post.set(kn_server);
+		post.set(pfk_nonce.slice(0, 4), 44);
+		post.set(encData, 48);
+
+		// Send the request
+		_fetchEncrypted(_AEM_API_PRIVATE_UPDATE, new Uint8Array([0]), post, function(response) {
 			if (typeof(response) === "number") {callback(response); return;}
 			if (response.length !== 1) {callback(0x04); return;}
 			callback(response[0]);
@@ -2294,6 +2340,7 @@ function AllEars(readyCallback) {
 			case 0x09: return "Private-field out of space";
 			case 0x10: return "Cannot delete oldest message";
 			case 0x11: return "Invalid address";
+			case 0x12: return "Cannot update Private field without fetching it first";
 
 			// 0xA0-0xAF	Basic
 			case 0xA0: return ["INTERNAL", "Internal server error"];
