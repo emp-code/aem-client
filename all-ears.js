@@ -366,8 +366,9 @@ function AllEars(readyCallback) {
 	};
 
 	const _addr32_decode = function(x) {
-		const c = _AEM_ADDR32_CHARS;
+		if (!x) return "(error)";
 
+		const c = _AEM_ADDR32_CHARS;
 		const dec =
 		  c[((x[0] & 7) << 2) | (x[1] >> 6)]
 		+ c[(x[1] & 62) >> 1]
