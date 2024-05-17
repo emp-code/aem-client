@@ -94,7 +94,7 @@
 
 				Your User Master Key (UMK):
 				<br>
-				<input type="password" readonly="readonly" size="43" id="user_umk" placeholder="Press Generate" autocomplete="off">
+				<input type="password" readonly="readonly" size="60" id="user_umk" placeholder="Press Generate" autocomplete="off">
 				<br>
 				<b style="color: #b44;">Never share this key with anyone.</b>
 			</div>
@@ -125,7 +125,7 @@
 			<p>
 				Your User Access Key (UAK):
 				<br>
-				<input type="text" readonly="readonly" size="64" id="user_uak">
+				<input type="text" readonly="readonly" size="74" id="user_uak">
 			</p>
 
 			<p>
@@ -150,20 +150,28 @@
 
 		<script>
 			sodium.ready.then(function() {
-				const _AEM_KDF_KEYID_UMK_UAK = new Uint8Array([0x01,0,0,0,0,0,0,0]);
-				const _AEM_KDF_KEYID_UMK_ESK = new Uint8Array([0x02,0,0,0,0,0,0,0]);
-				const _AEM_KDF_KEYID_UAK_UID = new Uint8Array([0x10,0,0,0,0,0,0,0]);
+				const _AEM_KDF_KEYID_UMK_UAK = 1;
+				const _AEM_KDF_KEYID_UMK_ESK = 2;
+				const _AEM_KDF_KEYID_UAK_UID = new Uint8Array([0x01,0,0,0,0,0,0,0]);
 
-				const _aem_kdf = function(size, nonce, key) {
-					return sodium.crypto_stream_chacha20(size, key, nonce);
+				const _aem_kdf_umk = function(size, id, key) {
+					const counter = (id << 8) | (key[44] << 16);
+					return sodium.crypto_stream_chacha20_ietf_xor_ic(new Uint8Array(size), key.slice(32, 44), counter, key.slice(0, 32));
+				}
+
+				const _aem_kdf_sub = function(size, n, key) {
+					const counter = ((key[36] & 127) << 24) | ((key[36] & 128) << 16);
+					const nonce = new Uint8Array([key[32], key[33], key[34], key[35], n[0], n[1], n[2], n[3], n[4], n[5], n[6], n[7]]);
+					return sodium.crypto_stream_chacha20_ietf_xor_ic(new Uint8Array(size), nonce, counter, key.slice(0, 32));
 				}
 
 				document.getElementById("btn_gen").onclick = function() {
-					const umk = window.crypto.getRandomValues(new Uint8Array(32));
-					const uak = _aem_kdf(32, _AEM_KDF_KEYID_UMK_UAK, umk);
-					const esk = _aem_kdf(32, _AEM_KDF_KEYID_UMK_ESK, umk);
+					const umk = window.crypto.getRandomValues(new Uint8Array(45));
+
+					const uak = _aem_kdf_umk(37, _AEM_KDF_KEYID_UMK_UAK, umk);
+					const esk = _aem_kdf_umk(32, _AEM_KDF_KEYID_UMK_ESK, umk);
 					const epk = sodium.crypto_scalarmult_base(esk);
-					const uid = new Uint16Array(_aem_kdf(2, _AEM_KDF_KEYID_UAK_UID, uak).buffer)[0] & 4095;
+					const uid = new Uint16Array(_aem_kdf_sub(2, _AEM_KDF_KEYID_UAK_UID, uak).buffer)[0] & 4095;
 					if (uid === 0) return document.getElementById("btn_gen").onclick();
 
 					document.getElementById("user_uid").textContent = String.fromCharCode(97 + (uid & 15)) + String.fromCharCode(97 + ((uid >> 4) & 15)) + String.fromCharCode(97 + ((uid >> 8) & 15));

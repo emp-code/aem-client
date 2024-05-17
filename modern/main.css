@@ -242,7 +242,7 @@ textarea {
 	background-color: #233;
 }
 
-#txt_umk:not(:disabled)[maxlength="43"] {
+#txt_umk:not(:disabled)[maxlength="60"] {
 	background-color: #466;
 }
 

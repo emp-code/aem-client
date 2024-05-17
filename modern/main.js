@@ -25,7 +25,7 @@ const ae = new AllEars(function(ok) {
 		document.getElementById("txt_pg").value = "LocalStorage inaccessible";
 	}
 
-	document.getElementById("txt_umk").maxLength = "43";
+	document.getElementById("txt_umk").maxLength = "60";
 });
 
 function TabState(cur, max, btnDele, btnUpdt) {

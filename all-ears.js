@@ -43,12 +43,12 @@ function AllEars(readyCallback) {
 	const _AEM_UAK_TYPE_RES_BODY = 96;
 	const _AEM_UAK_POST = 128;
 
-	const _AEM_KDF_KEYID_UMK_UAK = new Uint8Array([0x01,0,0,0,0,0,0,0]);
-	const _AEM_KDF_KEYID_UMK_ESK = new Uint8Array([0x02,0,0,0,0,0,0,0]);
-	const _AEM_KDF_KEYID_UMK_EHK = new Uint8Array([0x03,0,0,0,0,0,0,0]);
-	const _AEM_KDF_KEYID_UMK_PFK = new Uint8Array([0x04,0,0,0,0,0,0,0]);
-	const _AEM_KDF_KEYID_UAK_UID = new Uint8Array([0x10,0,0,0,0,0,0,0]);
-	const _AEM_KDF_KEYID_UAK_EAK = new Uint8Array([0x11,0,0,0,0,0,0,0]);
+	const _AEM_KDF_KEYID_UMK_UAK = 1;
+	const _AEM_KDF_KEYID_UMK_ESK = 2;
+	const _AEM_KDF_KEYID_UMK_EHK = 3;
+	const _AEM_KDF_KEYID_UMK_PFK = 4;
+
+	const _AEM_KDF_KEYID_UAK_UID = new Uint8Array([0x01,0,0,0,0,0,0,0]);
 
 	const _AEM_ADDR_FLAG_SHIELD = 128;
 	// 64 unused
@@ -65,7 +65,7 @@ function AllEars(readyCallback) {
 
 	const _AEM_ADDR32_CHARS = "0123456789abcdefghjkmnpqrstuwxyz";
 	const _AEM_ADDRESSES_PER_USER = 31;
-	const _AEM_LEN_PRIVATE = 4523;
+	const _AEM_LEN_PRIVATE = 4518;
 	const _AEM_MSG_MINBLOCKS = 12;
 	const _AEM_MSG_SRC_MAXSIZE = 1048699; // ((2^16 - 1) + 12) * 16 - 48 - 5; 1MiB + 123B
 	const _AEM_MSG_SRC_MINSIZE = 124;
@@ -97,7 +97,6 @@ function AllEars(readyCallback) {
 
 	// User keys shared with the Server
 	let _own_uak; // User Access Key
-	let _own_eak; // Envelope Access Key
 
 	// Private user keys
 	let _own_esk; // Envelope Secret Key
@@ -249,8 +248,15 @@ function AllEars(readyCallback) {
 		]);
 	}
 
-	const _aem_kdf = function(size, nonce, key) {
-		return sodium.crypto_stream_chacha20(size, key, nonce);
+	const _aem_kdf_umk = function(size, id, key) {
+		const counter = (id << 8) | (key[44] << 16);
+		return sodium.crypto_stream_chacha20_ietf_xor_ic(new Uint8Array(size), key.slice(32, 44), counter, key.slice(0, 32));
+	}
+
+	const _aem_kdf_sub = function(size, n, key) {
+		const counter = ((key[36] & 127) << 24) | ((key[36] & 128) << 16);
+		const nonce = new Uint8Array([key[32], key[33], key[34], key[35], n[0], n[1], n[2], n[3], n[4], n[5], n[6], n[7]]);
+		return sodium.crypto_stream_chacha20_ietf_xor_ic(new Uint8Array(size), nonce, counter, key.slice(0, 32));
 	}
 
 	const _uak_derive = function(binTs, post, type) {
@@ -258,7 +264,7 @@ function AllEars(readyCallback) {
 		nonce.set(binTs);
 		nonce[5] = (post? _AEM_UAK_POST : 0) | type;
 
-		return _aem_kdf(32, nonce, _own_uak);
+		return _aem_kdf_sub(32, nonce, _own_uak);
 	}
 
 	const _fetchBinary = async function(urlBase, postData, callback) {
@@ -910,9 +916,9 @@ function AllEars(readyCallback) {
 		const pfk_nonce = new Uint8Array(8);
 		pfk_nonce.set(pdEnc.slice(0, 4));
 
-		const kn_client = _aem_kdf(44, pfk_nonce, _own_pfk);
+		const kn_client = _aem_kdf_sub(44, pfk_nonce, _own_pfk);
 		pfk_nonce[7] = 1;
-		const kn_server = _aem_kdf(44, pfk_nonce, _own_pfk);
+		const kn_server = _aem_kdf_sub(44, pfk_nonce, _own_pfk);
 
 		// Decrypt the server's ChaCha20 encryption
 		let pdAes = sodium.crypto_stream_chacha20_ietf_xor(
@@ -1758,25 +1764,24 @@ function AllEars(readyCallback) {
 	};
 
 	this.setKeys = function(umk_b64, callback) {if(typeof(umk_b64)!=="string" || typeof(callback)!=="function"){return;}
-		if (umk_b64.length !== 43) {
+		if (umk_b64.length !== 60) {
 			callback(false);
 			return;
 		}
 
 		let umk;
 		try {
-			umk = sodium.from_base64(umk_b64, sodium.base64_variants.ORIGINAL_NO_PADDING);
+			umk = sodium.from_base64(umk_b64, sodium.base64_variants.ORIGINAL);
 		} catch(e) {
 			callback(false);
 			return;
 		}
 
-		_own_uak = _aem_kdf(32, _AEM_KDF_KEYID_UMK_UAK, umk);
-		_own_eak = _aem_kdf(32, _AEM_KDF_KEYID_UAK_EAK, _own_uak);
-		_own_esk = _aem_kdf(32, _AEM_KDF_KEYID_UMK_ESK, umk);
-		_own_ehk = _aem_kdf(32, _AEM_KDF_KEYID_UMK_EHK, umk);
-		_own_pfk = _aem_kdf(32, _AEM_KDF_KEYID_UMK_PFK, umk);
-		_own_uid = new Uint16Array(_aem_kdf(2, _AEM_KDF_KEYID_UAK_UID, _own_uak).buffer)[0] & 4095;
+		_own_uak = _aem_kdf_umk(37, _AEM_KDF_KEYID_UMK_UAK, umk);
+		_own_esk = _aem_kdf_umk(32, _AEM_KDF_KEYID_UMK_ESK, umk);
+		_own_ehk = _aem_kdf_umk(32, _AEM_KDF_KEYID_UMK_EHK, umk);
+		_own_pfk = _aem_kdf_umk(37, _AEM_KDF_KEYID_UMK_PFK, umk);
+		_own_uid = new Uint16Array(_aem_kdf_sub(2, _AEM_KDF_KEYID_UAK_UID, _own_uak).buffer)[0] & 4095;
 
 		callback(true);
 	};
@@ -1817,17 +1822,17 @@ function AllEars(readyCallback) {
 		});
 	};
 
-	this.Account_Create = function(uak_hex, epk_hex, callback) {if(typeof(uak_hex)!=="string" || uak_hex.length!==64 || typeof(epk_hex)!=="string" || epk_hex.length!==64 || typeof(callback)!=="function"){return;}
-		let data = new Uint8Array(64);
+	this.Account_Create = function(uak_hex, epk_hex, callback) {if(typeof(uak_hex)!=="string" || uak_hex.length!==74 || typeof(epk_hex)!=="string" || epk_hex.length!==64 || typeof(callback)!=="function"){return;}
+		let data = new Uint8Array(69);
 		data.set(sodium.from_hex(uak_hex));
-		data.set(sodium.from_hex(epk_hex), 32);
+		data.set(sodium.from_hex(epk_hex), 37);
 
 		_fetchEncrypted(_AEM_API_ACCOUNT_CREATE, new Uint8Array([0]), data, function(response) {
 			if (typeof(response) === "number") {callback(response); return;}
 			if (response.length !== 1) {callback(0x04); return;}
 			if (response[0] !== 0x00) {callback(response[0]); return;}
 
-			const new_uid = new Uint16Array(_aem_kdf(2, _AEM_KDF_KEYID_UAK_UID, sodium.from_hex(uak_hex)).buffer)[0] & 4095;
+			const new_uid = new Uint16Array(_aem_kdf_sub(2, _AEM_KDF_KEYID_UAK_UID, sodium.from_hex(uak_hex)).buffer)[0] & 4095;
 
 			_admin_userUid.push(new_uid);
 			_admin_userLvl.push(0);
@@ -2246,9 +2251,9 @@ function AllEars(readyCallback) {
 		const pfk_nonce = new Uint8Array(8);
 		pfk_nonce.set(new Uint8Array(new Uint32Array([_own_privateNonce]).buffer));
 
-		const kn_client = _aem_kdf(44, pfk_nonce, _own_pfk);
+		const kn_client = _aem_kdf_sub(44, pfk_nonce, _own_pfk);
 		pfk_nonce[7] = 1;
-		const kn_server = _aem_kdf(44, pfk_nonce, _own_pfk);
+		const kn_server = _aem_kdf_sub(44, pfk_nonce, _own_pfk);
 
 		// Client-side encryption
 		const encData = new Uint8Array(await window.crypto.subtle.encrypt(
