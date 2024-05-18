@@ -1769,7 +1769,10 @@ document.getElementById("btn_enter").onclick = function() {
 			document.body.style.cursor = "";
 
 			if (errorBrowse !== 0 && errorBrowse !== 0x09) {
-				document.getElementById("greeting").textContent = ae.getErrorMessage(errorBrowse) + " ("+ ((errorBrowse >= 400) ? errorBrowse : "0x" + errorBrowse.toString(16).padStart(2, "0").toUpperCase()) + ")";
+				let errorMsg = ae.getErrorMessage(errorBrowse);
+				if (typeof(errorMsg) == "object") errorMsg = errorMsg[1];
+
+				document.getElementById("greeting").textContent = errorMsg + " ("+ ((errorBrowse >= 400) ? errorBrowse : "0x" + errorBrowse.toString(16).padStart(2, "0").toUpperCase()) + ")";
 				document.getElementById("txt_umk").disabled = false;
 				btn.disabled = false;
 				btn.focus();
