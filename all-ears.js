@@ -1965,7 +1965,7 @@ function AllEars(readyCallback) {
 	};
 
 	this.Address_Delete = function(num, callback) {if(typeof(num)!=="number" || typeof(callback)!=="function"){return;}
-		_fetchEncrypted(_AEM_API_ADDRESS_DELETE, (_own_addr[i].addr32[0] & 16) ? 128 : 0, _own_addr[num].hash, null, function(response) {
+		_fetchEncrypted(_AEM_API_ADDRESS_DELETE, (_own_addr[num].addr32[0] & 16) ? 128 : 0, _own_addr[num].hash, null, function(response) {
 			if (typeof(response) === "number") {callback(response); return;}
 			if (response.length !== 1) {callback(0x04); return;}
 			if (response[0] !== 0) {callback(response[0]); return;}
