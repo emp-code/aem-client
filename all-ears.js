@@ -114,7 +114,7 @@ function AllEars(readyCallback) {
 	const _intMsg = [];
 	const _uplMsg = [];
 	const _outMsg = [];
-	let _newestMsgId = null;
+	let _newestEnvId = null;
 	let _newestMsgTs = 0;
 
 	let _totalMsgCount = 0;
@@ -1211,13 +1211,13 @@ function AllEars(readyCallback) {
 		return textBody.replaceAll(/[\x05-\x09\x0c-\x15\x18-\x1c]/g, "").replaceAll(/[\x1d\x1e\x1f]/g, "\n").replaceAll("\x0B", "---\n---").replaceAll("\x16", "*").replaceAll("\x17", "_");
 	};
 
-	const _addMessage = async function(msgData, msgId) {
+	const _addMessage = async function(msgData, envId) {
 		const msgInfo = msgData[0];
 		const padAmount = msgInfo & 15;
 
 		const msgTs = new Uint32Array(msgData.slice(1, 5).buffer)[0];
 		if (msgTs > _newestMsgTs) {
-			_newestMsgId = msgId;
+			_newestEnvId = envId;
 			_newestMsgTs = msgTs;
 		}
 
@@ -1318,9 +1318,9 @@ function AllEars(readyCallback) {
 					const msgHeaders = (headersEnd > 0) ? body.slice(0, headersEnd) : "";
 					const msgBody = body.slice(headersEnd + 1);
 
-					_extMsg.push(new _ExtMsg(msgId, msgTs, msgHdrTs, msgHdrTz, msgIp, msgCc, msgCs, msgTls, msgEsmtp, msgProtV, msgInval, msgRares, msgAttach, msgGrDom, msgIpBlk, dkimFail, msgDkim, msgGreet, msgRvDns, msgAuSys, msgEnvFr, msgHdrFr, msgDnFr, msgEnvTo, msgHdrTo, msgDnTo, msgRplTo, msgDnRt, msgMsgId, msgHeaders, msgSbjct, msgBody));
+					_extMsg.push(new _ExtMsg(envId, msgTs, msgHdrTs, msgHdrTz, msgIp, msgCc, msgCs, msgTls, msgEsmtp, msgProtV, msgInval, msgRares, msgAttach, msgGrDom, msgIpBlk, dkimFail, msgDkim, msgGreet, msgRvDns, msgAuSys, msgEnvFr, msgHdrFr, msgDnFr, msgEnvTo, msgHdrTo, msgDnTo, msgRplTo, msgDnRt, msgMsgId, msgHeaders, msgSbjct, msgBody));
 				} catch(e) {
-					_extMsg.push(new _ExtMsg(msgId, msgTs, msgHdrTs, msgHdrTz, msgIp, msgCc, msgCs, msgTls, msgEsmtp, msgProtV, msgInval, msgRares, msgAttach, msgGrDom, msgIpBlk, dkimFail, null, "", "", "", "", "", "", "", "", "", "", "", "", "", "Failed decompression", "Size: " + msgData.length));
+					_extMsg.push(new _ExtMsg(envId, msgTs, msgHdrTs, msgHdrTz, msgIp, msgCc, msgCs, msgTls, msgEsmtp, msgProtV, msgInval, msgRares, msgAttach, msgGrDom, msgIpBlk, dkimFail, null, "", "", "", "", "", "", "", "", "", "", "", "", "", "Failed decompression", "Size: " + msgData.length));
 				}
 			break;}
 
@@ -1337,7 +1337,7 @@ function AllEars(readyCallback) {
 					} catch(e) {bodyAndTitle = "(error)\nError decoding message: " + e;}
 
 					const separator = bodyAndTitle.indexOf("\n");
-					_intMsg.push(new _IntMsg(msgId, msgTs, false, 3, null, (msgType === 192) ? "system" : "public", "", bodyAndTitle.slice(0, separator), bodyAndTitle.slice(separator + 1)));
+					_intMsg.push(new _IntMsg(envId, msgTs, false, 3, null, (msgType === 192) ? "system" : "public", "", bodyAndTitle.slice(0, separator), bodyAndTitle.slice(separator + 1)));
 					break;
 				}
 
@@ -1356,7 +1356,7 @@ function AllEars(readyCallback) {
 				const msgSubj = msgTxt.slice(0, sep);
 				const msgBody = msgTxt.slice(sep + 1);
 
-				_intMsg.push(new _IntMsg(msgId, msgTs, false, msgFromLv, null, msgFrom, msgTo, msgSubj, msgBody));
+				_intMsg.push(new _IntMsg(envId, msgTs, false, msgFromLv, null, msgFrom, msgTo, msgSubj, msgBody));
 			break;}
 
 			case 32: { // UplMsg (Email attachment, or uploaded file)
@@ -1395,11 +1395,11 @@ function AllEars(readyCallback) {
 					}
 				}
 
-				_uplMsg.push(new _UplMsg(msgId, msgTs, msgFn, msgBody, msgParent, msgBody.length / 16));
+				_uplMsg.push(new _UplMsg(envId, msgTs, msgFn, msgBody, msgParent, msgBody.length / 16));
 			break;}
 
 			case 48: // OutMsg (Delivery report for sent message)
-//				_addOutMsg(msgData, msgId, msgTs, msgTs_bin, false);
+//				_addOutMsg(msgData, envId, msgTs, msgTs_bin, false);
 			break;
 		}
 
@@ -1993,7 +1993,7 @@ function AllEars(readyCallback) {
 	};
 
 	this.Message_Browse = function(newest, u_info, callback) {if(typeof(newest)!=="boolean" || typeof(u_info)!=="boolean" || typeof(callback)!=="function"){return;}
-		const startId = _newestMsgTs? (newest? _newestMsgId : _getOldestMsgId()) : null;
+		const startId = _newestMsgTs? (newest? _newestEnvId : _getOldestMsgId()) : null;
 		const flags = (u_info? _AEM_FLAG_UINFO : 0) | (newest? 0 : 128);
 
 		_fetchEncrypted(_AEM_API_MESSAGE_BROWSE, flags, startId, null, async function(response) {
@@ -2016,7 +2016,7 @@ function AllEars(readyCallback) {
 				const envBytes = (envBlocks + _AEM_MSG_MINBLOCKS) * 16;
 				offset += 2;
 				const envData = response.slice(offset, offset + envBytes);
-				const msgId = envData.slice(0, 16);
+				const envId = envData.slice(0, 24);
 
  				// Create the base for the hash
 				const base = new Uint8Array(sodium.crypto_scalarmult_BYTES + _X25519_PKBYTES + 2);
@@ -2036,7 +2036,7 @@ function AllEars(readyCallback) {
 					continue;
 				}
 
-				_addMessage(msgData, msgId);
+				_addMessage(msgData, envId);
 				_readyMsgBytes += envBytes;
 				offset += envBytes;
 			}
