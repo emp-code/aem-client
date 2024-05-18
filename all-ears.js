@@ -1211,6 +1211,20 @@ function AllEars(readyCallback) {
 		return textBody.replaceAll(/[\x05-\x09\x0c-\x15\x18-\x1c]/g, "").replaceAll(/[\x1d\x1e\x1f]/g, "\n").replaceAll("\x0B", "---\n---").replaceAll("\x16", "*").replaceAll("\x17", "_");
 	};
 
+	const _isDuplicate = function(msgSet, id) {
+		for (let j = 0; j < msgSet.length; j++) {
+			let matches = true;
+
+			for (let k = 0; k < 24; k++) {
+				if (id[k] !== msgSet[j].id[k]) {matches = false; break;}
+			}
+
+			if (matches) return true;
+		}
+
+		return false;
+	}
+
 	const _addMessage = async function(msgData, envId) {
 		const msgInfo = msgData[0];
 		const padAmount = msgInfo & 15;
@@ -1225,6 +1239,8 @@ function AllEars(readyCallback) {
 
 		switch (msgInfo & 48) {
 			case 0: { // ExtMsg
+				if (_isDuplicate(_extMsg, envId)) return 0;
+
 				const msgIp = msgData.slice(0, 4);
 				const msgCs  = new Uint16Array(msgData.slice(4, 6).buffer)[0];
 				const msgTls = msgData[6];
@@ -1325,6 +1341,8 @@ function AllEars(readyCallback) {
 			break;}
 
 			case 16: { // IntMsg
+				if (_isDuplicate(_intMsg, envId)) return 0;
+
 				const msgType = msgData[0] & 192;
 				// 32/16/8/4 unused
 
@@ -1360,6 +1378,8 @@ function AllEars(readyCallback) {
 			break;}
 
 			case 32: { // UplMsg (Email attachment, or uploaded file)
+				if (_isDuplicate(_uplMsg, envId)) return 0;
+
 				let msgFn;
 				let msgBody;
 				let msgParent = null;
@@ -1399,6 +1419,7 @@ function AllEars(readyCallback) {
 			break;}
 
 			case 48: // OutMsg (Delivery report for sent message)
+				if (_isDuplicate(_outMsg, envId)) return 0;
 //				_addOutMsg(msgData, envId, msgTs, msgTs_bin, false);
 			break;
 		}
