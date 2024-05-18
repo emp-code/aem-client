@@ -2011,8 +2011,6 @@ function AllEars(readyCallback) {
 			_totalMsgBytes = new Uint32Array(response.slice(2, 6).buffer)[0] * 16;
 
 			let offset = 6;
-			let prevTs = 1577836800; // 2020-01-01
-
 			while (offset < response.length) {
 				const envBlocks = new Uint16Array(response.slice(offset, offset + 2).buffer)[0];
 				const envBytes = (envBlocks + _AEM_MSG_MINBLOCKS) * 16;
@@ -2038,7 +2036,7 @@ function AllEars(readyCallback) {
 					continue;
 				}
 
-				prevTs = _addMessage(msgData, msgId);
+				_addMessage(msgData, msgId);
 				_readyMsgBytes += envBytes;
 				offset += envBytes;
 			}
