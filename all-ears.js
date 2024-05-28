@@ -114,8 +114,10 @@ function AllEars(readyCallback) {
 	const _intMsg = [];
 	const _uplMsg = [];
 	const _outMsg = [];
-	let _newestEnvId = null;
+	let _newestEvpId = null;
 	let _newestMsgTs = 0;
+	let _oldestEvpId = null;
+	let _oldestMsgTs = 4294967296;
 
 	let _totalMsgCount = 0;
 	let _totalMsgBytes = 0;
@@ -422,22 +424,6 @@ function AllEars(readyCallback) {
 		_outMsg.forEach(function(msg) {if (_arraysEqual(msg.id, id)) found = true;}); if (found) return true;
 
 		return false;
-	};
-
-	const _getOldestMsgId = function() {
-		let ts = (_extMsg.length === 0) ? 4294967296 : _extMsg[_extMsg.length - 1].ts;
-		let result = 0;
-
-		if (_intMsg.length !== 0 && _intMsg[_intMsg.length - 1].ts < ts) {result = 1; ts = _intMsg[_intMsg.length - 1].ts;}
-		if (_uplMsg.length !== 0 && _uplMsg[_uplMsg.length - 1].ts < ts) {result = 2; ts = _uplMsg[_uplMsg.length - 1].ts;}
-		if (_outMsg.length !== 0 && _outMsg[_outMsg.length - 1].ts < ts) {result = 3;}
-
-		switch (result) {
-			case 0: return _extMsg[_extMsg.length - 1].id;
-			case 1: return _intMsg[_intMsg.length - 1].id;
-			case 2: return _uplMsg[_uplMsg.length - 1].id;
-			case 3: return _outMsg[_outMsg.length - 1].id;
-		}
 	};
 
 	const _getFileType = function(filename) {
@@ -1211,36 +1197,25 @@ function AllEars(readyCallback) {
 		return textBody.replaceAll(/[\x05-\x09\x0c-\x15\x18-\x1c]/g, "").replaceAll(/[\x1d\x1e\x1f]/g, "\n").replaceAll("\x0B", "---\n---").replaceAll("\x16", "*").replaceAll("\x17", "_");
 	};
 
-	const _isDuplicate = function(msgSet, id) {
-		for (let j = 0; j < msgSet.length; j++) {
-			let matches = true;
-
-			for (let k = 0; k < 24; k++) {
-				if (id[k] !== msgSet[j].id[k]) {matches = false; break;}
-			}
-
-			if (matches) return true;
-		}
-
-		return false;
-	}
-
-	const _addMessage = async function(msgData, envId) {
+	const _addMessage = async function(msgData, evpId) {
 		const msgInfo = msgData[0];
 		const padAmount = msgInfo & 15;
 
 		const msgTs = new Uint32Array(msgData.slice(1, 5).buffer)[0];
 		if (msgTs > _newestMsgTs) {
-			_newestEnvId = envId;
+			_newestEvpId = evpId;
 			_newestMsgTs = msgTs;
+		}
+
+		if (msgTs < _oldestMsgTs) {
+			_oldestEvpId = evpId;
+			_oldestMsgTs = msgTs;
 		}
 
 		msgData = msgData.slice(5, msgData.length - padAmount);
 
 		switch (msgInfo & 48) {
 			case 0: { // ExtMsg
-				if (_isDuplicate(_extMsg, envId)) return 0;
-
 				const msgIp = msgData.slice(0, 4);
 				const msgCs  = new Uint16Array(msgData.slice(4, 6).buffer)[0];
 				const msgTls = msgData[6];
@@ -1334,15 +1309,13 @@ function AllEars(readyCallback) {
 					const msgHeaders = (headersEnd > 0) ? body.slice(0, headersEnd) : "";
 					const msgBody = body.slice(headersEnd + 1);
 
-					_extMsg.push(new _ExtMsg(envId, msgTs, msgHdrTs, msgHdrTz, msgIp, msgCc, msgCs, msgTls, msgEsmtp, msgProtV, msgInval, msgRares, msgAttach, msgGrDom, msgIpBlk, dkimFail, msgDkim, msgGreet, msgRvDns, msgAuSys, msgEnvFr, msgHdrFr, msgDnFr, msgEnvTo, msgHdrTo, msgDnTo, msgRplTo, msgDnRt, msgMsgId, msgHeaders, msgSbjct, msgBody));
+					_extMsg.push(new _ExtMsg(evpId, msgTs, msgHdrTs, msgHdrTz, msgIp, msgCc, msgCs, msgTls, msgEsmtp, msgProtV, msgInval, msgRares, msgAttach, msgGrDom, msgIpBlk, dkimFail, msgDkim, msgGreet, msgRvDns, msgAuSys, msgEnvFr, msgHdrFr, msgDnFr, msgEnvTo, msgHdrTo, msgDnTo, msgRplTo, msgDnRt, msgMsgId, msgHeaders, msgSbjct, msgBody));
 				} catch(e) {
-					_extMsg.push(new _ExtMsg(envId, msgTs, msgHdrTs, msgHdrTz, msgIp, msgCc, msgCs, msgTls, msgEsmtp, msgProtV, msgInval, msgRares, msgAttach, msgGrDom, msgIpBlk, dkimFail, null, "", "", "", "", "", "", "", "", "", "", "", "", "", "Failed decompression", "Size: " + msgData.length));
+					_extMsg.push(new _ExtMsg(evpId, msgTs, msgHdrTs, msgHdrTz, msgIp, msgCc, msgCs, msgTls, msgEsmtp, msgProtV, msgInval, msgRares, msgAttach, msgGrDom, msgIpBlk, dkimFail, null, "", "", "", "", "", "", "", "", "", "", "", "", "", "Failed decompression", "Size: " + msgData.length));
 				}
 			break;}
 
 			case 16: { // IntMsg
-				if (_isDuplicate(_intMsg, envId)) return 0;
-
 				const msgType = msgData[0] & 192;
 				// 32/16/8/4 unused
 
@@ -1355,7 +1328,7 @@ function AllEars(readyCallback) {
 					} catch(e) {bodyAndTitle = "(error)\nError decoding message: " + e;}
 
 					const separator = bodyAndTitle.indexOf("\n");
-					_intMsg.push(new _IntMsg(envId, msgTs, false, 3, null, (msgType === 192) ? "system" : "public", "", bodyAndTitle.slice(0, separator), bodyAndTitle.slice(separator + 1)));
+					_intMsg.push(new _IntMsg(evpId, msgTs, false, 3, null, (msgType === 192) ? "system" : "public", "", bodyAndTitle.slice(0, separator), bodyAndTitle.slice(separator + 1)));
 					break;
 				}
 
@@ -1374,12 +1347,10 @@ function AllEars(readyCallback) {
 				const msgSubj = msgTxt.slice(0, sep);
 				const msgBody = msgTxt.slice(sep + 1);
 
-				_intMsg.push(new _IntMsg(envId, msgTs, false, msgFromLv, null, msgFrom, msgTo, msgSubj, msgBody));
+				_intMsg.push(new _IntMsg(evpId, msgTs, false, msgFromLv, null, msgFrom, msgTo, msgSubj, msgBody));
 			break;}
 
 			case 32: { // UplMsg (Email attachment, or uploaded file)
-				if (_isDuplicate(_uplMsg, envId)) return 0;
-
 				let msgFn;
 				let msgBody;
 				let msgParent = null;
@@ -1415,12 +1386,11 @@ function AllEars(readyCallback) {
 					}
 				}
 
-				_uplMsg.push(new _UplMsg(envId, msgTs, msgFn, msgBody, msgParent, msgBody.length / 16));
+				_uplMsg.push(new _UplMsg(evpId, msgTs, msgFn, msgBody, msgParent, msgBody.length / 16));
 			break;}
 
 			case 48: // OutMsg (Delivery report for sent message)
-				if (_isDuplicate(_outMsg, envId)) return 0;
-//				_addOutMsg(msgData, envId, msgTs, msgTs_bin, false);
+//				_addOutMsg(msgData, evpId, msgTs, msgTs_bin, false);
 			break;
 		}
 
@@ -2014,10 +1984,11 @@ function AllEars(readyCallback) {
 	};
 
 	this.Message_Browse = function(newest, u_info, callback) {if(typeof(newest)!=="boolean" || typeof(u_info)!=="boolean" || typeof(callback)!=="function"){return;}
-		const startId = _newestMsgTs? (newest? _newestEnvId : _getOldestMsgId()) : null;
-		const flags = (u_info? _AEM_FLAG_UINFO : 0) | (newest? 0 : 128);
+		const startId = _newestMsgTs? (newest? _newestEvpId : _oldestEvpId) : null;
+		const flags = (u_info? _AEM_FLAG_UINFO : 0) | (newest? 0 : _AEM_FLAG_OLDER);
 
 		_fetchEncrypted(_AEM_API_MESSAGE_BROWSE, flags, startId, null, async function(response) {
+			if (response.length === 1 && response[0] === 0xB0 && startId) {callback(0); return;} // No more message data
 			if (typeof(response) === "number") {callback(response); return;}
 			if (response.length === 1) {callback(response[0]); return;}
 			if (typeof(response) !== "object") {callback(0x04); return;}
@@ -2030,36 +2001,38 @@ function AllEars(readyCallback) {
 
 			_totalMsgCount = new Uint16Array(response.slice(0, 2).buffer)[0];
 			_totalMsgBytes = new Uint32Array(response.slice(2, 6).buffer)[0] * 16;
+			const evpCount = new Uint16Array(response.slice(6, 8).buffer)[0];
+			const evpSize = new Uint16Array(response.slice(8, 8 + evpCount * 2).buffer);
 
-			let offset = 6;
-			while (offset < response.length) {
-				const envBlocks = new Uint16Array(response.slice(offset, offset + 2).buffer)[0];
-				const envBytes = (envBlocks + _AEM_MSG_MINBLOCKS) * 16;
-				offset += 2;
-				const envData = response.slice(offset, offset + envBytes);
-				const envId = envData.slice(0, 24);
+			let offset = 8 + evpCount * 2;
 
- 				// Create the base for the hash
-				const base = new Uint8Array(sodium.crypto_scalarmult_BYTES + _X25519_PKBYTES + 2);
-				base.set(sodium.crypto_scalarmult(_own_esk, envData.slice(0, _X25519_PKBYTES))); // Recreate the shared secret - this step cannot be done by the server
-				base.set(sodium.crypto_scalarmult_base(_own_esk), sodium.crypto_scalarmult_BYTES);
-				base.set(new Uint8Array(new Uint16Array([envBlocks]).buffer), sodium.crypto_scalarmult_BYTES + _X25519_PKBYTES);
+			for (let i = 0; i < evpCount; i++) {
+				const evpBlocks = evpSize[i];
+				const evpBytes = (evpBlocks + _AEM_MSG_MINBLOCKS) * 16;
+				const evpData = response.slice(offset, offset + evpBytes);
+				const evpId = evpData.slice(0, 24);
 
-				// Create the key and nonce, and retrieve the Message from the Envelope
-				const env_KeyNonce = sodium.crypto_generichash(sodium.crypto_stream_chacha20_KEYBYTES + sodium.crypto_stream_chacha20_NONCEBYTES, base);
-				const envDec = sodium.crypto_stream_chacha20_xor(envData.slice(_X25519_PKBYTES), env_KeyNonce.slice(sodium.crypto_stream_chacha20_KEYBYTES), env_KeyNonce.slice(0, sodium.crypto_stream_chacha20_KEYBYTES));
-
-				const msgSig = envDec.slice(0, 16);
-				const msgData = envDec.slice(16);
-
-				if (_msgExists(msgSig)) {
-					offset += msgBytes;
+				if (_msgExists(evpId)) {
+					offset += evpBytes;
 					continue;
 				}
 
-				_addMessage(msgData, envId);
-				_readyMsgBytes += envBytes;
-				offset += envBytes;
+ 				// Create the base for the hash
+				const base = new Uint8Array(sodium.crypto_scalarmult_BYTES + _X25519_PKBYTES + 2);
+				base.set(sodium.crypto_scalarmult(_own_esk, evpData.slice(0, _X25519_PKBYTES))); // Recreate the shared secret - this step cannot be done by the server
+				base.set(sodium.crypto_scalarmult_base(_own_esk), sodium.crypto_scalarmult_BYTES);
+				base.set(new Uint8Array(new Uint16Array([evpBlocks]).buffer), sodium.crypto_scalarmult_BYTES + _X25519_PKBYTES);
+
+				// Create the key and nonce, and retrieve the Message from the Envelope
+				const evp_KeyNonce = sodium.crypto_generichash(sodium.crypto_stream_chacha20_KEYBYTES + sodium.crypto_stream_chacha20_NONCEBYTES, base);
+				const evpDec = sodium.crypto_stream_chacha20_xor(evpData.slice(_X25519_PKBYTES), evp_KeyNonce.slice(sodium.crypto_stream_chacha20_KEYBYTES), evp_KeyNonce.slice(0, sodium.crypto_stream_chacha20_KEYBYTES));
+
+				const msgSig = evpDec.slice(0, 16);
+				const msgData = evpDec.slice(16);
+
+				_addMessage(msgData, evpId);
+				_readyMsgBytes += evpBytes;
+				offset += evpBytes;
 			}
 
 			_extMsg.sort((a, b) => (a.ts < b.ts) ? 1 : -1);
@@ -2118,7 +2091,7 @@ function AllEars(readyCallback) {
 		if (hexId.length !== 48) {callback(0x01); return;}
 		const delId = sodium.from_hex(hexId);
 
-		if (_arraysEqual(_getOldestMsgId(), delId)) {
+		if (_arraysEqual(_oldestEvpId, delId)) {
 			callback(0x10);
 			return;
 		}
@@ -2366,7 +2339,9 @@ function AllEars(readyCallback) {
 			case 0xA6: return ["LEVEL",    "Insufficient account level"];
 
 			// 0xB0-0xBF	General
-			case 0xB0: return ["MESSAGE_DELETE_NOTFOUND",     "Failed deleting message: not found"];
+			case 0xB0: return ["MESSAGE_BROWSE_NOMORE",   "No more message data"];
+			case 0xB1: return ["MESSAGE_BROWSE_NOTFOUND", "Message not found"];
+			case 0xB2: return ["MESSAGE_DELETE_NOTFOUND", "Failed deleting message: not found"];
 
 			// 0xC0-0xC9	Account
 			case 0xC0: return ["ACCOUNT_CREATE_EXIST",        "Account already exists"];

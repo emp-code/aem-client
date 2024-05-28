@@ -1765,7 +1765,7 @@ document.getElementById("btn_enter").onclick = function() {
 		document.body.style.cursor = "wait";
 		document.getElementById("greeting").textContent = "Connecting...";
 
-		ae.Message_Browse(false, true, function(errorBrowse) {
+		ae.Message_Browse(true, true, function(errorBrowse) {
 			document.body.style.cursor = "";
 
 			if (errorBrowse !== 0 && errorBrowse !== 0x09) {
