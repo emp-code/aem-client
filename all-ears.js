@@ -1466,7 +1466,7 @@ function AllEars(readyCallback) {
 	this.getReadyMsgBytes = function() {return _readyMsgBytes;};
 
 	this.getExtMsgCount = function() {return _extMsg.length;};
-	this.getExtMsgIdHex   = function(num) {if(typeof(num)!=="number"){return;} return sodium.to_hex(_extMsg[num].id);};
+	this.getExtMsgId      = function(num) {if(typeof(num)!=="number"){return;} return _extMsg[num].id;};
 	this.getExtMsgTime    = function(num) {if(typeof(num)!=="number"){return;} return _extMsg[num].ts;};
 	this.getExtMsgHdrTime = function(num) {if(typeof(num)!=="number"){return;} return _extMsg[num].hdrTs;};
 	this.getExtMsgHdrTz   = function(num) {if(typeof(num)!=="number"){return;} return _extMsg[num].hdrTz;};
@@ -1533,7 +1533,7 @@ function AllEars(readyCallback) {
 		+ "\r\nReceived: from " + _extMsg[num].greet +" (" + this.getExtMsgRdns(num) + " [" + this.getExtMsgIp(num) + "])"
 			+ " by " + _ourDomain
 			+ " with " + (_extMsg[num].esmtp ? "E" : "") + "SMTP" + (_extMsg[num].tls ? "S" : "")
-			+ " id " + sodium.to_base64(_extMsg[num].id, sodium.base64_variants.URLSAFE_NO_PADDING)
+			+ " id " + _extMsg[num].id
 			+ " for <" + _extMsg[num].envTo + ">; "
 			+ new Date(_extMsg[num].ts * 1000).toUTCString().slice(0, 26) + "+0000" // TODO: Preserve timezone info
 		+ "\r\nContent-Transfer-Encoding: 8bit"
@@ -1556,7 +1556,7 @@ function AllEars(readyCallback) {
 		+ "\r\nDate: " + new Date(_intMsg[num].ts * 1000).toUTCString().slice(0, 26) + "+0000"
 		+ "\r\nFrom: " + _intMsg[num].from + "@" + _ourDomain
 		+ "\r\nMIME-Version: 1.0"
-		+ "\r\nMessage-ID: <" + sodium.to_hex(_intMsg[num].id) + "@int." + _ourDomain + ">"
+		+ "\r\nMessage-ID: <" + _intMsg[num].id + "@int." + _ourDomain + ">"
 		+ "\r\nSubject: " + _intMsg[num].title
 		+ (_intMsg[num].to? ("\r\nTo: " + _intMsg[num].to + "@" + _ourDomain) : "")
 		+ "\r\n\r\n" + _intMsg[num].body.replaceAll("\n", "\r\n")
@@ -1656,7 +1656,7 @@ function AllEars(readyCallback) {
 	};
 
 	this.getIntMsgCount = function() {return _intMsg.length;};
-	this.getIntMsgIdHex  = function(num) {if(typeof(num)!=="number"){return;} return _intMsg[num].id? sodium.to_hex(_intMsg[num].id) : null;};
+	this.getIntMsgId     = function(num) {if(typeof(num)!=="number"){return;} return _intMsg[num].id;};
 	this.getIntMsgTime   = function(num) {if(typeof(num)!=="number"){return;} return _intMsg[num].ts;};
 	this.getIntMsgLevel  = function(num) {if(typeof(num)!=="number"){return;} return _intMsg[num].fromLv;};
 	this.getIntMsgApk    = function(num) {if(typeof(num)!=="number"){return;} return _intMsg[num].apk? sodium.to_base64(_intMsg[num].apk, sodium.base64_variants.ORIGINAL_NO_PADDING) : "";};
@@ -1668,7 +1668,7 @@ function AllEars(readyCallback) {
 	this.getIntMsgFlagE2ee = function(num) {if(typeof(num)!=="number"){return;} return _intMsg[num].isE2ee;};
 
 	this.getUplMsgCount = function() {return _uplMsg.length;};
-	this.getUplMsgIdHex = function(num) {if(typeof(num)!=="number"){return;} return _uplMsg[num].id? sodium.to_hex(_uplMsg[num].id) : null;};
+	this.getUplMsgId    = function(num) {if(typeof(num)!=="number"){return;} return _uplMsg[num].id;};
 	this.getUplMsgTime  = function(num) {if(typeof(num)!=="number"){return;} return _uplMsg[num].ts;};
 	this.getUplMsgTitle = function(num) {if(typeof(num)!=="number"){return;} return _uplMsg[num].title;};
 	this.getUplMsgBody  = function(num) {if(typeof(num)!=="number"){return;} return _uplMsg[num].body;};
@@ -1678,14 +1678,14 @@ function AllEars(readyCallback) {
 		if (!_uplMsg[num].parent) return false;
 
 		for (let i = 0; i < _extMsg.length; i++) {
-			if (_arraysEqual(_uplMsg[num].parent, _extMsg[i].id)) return i;
+			if (_uplMsg[num].parent === _extMsg[i].id) return i;
 		}
 
 		return null;
 	};
 
 	this.getOutMsgCount = function() {return _outMsg.length;};
-	this.getOutMsgIdHex = function(num) {if(typeof(num)!=="number"){return;} return sodium.to_hex(_outMsg[num].id);};
+	this.getOutMsgId    = function(num) {if(typeof(num)!=="number"){return;} return _outMsg[num].id;};
 	this.getOutMsgIsInt = function(num) {if(typeof(num)!=="number"){return;} return _outMsg[num].isInt;};
 	this.getOutMsgTime  = function(num) {if(typeof(num)!=="number"){return;} return _outMsg[num].ts;};
 	this.getOutMsgIp    = function(num) {if(typeof(num)!=="number"){return;} return String(_outMsg[num].ip[0] + "." + _outMsg[num].ip[1] + "." + _outMsg[num].ip[2] + "." + _outMsg[num].ip[3]);};
@@ -1984,7 +1984,7 @@ function AllEars(readyCallback) {
 	};
 
 	this.Message_Browse = function(newest, u_info, callback) {if(typeof(newest)!=="boolean" || typeof(u_info)!=="boolean" || typeof(callback)!=="function"){return;}
-		const startId = _newestMsgTs? (newest? _newestEvpId : _oldestEvpId) : null;
+		const startId = _newestMsgTs? (new Uint8Array(new Uint16Array([newest? _newestEvpId : _oldestEvpId]).buffer)) : null;
 		const flags = (u_info? _AEM_FLAG_UINFO : 0) | (newest? 0 : _AEM_FLAG_OLDER);
 
 		_fetchEncrypted(_AEM_API_MESSAGE_BROWSE, flags, startId, null, async function(response) {
@@ -2010,7 +2010,11 @@ function AllEars(readyCallback) {
 				const evpBlocks = evpSize[i];
 				const evpBytes = (evpBlocks + _AEM_MSG_MINBLOCKS) * 16;
 				const evpData = response.slice(offset, offset + evpBytes);
-				const evpId = evpData.slice(0, 24);
+
+				const evpId = new Uint16Array(new Uint8Array([
+					evpData[0]  ^ evpData[1]  ^ evpData[2]  ^ evpData[3]  ^ evpData[4]  ^ evpData[5]  ^ evpData[6]  ^ evpData[7]  ^ evpData[8]  ^ evpData[9]  ^ evpData[10] ^ evpData[11] ^ evpData[12] ^ evpData[13] ^ evpData[14] ^ evpData[15],
+					evpData[16] ^ evpData[17] ^ evpData[18] ^ evpData[19] ^ evpData[20] ^ evpData[21] ^ evpData[22] ^ evpData[23] ^ evpData[24] ^ evpData[25] ^ evpData[26] ^ evpData[27] ^ evpData[28] ^ evpData[29] ^ evpData[30] ^ evpData[31]
+				]).buffer)[0];
 
 				if (_msgExists(evpId)) {
 					offset += evpBytes;
@@ -2103,13 +2107,7 @@ function AllEars(readyCallback) {
 
 			[_extMsg, _intMsg, _uplMsg, _outMsg].forEach(function(msgSet) {
 				for (let j = 0; j < msgSet.length; j++) {
-					let matches = true;
-
-					for (let k = 0; k < 16; k++) {
-						if (id[k] !== msgSet[j].id[k]) {matches = false; break;}
-					}
-
-					if (matches) {msgSet.splice(j, 1); j--;}
+					if (id === msgSet[j].id) {msgSet.splice(j, 1); j--;}
 				}
 			});
 

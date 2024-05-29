@@ -43,8 +43,8 @@ const tabs = [
 	new TabState(0, 2, false, false) // Tools
 ];
 
-function MsgInfo(msgIdHex, msgType, msgNum) {
-	this.idHex = msgIdHex;
+function MsgInfo(msgId, msgType, msgNum) {
+	this.id = msgId;
 	this.type = msgType;
 	this.num = msgNum;
 }
@@ -158,7 +158,7 @@ function displayFile(isHistory, num, showNext) {
 
 	clearDisplay();
 	document.querySelector("article").scroll(0, 0);
-	document.querySelector("article").setAttribute("data-msgid", ae.getUplMsgIdHex(num));
+	document.querySelector("article").setAttribute("data-msgid", ae.getUplMsgId(num));
 
 	document.getElementById("btn_mdele").disabled = false;
 	document.getElementById("btn_msave").disabled = false;
@@ -169,7 +169,7 @@ function displayFile(isHistory, num, showNext) {
 	document.getElementById("readmsg_info").hidden = true;
 	document.querySelector("#readmsg_main > h1").textContent = ae.getUplMsgTitle(num);
 
-	msgDisplay = new MsgInfo(ae.getUplMsgIdHex(num), "upl", num);
+	msgDisplay = new MsgInfo(ae.getUplMsgId(num), "upl", num);
 	if (!isHistory) history.pushState({tab: tab, page: tabs[tab].cur, msg: msgDisplay}, null);
 
 	document.getElementById("main2").hidden = false;
@@ -274,7 +274,7 @@ function displayMsg(isHistory, isInt, num) {
 	document.getElementById("btn_mdele").disabled = false;
 
 	document.querySelector("article").scroll(0, 0);
-	document.querySelector("article").setAttribute("data-msgid", isInt? ae.getIntMsgIdHex(num) : ae.getExtMsgIdHex(num));
+	document.querySelector("article").setAttribute("data-msgid", isInt? ae.getIntMsgId(num) : ae.getExtMsgId(num));
 
 	document.getElementById("btn_msave").disabled = false;
 	document.getElementById("btn_msave").onclick = function() {displayExport(false, isInt, num);};
@@ -466,7 +466,7 @@ function displayMsg(isHistory, isInt, num) {
 	document.getElementById("main2").hidden = false;
 	document.getElementById("main1").hidden = !window.matchMedia("(min-width: 80em)").matches;
 
-	msgDisplay = new MsgInfo(isInt? ae.getIntMsgIdHex(num) : ae.getExtMsgIdHex(num), isInt? "int" : "ext", num);
+	msgDisplay = new MsgInfo(isInt? ae.getIntMsgId(num) : ae.getExtMsgId(num), isInt? "int" : "ext", num);
 	if (!isHistory) history.pushState({tab: tab, page: tabs[tab].cur, msg: msgDisplay}, null);
 }
 
@@ -486,14 +486,14 @@ function displayExport(isHistory, isInt, num) {
 	document.querySelector("#readmsg_export > div:nth-child(5)").onclick = function() {if (isInt) {ae.printIntMsg(num);} else {ae.printExtMsg(num);} displayMsg(false, isInt, num);};
 	document.querySelector("#readmsg_export > div:nth-child(6)").onclick = function() {navigator.clipboard.writeText(isInt? ae.txtIntMsg(num, false) : ae.txtExtMsg(num, false)); displayMsg(false, isInt, num);};
 
-	msgDisplay = new MsgInfo(isInt? ae.getIntMsgIdHex(num) : ae.getExtMsgIdHex(num), isInt? "int_exp" : "ext_exp", num);
+	msgDisplay = new MsgInfo(isInt? ae.getIntMsgId(num) : ae.getExtMsgId(num), isInt? "int_exp" : "ext_exp", num);
 	if (!isHistory) history.pushState({tab: tab, page: tabs[tab].cur, msg: msgDisplay}, null);
 }
 
 function displayOutMsg(isHistory, num) {
 	clearDisplay();
 	document.querySelector("article").scroll(0, 0);
-	document.querySelector("article").setAttribute("data-msgid", ae.getOutMsgIdHex(num));
+	document.querySelector("article").setAttribute("data-msgid", ae.getOutMsgId(num));
 
 	document.getElementById("btn_mdele").disabled = false;
 	document.getElementById("btn_msave").disabled = true;
@@ -541,7 +541,7 @@ function displayOutMsg(isHistory, num) {
 	document.getElementById("main2").hidden = false;
 	document.getElementById("main1").hidden = !window.matchMedia("(min-width: 80em)").matches;
 
-	msgDisplay = new MsgInfo(ae.getOutMsgIdHex(num), "out", num);
+	msgDisplay = new MsgInfo(ae.getOutMsgId(num), "out", num);
 	if (!isHistory) history.pushState({tab: tab, page: tabs[tab].cur, msg: msgDisplay}, null);
 }
 
@@ -632,7 +632,7 @@ function adjustLevel(uid, level, c) {
 
 function addMsg(isInt, i) {
 	const row = document.getElementById("tbl_inbox").insertRow(-1);
-	row.setAttribute("data-msgid", isInt? ae.getIntMsgIdHex(i) : ae.getExtMsgIdHex(i));
+	row.setAttribute("data-msgid", isInt? ae.getIntMsgId(i) : ae.getExtMsgId(i));
 
 	const ts = isInt? ae.getIntMsgTime(i) : ae.getExtMsgTime(i);
 	const el = document.createElement("time");
@@ -761,7 +761,7 @@ function showDrbox() {
 			}
 
 			const row = tbl.insertRow(-1);
-			row.setAttribute("data-msgid", ae.getOutMsgIdHex(i));
+			row.setAttribute("data-msgid", ae.getOutMsgId(i));
 
 			let cell;
 			cell = row.insertCell(-1); cell.textContent = new Date(ae.getOutMsgTime(i) * 1000).toISOString().slice(0, 10);
@@ -818,7 +818,7 @@ function showFiles() {
 			}
 
 			const row = tbl.insertRow(-1);
-			row.setAttribute("data-msgid", ae.getUplMsgIdHex(i));
+			row.setAttribute("data-msgid", ae.getUplMsgId(i));
 			row.className = "rowfile";
 
 			let cell = row.insertCell(-1);
@@ -846,7 +846,7 @@ function showFiles() {
 
 			cell = row.insertCell(-1);
 			const btn = document.createElement("button");
-			btn.setAttribute("data-msgid", ae.getUplMsgIdHex(i));
+			btn.setAttribute("data-msgid", ae.getUplMsgId(i));
 			btn.type = "button";
 			btn.textContent = "X";
 			btn.onclick = function() {
