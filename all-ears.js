@@ -1202,7 +1202,7 @@ function AllEars(readyCallback) {
 		const padAmount = msgInfo & 15;
 
 		const msgTs = new Uint32Array(msgData.slice(1, 5).buffer)[0];
-		if (msgTs > _newestMsgTs) {
+		if (msgTs >= _newestMsgTs) {
 			_newestEvpId = evpId;
 			_newestMsgTs = msgTs;
 		}
