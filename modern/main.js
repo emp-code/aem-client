@@ -74,7 +74,7 @@ function errorDialog(err, focusAfter) {
 
 	const dlg = document.querySelector("dialog");
 	dlg.children[0].style.height = getComputedStyle(document.querySelector("#main1 > div[class='mid']")).height;
-	dlg.querySelector("h1").textContent = "ERROR 0x" + err.toString(16).padStart(2, "0").toUpperCase();
+	dlg.querySelector("h1").textContent = "ERROR " + ((err >= 400) ? err : ("0x" + err.toString(16).padStart(2, "0").toUpperCase()));
 	dlg.querySelector("p").textContent = (typeof(errMsg) === "string") ? errMsg : errMsg[1];
 	dlg.show();
 
