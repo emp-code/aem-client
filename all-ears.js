@@ -1357,9 +1357,10 @@ function AllEars(readyCallback) {
 
 				if ((msgData[0] & 128) !== 0) {
 					// Email attachment, no additional encryption
-					msgParent = msgData.slice(1, 17);
-					msgFn = sodium.to_string(msgData.slice(17, 18 + (msgData[0] & 127)));
-					msgBody = msgData.slice(18 + (msgData[0] & 127));
+
+					msgParent = new Uint16Array(msgData.slice(1, 3).buffer)[0];
+					msgFn = sodium.to_string(msgData.slice(3, 4 + (msgData[0] & 127)));
+					msgBody = msgData.slice(4 + (msgData[0] & 127));
 				} else {
 					// Uploaded file
 					const nonce = new Uint8Array(16);
