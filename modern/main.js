@@ -4,8 +4,10 @@ sodium.ready.then(function() {
 
 let isReady = true;
 
-const vault = null;
-const vaultOk = false;
+let vaultPage = -4;
+const vault = new PostVault(function(ok) {
+	vaultPage = -3;
+});
 
 const ae = new AllEars(function(ok) {
 	if (!ok) {
@@ -800,8 +802,8 @@ function showFiles() {
 	const tbl = document.getElementById("tbl_files");
 	if (!document.getElementById("main1").hidden) setRowsPerPage(tbl);
 
-	const msgCount = ae.getUplMsgCount() + (vaultOk? vault.getFileCount() : 0);
-	const loadMore = (ae.getReadyMsgBytes() < ae.getTotalMsgBytes()) || (vaultOk === false);
+	const msgCount = ae.getUplMsgCount() + ((vaultPage >= 0) ? vault.getTotalFiles() : 0);
+	const loadMore = ae.getReadyMsgBytes() < ae.getTotalMsgBytes();
 
 	if (msgCount > 0) {
 		tabs[TAB_NOTES].max = 2 + Math.floor((msgCount - (loadMore? 0 : 1)) / rowsPerPage);
@@ -860,7 +862,7 @@ function showFiles() {
 			numAdd++;
 		}
 
-		if (vaultOk) {
+		if (vaultPage >= 0) {
 			for (let i = 0; numAdd < rowsPerPage && i < 256; i++) {
 				if (vault.getFileSize(i) < 1) continue;
 
@@ -870,7 +872,6 @@ function showFiles() {
 				}
 
 				const row = tbl.insertRow(-1);
-				row.setAttribute("data-msgid", i);
 				row.className = "rowfile";
 
 				let cell = row.insertCell(-1);
@@ -883,8 +884,10 @@ function showFiles() {
 				cell.textContent = "Vault";
 
 				cell = row.insertCell(-1);
-				cell.textContent = vault.getFileName(i);
-				cell.onclick = function() {vault.downloadFile(i);};
+				cell.textContent = vault.getFilePath(i);
+				cell.onclick = function() {vault.downloadFile(i, function(m,p){}, function(msg) {
+					if (msg !== "Done") errorDialog(404);
+				});};
 
 				cell = row.insertCell(-1);
 				const btn = document.createElement("button");
@@ -901,9 +904,7 @@ function showFiles() {
 				numAdd++;
 			}
 		}
-	} else {
-		tabs[TAB_NOTES].max = (vaultOk === false) ? 3 : 2;
-	}
+	} else tabs[TAB_NOTES].max = 2;
 
 	if (loadMore && tabs[TAB_NOTES].cur >= tabs[TAB_NOTES].max) {
 		const row = tbl.insertRow(-1);
@@ -929,22 +930,7 @@ function showFiles() {
 		}
 
 		cell = row.insertCell(-1);
-/*		if (vaultOk === false) {
-			cell.textContent = "Open PostVault";
-			cell.onclick = function() {
-				tbl.style.opacity = 0.5;
-
-				vault.getInfo(function() {
-					tbl.style.opacity = 1;
-
-					// TODO check for error
-
-					vaultOk = true;
-					showFiles();
-				});
-			};
-		}
-*/	}
+	}
 }
 
 function addAccountToTable(i) {
@@ -1079,6 +1065,16 @@ function setTab(isHistory, tabNum, pageNum) {
 		break;
 
 		case TAB_NOTES:
+			if (vaultPage === -2) {
+				vaultPage = -1;
+
+				vault.downloadIndex(function(err) {
+					if (err === 0) {
+						vaultPage = 0;
+					}
+				});
+			}
+
 			switch (tabs[tab].cur) {
 				case 0:
 					document.getElementById("div_notes").children[0].hidden = false;
@@ -1602,24 +1598,14 @@ document.getElementById("btn_upload").onclick = function() {
 
 		const reader = new FileReader();
 		reader.onload = function() {
-			if (vaultOk) { // Vault opened -> upload to PostVault
-				vault.uploadFile(fileSelector.files[0].name, new Uint8Array(reader.result), function(error) {
-					if (error === 0) {
-						showFiles();
-					} // TODO else show error
+			ae.Message_Upload(fileSelector.files[0].name, new Uint8Array(reader.result), function(error) {
+				if (error === 0) {
+					showFiles();
+					document.getElementById("tbd_accs").children[0].children[1].textContent = Math.round(ae.getTotalMsgBytes() / 1024 / 1024);
+				} else errorDialog(error);
 
-					btn.disabled = false;
-				});
-			} else { // No vault access -> upload to All-Ears
-				ae.Message_Upload(fileSelector.files[0].name, new Uint8Array(reader.result), function(error) {
-					if (error === 0) {
-						showFiles();
-						document.getElementById("tbd_accs").children[0].children[1].textContent = Math.round(ae.getTotalMsgBytes() / 1024 / 1024);
-					} else errorDialog(error);
-
-					btn.disabled = false;
-				});
-			}
+				btn.disabled = false;
+			});
 		};
 
 		reader.readAsArrayBuffer(fileSelector.files[0]);
@@ -1764,6 +1750,12 @@ document.getElementById("btn_enter").onclick = function() {
 
 		document.body.style.cursor = "wait";
 		document.getElementById("greeting").textContent = "Connecting...";
+
+		if (vaultPage === -3) {
+			vault.setKeys(txtUmk.value, function(vaultKeysOk) {
+				if (vaultKeysOk) vaultPage = -2;
+			});
+		}
 
 		ae.Message_Browse(true, true, function(errorBrowse) {
 			document.body.style.cursor = "";
