@@ -6,7 +6,7 @@ let isReady = true;
 
 let vaultPage = -4;
 const vault = new PostVault(function(ok) {
-	vaultPage = -3;
+	if (ok) vaultPage = -3;
 });
 
 const ae = new AllEars(function(ok) {
