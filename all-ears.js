@@ -410,18 +410,13 @@ function AllEars(readyCallback) {
 		return count;
 	};
 
-	const _arraysEqual = function(a, b) {
-		try {return a.every((el, ix) => el === b[ix]);}
-		catch(e) {return false;}
-	};
-
 	const _msgExists = function(id) {
 		let found = false;
 
-		_extMsg.forEach(function(msg) {if (_arraysEqual(msg.id, id)) found = true;}); if (found) return true;
-		_intMsg.forEach(function(msg) {if (_arraysEqual(msg.id, id)) found = true;}); if (found) return true;
-		_uplMsg.forEach(function(msg) {if (_arraysEqual(msg.id, id)) found = true;}); if (found) return true;
-		_outMsg.forEach(function(msg) {if (_arraysEqual(msg.id, id)) found = true;}); if (found) return true;
+		_extMsg.forEach(function(msg) {if (msg.id === id) found = true;}); if (found) return true;
+		_intMsg.forEach(function(msg) {if (msg.id === id) found = true;}); if (found) return true;
+		_uplMsg.forEach(function(msg) {if (msg.id === id) found = true;}); if (found) return true;
+		_outMsg.forEach(function(msg) {if (msg.id === id) found = true;}); if (found) return true;
 
 		return false;
 	};
@@ -2096,7 +2091,7 @@ function AllEars(readyCallback) {
 		if (hexId.length !== 48) {callback(0x01); return;}
 		const delId = sodium.from_hex(hexId);
 
-		if (_arraysEqual(_oldestEvpId, delId)) {
+		if (_oldestEvpId === delId) {
 			callback(0x10);
 			return;
 		}
