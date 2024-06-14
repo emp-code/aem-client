@@ -1,5 +1,3 @@
-#define _GNU_SOURCE
-
 #include <netinet/in.h>
 #include <stdbool.h>
 #include <stdint.h>
