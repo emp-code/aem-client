@@ -4,6 +4,8 @@
 #include <stddef.h>
 #include <sodium.h>
 
+#include "Include/AEM_KDF.h"
+
 #define AEM_ADDR_FLAG_SHIELD 128
 // 64 unused
 #define AEM_ADDR_FLAG_ORIGIN 32
@@ -15,11 +17,12 @@
 #define AEM_ADDR_FLAGS_DEFAULT (AEM_ADDR_FLAG_ACCEXT | AEM_ADDR_FLAG_ALLVER | AEM_ADDR_FLAG_ATTACH)
 
 #define AEM_ADDRESSES_PER_USER 31
-#define AEM_LEN_PRIVATE (4096 - crypto_box_PUBLICKEYBYTES - 1 - (AEM_ADDRESSES_PER_USER * 9))
 
-enum aem_api_commands {
+#define X25519_PKBYTES crypto_scalarmult_BYTES
+#define X25519_SKBYTES crypto_scalarmult_SCALARBYTES
+
+enum aem_api_command_get {
 	AEM_API_ACCOUNT_BROWSE,
-	AEM_API_ACCOUNT_CREATE,
 	AEM_API_ACCOUNT_DELETE,
 	AEM_API_ACCOUNT_UPDATE,
 	AEM_API_ADDRESS_CREATE,
@@ -27,15 +30,21 @@ enum aem_api_commands {
 	AEM_API_ADDRESS_LOOKUP,
 	AEM_API_ADDRESS_UPDATE,
 	AEM_API_MESSAGE_BROWSE,
-	AEM_API_MESSAGE_CREATE,
 	AEM_API_MESSAGE_DELETE,
-	AEM_API_MESSAGE_PUBLIC,
 	AEM_API_MESSAGE_SENDER,
-	AEM_API_MESSAGE_UPLOAD,
-	AEM_API_PRIVATE_UPDATE,
 	AEM_API_SETTING_LIMITS
 };
 
+enum aem_api_command_post {
+	AEM_API_ACCOUNT_CREATE,
+	AEM_API_MESSAGE_CREATE,
+	AEM_API_MESSAGE_PUBLIC,
+	AEM_API_MESSAGE_UPLOAD,
+	AEM_API_MESSAGE_VERIFY,
+	AEM_API_PRIVATE_UPDATE
+};
+
+/*
 struct aem_user {
 	uint16_t space;
 	uint8_t level;
@@ -70,24 +79,29 @@ struct aem_intMsg {
 #define AEM_INTMSG_FLAGS_FROMSHIELD 8
 #define AEM_INTMSG_FLAGS_TOSHIELD   4
 #define AEM_INTMSG_FLAGS_FROMLEVEL  3
+*/
 
-int allears_init(const char * const newOnionId, const unsigned char pk_apiBox[crypto_box_PUBLICKEYBYTES], const unsigned char pk_apiSig[crypto_sign_PUBLICKEYBYTES], const unsigned char pk_dlvSig[crypto_sign_PUBLICKEYBYTES], const unsigned char newSaltNm[crypto_pwhash_SALTBYTES], const unsigned char usk[crypto_kdf_KEYBYTES]);
-void allears_free(void);
+void aem_init(const char serverOnionId[56], const unsigned char umk[AEM_KDF_UMK_KEYLEN]);
+void aem_free(void);
 
-struct aem_intMsg *allears_intmsg(const int num);
+int aem_account_create(const unsigned char uak[AEM_KDF_SUB_KEYLEN], const unsigned char epk[X25519_PKBYTES]);
 
-int allears_account_browse(struct aem_user ** const userList);
-int allears_account_create(const unsigned char * const targetPk);
-int allears_account_delete(const unsigned char * const targetPk);
-int allears_account_update(const unsigned char * const targetPk, const uint8_t level);
-int allears_address_create(struct aem_address * const addr, const char * const norm, const size_t lenNorm);
-int allears_address_delete(const uint64_t hash);
-int allears_address_update(struct aem_address * const addr, const int count);
-int allears_message_browse();
-int allears_message_create(const char * const title, const size_t lenTitle, const char * const body, const size_t lenBody, const char * const addrFrom, const size_t lenAddrFrom, const char * const addrTo, const size_t lenAddrTo, const char * const replyId, const size_t lenReplyId, const unsigned char toPubkey[crypto_kx_PUBLICKEYBYTES], unsigned char * const msgId);
-int allears_message_delete(const unsigned char msgId[16]);
-int allears_message_public(const char * const title, const size_t lenTitle, const char * const body, const size_t lenBody, unsigned char * const msgId);
-int allears_message_upload(const char * const fileName, const size_t lenFileName, const unsigned char * const fileData, const size_t lenFileData, unsigned char * const msgId);
-int allears_private_update(const unsigned char newPrivate[AEM_LEN_PRIVATE]);
+/*
+struct aem_intMsg *aem_intmsg(const int num);
+
+int aem_account_browse(struct aem_user ** const userList);
+int aem_account_create(const unsigned char * const targetPk);
+int aem_account_delete(const unsigned char * const targetPk);
+int aem_account_update(const unsigned char * const targetPk, const uint8_t level);
+int aem_address_create(struct aem_address * const addr, const char * const norm, const size_t lenNorm);
+int aem_address_delete(const uint64_t hash);
+int aem_address_update(struct aem_address * const addr, const int count);
+int aem_message_browse();
+int aem_message_create(const char * const title, const size_t lenTitle, const char * const body, const size_t lenBody, const char * const addrFrom, const size_t lenAddrFrom, const char * const addrTo, const size_t lenAddrTo, const char * const replyId, const size_t lenReplyId, const unsigned char toPubkey[crypto_kx_PUBLICKEYBYTES], unsigned char * const msgId);
+int aem_message_delete(const unsigned char msgId[16]);
+int aem_message_public(const char * const title, const size_t lenTitle, const char * const body, const size_t lenBody, unsigned char * const msgId);
+int aem_message_upload(const char * const fileName, const size_t lenFileName, const unsigned char * const fileData, const size_t lenFileData, unsigned char * const msgId);
+int aem_private_update(const unsigned char newPrivate[AEM_LEN_PRIVATE]);
+*/
 
 #endif
