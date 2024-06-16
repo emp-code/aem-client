@@ -17,7 +17,7 @@ void aem_kdf_sub(unsigned char * const out, const size_t lenOut, const uint64_t 
 	crypto_stream_chacha20_ietf_xor_ic(out, out, lenOut, nonce, counter, key);
 }
 
-uint16_t aem_getUserId(const unsigned char uak[AEM_KDF_SUB_KEYLEN]) {
+uint16_t aem_kdf_uid(const unsigned char uak[AEM_KDF_SUB_KEYLEN]) {
 	uint16_t uid;
 	aem_kdf_sub((unsigned char*)&uid, sizeof(uint16_t), AEM_KDF_KEYID_UAK_UID, uak);
 	return uid & 4095;

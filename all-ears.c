@@ -578,7 +578,7 @@ void aem_init(const char newOnionId[56], const unsigned char umk[AEM_KDF_UMK_KEY
 	aem_kdf_umk(own_ehk, crypto_aead_aes256gcm_KEYBYTES, AEM_KDF_KEYID_UMK_UAK, umk);
 	aem_kdf_umk(own_pfk, AEM_KDF_SUB_KEYLEN,             AEM_KDF_KEYID_UMK_UAK, umk);
 
-	own_uid = aem_getUserId(own_uak);
+	own_uid = aem_kdf_uid(own_uak);
 }
 
 void aem_free(void) {

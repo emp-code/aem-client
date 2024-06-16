@@ -17,6 +17,6 @@ enum {
 
 void aem_kdf_umk(unsigned char * const out, const size_t lenOut, const uint8_t id, const unsigned char key[AEM_KDF_UMK_KEYLEN]);
 void aem_kdf_sub(unsigned char * const out, const size_t lenOut, const uint64_t n, const unsigned char key[AEM_KDF_SUB_KEYLEN]);
-uint16_t aem_getUserId(const unsigned char uak[AEM_KDF_SUB_KEYLEN]);
+uint16_t aem_kdf_uid(const unsigned char uak[AEM_KDF_SUB_KEYLEN]);
 
 #endif
