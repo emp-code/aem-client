@@ -274,11 +274,15 @@ int aem_account_create(const unsigned char uak[AEM_KDF_SUB_KEYLEN], const unsign
 	return (ret < 0) ? ret : api_readStatus();
 }
 
-/*
 int aem_account_delete(const uint16_t uid) {
-	return apiFetch(AEM_API_ACCOUNT_DELETE, targetPk, crypto_box_PUBLICKEYBYTES, NULL);
+	unsigned char data[AEM_API_REQ_DATA_LEN];
+	memcpy(data, &uid, sizeof(uint16_t));
+	bzero(data + 2, AEM_API_REQ_DATA_LEN - 2);
+
+	const int ret = api_send(AEM_API_ACCOUNT_DELETE, 0, data, NULL, 0);
+	return (ret < 0) ? ret : api_readStatus();
 }
-*/
+
 int aem_account_update(const uint16_t uid, const uint8_t level) {
 	if (level > AEM_LEVEL_MAX) return -1;
 

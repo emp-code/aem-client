@@ -32,6 +32,7 @@ static int performTests(int * const ret) {
 	if ((*ret = aem_account_create(u1_uak, u1_epk)) != 0) return 1;
 	if ((*ret = aem_account_create(u1_uak, u1_epk)) != AEM_API_ERR_ACCOUNT_EXIST) return 2;
 	if ((*ret = aem_account_update(4095, 1)) != 0) return 3;
+	if ((*ret = aem_account_delete(4095)) != 0) return 3;
 
 /*
 	struct aem_user *userList;
@@ -77,7 +78,6 @@ static int performTests(int * const ret) {
 	// User1
 	if (aem_init(onionId, spk_api_box, spk_api_sig, spk_dlv_sig, saltNm, usk_user1) != 0) return -999;
 	(*retNum)++; if ((ret = aem_address_delete(UINT64_MAX)) >= 0) return -999; //11
-	(*retNum)++; if ((ret = aem_account_delete(upk_user2)) >= 0) return -999; //12
 	(*retNum)++; if ((ret = aem_account_update(upk_user2, 3)) >= 0) return -999; //13
 	(*retNum)++; if ((ret = aem_account_update(upk_user2, 1)) >= 0) return -999; //14
 	(*retNum)++; if ((ret = aem_account_update(upk_user1, 3)) >= 0) return -999; //15

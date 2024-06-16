@@ -5,6 +5,7 @@
 #include <sodium.h>
 
 #include "Include/AEM_KDF.h"
+#include "Include/Error.h"
 
 #define AEM_ADDR_FLAG_SHIELD 128
 // 64 unused
@@ -85,14 +86,13 @@ void aem_init(const char serverOnionId[56], const unsigned char umk[AEM_KDF_UMK_
 void aem_free(void);
 
 int aem_account_create(const unsigned char uak[AEM_KDF_SUB_KEYLEN], const unsigned char epk[X25519_PKBYTES]);
+int aem_account_update(const uint16_t uid, const uint8_t level);
+int aem_account_delete(const uint16_t uid);
 
 /*
 struct aem_intMsg *aem_intmsg(const int num);
 
 int aem_account_browse(struct aem_user ** const userList);
-int aem_account_create(const unsigned char * const targetPk);
-int aem_account_delete(const unsigned char * const targetPk);
-int aem_account_update(const unsigned char * const targetPk, const uint8_t level);
 int aem_address_create(struct aem_address * const addr, const char * const norm, const size_t lenNorm);
 int aem_address_delete(const uint64_t hash);
 int aem_address_update(struct aem_address * const addr, const int count);
