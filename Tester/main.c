@@ -12,7 +12,7 @@ static void pppUserKeys(unsigned char * const uak, unsigned char * const epk) {
 		randombytes_buf(umk, AEM_KDF_UMK_KEYLEN);
 
 		aem_kdf_umk(uak, AEM_KDF_SUB_KEYLEN, AEM_KDF_KEYID_UMK_UAK, umk);
-		if (aem_getUserId(uak) != 4095) continue;
+		if (aem_kdf_uid(uak) != 4095) continue;
 
 		unsigned char esk[crypto_scalarmult_SCALARBYTES];
 		aem_kdf_umk(esk, crypto_scalarmult_SCALARBYTES, AEM_KDF_KEYID_UMK_ESK, umk);
@@ -24,15 +24,13 @@ static void pppUserKeys(unsigned char * const uak, unsigned char * const epk) {
 	}
 }
 
-static int performTests(int * const retNum) {
+static int performTests(int * const ret) {
 	unsigned char u1_uak[AEM_KDF_SUB_KEYLEN];
 	unsigned char u1_epk[X25519_PKBYTES];
 	pppUserKeys(u1_uak, u1_epk);
 
-	*retNum = 0;
-	int ret;
-	(*retNum)++; if ((ret = aem_account_create(u1_uak, u1_epk)) != 0) return ret; //1
-//	(*retNum)++; if ((ret = aem_account_create()) >= 0) return -999; //2
+	if ((*ret = aem_account_create(u1_uak, u1_epk)) != 0) return 1;
+	if ((*ret = aem_account_create(u1_uak, u1_epk)) != AEM_API_ERR_ACCOUNT_EXIST) return 2;
 //	(*retNum)++; if ((ret = aem_account_update(, 1)) != 0) return ret; //3
 
 /*
@@ -134,7 +132,7 @@ int main(int argc, char *argv[]) {
 
 	int retNum;
 	const int ret = performTests(&retNum);
-	if (ret != 0) printf("Failed test %d: %d\n", retNum, ret); else puts("All Ok");
+	if (ret != 0) printf("Failed test %d: %d\n", ret, retNum); else puts("All Ok");
 
 	aem_free();
 	return EXIT_SUCCESS;
