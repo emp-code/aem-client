@@ -31,7 +31,7 @@ static int performTests(int * const ret) {
 
 	if ((*ret = aem_account_create(u1_uak, u1_epk)) != 0) return 1;
 	if ((*ret = aem_account_create(u1_uak, u1_epk)) != AEM_API_ERR_ACCOUNT_EXIST) return 2;
-//	(*retNum)++; if ((ret = aem_account_update(, 1)) != 0) return ret; //3
+	if ((*ret = aem_account_update(4095, 1)) != 0) return 3;
 
 /*
 	struct aem_user *userList;

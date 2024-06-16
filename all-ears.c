@@ -18,7 +18,7 @@
 #define AEM_MSG_MINBLOCKS 12
 #define AEM_API_MAXSIZE_RESPONSE 2097152 // 2 MiB
 
-//#define AEM_LEVEL_MAX 3
+#define AEM_LEVEL_MAX 3
 #define AEM_ADDRESS_ARGON2_OPSLIMIT 2
 #define AEM_ADDRESS_ARGON2_MEMLIMIT 16777216
 
@@ -278,15 +278,17 @@ int aem_account_create(const unsigned char uak[AEM_KDF_SUB_KEYLEN], const unsign
 int aem_account_delete(const uint16_t uid) {
 	return apiFetch(AEM_API_ACCOUNT_DELETE, targetPk, crypto_box_PUBLICKEYBYTES, NULL);
 }
-
-int aem_account_update(const unsigned char * const targetPk, const uint8_t level) {
+*/
+int aem_account_update(const uint16_t uid, const uint8_t level) {
 	if (level > AEM_LEVEL_MAX) return -1;
 
-	unsigned char data[1 + crypto_box_PUBLICKEYBYTES];
-	data[0] = level;
-	memcpy(data + 1, targetPk, crypto_box_PUBLICKEYBYTES);
+	unsigned char data[AEM_API_REQ_DATA_LEN];
+	memcpy(data, &uid, sizeof(uint16_t));
+	data[2] = level;
+	bzero(data + 3, AEM_API_REQ_DATA_LEN - 3);
 
-	return apiFetch(AEM_API_ACCOUNT_UPDATE, data, 1 + crypto_box_PUBLICKEYBYTES, NULL);
+	const int ret = api_send(AEM_API_ACCOUNT_UPDATE, 0, data, NULL, 0);
+	return (ret < 0) ? ret : api_readStatus();
 }
 
 /*
