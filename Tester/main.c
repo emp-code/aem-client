@@ -32,25 +32,14 @@ static int performTests(int * const ret) {
 	if ((*ret = aem_account_create(u1_uak, u1_epk)) != 0) return 1;
 	if ((*ret = aem_account_create(u1_uak, u1_epk)) != AEM_API_ERR_ACCOUNT_EXIST) return 2;
 	if ((*ret = aem_account_update(4095, 1)) != 0) return 3;
-	if ((*ret = aem_account_delete(4095)) != 0) return 3;
-
-/*
-	struct aem_user *userList;
-	(*retNum)++; if ((ret = aem_account_browse(&userList)) < 0)  return ret; //4
 
 	// Account created, level set to one: check result
-	(*retNum)++;
-	int found = -1;
-	for (int i = 0; i < ret; i++) {
-		if (memcmp(userList[i].pk, upk_user1, crypto_box_PUBLICKEYBYTES) == 0) {
-			found = i;
-			break;
-		}
-	}
+	if ((*ret = aem_account_browse()) != 0)  return 4;
+	if (aem_getUserLevel(4095) != 1) return 5;
 
-	if (found == -1) return -999; //5
-	free(userList);
+	if ((*ret = aem_account_delete(4095)) != 0) return 6;
 
+/*
 	unsigned char privateData[AEM_LEN_PRIVATE];
 	memset(privateData, 0xFC, AEM_LEN_PRIVATE);
 

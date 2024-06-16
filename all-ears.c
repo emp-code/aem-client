@@ -19,6 +19,7 @@
 #define AEM_API_MAXSIZE_RESPONSE 2097152 // 2 MiB
 
 #define AEM_LEVEL_MAX 3
+#define AEM_USERCOUNT 4096
 #define AEM_ADDRESS_ARGON2_OPSLIMIT 2
 #define AEM_ADDRESS_ARGON2_MEMLIMIT 16777216
 
@@ -44,6 +45,17 @@ static bool req_post;
 // Server data
 static unsigned char saltNm[crypto_pwhash_SALTBYTES];
 static char onionId[56];
+
+uint8_t maxStorage[AEM_LEVEL_MAX + 1];
+uint8_t maxNormalA[AEM_LEVEL_MAX + 1];
+uint8_t maxShieldA[AEM_LEVEL_MAX + 1];
+
+struct {
+	uint32_t level: 2;
+	uint32_t addrN: 5;
+	uint32_t addrS: 5;
+	uint32_t stKib: 20;
+} users[AEM_USERCOUNT];
 
 // User data
 static unsigned char own_uak[AEM_KDF_SUB_KEYLEN];
@@ -221,18 +233,48 @@ static int api_readStatus(void) {
 	return dec[1];
 }
 
-static unsigned char *api_readData(void) {
-	return NULL; // TODO
+static int api_readData(unsigned char ** const dec) {
+	unsigned char * const raw = malloc(AEM_API_MAXSIZE_RESPONSE);
+	const ssize_t lenRaw = recv(req_sock, raw, 1024, 0);
+
+	if (lenRaw < 1) {free(raw); close(req_sock); return -1010;}
+	if (lenRaw == 71) {const int r = (((raw[9] - '0') * 100) + ((raw[10] - '0') * 10) + (raw[11] - '0')) * -1; free(raw); close(req_sock); return r;}
+	if (lenRaw < 73 + 257 + crypto_aead_aes256gcm_ABYTES || memcmp(raw, "HTTP/1.1 200 aem\r\n", 18) != 0) {free(raw); close(req_sock); return -1011;}
+
+	char * const cl = memmem(raw, lenRaw, (const unsigned char * const)"\r\nContent-Length: ", 18);
+	if (cl == NULL) {free(raw); close(req_sock); return -1020;}
+	const long lenEnc = strtol(cl + 18, NULL, 10);
+	if (lenEnc < 257 + crypto_aead_aes256gcm_ABYTES) {free(raw); close(req_sock); return -1021;}
+
+	const ssize_t lenFull = lenEnc + (70 + numberOfDigits(lenEnc));
+	if (lenRaw != lenFull) {
+		const ssize_t r2 = recv(req_sock, raw + lenRaw, lenFull - lenRaw, MSG_WAITALL);
+		close(req_sock);
+		if (r2 != lenFull - lenRaw) {free(raw); return -1022;}
+	} else close(req_sock);
+
+	unsigned char nonce[crypto_aead_aes256gcm_NPUBBYTES];
+	bzero(nonce, crypto_aead_aes256gcm_NPUBBYTES);
+
+	unsigned char key[crypto_aead_aes256gcm_KEYBYTES];
+	aem_kdf_sub(key, crypto_aead_aes256gcm_KEYBYTES, req_binTs | ((uint64_t)((req_post? AEM_UAK_POST : 0) | AEM_UAK_TYPE_RES_BODY) << 40), own_uak);
+
+	*dec = malloc(lenEnc - crypto_aead_aes256gcm_ABYTES);
+	if (crypto_aead_aes256gcm_decrypt(*dec, NULL, NULL, raw + 70 + numberOfDigits(lenEnc), lenEnc, NULL, 0, nonce, key) != 0) {free(raw); free(*dec); return -1012;}
+
+	free(raw);
+	const int lenDec = lenEnc - crypto_aead_aes256gcm_ABYTES - *dec[0] - 1;
+	memmove(*dec, *dec + 1, lenDec);
+	return lenDec;
 }
 
-/*
-int aem_account_browse(struct aem_user ** const userList) {
-	if (userList == NULL) return -1;
-
-	unsigned char *res = NULL;
-	const int ret = apiFetch(AEM_API_ACCOUNT_BROWSE, (unsigned char[]){0}, 1, &res);
+int aem_account_browse(void) {
+	int ret = api_send(AEM_API_ACCOUNT_BROWSE, 0, NULL, NULL, AEM_API_REQ_DATA_LEN);
 	if (ret < 0) return ret;
-	if (ret < 47) return -2;
+
+	unsigned char *res;
+	ret = api_readData(&res);
+	if (ret != 12 + (AEM_USERCOUNT * sizeof(uint32_t))) return ret;
 
 	for (int i = 0; i < 4; i++) {
 		maxStorage[i] = res[(i * 3) + 0];
@@ -240,30 +282,22 @@ int aem_account_browse(struct aem_user ** const userList) {
 		maxShieldA[i] = res[(i * 3) + 2];
 	}
 
-	uint32_t userCount;
-	memcpy(&userCount, res + 12, 4);
+	size_t offset = 12;
+	for (unsigned int i = 0; i < AEM_USERCOUNT; i++) {
+		uint32_t u32;
+		memcpy(&u32, res + offset, sizeof(uint32_t));
 
-	*userList = malloc(sizeof(struct aem_user) * userCount);
-	if (*userList == NULL) {free(res); return -100;}
+		users[i].level = u32 & 3;
+		users[i].addrN = (u32 >> 2) & 31;
+		users[i].addrS = (u32 >> 7) & 31;
+		users[i].stKib = u32 >> 12;
 
-	size_t offset = 16;
-	for (unsigned int i = 0; i < userCount; i++) {
-		uint16_t u16;
-		memcpy(&u16, res + offset, 2);
-
-		(*userList)[i].space = res[offset + 2] | ((u16 >> 4) & 3840);
-		(*userList)[i].level = u16 & 3;
-		(*userList)[i].addrNrm = (u16 >> 2) & 31;
-		(*userList)[i].addrShd = (u16 >> 7) & 31;
-		memcpy(((*userList)[i]).pk, res + offset + 3, crypto_box_PUBLICKEYBYTES);
-
-		offset += 35;
+		offset += sizeof(uint32_t);
 	}
 
 	free(res);
-	return userCount;
+	return 0;
 }
-*/
 
 int aem_account_create(const unsigned char uak[AEM_KDF_SUB_KEYLEN], const unsigned char epk[X25519_PKBYTES]) {
 	unsigned char data[AEM_KDF_SUB_KEYLEN + X25519_PKBYTES];
@@ -576,6 +610,11 @@ int aem_private_update(const unsigned char newPrivate[AEM_LEN_PRIVATE]) {
 }
 */
 
+uint8_t aem_getUserLevel(const uint16_t uid) {
+	if (uid >= AEM_USERCOUNT) return UINT8_MAX;
+	return users[uid].level;
+}
+
 void aem_init(const char newOnionId[56], const unsigned char umk[AEM_KDF_UMK_KEYLEN]) {
 	memcpy(onionId, newOnionId, 56);
 
@@ -585,6 +624,8 @@ void aem_init(const char newOnionId[56], const unsigned char umk[AEM_KDF_UMK_KEY
 	aem_kdf_umk(own_pfk, AEM_KDF_SUB_KEYLEN,             AEM_KDF_KEYID_UMK_UAK, umk);
 
 	own_uid = aem_kdf_uid(own_uak);
+
+	bzero(users, sizeof(users));
 }
 
 void aem_free(void) {
@@ -605,6 +646,8 @@ void aem_free(void) {
 		count_intMsg = 0;
 	}
 */
+
+	sodium_memzero(users, sizeof(users));
 
 	sodium_memzero(saltNm, crypto_pwhash_SALTBYTES);
 	sodium_memzero(onionId, 56);

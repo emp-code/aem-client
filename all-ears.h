@@ -82,9 +82,15 @@ struct aem_intMsg {
 #define AEM_INTMSG_FLAGS_FROMLEVEL  3
 */
 
+// Begin/End
 void aem_init(const char serverOnionId[56], const unsigned char umk[AEM_KDF_UMK_KEYLEN]);
 void aem_free(void);
 
+// Utility functions
+uint8_t aem_getUserLevel(const uint16_t uid);
+
+// API functions
+int aem_account_browse(void);
 int aem_account_create(const unsigned char uak[AEM_KDF_SUB_KEYLEN], const unsigned char epk[X25519_PKBYTES]);
 int aem_account_update(const uint16_t uid, const uint8_t level);
 int aem_account_delete(const uint16_t uid);
@@ -92,7 +98,6 @@ int aem_account_delete(const uint16_t uid);
 /*
 struct aem_intMsg *aem_intmsg(const int num);
 
-int aem_account_browse(struct aem_user ** const userList);
 int aem_address_create(struct aem_address * const addr, const char * const norm, const size_t lenNorm);
 int aem_address_delete(const uint64_t hash);
 int aem_address_update(struct aem_address * const addr, const int count);
