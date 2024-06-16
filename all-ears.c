@@ -20,6 +20,8 @@
 
 #define AEM_LEVEL_MAX 3
 #define AEM_USERCOUNT 4096
+#define AEM_ADDRESSES_PER_USER 31
+
 #define AEM_ADDRESS_ARGON2_OPSLIMIT 2
 #define AEM_ADDRESS_ARGON2_MEMLIMIT 16777216
 
@@ -63,6 +65,11 @@ static unsigned char own_esk[X25519_SKBYTES];
 static unsigned char own_ehk[crypto_aead_aes256gcm_KEYBYTES];
 static unsigned char own_pfk[AEM_KDF_SUB_KEYLEN];
 static uint16_t own_uid = UINT16_MAX;
+
+int own_addrCount = 0;
+unsigned char own_addr32[AEM_ADDRESSES_PER_USER][10];
+uint64_t own_addrHash[AEM_ADDRESSES_PER_USER];
+uint8_t own_addrFlags[AEM_ADDRESSES_PER_USER];
 
 /*
 static uint16_t totalMsgCount = 0;
@@ -120,9 +127,9 @@ static int torConnect(void) {
 	return -1;
 }
 
-static uint64_t normalHash(const char addr32[10]) {
+static uint64_t normalHash(const unsigned char addr32[10]) {
 	uint64_t halves[2];
-	return (crypto_pwhash((unsigned char*)halves, 16, addr32, 10, saltNm, AEM_ADDRESS_ARGON2_OPSLIMIT, AEM_ADDRESS_ARGON2_MEMLIMIT, crypto_pwhash_ALG_ARGON2ID13) == 0) ? (halves[0] ^ halves[1]) : 0;
+	return (crypto_pwhash((unsigned char*)halves, 16, (const char*)addr32, 10, saltNm, AEM_ADDRESS_ARGON2_OPSLIMIT, AEM_ADDRESS_ARGON2_MEMLIMIT, crypto_pwhash_ALG_ARGON2ID13) == 0) ? (halves[0] ^ halves[1]) : 0;
 }
 
 static int numberOfDigits(const size_t x) {
@@ -329,26 +336,45 @@ int aem_account_update(const uint16_t uid, const uint8_t level) {
 	return (ret < 0) ? ret : api_readStatus();
 }
 
-/*
-int aem_address_create(struct aem_address * const addr, const char * const norm, const size_t lenNorm) {
-	if (norm == NULL) {
-		unsigned char data[AEM_LEN_SHORTRESPONSE_DECRYPT - 1];
-		if (apiFetch(AEM_API_ADDRESS_CREATE, (const unsigned char[]){'S', 'H', 'I', 'E', 'L', 'D'}, 6, (unsigned char**)&data) != 0) return -1;
+int aem_address_create(const char * const addr, const size_t lenAddr) {
+	if (addr == NULL) {
+		int ret = api_send(AEM_API_ADDRESS_CREATE, 0, NULL, NULL, 0);
+		if (ret < 0) return ret;
 
-		memcpy(&(addr->hash), data, 8);
-		memcpy(addr->addr32, data + 8, 10);
+		unsigned char *res;
+		ret = api_readData(&res);
+		if (ret < 0) return ret;
+		if (ret != 18) {free(res); return -1;}
+
+		own_addrFlags[own_addrCount] = AEM_ADDR_FLAGS_DEFAULT;
+		memcpy(own_addrHash + own_addrCount, res, 8);
+		memcpy(own_addr32[own_addrCount], res + 8, 10);
+		own_addrCount++;
+		free(res);
 		return 0;
 	}
 
-	if (lenNorm < 1 || lenNorm > 15) return -1;
+	if (lenAddr < 1 || lenAddr > 15) return -1;
 
-	addr32_store(addr->addr32, norm, lenNorm);
-	addr->hash = normalHash((const char * const)addr->addr32);
-	addr->flags = AEM_ADDR_FLAGS_DEFAULT;
+	unsigned char addr32[10];
+	addr32_store(addr32, (const unsigned char * const)addr, lenAddr);
 
-	return apiFetch(AEM_API_ADDRESS_CREATE, &addr->hash, 8, NULL);
+	const uint64_t hash = normalHash(addr32);
+	unsigned char data[AEM_API_REQ_DATA_LEN];
+	memcpy(data, &hash, sizeof(uint64_t));
+	bzero(data + sizeof(uint64_t), AEM_API_REQ_DATA_LEN - sizeof(uint64_t));
+
+	const int ret = api_send(AEM_API_ADDRESS_CREATE, 0, data, NULL, 0);
+	if (ret < 0) return ret;
+
+	own_addrFlags[own_addrCount] = AEM_ADDR_FLAGS_DEFAULT;
+	memcpy(own_addr32[own_addrCount], addr32, 10);
+	own_addrHash[own_addrCount] = hash;
+	own_addrCount++;
+	return 0;
 }
 
+/*
 int aem_address_delete(const uint64_t hash) {
 	return apiFetch(AEM_API_ADDRESS_DELETE, &hash, 8, NULL);
 }

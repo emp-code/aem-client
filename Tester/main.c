@@ -5,9 +5,7 @@
 
 #include "../all-ears.h"
 
-static void pppUserKeys(unsigned char * const uak, unsigned char * const epk) {
-	unsigned char umk[AEM_KDF_UMK_KEYLEN];
-
+static void pppUserKeys(unsigned char * const umk, unsigned char * const uak, unsigned char * const epk) {
 	for(;;) {
 		randombytes_buf(umk, AEM_KDF_UMK_KEYLEN);
 
@@ -19,34 +17,38 @@ static void pppUserKeys(unsigned char * const uak, unsigned char * const epk) {
 		crypto_scalarmult_base(epk, esk);
 
 		sodium_memzero(esk, crypto_scalarmult_SCALARBYTES);
-		sodium_memzero(umk, AEM_KDF_UMK_KEYLEN);
 		break;
 	}
 }
 
-static int performTests(int * const ret) {
+static int performTests(const char * const onionId, const unsigned char * const admin_umk, int * const ret) {
+	unsigned char u1_umk[AEM_KDF_UMK_KEYLEN];
 	unsigned char u1_uak[AEM_KDF_SUB_KEYLEN];
 	unsigned char u1_epk[X25519_PKBYTES];
-	pppUserKeys(u1_uak, u1_epk);
+	pppUserKeys(u1_umk, u1_uak, u1_epk);
 
+// == Admin
+	aem_init(onionId, admin_umk);
 	if ((*ret = aem_account_create(u1_uak, u1_epk)) != 0) return 1;
 	if ((*ret = aem_account_create(u1_uak, u1_epk)) != AEM_API_ERR_ACCOUNT_EXIST) return 2;
-	if ((*ret = aem_account_update(4095, 1)) != 0) return 3;
+	if ((*ret = aem_account_update(4095, 3)) != 0) return 3;
 
 	// Account created, level set to one: check result
 	if ((*ret = aem_account_browse()) != 0)  return 4;
-	if (aem_getUserLevel(4095) != 1) return 5;
+	if (aem_getUserLevel(4095) != 3) return 5;
 
-	if ((*ret = aem_account_delete(4095)) != 0) return 6;
+// == ppp
+	aem_init(onionId, u1_umk);
+
+//	char testAddress[16];
+//	sprintf(testAddress, "aemtest%.8x", randombytes_random());
+	if ((*ret = aem_address_create(NULL, 0)) != 0) return 6;
+
+	if ((*ret = aem_account_delete(4095)) != 0) return 7;
 
 /*
 	unsigned char privateData[AEM_LEN_PRIVATE];
 	memset(privateData, 0xFC, AEM_LEN_PRIVATE);
-
-	struct aem_address addr;
-
-	char testAddress[16];
-	sprintf(testAddress, "aemtest%.8x", randombytes_random());
 
 	unsigned char msgId_msg[16];
 	unsigned char msgId_ann[16];
@@ -117,10 +119,9 @@ int main(int argc, char *argv[]) {
 
 	unsigned char umk_admin[AEM_KDF_UMK_KEYLEN];
 	if (sodium_base642bin(umk_admin, AEM_KDF_UMK_KEYLEN, argv[2], 60, NULL, NULL, NULL, sodium_base64_VARIANT_ORIGINAL_NO_PADDING) != 0) {puts("Invalid UMK"); return EXIT_FAILURE;}
-	aem_init(argv[1], umk_admin);
 
 	int retNum;
-	const int ret = performTests(&retNum);
+	const int ret = performTests(argv[1], umk_admin, &retNum);
 	if (ret != 0) printf("Failed test %d: %d\n", ret, retNum); else puts("All Ok");
 
 	aem_free();
