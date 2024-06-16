@@ -165,7 +165,7 @@ static int api_send(const int cmd, const int flags, const unsigned char * const 
 	sodium_bin2base64(url, 65, urlBase, 48, sodium_base64_VARIANT_URLSAFE);
 
 	if (!req_post) {
-		unsigned char req[175];
+		unsigned char req[176];
 		sprintf((char*)req,
 			"GET /%.64s HTTP/1.1\r\n"
 			"Host: %.56s.onion:302\r\n"
