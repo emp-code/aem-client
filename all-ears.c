@@ -60,11 +60,11 @@ struct {
 } users[AEM_USERCOUNT];
 
 // User data
-static unsigned char own_uak[AEM_KDF_SUB_KEYLEN];
-static unsigned char own_esk[X25519_SKBYTES];
-static unsigned char own_ehk[crypto_aead_aes256gcm_KEYBYTES];
-static unsigned char own_pfk[AEM_KDF_SUB_KEYLEN];
-static uint16_t own_uid = UINT16_MAX;
+static unsigned char own_uak[AEM_KDF_SUB_KEYLEN]; // User Access Key
+static unsigned char own_esk[X25519_SKBYTES]; // Envelope Secret Key
+static unsigned char own_ehk[crypto_aead_aes256gcm_KEYBYTES]; // Envelope Hidden Key
+static unsigned char own_pfk[AEM_KDF_SUB_KEYLEN]; // Private Field Key
+static uint16_t own_uid = UINT16_MAX; // UserID
 
 int own_addrCount = 0;
 unsigned char own_addr32[AEM_ADDRESSES_PER_USER][10];
