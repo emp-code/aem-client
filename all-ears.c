@@ -14,7 +14,7 @@
 
 #include "all-ears.h"
 
-// Server settigns - must match server
+// Server settings - must match server
 #define AEM_MSG_MINBLOCKS 12
 #define AEM_API_MAXSIZE_RESPONSE 2097152 // 2 MiB
 
