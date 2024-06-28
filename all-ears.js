@@ -401,10 +401,7 @@ function AllEars(readyCallback) {
 		let count = 0;
 
 		for (let i = 0; i < _own_addr.length; i++) {
-			if (_own_addr[i].addr32 && (
-			   ( isShield &&  (_own_addr[i].addr32[0] & 128))
-			|| (!isShield && !(_own_addr[i].addr32[0] & 128))
-			)) count++;
+			if (_own_addr[i].addr32 && !isShield === !(_own_addr[i].addr32[0] & 128)) count++;
 		}
 
 		return count;
