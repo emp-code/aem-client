@@ -1910,7 +1910,7 @@ function AllEars(readyCallback) {
 	};
 
 	this.Message_Browse = function(newest, u_info, callback) {if(typeof(newest)!=="boolean" || typeof(u_info)!=="boolean" || typeof(callback)!=="function"){return;}
-		const startId = _newestMsgTs? (new Uint8Array(new Uint16Array([newest? _newestEvpId : _oldestEvpId]).buffer)) : null;
+		const startId = _newestMsgTs? sodium.from_hex(newest? _newestEvpId : _oldestEvpId) : null;
 		const flags = (u_info? _AEM_FLAG_UINFO : 0) | (newest? 0 : _AEM_FLAG_OLDER);
 
 		_fetchEncrypted(_AEM_API_MESSAGE_BROWSE, flags, startId, null, async function(response) {
@@ -1937,10 +1937,10 @@ function AllEars(readyCallback) {
 				const evpBytes = (evpBlocks + _AEM_MSG_MINBLOCKS) * 16;
 				const evpData = response.slice(offset, offset + evpBytes);
 
-				const evpId = new Uint16Array(new Uint8Array([
+				const evpId = sodium.to_hex(new Uint8Array([
 					evpData[0]  ^ evpData[1]  ^ evpData[2]  ^ evpData[3]  ^ evpData[4]  ^ evpData[5]  ^ evpData[6]  ^ evpData[7]  ^ evpData[8]  ^ evpData[9]  ^ evpData[10] ^ evpData[11] ^ evpData[12] ^ evpData[13] ^ evpData[14] ^ evpData[15],
 					evpData[16] ^ evpData[17] ^ evpData[18] ^ evpData[19] ^ evpData[20] ^ evpData[21] ^ evpData[22] ^ evpData[23] ^ evpData[24] ^ evpData[25] ^ evpData[26] ^ evpData[27] ^ evpData[28] ^ evpData[29] ^ evpData[30] ^ evpData[31]
-				]).buffer)[0];
+				]));
 
 				if (_msgExists(evpId)) {
 					offset += evpBytes;
@@ -2018,22 +2018,22 @@ function AllEars(readyCallback) {
 	};
 
 	this.Message_Delete = function(hexId, callback) {if(typeof(callback)!=="function"){return;}
-		if (hexId.length !== 48) {callback(0x01); return;}
-		const delId = sodium.from_hex(hexId);
+		// TODO: Allow deleting multiple (12 max)
+		if (hexId.length !== 4) {callback(0x01); return;}
 
-		if (_oldestEvpId === delId) {
+		if (_oldestEvpId === hexId) {
 			callback(0x10);
 			return;
 		}
 
-		_fetchEncrypted(_AEM_API_MESSAGE_DELETE, 0, delId, null, function(response) {
+		_fetchEncrypted(_AEM_API_MESSAGE_DELETE, 0, sodium.from_hex(hexId), null, function(response) {
 			if (typeof(response) === "number") {callback(response); return;}
 			if (response.length !== 1) {callback(0x04); return;}
 			if (response[0] !== 0) {callback(response[0]); return;}
 
 			[_extMsg, _intMsg, _uplMsg, _outMsg].forEach(function(msgSet) {
 				for (let j = 0; j < msgSet.length; j++) {
-					if (id === msgSet[j].id) {msgSet.splice(j, 1); j--;}
+					if (hexId === msgSet[j].id) {msgSet.splice(j, 1); j--;}
 				}
 			});
 
