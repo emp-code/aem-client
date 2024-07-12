@@ -184,26 +184,13 @@ static int api_send(const int cmd, const int flags, const unsigned char * const 
 	sodium_bin2base64(url, 65, urlBase, 48, sodium_base64_VARIANT_URLSAFE);
 
 	if (!req_post) {
-		unsigned char req[176];
-		sprintf((char*)req,
-			"GET /%.64s HTTP/1.1\r\n"
-			"Host: %.56s.onion:302\r\n"
-			"Connection: close\r\n"
-			"\r\n",
-		url, onionId);
-
-		if (send(req_sock, req, 175, 0) != 175) {close(req_sock); return -1003;}
+		unsigned char req[70];
+		sprintf((char*)req, "GET /%.64s", url, onionId);
+		if (send(req_sock, req, 70, 0) != 70) {close(req_sock); return -1003;}
 	} else {
-		const ssize_t lenReq = 194 + numberOfDigits(lenPost) + lenPost + crypto_aead_aes256gcm_ABYTES;
-
-		unsigned char req[lenReq];
-		sprintf((char*)req,
-			"POST /%.64s HTTP/1.1\r\n"
-			"Host: %.56s.onion:302\r\n"
-			"Content-Length: %zu\r\n"
-			"Connection: close\r\n"
-			"\r\n",
-		url, onionId, lenPost + crypto_aead_aes256gcm_ABYTES);
+		const ssize_t lenReq = 101 + numberOfDigits(lenPost) + lenPost + crypto_aead_aes256gcm_ABYTES;
+		unsigned char req[lenReq + 1];
+		sprintf((char*)req, "POST /%.64s HTTP/1.0\r\nContent-Length: %zu\r\n\r\n", url, lenPost + crypto_aead_aes256gcm_ABYTES);
 
 		unsigned char body_nonce[crypto_aead_aes256gcm_NPUBBYTES];
 		bzero(body_nonce, crypto_aead_aes256gcm_NPUBBYTES);
@@ -211,7 +198,7 @@ static int api_send(const int cmd, const int flags, const unsigned char * const 
 		unsigned char body_key[crypto_aead_aes256gcm_KEYBYTES];
 		aem_kdf_sub(body_key, crypto_aead_aes256gcm_KEYBYTES, req_binTs | ((uint64_t)(AEM_UAK_POST | AEM_UAK_TYPE_REQ_BODY) << 40), own_uak);
 
-		crypto_aead_aes256gcm_encrypt(req + 194 + numberOfDigits(lenPost), NULL, post, lenPost, NULL, 0, NULL, body_nonce, body_key);
+		crypto_aead_aes256gcm_encrypt(req + 101 + numberOfDigits(lenPost), NULL, post, lenPost, NULL, 0, NULL, body_nonce, body_key);
 		if (send(req_sock, req, lenReq, 0) != lenReq) {close(req_sock); return -1003;}
 	}
 
@@ -225,7 +212,7 @@ static int api_readStatus(void) {
 
 	if (lenRaw < 1) return -1010;
 	if (lenRaw == 71) return (((raw[9] - '0') * 100) + ((raw[10] - '0') * 10) + (raw[11] - '0')) * -1;
-	if (lenRaw != 73 + 257 + crypto_aead_aes256gcm_ABYTES || memcmp(raw, "HTTP/1.1 200 aem\r\nContent-Length: 273\r\nAccess-Control-Allow-Origin: *\r\n\r\n", 73) != 0) return -1011;
+	if (lenRaw != 73 + 257 + crypto_aead_aes256gcm_ABYTES || memcmp(raw, "HTTP/1.0 200 aem\r\nContent-Length: 273\r\nAccess-Control-Allow-Origin: *\r\n\r\n", 73) != 0) return -1011;
 
 	unsigned char nonce[crypto_aead_aes256gcm_NPUBBYTES];
 	bzero(nonce, crypto_aead_aes256gcm_NPUBBYTES);
@@ -246,7 +233,7 @@ static int api_readData(unsigned char ** const dec) {
 
 	if (lenRaw < 1) {free(raw); close(req_sock); return -1010;}
 	if (lenRaw == 71) {const int r = (((raw[9] - '0') * 100) + ((raw[10] - '0') * 10) + (raw[11] - '0')) * -1; free(raw); close(req_sock); return r;}
-	if (lenRaw < 73 + 257 + crypto_aead_aes256gcm_ABYTES || memcmp(raw, "HTTP/1.1 200 aem\r\n", 18) != 0) {free(raw); close(req_sock); return -1011;}
+	if (lenRaw < 73 + 257 + crypto_aead_aes256gcm_ABYTES || memcmp(raw, "HTTP/1.0 200 aem\r\n", 18) != 0) {free(raw); close(req_sock); return -1011;}
 
 	char * const cl = memmem(raw, lenRaw, (const unsigned char * const)"\r\nContent-Length: ", 18);
 	if (cl == NULL) {free(raw); close(req_sock); return -1020;}
