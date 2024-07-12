@@ -210,9 +210,10 @@ static int api_readStatus(void) {
 	const ssize_t lenRaw = recv(req_sock, raw, 1 + 73 + 257 + crypto_aead_aes256gcm_ABYTES, 0);
 	close(req_sock);
 
-	if (lenRaw < 1) return -1010;
+	if (lenRaw == 0) return -1010;
+	if (lenRaw < 1) return -1011;
 	if (lenRaw == 71) return (((raw[9] - '0') * 100) + ((raw[10] - '0') * 10) + (raw[11] - '0')) * -1;
-	if (lenRaw != 73 + 257 + crypto_aead_aes256gcm_ABYTES || memcmp(raw, "HTTP/1.0 200 aem\r\nContent-Length: 273\r\nAccess-Control-Allow-Origin: *\r\n\r\n", 73) != 0) return -1011;
+	if (lenRaw != 73 + 257 + crypto_aead_aes256gcm_ABYTES || memcmp(raw, "HTTP/1.0 200 aem\r\nContent-Length: 273\r\nAccess-Control-Allow-Origin: *\r\n\r\n", 73) != 0) return -1012;
 
 	unsigned char nonce[crypto_aead_aes256gcm_NPUBBYTES];
 	bzero(nonce, crypto_aead_aes256gcm_NPUBBYTES);
@@ -221,7 +222,7 @@ static int api_readStatus(void) {
 	aem_kdf_sub(key, crypto_aead_aes256gcm_KEYBYTES, req_binTs | ((uint64_t)((req_post? AEM_UAK_POST : 0) | AEM_UAK_TYPE_RES_BODY) << 40), own_uak);
 
 	unsigned char dec[257];
-	if (crypto_aead_aes256gcm_decrypt(dec, NULL, NULL, raw + 73, lenRaw - 73, NULL, 0, nonce, key) != 0) return -1012;
+	if (crypto_aead_aes256gcm_decrypt(dec, NULL, NULL, raw + 73, lenRaw - 73, NULL, 0, nonce, key) != 0) return -1013;
 
 	if (dec[0] != 255) return -1013;
 	return dec[1];
@@ -231,9 +232,10 @@ static int api_readData(unsigned char ** const dec) {
 	unsigned char * const raw = malloc(AEM_API_MAXSIZE_RESPONSE);
 	const ssize_t lenRaw = recv(req_sock, raw, 1024, 0);
 
-	if (lenRaw < 1) {free(raw); close(req_sock); return -1010;}
+	if (lenRaw == 0) return -1010;
+	if (lenRaw < 1) {free(raw); close(req_sock); return -1011;}
 	if (lenRaw == 71) {const int r = (((raw[9] - '0') * 100) + ((raw[10] - '0') * 10) + (raw[11] - '0')) * -1; free(raw); close(req_sock); return r;}
-	if (lenRaw < 73 + 257 + crypto_aead_aes256gcm_ABYTES || memcmp(raw, "HTTP/1.0 200 aem\r\n", 18) != 0) {free(raw); close(req_sock); return -1011;}
+	if (lenRaw < 73 + 257 + crypto_aead_aes256gcm_ABYTES || memcmp(raw, "HTTP/1.0 200 aem\r\n", 18) != 0) {free(raw); close(req_sock); return -1012;}
 
 	char * const cl = memmem(raw, lenRaw, (const unsigned char * const)"\r\nContent-Length: ", 18);
 	if (cl == NULL) {free(raw); close(req_sock); return -1020;}
@@ -254,7 +256,7 @@ static int api_readData(unsigned char ** const dec) {
 	aem_kdf_sub(key, crypto_aead_aes256gcm_KEYBYTES, req_binTs | ((uint64_t)((req_post? AEM_UAK_POST : 0) | AEM_UAK_TYPE_RES_BODY) << 40), own_uak);
 
 	*dec = malloc(lenEnc - crypto_aead_aes256gcm_ABYTES);
-	if (crypto_aead_aes256gcm_decrypt(*dec, NULL, NULL, raw + 70 + numberOfDigits(lenEnc), lenEnc, NULL, 0, nonce, key) != 0) {free(raw); free(*dec); return -1012;}
+	if (crypto_aead_aes256gcm_decrypt(*dec, NULL, NULL, raw + 70 + numberOfDigits(lenEnc), lenEnc, NULL, 0, nonce, key) != 0) {free(raw); free(*dec); return -1013;}
 
 	free(raw);
 	const int lenDec = lenEnc - crypto_aead_aes256gcm_ABYTES - *dec[0] - 1;
