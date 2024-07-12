@@ -1524,7 +1524,7 @@ function AllEars(readyCallback) {
 
 		const oldTitle = document.title;
 		document.title = _extMsg[num].subj;
-		el.contentWindow.print();
+		try {el.contentWindow.print();} catch(e){}
 
 		document.title = oldTitle;
 		document.body.removeChild(el);
