@@ -1283,7 +1283,7 @@ function AllEars(readyCallback) {
 				if ((msgData[0] & 128) !== 0) {
 					// Email attachment, no additional encryption
 
-					msgParent = new Uint16Array(msgData.slice(1, 3).buffer)[0];
+					msgParent = sodium.to_hex(msgData.slice(1, 3));
 					msgFn = sodium.to_string(msgData.slice(3, 4 + (msgData[0] & 127)));
 					msgBody = msgData.slice(4 + (msgData[0] & 127));
 				} else {
