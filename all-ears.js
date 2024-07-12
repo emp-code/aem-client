@@ -1521,7 +1521,12 @@ function AllEars(readyCallback) {
 		document.body.appendChild(el);
 		el.contentWindow.document.head.replaceChildren(elStyle);
 		el.contentWindow.document.body.replaceChildren(elBody);
+
+		const oldTitle = document.title;
+		document.title = _extMsg[num].subj;
 		el.contentWindow.print();
+
+		document.title = oldTitle;
 		document.body.removeChild(el);
 	};
 
