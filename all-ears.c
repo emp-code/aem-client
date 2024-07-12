@@ -110,7 +110,7 @@ static int torConnect(void) {
 	unsigned char req[72];
 	unsigned char reply[8];
 
-	memcpy(req, "\x04\x01\x01\x2e\x00\x00\x00\x01\x00", 9);
+	memcpy(req, "\x04\x01\x01\x2e\x00\x00\x00\x01\x00", 9); // 012e: port 302
 	memcpy(req + 9, onionId, 56);
 	memcpy(req + 65, ".onion\0", 7);
 
