@@ -1026,7 +1026,7 @@ function AllEars(readyCallback) {
 
 	const _downloadFile = function(title, body) {
 		const a = document.createElement("a");
-		a.href = URL.createObjectURL(new Blob([body]));
+		a.href = URL.createObjectURL(body);
 		a.download = title;
 		a.click();
 
@@ -1498,7 +1498,7 @@ function AllEars(readyCallback) {
 	};
 
 	this.downloadUplMsg = function(num) {if(typeof(num)!=="number"){return;}
-		_downloadFile(_uplMsg[num].title, _uplMsg[num].body.buffer);
+		_downloadFile(_uplMsg[num].title, new Blob([_uplMsg[num].body.buffer]));
 	};
 
 	this.printExtMsg = function(num) {if(typeof(num)!=="number"){return;}
