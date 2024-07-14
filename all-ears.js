@@ -930,7 +930,7 @@ function AllEars(readyCallback) {
 		let offset = 4;
 		for (let i = 0; i < (browseData[0] >> 2); i++) {
 			const hash = browseData.slice(offset, offset + 8);
-			_own_addr.push(new _Address(hash, null, browseData[offset + 8]));
+			_own_addr.push(new _Address(hash, new Uint8Array(10), browseData[offset + 8]));
 			offset += 9;
 		}
 
