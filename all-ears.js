@@ -61,6 +61,7 @@ function AllEars(readyCallback) {
 	const _AEM_FLAG_OLDER = 8;
 	const _AEM_FLAG_UINFO = 4;
 	const _AEM_FLAG_EMAIL = 8;
+	const _AEM_FLAG_EMPTY = 8;
 
 	const _AEM_ADDR32_CHARS = "0123456789abcdefghjkmnpqrstuwxyz";
 	const _AEM_ADDRESSES_PER_USER = 31;
@@ -1952,7 +1953,7 @@ function AllEars(readyCallback) {
 					continue;
 				}
 
- 				// Create the base for the hash
+				// Create the base for the hash
 				const base = new Uint8Array(sodium.crypto_scalarmult_BYTES + _X25519_PKBYTES + 2);
 				base.set(sodium.crypto_scalarmult(_own_esk, evpData.slice(0, _X25519_PKBYTES))); // Recreate the shared secret - this step cannot be done by the server
 				base.set(sodium.crypto_scalarmult_base(_own_esk), sodium.crypto_scalarmult_BYTES);
@@ -1966,6 +1967,7 @@ function AllEars(readyCallback) {
 				const msgData = evpDec.slice(16);
 
 				_addMessage(msgData, evpId);
+
 				_readyMsgBytes += evpBytes;
 				offset += evpBytes;
 			}
@@ -2023,27 +2025,46 @@ function AllEars(readyCallback) {
 	};
 
 	this.Message_Delete = function(hexId, callback) {if(typeof(callback)!=="function"){return;}
-		// TODO: Allow deleting multiple (12 max)
-		if (hexId.length !== 4) {callback(0x01); return;}
+		if (hexId === "ALL") {
+			_fetchEncrypted(_AEM_API_MESSAGE_DELETE, _AEM_FLAG_EMPTY, null, null, function(response) {
+				if (typeof(response) === "number") {callback(response); return;}
+				if (response.length !== 1) {callback(0x04); return;}
+				if (response[0] !== 0) {callback(response[0]); return;}
 
-		if (_oldestEvpId === hexId) {
-			callback(0x10);
-			return;
-		}
+				[_extMsg, _intMsg, _uplMsg, _outMsg].forEach(function(msgSet) {
+					msgSet.splice(msgSet.length);
+				});
 
-		_fetchEncrypted(_AEM_API_MESSAGE_DELETE, 0, sodium.from_hex(hexId), null, function(response) {
-			if (typeof(response) === "number") {callback(response); return;}
-			if (response.length !== 1) {callback(0x04); return;}
-			if (response[0] !== 0) {callback(response[0]); return;}
+				_newestEvpId = null;
+				_newestMsgTs = 0;
+				_oldestEvpId = null;
+				_oldestMsgTs = 4294967296;
 
-			[_extMsg, _intMsg, _uplMsg, _outMsg].forEach(function(msgSet) {
-				for (let j = 0; j < msgSet.length; j++) {
-					if (hexId === msgSet[j].id) {msgSet.splice(j, 1); j--;}
-				}
+				callback(0);
 			});
+		} else {
+			// TODO: Allow deleting multiple (12 max)
+			if (hexId.length !== 4) {callback(0x01); return;}
 
-			callback(0);
-		});
+			if (_oldestEvpId === hexId) {
+				callback(0x10);
+				return;
+			}
+
+			_fetchEncrypted(_AEM_API_MESSAGE_DELETE, 0, sodium.from_hex(hexId), null, function(response) {
+				if (typeof(response) === "number") {callback(response); return;}
+				if (response.length !== 1) {callback(0x04); return;}
+				if (response[0] !== 0) {callback(response[0]); return;}
+
+				[_extMsg, _intMsg, _uplMsg, _outMsg].forEach(function(msgSet) {
+					for (let j = 0; j < msgSet.length; j++) {
+						if (hexId === msgSet[j].id) {msgSet.splice(j, 1); j--;}
+					}
+				});
+
+				callback(0);
+			});
+		}
 	};
 
 	this.Message_Public = function(title, body, callback) {if(typeof(title)!=="string" || typeof(body)!=="string" || typeof(callback)!=="function"){return;}
