@@ -136,19 +136,7 @@ function AllEars(readyCallback) {
 	const _admin_userLvl = [];
 
 // Private functions
-	function _Dkim() {
-		this.domain = [];
-		this.senderId = [];
-		this.sgnAll = [];
-		this.sgnDate = [];
-		this.sgnFrom = [];
-		this.sgnMsgId = [];
-		this.sgnReplyTo = [];
-		this.sgnSubject = [];
-		this.sgnTo = [];
-	}
-
-	function _ExtMsg(id, ts, hdrTs, hdrTz, ip, cc, cs, tls, esmtp, protV, inval, rares, attach, greetDomainIp, ipBlacklisted, dkimFail, dkim, greet, rdns, auSys, envFrom, hdrFrom, dnFrom, envTo, hdrTo, dnTo, hdrRt, dnRt, hdrId, headers, subj, body) {
+	function _ExtMsg(id, ts, hdrTs, hdrTz, ip, cc, cs, tls, esmtp, protV, inval, rares, attach, greetDomainIp, ipBlacklisted, dkim, dkimTxt, greet, rdns, auSys, envFrom, hdrFrom, dnFrom, envTo, hdrTo, dnTo, hdrRt, dnRt, hdrId, headers, subj, body) {
 		this.id = id;
 		this.ts = ts;
 		this.hdrTs = hdrTs;
@@ -164,8 +152,8 @@ function AllEars(readyCallback) {
 		this.attach = attach;
 		this.greetDomainIp = greetDomainIp;
 		this.ipBlacklisted = ipBlacklisted;
-		this.dkimFail = dkimFail;
 		this.dkim = dkim;
+		this.dkimTxt = dkimTxt;
 		this.greet = greet;
 		this.rdns = rdns;
 		this.auSys = auSys;
@@ -1172,32 +1160,11 @@ function AllEars(readyCallback) {
 				const dkimFail = (msgData[20] & 128) !== 0;
 				const msgHdrTz = (msgData[20] & 127) * 15 - 900; // Timezone offset in minutes; -900m..900m (-15h..+15h)
 
-				const msgHdrTs = new Uint16Array(msgData.slice(21,23).buffer)[0] - 736;
+				const msgHdrTs = new Uint16Array(msgData.slice(21, 23).buffer)[0] - 736;
 				const msgCc = ((msgData[8] & 31) <= 26 && (msgData[9] & 31) <= 26) ? String.fromCharCode("A".charCodeAt(0) + (msgData[8] & 31)) + String.fromCharCode("A".charCodeAt(0) + (msgData[9] & 31)) : "??";
 
-				let msgDkim = null;
-				let lenDkimDomain = [];
-
-				let extOffset = 23;
-
-				if (dkimCount > 0) {
-					msgDkim = new _Dkim();
-
-					for (let i = 0; i < dkimCount; i++) {
-						msgDkim.senderId   = [(msgData[extOffset + 1] & 128) !== 0];
-						msgDkim.sgnAll     = [(msgData[extOffset + 1] &  64) !== 0];
-						msgDkim.sgnDate    = [(msgData[extOffset + 1] &  32) !== 0];
-						msgDkim.sgnFrom    = [(msgData[extOffset + 1] &  16) !== 0];
-						msgDkim.sgnMsgId   = [(msgData[extOffset + 1] &   8) !== 0];
-						msgDkim.sgnReplyTo = [(msgData[extOffset + 1] &   4) !== 0];
-						msgDkim.sgnSubject = [(msgData[extOffset + 1] &   2) !== 0];
-						msgDkim.sgnTo      = [(msgData[extOffset + 1] &   1) !== 0];
-
-						lenDkimDomain.push((msgData[extOffset + 2] & 63) + 4);
-
-						extOffset += 3;
-					}
-				}
+				const msgDkim = (dkimCount > 0) ? (msgData.slice(23, 23 + (dkimCount * 12))) : null;
+				const extOffset = (dkimCount > 0) ? (23 + (dkimCount * 12)) : 23;
 
 				try {
 					const msgBodyBr = new Int8Array(msgData.slice(extOffset));
@@ -1207,9 +1174,10 @@ function AllEars(readyCallback) {
 					let o = 0;
 
 					for (let i = 0; i < dkimCount; i++) {
-						msgDkim.domain.push(d.decode(msgBodyU8.slice(o, o + lenDkimDomain[i])));
-						o += lenDkimDomain[i];
+						o += (msgDkim[i * 12 + 9] & 127) + (msgDkim[i * 12 + 10] & 127) + (msgDkim[i * 12 + 11] & 127);
 					}
+
+					const dkimTxt = (o > 0) ? d.decode(msgBodyU8.slice(0, o)) : null;
 
 					const msgEnvTo = d.decode(msgBodyU8.slice(o, o + lenEnvTo)) + "@" + _ourDomain; o += lenEnvTo;
 					const    hdrTo = d.decode(msgBodyU8.slice(o, o + lenHdrTo)); o+= lenHdrTo;
@@ -1235,9 +1203,9 @@ function AllEars(readyCallback) {
 					const msgHeaders = (headersEnd > 0) ? body.slice(0, headersEnd) : "";
 					const msgBody = body.slice(headersEnd + 1);
 
-					_extMsg.push(new _ExtMsg(evpId, msgTs, msgHdrTs, msgHdrTz, msgIp, msgCc, msgCs, msgTls, msgEsmtp, msgProtV, msgInval, msgRares, msgAttach, msgGrDom, msgIpBlk, dkimFail, msgDkim, msgGreet, msgRvDns, msgAuSys, msgEnvFr, msgHdrFr, msgDnFr, msgEnvTo, msgHdrTo, msgDnTo, msgRplTo, msgDnRt, msgMsgId, msgHeaders, msgSbjct, msgBody));
+					_extMsg.push(new _ExtMsg(evpId, msgTs, msgHdrTs, msgHdrTz, msgIp, msgCc, msgCs, msgTls, msgEsmtp, msgProtV, msgInval, msgRares, msgAttach, msgGrDom, msgIpBlk, msgDkim, dkimTxt, msgGreet, msgRvDns, msgAuSys, msgEnvFr, msgHdrFr, msgDnFr, msgEnvTo, msgHdrTo, msgDnTo, msgRplTo, msgDnRt, msgMsgId, msgHeaders, msgSbjct, msgBody));
 				} catch(e) {
-					_extMsg.push(new _ExtMsg(evpId, msgTs, msgHdrTs, msgHdrTz, msgIp, msgCc, msgCs, msgTls, msgEsmtp, msgProtV, msgInval, msgRares, msgAttach, msgGrDom, msgIpBlk, dkimFail, null, "", "", "", "", "", "", "", "", "", "", "", "", "", "Failed decompression", "Size: " + msgData.length));
+					_extMsg.push(new _ExtMsg(evpId, msgTs, msgHdrTs, msgHdrTz, msgIp, msgCc, msgCs, msgTls, msgEsmtp, msgProtV, msgInval, msgRares, msgAttach, msgGrDom, msgIpBlk, null, null, "", "", "", "", "", "", "", "", "", "", "", "", "", "Failed decompression", "Size: " + msgData.length));
 				}
 			break;}
 
@@ -1399,7 +1367,6 @@ function AllEars(readyCallback) {
 	this.getExtMsgHdrTz   = function(num) {if(typeof(num)!=="number"){return;} return _extMsg[num].hdrTz;};
 	this.getExtMsgTLS     = function(num) {if(typeof(num)!=="number"){return;} return (_extMsg[num].cs === 0) ? "" : "TLS v1." + (_extMsg[num].tls & 3) + " " + _getCiphersuite(_extMsg[num].cs);};
 	this.getExtMsgIp      = function(num) {if(typeof(num)!=="number"){return;} return String(_extMsg[num].ip[0] + "." + _extMsg[num].ip[1] + "." + _extMsg[num].ip[2] + "." + _extMsg[num].ip[3]);};
-	this.getExtMsgDkim    = function(num) {if(typeof(num)!=="number"){return;} return _extMsg[num].dkim;};
 	this.getExtMsgGreet   = function(num) {if(typeof(num)!=="number"){return;} return _extMsg[num].greet;};
 	this.getExtMsgRdns    = function(num) {if(typeof(num)!=="number"){return;} return _extMsg[num].rdns;};
 	this.getExtMsgAuSys   = function(num) {if(typeof(num)!=="number"){return;} return _extMsg[num].auSys;};
@@ -1434,7 +1401,6 @@ function AllEars(readyCallback) {
 	this.getExtMsgFlagPErr = function(num) {if(typeof(num)!=="number"){return;} return _extMsg[num].protV;};
 	this.getExtMsgFlagGrDm = function(num) {if(typeof(num)!=="number"){return;} return _extMsg[num].greetDomainIp;};
 	this.getExtMsgFlagIpBl = function(num) {if(typeof(num)!=="number"){return;} return _extMsg[num].ipBlacklisted;};
-	this.getExtMsgFlagDkFl = function(num) {if(typeof(num)!=="number"){return;} return _extMsg[num].dkimFail;};
 
 	this.getExtMsgTlsDomain = function(num) {if(typeof(num)!=="number"){return;}
 		if (_extMsg[num].tls & _AEM_EMAIL_CERT_MATCH_HDRFR && _extMsg[num].hdrFrom) return _extMsg[num].hdrFrom.split("@")[1];
@@ -1454,6 +1420,83 @@ function AllEars(readyCallback) {
 			default: return "";
 		}
 	};
+
+	this.getExtMsgDkimCount = function(num) {if(typeof(num)!=="number"){return;} return _extMsg[num].dkim? (_extMsg[num].dkim.length / 12) : 0};
+	this.getExtMsgDkimDomain = function(num, i) {if(typeof(num)!=="number" || typeof(i)!=="number"){return;}
+		let start = 0;
+		for (let j = 0; j < i; j++) {
+			start += (_extMsg[num].dkim[j * 12 + 9] & 127) + (_extMsg[num].dkim[j * 12 + 10] & 127) + (_extMsg[num].dkim[j * 12 + 11] & 127);
+		}
+
+		return _extMsg[num].dkimTxt.slice(start, start + _extMsg[num].dkim[i * 12 + 9] & 127);
+	};
+	this.getExtMsgDkimSelector = function(num, i) {if(typeof(num)!=="number" || typeof(i)!=="number"){return;}
+		let start = 0;
+		for (let j = 0; j < i; j++) {
+			start += (_extMsg[num].dkim[j * 12 + 9] & 127) + (_extMsg[num].dkim[j * 12 + 10] & 127) + (_extMsg[num].dkim[j * 12 + 11] & 127);
+		}
+
+		start += _extMsg[num].dkim[i * 12 + 9] & 127;
+		return _extMsg[num].dkimTxt.slice(start, start + _extMsg[num].dkim[i * 12 + 10] & 127);
+	};
+	this.getExtMsgDkimNotes = function(num, i) {if(typeof(num)!=="number" || typeof(i)!=="number"){return;}
+		let start = 0;
+		for (let j = 0; j < i; j++) {
+			start += (_extMsg[num].dkim[j * 12 + 9] & 127) + (_extMsg[num].dkim[j * 12 + 10] & 127) + (_extMsg[num].dkim[j * 12 + 11] & 127);
+		}
+
+		start += (_extMsg[num].dkim[i * 12 + 9] & 127) + (_extMsg[num].dkim[i * 12 + 10] & 127);
+		return _extMsg[num].dkimTxt.slice(start, start + _extMsg[num].dkim[i * 12 + 11] & 127);
+	};
+	this.getExtMsgDkimValidSig = function(num, i) {if(typeof(num)!=="number" || typeof(i)!=="number"){return;}
+		return _extMsg[num].dkim[i * 12 + 6] & 1 === 1;
+	};
+	this.getExtMsgDkimHeadHash = function(num, i) {if(typeof(num)!=="number" || typeof(i)!=="number"){return;}
+		switch (_extMsg[num].dkim[i * 12 + 6] & 6) {
+			case 0: return "I"; // Invalid
+			case 2: return "F"; // Fail
+			case 4: return "R"; // Relaxed
+			case 6: return "S"; // Simple
+		}
+	}
+	this.getExtMsgDkimBodyHash = function(num, i) {if(typeof(num)!=="number" || typeof(i)!=="number"){return;}
+		switch (_extMsg[num].dkim[i * 12 + 6] & 24) {
+			case  0: return "I";
+			case  8: return "F";
+			case 16: return "R";
+			case 24: return "S";
+		}
+	}
+	this.getExtMsgDkimAlgo = function(num, i) {if(typeof(num)!=="number" || typeof(i)!=="number"){return;}
+		switch (_extMsg[num].dkim[i * 12 + 7] & 15) {
+			case 0: return "RSA-SHA1-BAD";
+			case 1: return "RSA-SHA1-512";
+			case 2: return "RSA-SHA1-1K";
+			case 3: return "RSA-SHA1-2K";
+
+			case 4: return "RSA-SHA256-BAD";
+			case 5: return "RSA-SHA256-512";
+			case 6: return "RSA-SHA256-1K";
+			case 7: return "RSA-SHA256-2K";
+			case 8: return "RSA-SHA256-4K";
+
+			case  9: return "ED25519-SHA256-BAD";
+			case 10: return "ED25519-SHA256";
+
+			default: return "Invalid-Algo";
+		}
+	};
+	this.getExtMsgDkimIdentity = function(num, i) {if(typeof(num)!=="number" || typeof(i)!=="number"){return;}
+		switch (_extMsg[num].dkim[i * 12 + 7] & 192) {
+			case   0: return "";
+			case  64: return "envFr";
+			case 128: return "hdrFr";
+			case 192: return "hdrRt";
+		}
+	}
+	this.getExtMsgDkimTs = function(num, i) {if(typeof(num)!=="number" || typeof(i)!=="number"){return 0;}
+		return (_extMsg[num].dkim[i * 12] | (_extMsg[num].dkim[i * 12 + 1] << 8) | ((_extMsg[num].dkim[i * 12 + 2] & 63) << 16));
+	}
 
 	this.exportExtMsg = function(num) {if(typeof(num)!=="number"){return;}
 		return "Return-Path: <" + _extMsg[num].envFrom + ">"

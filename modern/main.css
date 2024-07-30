@@ -590,6 +590,17 @@ dialog,
 	grid-template-columns: 1fr;
 }
 
+#readmsg_dkim {
+	width: 100%;
+	display: grid;
+	opacity: 0.5;
+	font-family: monospace, monospace;
+	padding-bottom: 0.25em;
+	border-bottom: 1px solid #555;
+	flex: none;
+	grid-template-columns: 1fr;
+}
+
 #readmsg_main > h1 {
 	font-size: large;
 	text-align: center;

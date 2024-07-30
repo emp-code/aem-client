@@ -132,10 +132,7 @@ function clearDisplay() {
 	el.remove();
 }
 
-function clearMsgFlags() {
-	document.getElementById("readmsg_flags").children[0].replaceChildren();
-}
-
+/*
 function addMsgFlag(abbr, abbrTitle) {
 	const parent = document.getElementById("readmsg_flags").children[0];
 
@@ -146,6 +143,7 @@ function addMsgFlag(abbr, abbrTitle) {
 	parent.appendChild(document.createTextNode(" "));
 	parent.appendChild(el);
 }
+*/
 
 function displayFile(isHistory, num, showNext) {
 	if (num < 0 || num >= ae.getUplMsgCount()) return;
@@ -169,6 +167,7 @@ function displayFile(isHistory, num, showNext) {
 	document.getElementById("btn_msave").onclick = function() {ae.downloadUplMsg(num);};
 
 	document.getElementById("readmsg_info").hidden = true;
+	document.getElementById("readmsg_dkim").hidden = true;
 	document.querySelector("#readmsg_main > h1").textContent = ae.getUplMsgTitle(num);
 
 	msgDisplay = new MsgInfo(ae.getUplMsgId(num), "upl", num);
@@ -329,6 +328,8 @@ function displayMsg(isHistory, isInt, num) {
 	document.getElementById("readmsg_date").children[1].dateTime = new Date(ts * 1000).toISOString();
 
 	if (isInt) {
+		document.getElementById("readmsg_dkim").hidden = true;
+
 		document.querySelector("#readmsg_main > h1").textContent = ae.getIntMsgTitle(num);
 		document.querySelector("#readmsg_main > pre").textContent = ae.getIntMsgBody(num);
 
@@ -336,7 +337,6 @@ function displayMsg(isHistory, isInt, num) {
 
 		document.getElementById("readmsg_ip").style.visibility = "hidden";
 		document.getElementById("readmsg_rdns").style.visibility = "hidden";
-		document.getElementById("readmsg_dkim").style.visibility = "hidden";
 		document.getElementById("readmsg_greet").style.visibility = "hidden";
 		document.getElementById("readmsg_cert").style.visibility = "hidden";
 		document.getElementById("readmsg_envfrom").style.visibility = "hidden";
@@ -358,8 +358,7 @@ function displayMsg(isHistory, isInt, num) {
 
 		document.getElementById("readmsg_hdrfrom").replaceChildren(symbol, document.createTextNode(" " + ae.getIntMsgFrom(num)));
 
-		clearMsgFlags();
-		if ( ae.getIntMsgFlagE2ee(num)) addMsgFlag("E2EE", "End-to-end encrypted");
+//		if ( ae.getIntMsgFlagE2ee(num)) addMsgFlag("E2EE", "End-to-end encrypted");
 	} else {
 		const headers = document.createElement("p");
 		headers.textContent = ae.getExtMsgHeaders(num);
@@ -405,7 +404,6 @@ function displayMsg(isHistory, isInt, num) {
 
 		document.getElementById("readmsg_ip").style.visibility = "visible";
 		document.getElementById("readmsg_rdns").style.visibility = "visible";
-		document.getElementById("readmsg_dkim").style.visibility = "visible";
 		document.getElementById("readmsg_greet").style.visibility = "visible";
 		document.getElementById("readmsg_tls").style.visibility = "visible";
 		document.getElementById("readmsg_cert").style.visibility = "visible";
@@ -413,28 +411,21 @@ function displayMsg(isHistory, isInt, num) {
 		document.getElementById("readmsg_envto").style.visibility = "visible";
 
 		// DKIM
-		let dkim = "";
-		if (ae.getExtMsgDkim(num)) {
-			[ // Look for a matching domain in this order
-				ae.getExtMsgHdrFrom(num).split("@")[1],
-				ae.getExtMsgEnvFrom(num).split("@")[1],
-				ae.getExtMsgRdns(num),
-				ae.getExtMsgGreet(num),
-				ae.getExtMsgTlsDomain(num)
-			].forEach(function(dom) {
-				if (dkim) return;
-				for (let i = 0; i < ae.getExtMsgDkim(num).domain.length; i++) {
-					if (ae.getExtMsgDkim(num).domain[i] === dom) {
-						dkim = dom + " ✓";
-						return;
-					}
+		if (ae.getExtMsgDkimCount(num) > 0) {
+			document.getElementById("readmsg_dkim").hidden = false;
+
+			document.querySelectorAll("#readmsg_dkim div").forEach(function(d, i) {
+				if (i >= ae.getExtMsgDkimCount(num)) {
+					d.textContent = "";
+					return;
 				}
+				d.textContent = (ae.getExtMsgDkimValidSig(num, i) ? "OK" : "❌") + " " + ae.getExtMsgDkimAlgo(num, i) + " " + ae.getExtMsgDkimHeadHash(num, i) + "/" + ae.getExtMsgDkimBodyHash(num, i) + ": "
+					+ (ae.getExtMsgDkimIdentity(num, i) ? (ae.getExtMsgDkimIdentity(num, i) + "|") : "") + ae.getExtMsgDkimDomain(num, i) + "|" + ae.getExtMsgDkimSelector(num, i)
+					+ ((ae.getExtMsgDkimTs(num, i) > 0) ? (" @" + ae.getExtMsgDkimTs(num, i)) : "");
 			});
-
-			if (!dkim) dkim = ae.getExtMsgDkim(num).domain[0]; // Default to first signature domain
+		} else {
+			document.getElementById("readmsg_dkim").hidden = true;
 		}
-
-		if (ae.getExtMsgFlagDkFl(num)) dkim += " (fail)";
 
 		// Left side
 		document.getElementById("readmsg_country").textContent = getCountryFlag(ae.getExtMsgCcode(num));
@@ -447,7 +438,6 @@ function displayMsg(isHistory, isInt, num) {
 		document.getElementById("readmsg_greet").children[0].textContent = ae.getExtMsgGreet(num) + (ae.getExtMsgFlagGrDm(num) ? " ✓" : "");
 		document.getElementById("readmsg_rdns").children[0].textContent = ae.getExtMsgRdns(num) + (ae.getExtMsgGreet(num).toLowerCase() === ae.getExtMsgRdns(num).toLowerCase() ? " ✓" : "");
 		document.getElementById("readmsg_cert").children[0].textContent = ae.getExtMsgTlsDomain(num) ? (ae.getExtMsgTlsDomain(num) + " ✓") : "";
-		document.getElementById("readmsg_dkim").children[0].textContent = dkim;
 		document.getElementById("readmsg_envfrom").textContent = ae.getExtMsgEnvFrom(num);
 		document.getElementById("readmsg_hdrfrom").textContent = ae.getExtMsgHdrFrom(num);
 		if (ae.getExtMsgDnFrom(num)) {
@@ -457,11 +447,13 @@ function displayMsg(isHistory, isInt, num) {
 			document.getElementById("readmsg_hdrfrom").appendChild(span);
 		}
 
+/*
 		clearMsgFlags();
 		if (!ae.getExtMsgFlagPExt(num)) addMsgFlag("SMTP", "The sender did not use the Extended (ESMTP) protocol");
 		if ( ae.getExtMsgFlagRare(num)) addMsgFlag("RARE", "The sender issued unusual command(s)");
 		if ( ae.getExtMsgFlagFail(num)) addMsgFlag("FAIL", "The sender issued invalid command(s)");
 		if ( ae.getExtMsgFlagPErr(num)) addMsgFlag("PROT", "The sender violated the protocol");
+*/
 	}
 
 	document.getElementById("readmsg_main").hidden = false;
@@ -507,7 +499,6 @@ function displayOutMsg(isHistory, num) {
 	document.querySelector("#readmsg_main > h1").textContent = ae.getOutMsgSubj(num);
 	document.querySelector("#readmsg_main > pre").textContent = ae.getOutMsgBody(num);
 
-	document.getElementById("readmsg_dkim").style.visibility    = "hidden";
 	document.getElementById("readmsg_hdrto").style.visibility   = "visible";
 	document.getElementById("readmsg_hdrfrom").style.visibility = "visible";
 	document.getElementById("readmsg_envto").style.visibility   = "visible";
@@ -537,8 +528,7 @@ function displayOutMsg(isHistory, num) {
 		document.getElementById("readmsg_greet").children[0].textContent = ae.getOutMsgGreet(num);
 	}
 
-	clearMsgFlags();
-	if ( ae.getOutMsgFlagE2ee(num)) addMsgFlag("E2EE", "End-to-end encrypted");
+//	if ( ae.getOutMsgFlagE2ee(num)) addMsgFlag("E2EE", "End-to-end encrypted");
 
 	document.getElementById("main2").hidden = false;
 	document.getElementById("main1").hidden = !window.matchMedia("(min-width: 80em)").matches;
