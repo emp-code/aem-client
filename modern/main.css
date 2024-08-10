@@ -481,7 +481,6 @@ dialog,
 	width: 100%;
 }
 
-#tbl_addrs td:not(:last-of-type),
 #limit_normal,
 #limit_shield,
 #limit_total {
@@ -489,15 +488,23 @@ dialog,
 }
 
 #tbl_addrs td:first-of-type {
-	cursor: copy;
 	padding-right: 2px;
 }
 
-#tbl_addrs td:first-of-type,
+#tbl_addrs td:first-of-type input,
 #table_reg input {
 	font-family: monospace, monospace;
 	text-align: right;
 	font-size: 1em;
+}
+
+#tbl_addrs td:first-of-type input[readonly] {
+	border: 1px solid rgba(0,0,0,0);
+	cursor: copy;
+}
+
+#tbl_addrs td:first-of-type input:not([readonly]) {
+	border: 1px solid gray;
 }
 
 #txt_address_create_normal {
@@ -616,7 +623,6 @@ dialog,
 	font-family: sans-serif;
 	text-rendering: optimizeLegibility;
 }
-
 
 #readmsg_main > pre table {
 	width: 100%;

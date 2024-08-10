@@ -220,10 +220,11 @@ function AllEars(readyCallback) {
 		this.blocks = blocks;
 	}
 
-	function _Address(hash, addr32, flags) {
+	function _Address(hash, addr32, flags, nick) {
 		this.hash = hash;
 		this.addr32 = addr32;
 		this.flags = flags;
+		this.nick = nick;
 	}
 
 	const _getBinTs = function() {
@@ -845,10 +846,11 @@ function AllEars(readyCallback) {
 		if (_own_privateNonce >= Math.pow(2, 32)) _own_privateNonce = 0;
 
 		// Address data
+		let privOffset = 1;
 		for (let i = 0; i < pd[0]; i++) {
-			const start = 1 + (i * 18);
-			const hash = pd.slice(start, start + 8);
-			const addr32 = pd.slice(start + 8, start + 18);
+			const hash = pd.slice(privOffset, privOffset + 8);
+			const addr32 = pd.slice(privOffset + 8, privOffset + 18);
+			const lenNick = pd[privOffset + 18];
 
 			for (let j = 0; j < _own_addr.length; j++) {
 				let wasFound = true;
@@ -862,13 +864,15 @@ function AllEars(readyCallback) {
 
 				if (wasFound) {
 					_own_addr[j].addr32 = addr32;
+					_own_addr[j].nick = sodium.to_string(pd.slice(privOffset + 19, privOffset + 19 + lenNick));
 					break;
 				}
 			}
+
+			privOffset += 19 + lenNick;
 		}
 
 		// Contacts
-		let privOffset = 1 + (pd[0] * 18);
 		const contactCount = pd[privOffset];
 		privOffset++;
 
@@ -919,7 +923,7 @@ function AllEars(readyCallback) {
 		let offset = 4;
 		for (let i = 0; i < (browseData[0] >> 2); i++) {
 			const hash = browseData.slice(offset, offset + 8);
-			_own_addr.push(new _Address(hash, new Uint8Array(10), browseData[offset + 8]));
+			_own_addr.push(new _Address(hash, new Uint8Array(10), browseData[offset + 8], ""));
 			offset += 9;
 		}
 
@@ -1326,12 +1330,14 @@ function AllEars(readyCallback) {
 	this.getAddrPerUser = function() {return _AEM_ADDRESSES_PER_USER;};
 
 	this.getAddress = function(num) {if(typeof(num)!=="number"){return;} return _addr32_decode(_own_addr[num].addr32);};
+	this.getAddressNick = function(num) {if(typeof(num)!=="number"){return;} return _own_addr[num].nick? _own_addr[num].nick : _addr32_decode(_own_addr[num].addr32);};
 	this.getAddressOrigin = function(num) {if(typeof(num)!=="number"){return;} return (_own_addr[num].flags & _AEM_ADDR_FLAG_ORIGIN) !== 0;};
 	this.getAddressSecure = function(num) {if(typeof(num)!=="number"){return;} return (_own_addr[num].flags & _AEM_ADDR_FLAG_SECURE) !== 0;};
 	this.getAddressAttach = function(num) {if(typeof(num)!=="number"){return;} return (_own_addr[num].flags & _AEM_ADDR_FLAG_ATTACH) !== 0;};
 	this.getAddressAllVer = function(num) {if(typeof(num)!=="number"){return;} return (_own_addr[num].flags & _AEM_ADDR_FLAG_ALLVER) !== 0;};
 	this.getAddressAccExt = function(num) {if(typeof(num)!=="number"){return;} return (_own_addr[num].flags & _AEM_ADDR_FLAG_ACCEXT) !== 0;};
 	this.getAddressAccInt = function(num) {if(typeof(num)!=="number"){return;} return (_own_addr[num].flags & _AEM_ADDR_FLAG_ACCINT) !== 0;};
+	this.isAddressShield  = function(num) {if(typeof(num)!=="number"){return;} return (_own_addr[num].addr32[0] & 128) != 0;}
 
 	this.setAddressOrigin = function(num, val) {if(typeof(num)!=="number"){return;} if (val) {_own_addr[num].flags |= _AEM_ADDR_FLAG_ORIGIN;} else {_own_addr[num].flags &= (0xFF & ~_AEM_ADDR_FLAG_ORIGIN);}};
 	this.setAddressSecure = function(num, val) {if(typeof(num)!=="number"){return;} if (val) {_own_addr[num].flags |= _AEM_ADDR_FLAG_SECURE;} else {_own_addr[num].flags &= (0xFF & ~_AEM_ADDR_FLAG_SECURE);}};
@@ -1339,6 +1345,7 @@ function AllEars(readyCallback) {
 	this.setAddressAllVer = function(num, val) {if(typeof(num)!=="number"){return;} if (val) {_own_addr[num].flags |= _AEM_ADDR_FLAG_ALLVER;} else {_own_addr[num].flags &= (0xFF & ~_AEM_ADDR_FLAG_ALLVER);}};
 	this.setAddressAccExt = function(num, val) {if(typeof(num)!=="number"){return;} if (val) {_own_addr[num].flags |= _AEM_ADDR_FLAG_ACCEXT;} else {_own_addr[num].flags &= (0xFF & ~_AEM_ADDR_FLAG_ACCEXT);}};
 	this.setAddressAccInt = function(num, val) {if(typeof(num)!=="number"){return;} if (val) {_own_addr[num].flags |= _AEM_ADDR_FLAG_ACCINT;} else {_own_addr[num].flags &= (0xFF & ~_AEM_ADDR_FLAG_ACCINT);}};
+	this.setAddressNick = function(num, val) {if(typeof(num)!=="number" || typeof(val)!=="string"){return;} _own_addr[num].nick = val};
 
 	this.getAddressCount = function() {return _own_addr.length;};
 	this.getAddressCountNormal = function() {return _getAddressCount(false);};
@@ -1874,7 +1881,7 @@ function AllEars(readyCallback) {
 				if (typeof(response) === "number") {callback(response); return;}
 				if (response.length !== 18) {callback(0x04); return;}
 
-				_own_addr.push(new _Address(response.slice(0, 8), response.slice(8, 18), _AEM_ADDR_FLAGS_DEFAULT));
+				_own_addr.push(new _Address(response.slice(0, 8), response.slice(8, 18), _AEM_ADDR_FLAGS_DEFAULT, ""));
 				callback(0);
 			});
 		} else {
@@ -1903,7 +1910,7 @@ function AllEars(readyCallback) {
 				if (response.length !== 1) {callback(0x04); return;}
 				if (response[0] !== 0) {callback(response[0]); return;}
 
-				_own_addr.push(new _Address(hash, addr32, _AEM_ADDR_FLAGS_DEFAULT));
+				_own_addr.push(new _Address(hash, addr32, _AEM_ADDR_FLAGS_DEFAULT, ""));
 				callback(0);
 			});
 		}
@@ -2192,7 +2199,12 @@ function AllEars(readyCallback) {
 		for (let i = 0; i < _own_addr.length; i++) {
 			pd.set(_own_addr[i].hash, offset);
 			pd.set(_own_addr[i].addr32, offset + 8);
-			offset += 18;
+			pd[offset + 18] = _own_addr[i].nick.length;
+
+			const nick = sodium.from_string(_own_addr[i].nick);
+			pd.set(nick, offset + 19);
+
+			offset += 19 + nick.length;
 		}
 
 		pd[offset] = _contactMail.length;

@@ -145,16 +145,18 @@
 							<table id="table_reg">
 								<tbody>
 									<tr>
-										<td><input type="text" id="txt_address_create_normal" size="16" minlength="1" maxlength="15" pattern="[0-9A-z]{1,15}" required autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="new"></td>
+										<td colspan="2"><input type="text" id="txt_address_create_normal" size="16" minlength="1" maxlength="15" pattern="[0-9A-z]{1,15}" required autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="new"></td>
 										<td colspan="2"><button type="button" id="btn_address_create_normal" autocomplete="off">Register</button></td>
 										<td id="limit_normal"></td>
 									</tr>
 									<tr>
+										<td></td>
 										<td class="half">Shield</td>
 										<td colspan="2"><button type="button" id="btn_address_create_shield" autocomplete="off">Generate</button></td>
 										<td id="limit_shield"></td>
 									</tr>
 									<tr>
+										<td><input type="checkbox" id="chk_addr_nick"><label for="chk_addr_nick">Nicknames</label></td>
 										<td class="half">Total</td>
 										<td colspan="2"><button type="button" id="btn_address_update" autocomplete="off">Update</button></td>
 										<td id="limit_total"></td>

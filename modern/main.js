@@ -1189,11 +1189,32 @@ function addAddress(num) {
 	const addr = ae.getAddress(num);
 
 	let cell = row.insertCell(-1);
-	cell.textContent = addr;
-	cell.onclick = function() {navigator.clipboard.writeText(((this.textContent.length === 16) ? ae.shieldMix(this.textContent, 0) : this.textContent) + "@" + ae.getDomainEml());};
+	let el = document.createElement("input");
+	el.type = "text";
+	el.size = ae.isAddressShield(num) ? 16 : 15;
+
+	if (document.getElementById("chk_addr_nick").checked) {
+		el.minLength = ae.getAddress(num).length;
+		el.maxLength = 31;
+		el.placeholder = ae.getAddress(num);
+		el.value = ae.getAddressNick(num);
+
+		el.onchange = function() {
+			ae.setAddressNick(num, this.value);
+		};
+	} else {
+		el.value = addr;
+		el.readOnly = true;
+
+		el.onclick = function() {
+			navigator.clipboard.writeText((ae.isAddressShield(num)? ae.shieldMix(el.value, 0) : el.value) + "@" + ae.getDomainEml());
+		};
+	}
+
+	cell.appendChild(el);
 
 	cell = row.insertCell(-1);
-	let el = document.createElement("input");
+	el = document.createElement("input");
 	el.type = "checkbox";
 	el.checked = ae.getAddressAccInt(num);
 	cell.appendChild(el);
@@ -1236,8 +1257,23 @@ function addAddress(num) {
 	cell.appendChild(el);
 
 	el = document.createElement("option");
-	el.value = addr;
-	el.textContent = addr + "@" + ae.getDomainEml();
+	let pref = "";
+	let counter = 0;
+	for (let i = 0; i < ae.getAddressNick(num).length; i++) {
+		if (
+		    addr[counter] === ae.getAddressNick(num)[i].toLowerCase()
+		|| (addr[counter] === '0' && ae.getAddressNick(num)[i].toLowerCase() == 'o')
+		|| (addr[counter] === '1' && (ae.getAddressNick(num)[i].toLowerCase() == 'i' || ae.getAddressNick(num)[i].toLowerCase() == 'l'))
+		|| (addr[counter] === 'w' && ae.getAddressNick(num)[i].toLowerCase() == 'v')
+		) {
+			pref += ae.getAddressNick(num)[i].toLowerCase();
+			counter++;
+		}
+	}
+	pref += addr.slice(counter);
+
+	el.value = pref;
+	el.textContent = pref + "@" + ae.getDomainEml();
 	document.getElementById("write_from").appendChild(el);
 
 	if (addr.length !== 16) {
@@ -1249,6 +1285,10 @@ function addAddress(num) {
 }
 
 function addAddresses() {
+	document.getElementById("tbl_addrs").replaceChildren();
+	document.getElementById("getapk_addr").replaceChildren();
+	document.getElementById("write_from").replaceChildren();
+
 	for (let i = 0; i < ae.getAddressCount(); i++) {
 		addAddress(i);
 	}
@@ -1351,7 +1391,6 @@ document.getElementById("btn_rght").onclick = function() {
 	setTab(false, tab, tabs[tab].cur + 1);
 };
 
-
 document.getElementById("btn_dele").onclick = function() {
 	this.blur();
 
@@ -1431,6 +1470,10 @@ document.getElementById("btn_savecontacts").onclick = function() {
 	});
 };
 
+document.getElementById("chk_addr_nick").onclick = function() {
+	addAddresses();
+};
+
 document.getElementById("btn_address_create_normal").onclick = function() {
 	if (ae.getAddressCountNormal() >= ae.getLimitNormalA(ae.getOwnLevel()) || ae.getAddressCountNormal() + ae.getAddressCountShield() >= 31) return;
 
@@ -1459,12 +1502,12 @@ document.getElementById("btn_address_update").onclick = function() {
 	const rows = document.getElementById("tbl_addrs").rows;
 
 	for (let i = 0; i < rows.length; i++) {
-		ae.setAddressAccInt(i, rows[i].getElementsByTagName("input")[0].checked);
-		ae.setAddressAccExt(i, rows[i].getElementsByTagName("input")[1].checked);
-		ae.setAddressAllVer(i, rows[i].getElementsByTagName("input")[2].checked);
-		ae.setAddressAttach(i, rows[i].getElementsByTagName("input")[3].checked);
-		ae.setAddressSecure(i, rows[i].getElementsByTagName("input")[4].checked);
-		ae.setAddressOrigin(i, rows[i].getElementsByTagName("input")[5].checked);
+		ae.setAddressAccInt(i, rows[i].getElementsByTagName("input")[1].checked);
+		ae.setAddressAccExt(i, rows[i].getElementsByTagName("input")[2].checked);
+		ae.setAddressAllVer(i, rows[i].getElementsByTagName("input")[3].checked);
+		ae.setAddressAttach(i, rows[i].getElementsByTagName("input")[4].checked);
+		ae.setAddressSecure(i, rows[i].getElementsByTagName("input")[5].checked);
+		ae.setAddressOrigin(i, rows[i].getElementsByTagName("input")[6].checked);
 	}
 
 	ae.Address_Update(function(error) {
