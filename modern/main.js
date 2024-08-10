@@ -822,11 +822,11 @@ function showFiles() {
 			cell.onclick = function() {displayFile(false, i, null);};
 
 			cell = row.insertCell(-1);
-			const parentNum = ae.getUplMsgParent(i);
-			if (typeof(parentNum) === "number") {
-				cell.textContent = ae.getExtMsgTitle(parentNum);
-				cell.onclick = function() {displayMsg(false, false, parentNum);};
-			} else if (parentNum === false) {
+			const parentId = ae.getUplMsgParent(i);
+			if (typeof(parentId) === "number") {
+				cell.textContent = ae.getExtMsgTitle(parentId);
+				cell.onclick = function() {displayMsg(false, false, parentId);};
+			} else if (parentId === false) {
 				cell.textContent = "Upload";
 			} else {
 				cell.textContent = "Unknown";
