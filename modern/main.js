@@ -1188,6 +1188,21 @@ function addAddress(num) {
 	const row = addrTable.insertRow(-1);
 	const addr = ae.getAddress(num);
 
+	let pref = "";
+	let counter = 0;
+	for (let i = 0; i < ae.getAddressNick(num).length; i++) {
+		if (
+		    addr[counter] === ae.getAddressNick(num)[i].toLowerCase()
+		|| (addr[counter] === '0' && ae.getAddressNick(num)[i].toLowerCase() == 'o')
+		|| (addr[counter] === '1' && (ae.getAddressNick(num)[i].toLowerCase() == 'i' || ae.getAddressNick(num)[i].toLowerCase() == 'l'))
+		|| (addr[counter] === 'w' && ae.getAddressNick(num)[i].toLowerCase() == 'v')
+		) {
+			pref += ae.getAddressNick(num)[i].toLowerCase();
+			counter++;
+		}
+	}
+	pref += addr.slice(counter);
+
 	let cell = row.insertCell(-1);
 	let el = document.createElement("input");
 	el.type = "text";
@@ -1203,7 +1218,7 @@ function addAddress(num) {
 			ae.setAddressNick(num, this.value);
 		};
 	} else {
-		el.value = addr;
+		el.value = pref;
 		el.readOnly = true;
 
 		el.onclick = function() {
@@ -1257,21 +1272,6 @@ function addAddress(num) {
 	cell.appendChild(el);
 
 	el = document.createElement("option");
-	let pref = "";
-	let counter = 0;
-	for (let i = 0; i < ae.getAddressNick(num).length; i++) {
-		if (
-		    addr[counter] === ae.getAddressNick(num)[i].toLowerCase()
-		|| (addr[counter] === '0' && ae.getAddressNick(num)[i].toLowerCase() == 'o')
-		|| (addr[counter] === '1' && (ae.getAddressNick(num)[i].toLowerCase() == 'i' || ae.getAddressNick(num)[i].toLowerCase() == 'l'))
-		|| (addr[counter] === 'w' && ae.getAddressNick(num)[i].toLowerCase() == 'v')
-		) {
-			pref += ae.getAddressNick(num)[i].toLowerCase();
-			counter++;
-		}
-	}
-	pref += addr.slice(counter);
-
 	el.value = pref;
 	el.textContent = pref + "@" + ae.getDomainEml();
 	document.getElementById("write_from").appendChild(el);
