@@ -1285,6 +1285,8 @@ function addAddress(num) {
 }
 
 function addAddresses() {
+	const si = Math.max(0, document.getElementById("write_from").selectedIndex);
+
 	document.getElementById("tbl_addrs").replaceChildren();
 	document.getElementById("getapk_addr").replaceChildren();
 	document.getElementById("write_from").replaceChildren();
@@ -1292,6 +1294,8 @@ function addAddresses() {
 	for (let i = 0; i < ae.getAddressCount(); i++) {
 		addAddress(i);
 	}
+
+	document.getElementById("write_from").selectedIndex = si;
 }
 
 function addressCreate(addr) {
