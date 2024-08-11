@@ -1222,7 +1222,7 @@ function addAddress(num) {
 		el.readOnly = true;
 
 		el.onclick = function() {
-			navigator.clipboard.writeText((ae.isAddressShield(num)? ae.shieldMix(el.value, 0) : el.value) + "@" + ae.getDomainEml());
+			navigator.clipboard.writeText((ae.isAddressShield(num)? ae.shieldMix(el.value, 0) : pref) + "@" + ae.getDomainEml());
 		};
 	}
 
