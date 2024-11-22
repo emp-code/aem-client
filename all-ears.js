@@ -183,19 +183,20 @@ function AllEars(readyCallback) {
 		this.body = body;
 	}
 
-	function _OutMsg_Ext(id, ts, ip, cc, to, from, subj, body, mxDom, greet, tlsCs, tlsVer, attach) {
+	function _OutMsg_Ext(id, ts, ip, cc, fr, to, sb, bd, mx, gr, st, cs, tlsVer, attach) {
 		this.isInt = false;
 		this.id = id;
 		this.ts = ts;
 		this.ip = ip;
 		this.countryCode = cc;
+		this.from = fr;
 		this.to = to;
-		this.from = from;
-		this.subj = subj;
-		this.body = body;
-		this.mxDom = mxDom;
-		this.greet = greet;
-		this.tlsCs = tlsCs;
+		this.subj = sb;
+		this.body = bd;
+		this.mxDom = mx;
+		this.greet = gr;
+		this.status = st;
+		this.tlsCs = cs;
 		this.tlsVer = tlsVer;
 		this.attach = attach;
 	}
@@ -944,7 +945,7 @@ function AllEars(readyCallback) {
 		return offset;
 	};
 
-	const _addOutMsg = function(msgData, msgId, msgTs, msgTs_bin, newest) {
+	const _addOutMsg = function(msgData, msgId, msgTs) {
 		const lenSb = msgData[0] & 127;
 
 		let newMsg;
@@ -954,27 +955,32 @@ function AllEars(readyCallback) {
 			const msgCs = new Uint16Array(msgData.slice(5, 7).buffer)[0];
 			const msgTlsVer = msgData[7] >> 5;
 			const msgAttach = msgData[7] & 31;
-			// msgData[8]: TLS_InfoByte
 
 			const msgCc = ((msgData[8] & 31) <= 26 && (msgData[9] & 31) <= 26) ? String.fromCharCode("A".charCodeAt(0) + (msgData[8] & 31)) + String.fromCharCode("A".charCodeAt(0) + (msgData[9] & 31)) : "??";
-			const lenTo = msgData[10];
-			const lenFr = msgData[11];
-			const lenMx = msgData[12];
-			const lenGr = msgData[13];
+			const lenFr = msgData[10] & 31;
+			const lenTo = msgData[11] & 127;
+			const lenMx = msgData[12] & 127;
+			const lenT1 = msgData[13] & 127;
+			const lenT2 = msgData[14] & 127;
+			const lenGr = msgData[15] & 127;
+			const lenSt = msgData[16] & 127;
 
-			let os = 14;
-			const msgTo = sodium.to_string(msgData.slice(os, os + lenTo)); os += lenTo;
+			let os = 17;
 			const msgFr = sodium.to_string(msgData.slice(os, os + lenFr)); os += lenFr;
+			const msgTo = sodium.to_string(msgData.slice(os, os + lenTo)); os += lenTo;
 			const msgMx = sodium.to_string(msgData.slice(os, os + lenMx)); os += lenMx;
 			const msgGr = sodium.to_string(msgData.slice(os, os + lenGr)); os += lenGr;
+			const msgSt = sodium.to_string(msgData.slice(os, os + lenSb)); os += lenSt;
 			const msgSb = sodium.to_string(msgData.slice(os, os + lenSb)); os += lenSb;
+
+			let msgBd;
 			try {
 				msgBd = sodium.to_string(msgData.slice(os));
 			} catch(e) {
 				msgBd = "(error)";
 			}
 
-			newMsg = new _OutMsg_Ext(msgId, msgTs, msgIp, msgCc, msgTo, msgFr, msgSb, msgBd, msgMx, msgGr, msgCs, msgTlsVer, msgAttach);
+			newMsg = new _OutMsg_Ext(msgId, msgTs, msgIp, msgCc, msgFr, msgTo, msgSb, msgBd, msgMx, msgGr, msgSt, msgCs, msgTlsVer, msgAttach);
 		} else { // Internal message
 			const isE2ee = (msgData[1] & 64) !== 0;
 			const msgFr = _addr32_decode(msgData.slice(2, 12));
@@ -1010,11 +1016,7 @@ function AllEars(readyCallback) {
 			newMsg = new _OutMsg_Int(msgId, msgTs, isE2ee, msgTo, msgFr, msgSb, msgBd);
 		}
 
-		if (newest) {
-			_outMsg.unshift(newMsg);
-		} else {
 			_outMsg.push(newMsg);
-		}
 	};
 
 	const _downloadFile = function(title, body) {
@@ -1289,7 +1291,7 @@ function AllEars(readyCallback) {
 			break;}
 
 			case 48: // OutMsg (Delivery report for sent message)
-//				_addOutMsg(msgData, evpId, msgTs, msgTs_bin, false);
+				_addOutMsg(msgData, evpId, msgTs);
 			break;
 		}
 
