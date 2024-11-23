@@ -974,7 +974,7 @@ function AllEars(readyCallback) {
 			const msgAs = sodium.to_string(msgData.slice(os, os + lenAs)); os += lenAs;
 			const msgRd = sodium.to_string(msgData.slice(os, os + lenRd)); os += lenRd;
 			const msgGr = sodium.to_string(msgData.slice(os, os + lenGr)); os += lenGr;
-			const msgSt = sodium.to_string(msgData.slice(os, os + lenSb)); os += lenSt;
+			const msgSt = sodium.to_string(msgData.slice(os, os + lenSt)); os += lenSt;
 			const msgSb = sodium.to_string(msgData.slice(os, os + lenSb)); os += lenSb;
 
 			let msgBd;
