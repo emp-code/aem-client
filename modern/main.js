@@ -502,7 +502,6 @@ function displayOutMsg(isHistory, num) {
 	document.getElementById("readmsg_hdrto").style.visibility   = "visible";
 	document.getElementById("readmsg_hdrfrom").style.visibility = "visible";
 	document.getElementById("readmsg_envto").style.visibility   = "visible";
-	document.getElementById("readmsg_envfrom").style.visibility = "hidden";
 
 	document.getElementById("readmsg_hdrfrom").textContent = ae.getOutMsgFrom(num);
 
@@ -519,6 +518,7 @@ function displayOutMsg(isHistory, num) {
 	document.getElementById("readmsg_tls").style.visibility   = /*isInt?*/ "hidden" /*: "visible"*/; // TODO
 	document.getElementById("readmsg_cert").style.visibility  = /*isInt?*/ "hidden" /*: "visible"*/; // TODO
 	document.getElementById("readmsg_greet").style.visibility = isInt? "hidden" : "visible";
+	document.getElementById("readmsg_envfrom").style.visibility = isInt? "hidden" : "visible";
 
 	if (!isInt) {
 		document.getElementById("readmsg_ip").children[1].textContent = ae.getOutMsgIp(num);
@@ -528,6 +528,7 @@ function displayOutMsg(isHistory, num) {
 //		document.getElementById("readmsg_tls").children[0].textContent = ae.getOutMsgTLS(num);
 		document.getElementById("readmsg_greet").children[0].textContent = ae.getOutMsgGreet(num);
 		document.getElementById("readmsg_rdns").children[0].textContent = ae.getOutMsgRdns(num);
+		document.getElementById("readmsg_envfrom").textContent = ae.getOutMsgStatus(num);
 	}
 
 //	if ( ae.getOutMsgFlagE2ee(num)) addMsgFlag("E2EE", "End-to-end encrypted");
