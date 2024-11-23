@@ -503,7 +503,7 @@ function displayOutMsg(isHistory, num) {
 	document.getElementById("readmsg_hdrfrom").style.visibility = "visible";
 	document.getElementById("readmsg_envto").style.visibility   = "visible";
 
-	document.getElementById("readmsg_hdrfrom").textContent = ae.getOutMsgFrom(num);
+	document.getElementById("readmsg_hdrfrom").textContent = ae.getOutMsgFrom(num) + "@" + ae.getDomainEml();
 
 	document.getElementById("readmsg_envto").textContent = ae.getOutMsgMx(num);
 	document.getElementById("readmsg_hdrto").textContent = ae.getOutMsgTo(num);
