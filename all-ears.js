@@ -1372,6 +1372,7 @@ function AllEars(readyCallback) {
 	this.getTotalMsgCount = function() {return _totalMsgCount;};
 	this.getTotalMsgBytes = function() {return _totalMsgBytes;};
 	this.getReadyMsgBytes = function() {return _readyMsgBytes;};
+	this.haveOldest = function() {return (_oldestEvpId === "0000");};
 
 	this.getExtMsgCount = function() {return _extMsg.length;};
 	this.getExtMsgId      = function(num) {if(typeof(num)!=="number"){return;} return _extMsg[num].id;};
@@ -2105,7 +2106,7 @@ function AllEars(readyCallback) {
 			// TODO: Allow deleting multiple (12 max)
 			if (hexId.length !== 4) {callback(0x01); return;}
 
-			if (_oldestEvpId === hexId) {
+			if (hexId === "0000") {
 				callback(0x10);
 				return;
 			}

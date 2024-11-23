@@ -683,7 +683,7 @@ function showInbox() {
 
 	const maxExt = ae.getExtMsgCount();
 	const maxInt = ae.getIntMsgCount();
-	const loadMore = ae.getReadyMsgBytes() < ae.getTotalMsgBytes();
+	const loadMore = !ae.haveOldest();
 
 	if (maxExt + maxInt > 0) {
 		tabs[TAB_INBOX].max = Math.floor((maxExt + maxInt - (loadMore? 0 : 1)) / rowsPerPage);
