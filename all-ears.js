@@ -183,7 +183,7 @@ function AllEars(readyCallback) {
 		this.body = body;
 	}
 
-	function _OutMsg_Ext(id, ts, ip, cc, fr, to, sb, bd, mx, gr, st, cs, tlsVer, attach) {
+	function _OutMsg_Ext(id, ts, ip, cc, fr, to, sb, bd, mx, asn, rdns, gr, st, cs, tlsVer, attach) {
 		this.isInt = false;
 		this.id = id;
 		this.ts = ts;
@@ -193,8 +193,10 @@ function AllEars(readyCallback) {
 		this.to = to;
 		this.subj = sb;
 		this.body = bd;
-		this.mxDom = mx;
+		this.mx = mx;
 		this.greet = gr;
+		this.asn = asn;
+		this.rdns = rdns;
 		this.status = st;
 		this.tlsCs = cs;
 		this.tlsVer = tlsVer;
@@ -960,8 +962,8 @@ function AllEars(readyCallback) {
 			const lenFr = msgData[10] & 31;
 			const lenTo = msgData[11] & 127;
 			const lenMx = msgData[12] & 127;
-			const lenT1 = msgData[13] & 127;
-			const lenT2 = msgData[14] & 127;
+			const lenAs = msgData[13] & 127;
+			const lenRd = msgData[14] & 127;
 			const lenGr = msgData[15] & 127;
 			const lenSt = msgData[16] & 127;
 
@@ -969,6 +971,8 @@ function AllEars(readyCallback) {
 			const msgFr = sodium.to_string(msgData.slice(os, os + lenFr)); os += lenFr;
 			const msgTo = sodium.to_string(msgData.slice(os, os + lenTo)); os += lenTo;
 			const msgMx = sodium.to_string(msgData.slice(os, os + lenMx)); os += lenMx;
+			const msgAs = sodium.to_string(msgData.slice(os, os + lenAs)); os += lenAs;
+			const msgRd = sodium.to_string(msgData.slice(os, os + lenRd)); os += lenRd;
 			const msgGr = sodium.to_string(msgData.slice(os, os + lenGr)); os += lenGr;
 			const msgSt = sodium.to_string(msgData.slice(os, os + lenSb)); os += lenSt;
 			const msgSb = sodium.to_string(msgData.slice(os, os + lenSb)); os += lenSb;
@@ -980,7 +984,7 @@ function AllEars(readyCallback) {
 				msgBd = "(error)";
 			}
 
-			newMsg = new _OutMsg_Ext(msgId, msgTs, msgIp, msgCc, msgFr, msgTo, msgSb, msgBd, msgMx, msgGr, msgSt, msgCs, msgTlsVer, msgAttach);
+			newMsg = new _OutMsg_Ext(msgId, msgTs, msgIp, msgCc, msgFr, msgTo, msgSb, msgBd, msgMx, msgAs, msgRd, msgGr, msgSt, msgCs, msgTlsVer, msgAttach);
 		} else { // Internal message
 			const isE2ee = (msgData[1] & 64) !== 0;
 			const msgFr = _addr32_decode(msgData.slice(2, 12));
@@ -1675,11 +1679,13 @@ function AllEars(readyCallback) {
 	this.getOutMsgIp    = function(num) {if(typeof(num)!=="number"){return;} return String(_outMsg[num].ip[0] + "." + _outMsg[num].ip[1] + "." + _outMsg[num].ip[2] + "." + _outMsg[num].ip[3]);};
 	this.getOutMsgCcode = function(num) {if(typeof(num)!=="number"){return;} return _outMsg[num].countryCode;};
 	this.getOutMsgCname = function(num) {if(typeof(num)!=="number"){return;} return _getCountryName(_outMsg[num].countryCode);};
+	this.getOutMsgAsn   = function(num) {if(typeof(num)!=="number"){return;} return _outMsg[num].asn;};
+	this.getOutMsgRdns  = function(num) {if(typeof(num)!=="number"){return;} return _outMsg[num].rdns;};
+	this.getOutMsgMx    = function(num) {if(typeof(num)!=="number"){return;} return _outMsg[num].mx;};
 	this.getOutMsgTo    = function(num) {if(typeof(num)!=="number"){return;} return _outMsg[num].to;};
 	this.getOutMsgFrom  = function(num) {if(typeof(num)!=="number"){return;} return _outMsg[num].from;};
 	this.getOutMsgSubj  = function(num) {if(typeof(num)!=="number"){return;} return _outMsg[num].subj;};
 	this.getOutMsgBody  = function(num) {if(typeof(num)!=="number"){return;} return _outMsg[num].body;};
-	this.getOutMsgMxDom = function(num) {if(typeof(num)!=="number"){return;} return _outMsg[num].mxDom;};
 	this.getOutMsgGreet = function(num) {if(typeof(num)!=="number"){return;} return _outMsg[num].greet;};
 	this.getOutMsgTLS   = function(num) {if(typeof(num)!=="number"){return;} return (_outMsg[num].tlsCs === 0) ? "" : "TLS v1." + _outMsg[num].tlsVer + " " + _getCiphersuite(_outMsg[num].tlsCs);};
 	this.getOutMsgAttach = function(num) {if(typeof(num)!=="number"){return;} return _outMsg[num].attach;};
