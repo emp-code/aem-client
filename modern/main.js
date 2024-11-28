@@ -289,7 +289,7 @@ function displayMsg(isHistory, isInt, num) {
 			document.getElementById("write_recv").value = isInt? ae.getIntMsgFrom(num) : ae.getExtMsgReplyAddress(num);
 			document.getElementById("write_subj").value = isInt? ae.getIntMsgTitle(num) : ae.getExtMsgTitle(num);
 			if (!document.getElementById("write_subj").value.startsWith("Re:")) document.getElementById("write_subj").value = "Re: " + document.getElementById("write_subj").value;
-			document.querySelector("#write2_pkey > input").value = isInt? ae.getIntMsgApk(num) : "";
+			document.querySelector("#write2_ask > input").value = isInt? ae.getIntMsgAsk(num) : "";
 
 			document.getElementById("write_recv").readOnly = !isInt;
 			document.getElementById("write_subj").readOnly = !isInt;
@@ -344,7 +344,7 @@ function displayMsg(isHistory, isInt, num) {
 
 		if (ae.getIntMsgFrom(num) !== "system" && ae.getIntMsgFrom(num) !== "public") {
 			document.getElementById("readmsg_tls").style.visibility = "visible";
-			document.getElementById("readmsg_tls").children[0].textContent = ae.getIntMsgApk(num);
+			document.getElementById("readmsg_tls").children[0].textContent = ae.getIntMsgAsk(num);
 		} else document.getElementById("readmsg_tls").style.visibility = "hidden";
 
 		let symbol = document.createElement("span");
@@ -555,7 +555,7 @@ function updateAddressCounts() {
 	document.getElementById("limit_total").textContent = ((ae.getAddressCountNormal() + ae.getAddressCountShield()) + "/" + ae.getAddrPerUser()).padStart(5);
 
 	updateAddressButtons();
-//	document.getElementById("getapk_result").textContent = ae.getOwnApk(document.getElementById("getapk_addr").value);
+//	document.getElementById("getask_result").textContent = ae.getOwnAsk(document.getElementById("getask_addr").value);
 }
 
 function addOwnAccount() {
@@ -1009,15 +1009,15 @@ function deleteAddress(addr) {
 		document.getElementById("write_from").remove(addressToDelete);
 
 		if (ae.getAddressCountNormal() > 0) {
-			const apkList = document.getElementById("getapk_addr");
-			for (let i = 0; i < apkList.children.length; i++) {
-				if (apkList.children[i].value === addr) {
-					apkList.remove(i);
+			const askList = document.getElementById("getask_addr");
+			for (let i = 0; i < askList.children.length; i++) {
+				if (askList.children[i].value === addr) {
+					askList.remove(i);
 					break;
 				}
 			}
 		} else {
-			document.getElementById("getapk_addr").replaceChildren();
+			document.getElementById("getask_addr").replaceChildren();
 		}
 
 		updateAddressCounts();
@@ -1115,7 +1115,7 @@ window.onresize = function() {
 function clearWrite() {
 	setTab(false, TAB_WRITE, 0);
 
-	document.querySelector("#write2_pkey > input").value = "";
+	document.querySelector("#write2_ask > input").value = "";
 	document.getElementById("write_body").value = "";
 	document.getElementById("write_subj").value = "";
 	document.getElementById("write_subj").readOnly = false;
@@ -1283,7 +1283,7 @@ function addAddress(num) {
 		el = document.createElement("option");
 		el.value = addr;
 		el.textContent = addr;
-		document.getElementById("getapk_addr").appendChild(el);
+		document.getElementById("getask_addr").appendChild(el);
 	}
 }
 
@@ -1291,7 +1291,7 @@ function addAddresses() {
 	const si = Math.max(0, document.getElementById("write_from").selectedIndex);
 
 	document.getElementById("tbl_addrs").replaceChildren();
-	document.getElementById("getapk_addr").replaceChildren();
+	document.getElementById("getask_addr").replaceChildren();
 	document.getElementById("write_from").replaceChildren();
 
 	for (let i = 0; i < ae.getAddressCount(); i++) {
@@ -1354,10 +1354,10 @@ function writeVerify() {
 
 	if (document.getElementById("write_recv").value.indexOf("@") >= 0) {
 		document.getElementById("write2_from").textContent = document.getElementById("write_from").value + "@" + ae.getDomainEml();
-		document.getElementById("write2_pkey").hidden = true;
+		document.getElementById("write2_ask").hidden = true;
 	} else {
 		document.getElementById("write2_from").textContent = document.getElementById("write_from").value;
-		document.getElementById("write2_pkey").hidden = (document.getElementById("write_recv").value === "public");
+		document.getElementById("write2_ask").hidden = (document.getElementById("write_recv").value === "public");
 	}
 
 	document.querySelector("#write2_send > button").disabled = false;
@@ -1678,20 +1678,14 @@ document.querySelector("#write2_send > button").onclick = function() {
 	}
 
 	// Email or internal message
-	let apk = null;
+	let ask = null;
 	if (document.getElementById("write2_recv").textContent.indexOf("@") === -1) {
-		const elApk = document.querySelector("#write2_pkey > input");
-		if (!elApk.reportValidity()) {
+		const elAsk = document.querySelector("#write2_ask > input");
+		if (!elAsk.reportValidity()) {
 			btn.disabled = false;
 			return;
 		}
-
-		try {apk = sodium.from_base64(elApk.value, sodium.base64_variants.ORIGINAL_NO_PADDING);}
-		catch(e) {
-			errorDialog(1); // Invalid input
-			btn.disabled = false;
-			return;
-		}
+		ask = elAsk.value;
 	}
 
 	document.getElementById("write2_btntxt").textContent = "Sending to";
@@ -1702,7 +1696,7 @@ document.querySelector("#write2_send > button").onclick = function() {
 		document.getElementById("write_from").value,
 		document.getElementById("write_recv").value,
 		document.getElementById("write_subj").getAttribute("data-replyid"),
-		apk,
+		ask,
 		function(error) {
 			if (error !== 0) {
 				errorDialog(error);
@@ -1748,8 +1742,8 @@ document.getElementById("btn_limits").onclick = function() {
 	});
 };
 
-document.getElementById("getapk_addr").onchange = function() {
-	document.getElementById("getapk_result").textContent = ae.getOwnApk(document.getElementById("getapk_addr").value);
+document.getElementById("getask_addr").onchange = function() {
+	document.getElementById("getask_result").textContent = ae.getOwnAsk(document.getElementById("getask_addr").value);
 };
 
 document.getElementById("txt_umk").onfocus = function() {
