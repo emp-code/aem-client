@@ -982,7 +982,6 @@ function updateLimits() {
 	}
 }
 
-
 function deleteAddress(addr) {
 	const buttons = document.querySelectorAll("#tbl_addrs button");
 	buttons.forEach(function(btn) {btn.disabled = true;});
@@ -1007,16 +1006,12 @@ function deleteAddress(addr) {
 		document.getElementById("tbl_addrs").deleteRow(addressToDelete);
 		document.getElementById("write_from").remove(addressToDelete);
 
-		if (ae.getAddressCountNormal() > 0) {
-			const askList = document.getElementById("getask_addr");
-			for (let i = 0; i < askList.children.length; i++) {
-				if (askList.children[i].value === addr) {
-					askList.remove(i);
-					break;
-				}
+		const askList = document.getElementById("getask_addr");
+		for (let i = 0; i < askList.children.length; i++) {
+			if (askList.children[i].value === addr) {
+				askList.remove(i);
+				break;
 			}
-		} else {
-			document.getElementById("getask_addr").replaceChildren();
 		}
 
 		updateAddressCounts();
@@ -1278,12 +1273,10 @@ function addAddress(num) {
 	el.textContent = pref + "@" + ae.getDomainEml();
 	document.getElementById("write_from").appendChild(el);
 
-	if (addr.length !== 16) {
-		el = document.createElement("option");
-		el.value = addr;
-		el.textContent = addr;
-		document.getElementById("getask_addr").appendChild(el);
-	}
+	el = document.createElement("option");
+	el.value = addr;
+	el.textContent = addr;
+	document.getElementById("getask_addr").appendChild(el);
 }
 
 function addAddresses() {
