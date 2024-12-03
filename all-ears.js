@@ -174,11 +174,11 @@ function AllEars(readyCallback) {
 		this.body = body;
 	}
 
-	function _IntMsg(id, ts, isE2ee, isAdmin, ask, fr, to, subject, body) {
+	function _IntMsg(id, ts, type, admin, ask, fr, to, subject, body) {
 		this.id = id;
 		this.ts = ts;
-		this.isE2ee = isE2ee;
-		this.isAdmin = isAdmin;
+		this.type = type;
+		this.admin = admin;
 		this.ask = ask;
 		this.from = fr;
 		this.to = to;
@@ -1258,7 +1258,7 @@ function AllEars(readyCallback) {
 					} catch(e) {txt = "(error)\nError decoding system message: " + e;}
 
 					const sep = txt.indexOf("\n");
-					_intMsg.push(new _IntMsg(evpId, msgTs, false, 3, null, "system", "", txt.slice(0, sep), txt.slice(sep + 1)));
+					_intMsg.push(new _IntMsg(evpId, msgTs, "system", true, null, "system", "", txt.slice(0, sep), txt.slice(sep + 1)));
 				} else if (msgType == 128) { // Public
 					// [0] unused
 
@@ -1268,7 +1268,7 @@ function AllEars(readyCallback) {
 					} catch(e) {txt = "(error)\nError decoding public message: " + e;}
 
 					const sep = txt.indexOf("\n");
-					_intMsg.push(new _IntMsg(evpId, msgTs, false, 3, null, "public", "", txt.slice(0, sep), txt.slice(sep + 1)));
+					_intMsg.push(new _IntMsg(evpId, msgTs, "public", true, null, "public", "", txt.slice(0, sep), txt.slice(sep + 1)));
 				} else if (msgType === 64) { // E2EE
 					const fromAdmin = msgData[0] & 1;
 					// [1][2] TODO
@@ -1295,7 +1295,7 @@ function AllEars(readyCallback) {
 							msgData.slice(33)
 						));
 					} catch(e) {
-						_intMsg.push(new _IntMsg(evpId, msgTs, true, fromAdmin, null, msgFrom, msgTo, "(error)", "Error decoding message: " + e));
+						_intMsg.push(new _IntMsg(evpId, msgTs, "e2ee", fromAdmin, null, msgFrom, msgTo, "(error)", "Error decoding message: " + e));
 						return;
 					}
 
@@ -1310,7 +1310,7 @@ function AllEars(readyCallback) {
 					} catch(e) {txt = "(error)\nError decoding message: " + e;}
 
 					const sep = txt.indexOf("\n");
-					_intMsg.push(new _IntMsg(evpId, msgTs, true, fromAdmin, replyAsk, msgFrom, msgTo, txt.slice(0, sep), txt.slice(sep + 1)));
+					_intMsg.push(new _IntMsg(evpId, msgTs, "e2ee", fromAdmin, replyAsk, msgFrom, msgTo, txt.slice(0, sep), txt.slice(sep + 1)));
 				} else { // Non-E2EE
 					const fromAdmin = (msgData[0] & 1) === 1;
 					// [1][2] TODO
@@ -1324,7 +1324,7 @@ function AllEars(readyCallback) {
 					} catch(e) {txt = "(error)\nError decoding message: " + e}
 
 					const sep = txt.indexOf("\n");
-					_intMsg.push(new _IntMsg(evpId, msgTs, false, fromAdmin, replyAsk, msgFrom, msgTo, txt.slice(0, sep), txt.slice(sep + 1)));
+					_intMsg.push(new _IntMsg(evpId, msgTs, "plain", fromAdmin, replyAsk, msgFrom, msgTo, txt.slice(0, sep), txt.slice(sep + 1)));
 				}
 			break;}
 
@@ -1730,14 +1730,13 @@ function AllEars(readyCallback) {
 	this.getIntMsgCount = function() {return _intMsg.length;};
 	this.getIntMsgId     = function(num) {if(typeof(num)!=="number"){return;} return _intMsg[num].id;};
 	this.getIntMsgTime   = function(num) {if(typeof(num)!=="number"){return;} return _intMsg[num].ts;};
-	this.getIntMsgLevel  = function(num) {if(typeof(num)!=="number"){return;} return _intMsg[num].fromLv;};
 	this.getIntMsgAsk    = function(num) {if(typeof(num)!=="number"){return;} return _intMsg[num].ask? sodium.to_base64(_intMsg[num].ask, sodium.base64_variants.ORIGINAL) : "";};
 	this.getIntMsgFrom   = function(num) {if(typeof(num)!=="number"){return;} return _intMsg[num].from;};
 	this.getIntMsgTo     = function(num) {if(typeof(num)!=="number"){return;} return _intMsg[num].to;};
 	this.getIntMsgTitle  = function(num) {if(typeof(num)!=="number"){return;} return _intMsg[num].title;};
 	this.getIntMsgBody   = function(num) {if(typeof(num)!=="number"){return;} return _intMsg[num].body;};
-
-	this.getIntMsgFlagE2ee = function(num) {if(typeof(num)!=="number"){return;} return _intMsg[num].isE2ee;};
+	this.getIntMsgAdmin  = function(num) {if(typeof(num)!=="number"){return;} return _intMsg[num].admin;};
+	this.getIntMsgType   = function(num) {if(typeof(num)!=="number"){return;} return _intMsg[num].type;};
 
 	this.getUplMsgCount = function() {return _uplMsg.length;};
 	this.getUplMsgId    = function(num) {if(typeof(num)!=="number"){return;} return _uplMsg[num].id;};
@@ -2402,6 +2401,7 @@ function AllEars(readyCallback) {
 			callback(fetchErr);
 		});
 	};
+
 
 	// Extras
 	this.shieldMix = function(addr, extreme) {if(typeof(addr)!=="string"){return;}

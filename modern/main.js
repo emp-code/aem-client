@@ -348,17 +348,15 @@ function displayMsg(isHistory, isInt, num) {
 		} else document.getElementById("readmsg_tls").style.visibility = "hidden";
 
 		let symbol = document.createElement("span");
-		if      (ae.getIntMsgLevel(num) === 3 && ae.getIntMsgFrom(num) === "system") {symbol.title = "System message"; symbol.textContent = "🅢";}
-		else if (ae.getIntMsgLevel(num) === 3 && ae.getIntMsgFrom(num) === "public") {symbol.title = "Public announcement"; symbol.textContent = "🅟";}
-		else if (ae.getIntMsgLevel(num) === 3) {symbol.title = "Administrator"; symbol.textContent = "🅐";}
-		else if (ae.getIntMsgLevel(num) === 2) {symbol.title = "Level 2";  symbol.textContent = "➋";}
-		else if (ae.getIntMsgLevel(num) === 1) {symbol.title = "Level 1";  symbol.textContent = "➊";}
-		else if (ae.getIntMsgLevel(num) === 0) {symbol.title = "Level 0";  symbol.textContent = "🄌";}
-		else {symbol.title = "Invalid level"; symbol.textContent = "⚠";}
+		switch(ae.getIntMsgType(num)) {
+			case "system": symbol.title = "System message"; symbol.textContent = "S"; break;
+			case "public": symbol.title = "Public announcement"; symbol.textContent = "P"; break;
+			case "e2ee": symbol.title = "End-to-end encrypted message"; symbol.textContent = "🔒"; break;
+			case "plain": symbol.title = "Plain message"; symbol.textContent = "-"; break;
+			default: symbol.title = "Unrecognized type: " + ae.getIntMsgType(num); symbol.textContent = "?";
+		}
 
 		document.getElementById("readmsg_hdrfrom").replaceChildren(symbol, document.createTextNode(" " + ae.getIntMsgFrom(num)));
-
-//		if ( ae.getIntMsgFlagE2ee(num)) addMsgFlag("E2EE", "End-to-end encrypted");
 	} else {
 		const headers = document.createElement("p");
 		headers.textContent = ae.getExtMsgHeaders(num);
@@ -983,6 +981,7 @@ function updateLimits() {
 		tbl.rows[lvl].cells[3].children[0].value = ae.getLimitShieldA(lvl);
 	}
 }
+
 
 function deleteAddress(addr) {
 	const buttons = document.querySelectorAll("#tbl_addrs button");
