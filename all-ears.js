@@ -59,11 +59,11 @@ function AllEars(readyCallback) {
 	const _AEM_ADDR_FLAG_ACCINT =   1;
 	const _AEM_ADDR_FLAGS_DEFAULT = (_AEM_ADDR_FLAG_ACCEXT | _AEM_ADDR_FLAG_ALLVER | _AEM_ADDR_FLAG_ATTACH);
 
-	const _AEM_FLAG_OLDER = 8;
-	const _AEM_FLAG_UINFO = 4;
-	const _AEM_FLAG_EMAIL = 8;
-	const _AEM_FLAG_E2EE  = 4;
-	const _AEM_FLAG_EMPTY = 8;
+	const _AEM_FLAG_OLDER = 1;
+	const _AEM_FLAG_UINFO = 2;
+	const _AEM_FLAG_EMAIL = 1;
+	const _AEM_FLAG_E2EE  = 2;
+	const _AEM_FLAG_EMPTY = 1;
 
 	const _AEM_ADDR32_CHARS = "0123456789abcdefghjkmnpqrstuwxyz";
 	const _AEM_ADDRESSES_PER_USER = 31;
@@ -2401,7 +2401,6 @@ function AllEars(readyCallback) {
 			callback(fetchErr);
 		});
 	};
-
 
 	// Extras
 	this.shieldMix = function(addr, extreme) {if(typeof(addr)!=="string"){return;}
