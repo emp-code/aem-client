@@ -282,7 +282,7 @@ function displayMsg(isHistory, isInt, num) {
 
 	const ts = isInt? ae.getIntMsgTime(num) : ae.getExtMsgTime(num);
 
-	if (!isInt || (ae.getIntMsgFrom(num) !== "public" && ae.getIntMsgFrom(num) !== "system")) {
+	if (!isInt || ae.getIntMsgType(num) !== "system") {
 		document.getElementById("btn_reply").disabled = false;
 
 		document.getElementById("btn_reply").onclick = function() {
@@ -342,7 +342,7 @@ function displayMsg(isHistory, isInt, num) {
 		document.getElementById("readmsg_envfrom").style.visibility = "hidden";
 		document.getElementById("readmsg_envto").style.visibility = "hidden";
 
-		if (ae.getIntMsgFrom(num) !== "system" && ae.getIntMsgFrom(num) !== "public") {
+		if (ae.getIntMsgType(num) !== "system") {
 			document.getElementById("readmsg_tls").style.visibility = "visible";
 			document.getElementById("readmsg_tls").children[0].textContent = ae.getIntMsgAsk(num);
 		} else document.getElementById("readmsg_tls").style.visibility = "hidden";
@@ -1130,7 +1130,7 @@ function refreshContactList() {
 
 	if (ae.isUserAdmin()) {
 		const el = document.createElement("option");
-		el.value = "public";
+		el.value = "All Users";
 		opts.push(el);
 	}
 
@@ -1349,11 +1349,11 @@ function writeVerify() {
 		document.getElementById("write2_ask").hidden = true;
 	} else {
 		document.getElementById("write2_from").textContent = document.getElementById("write_from").value;
-		document.getElementById("write2_ask").hidden = (document.getElementById("write_recv").value === "public");
+		document.getElementById("write2_ask").hidden = (document.getElementById("write_recv").value === "All Users");
 	}
 
 	document.querySelector("#write2_send > button").disabled = false;
-	document.getElementById("write2_btntxt").textContent = (document.getElementById("write_recv").value === "public") ? "Make" : "Send to";
+	document.getElementById("write2_btntxt").textContent = "Send to";
 	return true;
 }
 
@@ -1652,24 +1652,6 @@ document.querySelector("#write2_send > button").onclick = function() {
 	const btn = this;
 	btn.disabled = true;
 
-	// Public announcement
-	if (document.getElementById("write2_recv").textContent === "public") {
-		ae.Message_Public(document.getElementById("write_subj").value, document.getElementById("write_body").value, function(error) {
-			if (error !== 0) {
-				document.getElementById("write2_btntxt").textContent = "Retry making";
-				btn.disabled = false;
-				errorDialog(error);
-				return;
-			}
-
-			clearWrite();
-			displayMsg(false, true, 0);
-		});
-
-		return;
-	}
-
-	// Email or internal message
 	let ask = null;
 	if (document.getElementById("write2_recv").textContent.indexOf("@") === -1) {
 		const elAsk = document.querySelector("#write2_ask > input");

@@ -62,6 +62,7 @@ function AllEars(readyCallback) {
 	const _AEM_FLAG_OLDER = 1;
 	const _AEM_FLAG_UINFO = 2;
 	const _AEM_FLAG_EMAIL = 1;
+	const _AEM_FLAG_PUB   = 4;
 	const _AEM_FLAG_E2EE  = 2;
 	const _AEM_FLAG_EMPTY = 1;
 
@@ -1261,14 +1262,16 @@ function AllEars(readyCallback) {
 					_intMsg.push(new _IntMsg(evpId, msgTs, "system", true, null, "system", "", txt.slice(0, sep), txt.slice(sep + 1)));
 				} else if (msgType == 128) { // Public
 					// [0] unused
+					const msgFrom = _addr32_decode(msgData.slice( 1, 11));
+					const replyAsk = msgData.slice(11, 50);
 
 					let txt;
 					try {
-						txt = sodium.to_string(msgData.slice(1));
-					} catch(e) {txt = "(error)\nError decoding public message: " + e;}
+						txt = sodium.to_string(msgData.slice(50));
+					} catch(e) {txt = "(error)\nError decoding public message: " + e}
 
 					const sep = txt.indexOf("\n");
-					_intMsg.push(new _IntMsg(evpId, msgTs, "public", true, null, "public", "", txt.slice(0, sep), txt.slice(sep + 1)));
+					_intMsg.push(new _IntMsg(evpId, msgTs, "public", true, replyAsk, msgFrom, "", txt.slice(0, sep), txt.slice(sep + 1)));
 				} else if (msgType === 64) { // E2EE
 					const fromAdmin = msgData[0] & 1;
 					// [1][2] TODO
@@ -2147,53 +2150,66 @@ function AllEars(readyCallback) {
 		const addr32_from = _addr32_encode(addr_from);
 		if (!addr32_from) {callback(0x11); return;}
 
-		const addr32_to = _addr32_encode(addr_to);
-		if (!addr32_to) {callback(0x11); return;}
-
 		const ourHash = _addr32toHash(addr32_from);
 		if (!ourHash) return 0x01;
 
-		const url = new Uint8Array(24);
-		url.set(addr32_from);
-		url.set(addr32_to, 10);
-
-		let post;
 		const bts = _getBinTs();
 		const txt = sodium.from_string(subject + "\n" + body);
 
-		if (to_ask) { // E2EE
-			// Encrypted part with our APK for reply
-			const plain = new Uint8Array(txt.length + 34);
-			plain.set(_aem_kdf_abk(ourHash, bts));
-			plain.set(txt, 34);
+		const url = new Uint8Array(24);
+		url.set(addr32_from);
 
-			const ask = sodium.from_base64(to_ask, sodium.base64_variants.ORIGINAL);
-			const nonce = new Uint8Array(12); // 2 key bytes, their bts, our bts
-			nonce.set(ask.slice(32));
-			nonce.set(bts, 7);
-
-			const enc = new Uint8Array(await window.crypto.subtle.encrypt(
-				{name: "AES-GCM", iv: nonce},
-				await window.crypto.subtle.importKey("raw", ask.slice(0, 32), {"name": "AES-GCM"}, false, ["encrypt"]),
-				plain
-			));
-
-			post = new Uint8Array(10 + enc.length);
-			post.set(ask.slice(34));
-			post.set(bts, 5);
-			post.set(enc, 10);
-		} else { // Non-E2EE
-			post = new Uint8Array(39 + txt.length);
+		if (addr_to === "All Users") {
+			const post = new Uint8Array(39 + txt.length);
 			post.set(_aem_kdf_abk(ourHash, bts));
 			post.set(bts, 34);
 			post.set(txt, 39);
-		}
 
-		_fetchEncrypted(_AEM_API_MESSAGE_CREATE, to_ask? _AEM_FLAG_E2EE : 0, url, post, function(response) {
-			if (typeof(response) === "number") {callback(response); return;}
-			if (response.length === 1) {callback(response[0]); return;}
-			callback(0x04);
-		});
+			_fetchEncrypted(_AEM_API_MESSAGE_CREATE, _AEM_FLAG_PUB, url, post, function(response) {
+				if (typeof(response) === "number") {callback(response); return;}
+				if (response.length === 1) {callback(response[0]); return;}
+				callback(0x04);
+			});
+		} else {
+			const addr32_to = _addr32_encode(addr_to);
+			if (!addr32_to) {callback(0x11); return;}
+			url.set(addr32_to, 10);
+
+			let post;
+			if (to_ask) { // E2EE
+				// Encrypted part with our APK for reply
+				const plain = new Uint8Array(txt.length + 34);
+				plain.set(_aem_kdf_abk(ourHash, bts));
+				plain.set(txt, 34);
+
+				const ask = sodium.from_base64(to_ask, sodium.base64_variants.ORIGINAL);
+				const nonce = new Uint8Array(12); // 2 key bytes, their bts, our bts
+				nonce.set(ask.slice(32));
+				nonce.set(bts, 7);
+
+				const enc = new Uint8Array(await window.crypto.subtle.encrypt(
+					{name: "AES-GCM", iv: nonce},
+					await window.crypto.subtle.importKey("raw", ask.slice(0, 32), {"name": "AES-GCM"}, false, ["encrypt"]),
+					plain
+				));
+
+				post = new Uint8Array(10 + enc.length);
+				post.set(ask.slice(34));
+				post.set(bts, 5);
+				post.set(enc, 10);
+			} else { // Non-E2EE
+				post = new Uint8Array(39 + txt.length);
+				post.set(_aem_kdf_abk(ourHash, bts));
+				post.set(bts, 34);
+				post.set(txt, 39);
+			}
+
+			_fetchEncrypted(_AEM_API_MESSAGE_CREATE, to_ask? _AEM_FLAG_E2EE : 0, url, post, function(response) {
+				if (typeof(response) === "number") {callback(response); return;}
+				if (response.length === 1) {callback(response[0]); return;}
+				callback(0x04);
+			});
+		}
 	};
 
 	this.Message_Delete = function(hexId, callback) {if(typeof(callback)!=="function"){return;}
@@ -2238,25 +2254,6 @@ function AllEars(readyCallback) {
 			});
 		}
 	};
-
-	this.Message_Public = function(title, body, callback) {if(typeof(title)!=="string" || typeof(body)!=="string" || typeof(callback)!=="function"){return;}
-		// TODO
-/*		const binMsg = sodium.from_string(title + "\n" + body);
-		if (binMsg.length < 59) {callback(0x06); return;} // 59 = 177-48-64-5-1
-
-		_fetchEncrypted(_AEM_API_MESSAGE_PUBLIC, 0, binMsg, function(response) {
-			if (fetchErr) {callback(fetchErr); return;}
-
-			_intMsg.unshift(new _IntMsg(true, true, newMsgId, Date.now() / 1000, false, 3, null, "public", "", title, body));
-
-			let x = binMsg.length + 118; // 5 (BoxInfo + ts) + 1 (InfoByte) + 64 (sig) + 48 (sealed box)
-			if (x % 16 !== 0) x+= (16 - (x % 16));
-			_totalMsgBytes += x;
-			_readyMsgBytes += x;
-
-			callback(0);
-		});
-*/	};
 
 	this.Message_Sender = function(msgId, callback) {if(typeof(hash)!=="string" || typeof(callback)!=="function"){return;}
 		// TODO
