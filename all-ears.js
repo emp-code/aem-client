@@ -16,6 +16,7 @@ function AllEars(readyCallback) {
 	const _AEM_APIURL = document.head.querySelector("meta[name='aem.url.api']").content? document.head.querySelector("meta[name='aem.url.api']").content : "https://" + document.domain + ":302";
 	const _AEM_USERCOUNT = 4096;
 	const _AEM_MAXLEN_OURDOMAIN = 32;
+	const _AEM_TS_BEGIN = 1735689600 // 2025-01-01 00:00:00 UTC
 
 	// GET
 	const _AEM_API_ACCOUNT_BROWSE = 0;
@@ -68,10 +69,10 @@ function AllEars(readyCallback) {
 
 	const _AEM_ADDR32_CHARS = "0123456789abcdefghjkmnpqrstuwxyz";
 	const _AEM_ADDRESSES_PER_USER = 31;
-	const _AEM_LEN_PRIVATE = 4518;
-	const _AEM_MSG_MINBLOCKS = 12;
-	const _AEM_MSG_SRC_MAXSIZE = 1048699; // ((2^16 - 1) + 12) * 16 - 48 - 5; 1MiB + 123B
-	const _AEM_MSG_SRC_MINSIZE = 124;
+	const _AEM_LEN_PRIVATE = 6177;
+	const _AEM_BLOCKSIZE = 32;
+	const _AEM_MSG_MINBLOCKS = 3;
+	const _AEM_MSG_SRC_MAXSIZE = 2097183;
 	const _AEM_USER_MAXLEVEL = 3;
 	const _X25519_PKBYTES = 32;
 
@@ -234,41 +235,48 @@ function AllEars(readyCallback) {
 		this.nick = nick;
 	}
 
+	// 42-bit millisecond timestamp, years 2025-2164
 	const _getBinTs = function() {
-		const ts = BigInt(Date.now());
+	const ts = BigInt(Date.now() - (_AEM_TS_BEGIN * 1000));
 
 		return new Uint8Array([
 			Number(ts & 255n),
 			Number((ts >> 8n) & 255n),
 			Number((ts >> 16n) & 255n),
 			Number((ts >> 24n) & 255n),
-			Number((ts >> 32n) & 255n)
+			Number((ts >> 32n) & 255n),
+			Number((ts >> 40n) & 3n)
 		]);
 	}
 
-	const _aem_kdf_umk = function(size, id, key) {
-		const counter = (id << 8) | (key[44] << 16);
-		return sodium.crypto_stream_chacha20_ietf_xor_ic(new Uint8Array(size), key.slice(32, 44), counter, key.slice(0, 32));
+	// Use the 360-bit UMK with a 16-bit Nonce to generate up to 16 KiB
+	const _aem_kdf_umk = function(size, n, key) {
+		return sodium.crypto_stream_chacha20_ietf_xor_ic(new Uint8Array(size),
+			/* Nonce   */ key.slice(32, 44),
+			/* Counter */ new Uint32Array([(key[44] << 24) | (n << 8)])[0],
+			/* Key     */ key.slice(0, 32));
 	}
 
+	// Use the 320-bit Key with a 56-bit Nonce to generate up to 16 KiB
 	const _aem_kdf_sub = function(size, n, key) {
-		const counter = ((key[36] & 127) << 24) | ((key[36] & 128) << 16);
-		const nonce = new Uint8Array([key[32], key[33], key[34], key[35], n[0], n[1], n[2], n[3], n[4], n[5], n[6], n[7]]);
-		return sodium.crypto_stream_chacha20_ietf_xor_ic(new Uint8Array(size), nonce, counter, key.slice(0, 32));
+		return sodium.crypto_stream_chacha20_ietf_xor_ic(new Uint8Array(size),
+			/* Nonce   */ new Uint8Array([key[32], key[33], key[34], key[35], key[36], key[37], key[38], key[39], n[0], n[1], n[2], n[3]]),
+			/* Counter */ new Uint32Array([(n[4] << 8) | (n[5] << 16), (n[6] << 24)])[0],
+			/* Key     */ key.slice(0, 32));
 	}
 
-	// Uses the 280-bit ABK to generate a one-time 272-bit APK
+	// Use the 280-bit ABK to generate a one-time 272-bit APK
 	const _aem_kdf_abk = function(addrHash, binTs) {
-		const counter = ((_own_abk[34] & 127) << 24) | (_own_abk[33] << 16) | (_own_abk[32] << 8) | binTs[0];
-		const nonce = new Uint8Array([binTs[1], binTs[2], binTs[3], binTs[4], addrHash[0], addrHash[1], addrHash[2], addrHash[3], addrHash[4], addrHash[5], addrHash[6], addrHash[7]]);
-		return sodium.crypto_stream_chacha20_ietf_xor_ic(new Uint8Array(34), nonce, counter, _own_abk.slice(0, 32));
+		return sodium.crypto_stream_chacha20_ietf_xor_ic(new Uint8Array(34),
+			/* Nonce   */ new Uint8Array([binTs[1], binTs[2], binTs[3], binTs[4], addrHash[0], addrHash[1], addrHash[2], addrHash[3], addrHash[4], addrHash[5], addrHash[6], addrHash[7]]),
+			/* Counter */ (_own_abk[34] << 24) | (_own_abk[33] << 16) | (_own_abk[32] << 8) | binTs[0],
+			/* Key     */ _own_abk.slice(0, 32));
 	}
 
 	const _uak_derive = function(binTs, post, type) {
-		const nonce = new Uint8Array(8);
+		const nonce = new Uint8Array(7);
 		nonce.set(binTs);
-		nonce[5] = (post? _AEM_UAK_POST : 0) | type;
-
+		nonce[5] |= (post? _AEM_UAK_POST : 0) | type;
 		return _aem_kdf_sub(32, nonce, _own_uak);
 	}
 
@@ -302,21 +310,20 @@ function AllEars(readyCallback) {
 		const data_key = _uak_derive(binTs, postData? true:false, _AEM_UAK_TYPE_URL_DATA);
 
 		// Create URL Base
-		const urlBase = new Uint8Array(48);
+		const urlBase = new Uint8Array(39);
 		urlBase.set(binTs);
-		urlBase[5] = _own_uid & 255; // First 8 bits of UID
-		urlBase[6] = (_own_uid >> 8) | ((cmd ^ (data_key[0] & 15)) << 4); // Last 4 bits of UID; Encrypted: CMD
-		urlBase[7] = (flags & 15) ^ (data_key[0] >> 4); // High bits unused
+		urlBase[5] |= ((cmd & 63) ^ (data_key[0] & 63)) << 2; // Encrypted CMD, 2 bits of BinTs
+		urlBase[6] = flags ^ data_key[1];
 
-		for (let i = 0; i < 24; i++) {
+		for (let i = 0; i < 16; i++) {
 			if (urlData && i < urlData.length) {
-				urlBase[8 + i] = urlData[i] ^ data_key[1 + i];
+				urlBase[7 + i] = urlData[i] ^ data_key[2 + i];
 			} else {
-				urlBase[8 + i] = data_key[1 + i];
+				urlBase[7 + i] = data_key[2 + i];
 			}
 		}
 
-		urlBase.set(sodium.crypto_onetimeauth(urlBase.slice(5, 32), auth_key), 32);
+		urlBase.set(sodium.crypto_onetimeauth(urlBase.slice(5, 23), auth_key), 23);
 
 		let post = null;
 		if (postData && (typeof(postData) === "object")) {
@@ -335,7 +342,7 @@ function AllEars(readyCallback) {
 					{name: "AES-GCM", iv: new Uint8Array(12)},
 					await window.crypto.subtle.importKey("raw", _uak_derive(binTs, postData? true:false, _AEM_UAK_TYPE_RES_BODY), {"name": "AES-GCM"}, false, ["decrypt"]),
 					result);
-			} catch(e) {callback(0x04);}
+			} catch(e) {callback(0x04); return;}
 
 			let u8 = new Uint8Array(dec);
 			u8 = u8.slice(1, u8.length - u8[0]);
@@ -843,11 +850,11 @@ function AllEars(readyCallback) {
 
 	const _parsePrivate = async function(pdEnc) {
 		// Derive the two key-nonce sets
-		const pfk_nonce = new Uint8Array(8);
+		const pfk_nonce = new Uint8Array(7);
 		pfk_nonce.set(pdEnc.slice(0, 4));
 
 		const kn_client = _aem_kdf_sub(44, pfk_nonce, _own_pfk);
-		pfk_nonce[7] = 1;
+		pfk_nonce[6] = 1;
 		const kn_server = _aem_kdf_sub(44, pfk_nonce, _own_pfk);
 
 		// Decrypt the server's ChaCha20 encryption
@@ -1148,24 +1155,11 @@ function AllEars(readyCallback) {
 		return textBody.replaceAll(/[\x05-\x09\x0c-\x15\x18-\x1c]/g, "").replaceAll(/[\x1d\x1e\x1f]/g, "\n").replaceAll("\x0B", "---\n---").replaceAll("\x16", "*").replaceAll("\x17", "_");
 	};
 
-	const _addMessage = async function(msgData, evpId) {
-		const msgInfo = msgData[0];
-		const padAmount = msgInfo & 15;
+	const _addMessage = async function(msgData, msgTs, msgType, msgSig, evpId) {
+		if (msgTs >= _newestMsgTs) {_newestEvpId = evpId; _newestMsgTs = msgTs;}
+		if (msgTs <  _oldestMsgTs) {_oldestEvpId = evpId; _oldestMsgTs = msgTs;}
 
-		const msgTs = new Uint32Array(msgData.slice(1, 5).buffer)[0];
-		if (msgTs >= _newestMsgTs) {
-			_newestEvpId = evpId;
-			_newestMsgTs = msgTs;
-		}
-
-		if (msgTs < _oldestMsgTs) {
-			_oldestEvpId = evpId;
-			_oldestMsgTs = msgTs;
-		}
-
-		msgData = msgData.slice(5, msgData.length - padAmount);
-
-		switch (msgInfo & 48) {
+		switch (msgType) {
 			case 0: { // ExtMsg
 				const msgIp = msgData.slice(0, 4);
 				const msgCs  = new Uint16Array(msgData.slice(4, 6).buffer)[0];
@@ -1246,7 +1240,7 @@ function AllEars(readyCallback) {
 				}
 			break;}
 
-			case 16: { // IntMsg
+			case 1: { // IntMsg
 				const msgType = msgData[0] & 192;
 				// 32/16/8/4 unused
 
@@ -1331,7 +1325,7 @@ function AllEars(readyCallback) {
 				}
 			break;}
 
-			case 32: { // UplMsg (Email attachment, or uploaded file)
+			case 2: { // UplMsg (Email attachment, or uploaded file)
 				let msgFn;
 				let msgBody;
 				let msgParent = null;
@@ -1371,7 +1365,7 @@ function AllEars(readyCallback) {
 				_uplMsg.push(new _UplMsg(evpId, msgTs, msgFn, msgBody, msgParent, msgBody.length / 16));
 			break;}
 
-			case 48: // OutMsg (Delivery report for sent message)
+			case 3: // OutMsg (Delivery report for sent message)
 				_addOutMsg(msgData, evpId, msgTs);
 			break;
 		}
@@ -1462,7 +1456,7 @@ function AllEars(readyCallback) {
 
 	this.getExtMsgCount = function() {return _extMsg.length;};
 	this.getExtMsgId      = function(num) {if(typeof(num)!=="number"){return;} return _extMsg[num].id;};
-	this.getExtMsgTime    = function(num) {if(typeof(num)!=="number"){return;} return _extMsg[num].ts;};
+	this.getExtMsgTime    = function(num) {if(typeof(num)!=="number"){return;} return _extMsg[num].ts + _AEM_TS_BEGIN;};
 	this.getExtMsgHdrTime = function(num) {if(typeof(num)!=="number"){return;} return _extMsg[num].hdrTs;};
 	this.getExtMsgHdrTz   = function(num) {if(typeof(num)!=="number"){return;} return _extMsg[num].hdrTz;};
 	this.getExtMsgTLS     = function(num) {if(typeof(num)!=="number"){return;} return (_extMsg[num].cs === 0) ? "" : "TLS v1." + (_extMsg[num].tls & 3) + " " + _getCiphersuite(_extMsg[num].cs);};
@@ -1732,7 +1726,7 @@ function AllEars(readyCallback) {
 
 	this.getIntMsgCount = function() {return _intMsg.length;};
 	this.getIntMsgId     = function(num) {if(typeof(num)!=="number"){return;} return _intMsg[num].id;};
-	this.getIntMsgTime   = function(num) {if(typeof(num)!=="number"){return;} return _intMsg[num].ts;};
+	this.getIntMsgTime   = function(num) {if(typeof(num)!=="number"){return;} return _intMsg[num].ts + _AEM_TS_BEGIN;};
 	this.getIntMsgAsk    = function(num) {if(typeof(num)!=="number"){return;} return _intMsg[num].ask? sodium.to_base64(_intMsg[num].ask, sodium.base64_variants.ORIGINAL) : "";};
 	this.getIntMsgFrom   = function(num) {if(typeof(num)!=="number"){return;} return _intMsg[num].from;};
 	this.getIntMsgTo     = function(num) {if(typeof(num)!=="number"){return;} return _intMsg[num].to;};
@@ -1743,10 +1737,10 @@ function AllEars(readyCallback) {
 
 	this.getUplMsgCount = function() {return _uplMsg.length;};
 	this.getUplMsgId    = function(num) {if(typeof(num)!=="number"){return;} return _uplMsg[num].id;};
-	this.getUplMsgTime  = function(num) {if(typeof(num)!=="number"){return;} return _uplMsg[num].ts;};
+	this.getUplMsgTime  = function(num) {if(typeof(num)!=="number"){return;} return _uplMsg[num].ts + _AEM_TS_BEGIN;};
 	this.getUplMsgTitle = function(num) {if(typeof(num)!=="number"){return;} return _uplMsg[num].title;};
 	this.getUplMsgBody  = function(num) {if(typeof(num)!=="number"){return;} return _uplMsg[num].body;};
-	this.getUplMsgBytes = function(num) {if(typeof(num)!=="number"){return;} return _uplMsg[num].blocks * 16;};
+	this.getUplMsgBytes = function(num) {if(typeof(num)!=="number"){return;} return _uplMsg[num].blocks * _AEM_BLOCKSIZE;};
 	this.getUplMsgType  = function(num) {if(typeof(num)!=="number"){return;} return _getFileType(_uplMsg[num].title);};
 	this.getUplMsgParent = function(num) {if(typeof(num)!=="number"){return;}
 		if (!_uplMsg[num].parent) return false;
@@ -1761,7 +1755,7 @@ function AllEars(readyCallback) {
 	this.getOutMsgCount  = function() {return _outMsg.length;};
 	this.getOutMsgId     = function(num) {if(typeof(num)!=="number"){return;} return _outMsg[num].id;};
 	this.getOutMsgIsInt  = function(num) {if(typeof(num)!=="number"){return;} return _outMsg[num].isInt;};
-	this.getOutMsgTime   = function(num) {if(typeof(num)!=="number"){return;} return _outMsg[num].ts;};
+	this.getOutMsgTime   = function(num) {if(typeof(num)!=="number"){return;} return _outMsg[num].ts + _AEM_TS_BEGIN;};
 	this.getOutMsgIp     = function(num) {if(typeof(num)!=="number"){return;} return String(_outMsg[num].ip[0] + "." + _outMsg[num].ip[1] + "." + _outMsg[num].ip[2] + "." + _outMsg[num].ip[3]);};
 	this.getOutMsgCcode  = function(num) {if(typeof(num)!=="number"){return;} return _outMsg[num].countryCode;};
 	this.getOutMsgCname  = function(num) {if(typeof(num)!=="number"){return;} return _getCountryName(_outMsg[num].countryCode);};
@@ -1844,10 +1838,10 @@ function AllEars(readyCallback) {
 			return;
 		}
 
-		_own_uak = _aem_kdf_umk(37, _AEM_KDF_KEYID_UMK_UAK, umk);
+		_own_uak = _aem_kdf_umk(40, _AEM_KDF_KEYID_UMK_UAK, umk);
 		_own_esk = _aem_kdf_umk(32, _AEM_KDF_KEYID_UMK_ESK, umk);
 		_own_ehk = _aem_kdf_umk(32, _AEM_KDF_KEYID_UMK_EHK, umk);
-		_own_pfk = _aem_kdf_umk(37, _AEM_KDF_KEYID_UMK_PFK, umk);
+		_own_pfk = _aem_kdf_umk(40, _AEM_KDF_KEYID_UMK_PFK, umk);
 		_own_abk = _aem_kdf_umk(35, _AEM_KDF_KEYID_UMK_ABK, umk);
 		_own_uid = new Uint16Array(_aem_kdf_sub(2, _AEM_KDF_KEYID_UAK_UID, _own_uak).buffer)[0] & 4095;
 
@@ -2078,7 +2072,7 @@ function AllEars(readyCallback) {
 			}
 
 			_totalMsgCount = new Uint16Array(response.slice(0, 2).buffer)[0];
-			_totalMsgBytes = new Uint32Array(response.slice(2, 6).buffer)[0] * 16;
+			_totalMsgBytes = new Uint32Array(response.slice(2, 6).buffer)[0] * _AEM_BLOCKSIZE;
 			const evpCount = new Uint16Array(response.slice(6, 8).buffer)[0];
 			const evpSize = new Uint16Array(response.slice(8, 8 + evpCount * 2).buffer);
 
@@ -2086,7 +2080,7 @@ function AllEars(readyCallback) {
 
 			for (let i = 0; i < evpCount; i++) {
 				const evpBlocks = evpSize[i];
-				const evpBytes = (evpBlocks + _AEM_MSG_MINBLOCKS) * 16;
+				const evpBytes = (evpBlocks + _AEM_MSG_MINBLOCKS) * _AEM_BLOCKSIZE;
 				const evpData = response.slice(offset, offset + evpBytes);
 
 				const evpId = sodium.to_hex(new Uint8Array([
@@ -2105,14 +2099,23 @@ function AllEars(readyCallback) {
 				base.set(sodium.crypto_scalarmult_base(_own_esk), sodium.crypto_scalarmult_BYTES);
 				base.set(new Uint8Array(new Uint16Array([evpBlocks]).buffer), sodium.crypto_scalarmult_BYTES + _X25519_PKBYTES);
 
-				// Create the key and nonce, and retrieve the Message from the Envelope
-				const evp_KeyNonce = sodium.crypto_generichash(sodium.crypto_stream_chacha20_KEYBYTES + sodium.crypto_stream_chacha20_NONCEBYTES, base);
-				const evpDec = sodium.crypto_stream_chacha20_xor(evpData.slice(_X25519_PKBYTES), evp_KeyNonce.slice(sodium.crypto_stream_chacha20_KEYBYTES), evp_KeyNonce.slice(0, sodium.crypto_stream_chacha20_KEYBYTES));
+				// Re-create the 368 bits of nonce-counter-key to retrieve the Message from the Envelope
+				const nck = sodium.crypto_generichash(sodium.crypto_stream_chacha20_ietf_NONCEBYTES + 2 + sodium.crypto_stream_chacha20_ietf_KEYBYTES, base);
+				const evpDec = sodium.crypto_stream_chacha20_ietf_xor_ic(evpData.slice(_X25519_PKBYTES),
+					/*N*/ nck.slice(0, sodium.crypto_stream_chacha20_ietf_NONCEBYTES),
+					/*C*/ new Uint32Array([new Uint16Array(nck.slice(sodium.crypto_stream_chacha20_ietf_NONCEBYTES).buffer)[0] << 16])[0],
+					/*K*/ nck.slice(sodium.crypto_stream_chacha20_ietf_NONCEBYTES + 2));
 
-				const msgSig = evpDec.slice(0, 16);
-				const msgData = evpDec.slice(16);
+				const lenPadding = evpDec[0];
+				let sigType = evpDec.slice(1, 29);
+				const msgType = sigType[27] & 3;
+				sigType[28] &= 252;
+				const msgSig = sigType;
 
-				_addMessage(msgData, evpId);
+				const msgTs = new Uint32Array(evpDec.slice(29,33).buffer)[0];
+				const msgData = evpDec.slice(33);
+
+				_addMessage(msgData, msgTs, msgType, msgSig, evpId);
 
 				_readyMsgBytes += evpBytes;
 				offset += evpBytes;
@@ -2273,7 +2276,6 @@ function AllEars(readyCallback) {
 
 		const lenData = 13 + u8fn.length + u8body.length;
 		if (lenData > _AEM_MSG_SRC_MAXSIZE) {callback(0x07); return;}
-		if (lenData < _AEM_MSG_SRC_MINSIZE) {callback(0x08); return;}
 
 		const rawData = new Uint8Array(13 + u8fn.length + u8body.length);
 		rawData[0] = u8fn.length - 1;
@@ -2297,11 +2299,11 @@ function AllEars(readyCallback) {
 			if (response[0] !== 0) {callback(response[0]); return;}
 
 			let x = encData.length + 53; // 5 (info + ts) + 48 (Envelope)
-			if (x % 16 !== 0) x+= (16 - (x % 16));
+			if (x % _AEM_BLOCKSIZE !== 0) x+= (_AEM_BLOCKSIZE - (x % _AEM_BLOCKSIZE));
 			_totalMsgBytes += x;
 			_readyMsgBytes += x;
 
-			_uplMsg.unshift(new _UplMsg(/*newMsgId*/null, Date.now() / 1000, filename, u8body, null, x / 16));
+			_uplMsg.unshift(new _UplMsg(/*newMsgId*/null, Date.now() / 1000, filename, u8body, null, x / _AEM_BLOCKSIZE));
 			callback(0);
 		});
 	};
@@ -2350,11 +2352,11 @@ function AllEars(readyCallback) {
 		_own_privateNonce++;
 		if (_own_privateNonce >= Math.pow(2, 32)) _own_privateNonce = 0;
 
-		const pfk_nonce = new Uint8Array(8);
+		const pfk_nonce = new Uint8Array(7);
 		pfk_nonce.set(new Uint8Array(new Uint32Array([_own_privateNonce]).buffer));
 
 		const kn_client = _aem_kdf_sub(44, pfk_nonce, _own_pfk);
-		pfk_nonce[7] = 1;
+		pfk_nonce[6] = 1;
 		const kn_server = _aem_kdf_sub(44, pfk_nonce, _own_pfk);
 
 		// Client-side encryption
@@ -2447,7 +2449,7 @@ function AllEars(readyCallback) {
 			case 0x05: return "Failed decrypting response";
 			case 0x06: return "Name too long";
 			case 0x07: return "Contents too large";
-			case 0x08: return "Contents too small";
+			case 0x08: return "";
 			case 0x09: return "Private-field out of space";
 			case 0x10: return "Cannot delete oldest message";
 			case 0x11: return "Invalid address";

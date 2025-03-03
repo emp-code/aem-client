@@ -153,23 +153,28 @@
 			sodium.ready.then(function() {
 				const _AEM_KDF_KEYID_UMK_UAK = 1;
 				const _AEM_KDF_KEYID_UMK_ESK = 2;
-				const _AEM_KDF_KEYID_UAK_UID = new Uint8Array([0x01,0,0,0,0,0,0,0]);
+				const _AEM_KDF_KEYID_UAK_UID = new Uint8Array([0x01,0,0,0,0,0,0]);
 
-				const _aem_kdf_umk = function(size, id, key) {
-					const counter = (id << 8) | (key[44] << 16);
-					return sodium.crypto_stream_chacha20_ietf_xor_ic(new Uint8Array(size), key.slice(32, 44), counter, key.slice(0, 32));
+				// Use the 360-bit UMK with a 16-bit Nonce to generate up to 16 KiB
+				const _aem_kdf_umk = function(size, n, key) {
+					return sodium.crypto_stream_chacha20_ietf_xor_ic(new Uint8Array(size),
+						/* Nonce   */ key.slice(32, 44),
+						/* Counter */ new Uint32Array([(key[44] << 24) | (n << 8)])[0],
+						/* Key     */ key.slice(0, 32));
 				}
 
+				// Use the 320-bit Key with a 56-bit Nonce to generate up to 16 KiB
 				const _aem_kdf_sub = function(size, n, key) {
-					const counter = ((key[36] & 127) << 24) | ((key[36] & 128) << 16);
-					const nonce = new Uint8Array([key[32], key[33], key[34], key[35], n[0], n[1], n[2], n[3], n[4], n[5], n[6], n[7]]);
-					return sodium.crypto_stream_chacha20_ietf_xor_ic(new Uint8Array(size), nonce, counter, key.slice(0, 32));
+					return sodium.crypto_stream_chacha20_ietf_xor_ic(new Uint8Array(size),
+						/* Nonce   */ new Uint8Array([key[32], key[33], key[34], key[35], key[36], key[37], key[38], key[39], n[0], n[1], n[2], n[3]]),
+						/* Counter */ new Uint32Array([(n[4] << 8) | (n[5] << 16), (n[6] << 24)])[0],
+						/* Key     */ key.slice(0, 32));
 				}
 
 				document.getElementById("btn_gen").onclick = function() {
 					const umk = window.crypto.getRandomValues(new Uint8Array(45));
 
-					const uak = _aem_kdf_umk(37, _AEM_KDF_KEYID_UMK_UAK, umk);
+					const uak = _aem_kdf_umk(40, _AEM_KDF_KEYID_UMK_UAK, umk);
 					const esk = _aem_kdf_umk(32, _AEM_KDF_KEYID_UMK_ESK, umk);
 					const epk = sodium.crypto_scalarmult_base(esk);
 					const uid = new Uint16Array(_aem_kdf_sub(2, _AEM_KDF_KEYID_UAK_UID, uak).buffer)[0] & 4095;
