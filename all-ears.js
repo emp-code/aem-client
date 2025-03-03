@@ -237,7 +237,7 @@ function AllEars(readyCallback) {
 
 	// 42-bit millisecond timestamp, years 2025-2164
 	const _getBinTs = function() {
-	const ts = BigInt(Date.now() - (_AEM_TS_BEGIN * 1000));
+		const ts = BigInt(Date.now() - (_AEM_TS_BEGIN * 1000));
 
 		return new Uint8Array([
 			Number(ts & 255n),
