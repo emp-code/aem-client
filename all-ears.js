@@ -2436,7 +2436,8 @@ function AllEars(readyCallback) {
 			// 400+ Unauthenticated
 			case 400: return "Bad request";
 			case 403: return "Authentication failed";
-			case 404: return "Connection error";
+			case 404: return "Time difference too big";
+			case 408: return "Connection error";
 			case 500: return "Internal server error";
 
 			// 0x00: OK
