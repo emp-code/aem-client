@@ -2113,7 +2113,7 @@ function AllEars(readyCallback) {
 				const msgSig = sigType;
 
 				const msgTs = new Uint32Array(evpDec.slice(29,33).buffer)[0];
-				const msgData = evpDec.slice(33);
+				const msgData = evpDec.slice(33, evpDec.length - lenPadding);
 
 				_addMessage(msgData, msgTs, msgType, msgSig, evpId);
 
