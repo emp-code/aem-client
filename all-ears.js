@@ -1236,7 +1236,7 @@ function AllEars(readyCallback) {
 
 					_extMsg.push(new _ExtMsg(evpId, msgTs, msgHdrTs, msgHdrTz, msgIp, msgCc, msgCs, msgTls, msgEsmtp, msgProtV, msgInval, msgRares, msgAttach, msgGrDom, msgIpBlk, msgDkim, dkimTxt, msgGreet, msgRvDns, msgAuSys, msgEnvFr, msgHdrFr, msgDnFr, msgEnvTo, msgHdrTo, msgDnTo, msgRplTo, msgDnRt, msgMsgId, msgHeaders, msgSbjct, msgBody));
 				} catch(e) {
-					_extMsg.push(new _ExtMsg(evpId, msgTs, msgHdrTs, msgHdrTz, msgIp, msgCc, msgCs, msgTls, msgEsmtp, msgProtV, msgInval, msgRares, msgAttach, msgGrDom, msgIpBlk, null, null, "", "", "", "", "", "", "", "", "", "", "", "", "", "Failed decompression", "Size: " + msgData.length));
+					_extMsg.push(new _ExtMsg(evpId, msgTs, msgHdrTs, msgHdrTz, msgIp, msgCc, msgCs, msgTls, msgEsmtp, msgProtV, msgInval, msgRares, msgAttach, msgGrDom, msgIpBlk, null, null, "", "", "", "", "", "", "", "", "", "", "", "", "", "Failed decompression", e + ". Size: " + msgData.length));
 				}
 			break;}
 
