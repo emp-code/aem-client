@@ -323,9 +323,9 @@ function displayMsg(isHistory, isInt, num) {
 	}
 
 	const tzOs = new Date().getTimezoneOffset();
-	const msgDate = new Date((ts * 1000) + (tzOs * -60000));
+	const msgDate = new Date((Number(ts)) + (tzOs * -60000));
 	document.getElementById("readmsg_date").children[0].textContent = getClockIcon(msgDate);
-	document.getElementById("readmsg_date").children[1].dateTime = new Date(ts * 1000).toISOString();
+	document.getElementById("readmsg_date").children[1].dateTime = new Date(Number(ts)).toISOString();
 
 	if (isInt) {
 		document.getElementById("readmsg_dkim").hidden = true;
@@ -508,7 +508,7 @@ function displayOutMsg(isHistory, num) {
 
 	const ts = ae.getOutMsgTime(num);
 	const tzOs = new Date().getTimezoneOffset();
-	document.getElementById("readmsg_date").children[1].textContent = new Date((ts * 1000) + (tzOs * -60000)).toISOString().slice(0, 19).replace("T", " ");
+	document.getElementById("readmsg_date").children[1].textContent = new Date(Number(ts) + (tzOs * -60000)).toISOString().slice(0, 19).replace("T", " ");
 
 	const isInt = ae.getOutMsgIsInt(num);
 	document.getElementById("readmsg_ip").style.visibility    = isInt? "hidden" : "visible";
@@ -629,8 +629,8 @@ function addMsg(isInt, i) {
 
 	const ts = isInt? ae.getIntMsgTime(i) : ae.getExtMsgTime(i);
 	const el = document.createElement("time");
-	el.dateTime = new Date(ts * 1000).toISOString();
-	el.textContent = new Date((ts * 1000) + (new Date().getTimezoneOffset() * -60000)).toISOString().slice(0, 10);
+	el.dateTime = new Date(Number(ts)).toISOString();
+	el.textContent = new Date((Number(ts)) + (new Date().getTimezoneOffset() * -60000)).toISOString().slice(0, 10);
 	let cell = row.insertCell(-1);
 	cell.appendChild(el);
 
@@ -757,7 +757,7 @@ function showDrbox() {
 			row.setAttribute("data-msgid", ae.getOutMsgId(i));
 
 			let cell;
-			cell = row.insertCell(-1); cell.textContent = new Date(ae.getOutMsgTime(i) * 1000).toISOString().slice(0, 10);
+			cell = row.insertCell(-1); cell.textContent = new Date(Number(ae.getOutMsgTime(i))).toISOString().slice(0, 10);
 			cell = row.insertCell(-1); cell.textContent = ae.getOutMsgSubj(i);
 			row.onclick = function() {displayOutMsg(false, i);};
 
@@ -815,7 +815,7 @@ function showFiles() {
 			row.className = "rowfile";
 
 			let cell = row.insertCell(-1);
-			cell.textContent = new Date(ae.getUplMsgTime(i) * 1000).toISOString().slice(0, 10);
+			cell.textContent = new Date(Number(ae.getUplMsgTime(i))).toISOString().slice(0, 10);
 			cell.onclick = function() {displayFile(false, i, null);};
 
 			cell = row.insertCell(-1);

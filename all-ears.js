@@ -16,7 +16,7 @@ function AllEars(readyCallback) {
 	const _AEM_APIURL = document.head.querySelector("meta[name='aem.url.api']").content? document.head.querySelector("meta[name='aem.url.api']").content : "https://" + document.domain + ":302";
 	const _AEM_USERCOUNT = 4096;
 	const _AEM_MAXLEN_OURDOMAIN = 32;
-	const _AEM_TS_BEGIN = 1735689600 // 2025-01-01 00:00:00 UTC
+	const _AEM_TS_BEGIN = 1735689600000n // 2025-01-01 00:00:00 UTC
 
 	// GET
 	const _AEM_API_ACCOUNT_BROWSE = 0;
@@ -237,7 +237,7 @@ function AllEars(readyCallback) {
 
 	// 42-bit millisecond timestamp, years 2025-2164
 	const _getBinTs = function() {
-		const ts = BigInt(Date.now() - (_AEM_TS_BEGIN * 1000));
+		const ts = BigInt(Date.now()) - _AEM_TS_BEGIN;
 
 		return new Uint8Array([
 			Number(ts & 255n),
@@ -1340,6 +1340,7 @@ function AllEars(readyCallback) {
 					// Uploaded file
 					const nonce = new Uint8Array(16);
 					nonce.set(msgData.slice(1, 13));
+
 					const dec = new Uint8Array(await window.crypto.subtle.decrypt(
 						{name: "AES-CTR", counter: nonce, length: 32},
 						await window.crypto.subtle.importKey("raw", _own_ehk, {"name": "AES-CTR"}, false, ["decrypt"]),
@@ -2107,12 +2108,11 @@ function AllEars(readyCallback) {
 					/*K*/ nck.slice(sodium.crypto_stream_chacha20_ietf_NONCEBYTES + 2));
 
 				const lenPadding = evpDec[0];
-				let sigType = evpDec.slice(1, 29);
-				const msgType = sigType[27] & 3;
-				sigType[28] &= 252;
-				const msgSig = sigType;
+				const msgType = (evpDec[27] & 48) >> 4;
+				let msgSig = evpDec.slice(1, 28);
+				msgSig[27] &= 15;
 
-				const msgTs = new Uint32Array(evpDec.slice(29,33).buffer)[0];
+				const msgTs = (BigInt(evpDec[27] & 192) >> 6n) | (BigInt(evpDec[28]) << 2n) | (BigInt(evpDec[29]) << 10n) | (BigInt(evpDec[30]) << 18n) | (BigInt(evpDec[31]) << 26n) | (BigInt(evpDec[32]) << 34n);
 				const msgData = evpDec.slice(33, evpDec.length - lenPadding);
 
 				_addMessage(msgData, msgTs, msgType, msgSig, evpId);
