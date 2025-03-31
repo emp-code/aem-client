@@ -2237,7 +2237,7 @@ function AllEars(readyCallback) {
 				_newestEvpId = null;
 				_newestMsgTs = 0;
 				_oldestEvpId = null;
-				_oldestMsgTs = 4294967296;
+				_oldestMsgTs = 4398046511103n;
 
 				callback(0);
 			});
