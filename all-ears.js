@@ -122,9 +122,9 @@ function AllEars(readyCallback) {
 	const _uplMsg = [];
 	const _outMsg = [];
 	let _newestEvpId = null;
-	let _newestMsgTs = 0;
+	let _newestMsgTs = 0n;
 	let _oldestEvpId = null;
-	let _oldestMsgTs = 4294967296;
+	let _oldestMsgTs = 4398046511103n;
 
 	let _totalMsgCount = 0;
 	let _totalMsgBytes = 0;
