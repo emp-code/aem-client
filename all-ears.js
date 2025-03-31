@@ -2242,13 +2242,9 @@ function AllEars(readyCallback) {
 				callback(0);
 			});
 		} else {
-			// TODO: Allow deleting multiple (12 max)
+			// TODO: Allow deleting multiple (8 max)
 			if (hexId.length !== 4) {callback(0x01); return;}
-
-			if (hexId === "0000") {
-				callback(0x10);
-				return;
-			}
+			if (hexId === "0000") {	callback(0x10); return;}
 
 			_fetchEncrypted(_AEM_API_MESSAGE_DELETE, 0, sodium.from_hex(hexId), null, function(response) {
 				if (typeof(response) === "number") {callback(response); return;}
