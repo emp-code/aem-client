@@ -109,7 +109,7 @@ document.getElementById("btn_reg").onclick = function() {
 };
 
 document.getElementById("reg_permit").onchange = function() {
-	if (!this.reportValidity()) {document.getElementById("reg_expire").textContent = "Enter a valid permit to continue."; return false;}
+	if (!this.reportValidity()) {document.getElementById("reg_expire").textContent = "Enter a valid permit to continue."; return;}
 
 	const p = sodium.from_base64(this.value + "A", sodium.base64_variants.ORIGINAL_NO_PADDING);
 	const ts = (BigInt(p[32]))
@@ -121,8 +121,8 @@ document.getElementById("reg_permit").onchange = function() {
 
 	const ms = (ts - (BigInt(Date.now()) - 1735689600000n)) + 1073741824n;
 	if (ms > 1073741824n) {
-		document.getElementById("reg_expire").textContent = "Invalid permit.";
 		document.getElementById("reg_cont").disabled = true;
+		document.getElementById("reg_expire").textContent = "Invalid permit.";
 	} else if (ms < 0) {
 		document.getElementById("reg_cont").disabled = true;
 		document.getElementById("reg_expire").textContent = "Permit expired.";
