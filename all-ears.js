@@ -13,7 +13,8 @@ function AllEars(readyCallback) {
 	} catch(e) {return readyCallback(false);}
 
 // Private constants - must match server
-	const _AEM_APIURL = document.head.querySelector("meta[name='aem.url.api']").content? document.head.querySelector("meta[name='aem.url.api']").content : "https://" + document.domain + ":302";
+	const _AEM_PROVIDER = document.head.querySelector("meta[name='aem.provider']").content? document.head.querySelector("meta[name='aem.provider']").content : document.domain;
+	const _AEM_APIURL = (document.URL.startsWith("http://") ? "http://" : "https://") + _AEM_PROVIDER + ":302";
 	const _AEM_USERCOUNT = 4096;
 	const _AEM_MAXLEN_OURDOMAIN = 32;
 	const _AEM_TS_BEGIN = 1735689600000n // 2025-01-01 00:00:00 UTC
@@ -21,18 +22,18 @@ function AllEars(readyCallback) {
 	// GET
 	const _AEM_API_ACCOUNT_BROWSE = 0;
 	const _AEM_API_ACCOUNT_DELETE = 1;
-	const _AEM_API_ACCOUNT_UPDATE = 2;
-	const _AEM_API_ADDRESS_CREATE = 3;
-	const _AEM_API_ADDRESS_DELETE = 4;
-	const _AEM_API_ADDRESS_UPDATE = 6;
-	const _AEM_API_MESSAGE_BROWSE = 7;
-	const _AEM_API_MESSAGE_DELETE = 8;
-	const _AEM_API_MESSAGE_SENDER = 9;
-	const _AEM_API_SETTING_LIMITS = 10;
+	const _AEM_API_ACCOUNT_PERMIT = 2;
+	const _AEM_API_ACCOUNT_UPDATE = 3;
+	const _AEM_API_ADDRESS_CREATE = 4;
+	const _AEM_API_ADDRESS_DELETE = 5;
+	const _AEM_API_MESSAGE_BROWSE = 6;
+	const _AEM_API_MESSAGE_DELETE = 7;
+	const _AEM_API_MESSAGE_SENDER = 8;
+	const _AEM_API_SETTING_LIMITS = 9;
 	// POST
-	const _AEM_API_ACCOUNT_CREATE = 0;
-	const _AEM_API_MESSAGE_CREATE = 1;
-	const _AEM_API_MESSAGE_PUBLIC = 2;
+	const _AEM_API_ACCOUNT_KEYSET = 0;
+	const _AEM_API_ADDRESS_UPDATE = 1;
+	const _AEM_API_MESSAGE_CREATE = 2;
 	const _AEM_API_MESSAGE_UPLOAD = 3;
 	const _AEM_API_MESSAGE_VERIFY = 4;
 	const _AEM_API_PRIVATE_UPDATE = 5;
@@ -62,9 +63,9 @@ function AllEars(readyCallback) {
 
 	const _AEM_FLAG_OLDER = 1;
 	const _AEM_FLAG_UINFO = 2;
-	const _AEM_FLAG_EMAIL = 1;
-	const _AEM_FLAG_PUB   = 4;
-	const _AEM_FLAG_E2EE  = 2;
+	const _AEM_FLAG_E2EE  = 1;
+	const _AEM_FLAG_PUB   = 2;
+	const _AEM_FLAG_EMAIL = 3;
 	const _AEM_FLAG_EMPTY = 1;
 
 	const _AEM_ADDR32_CHARS = "0123456789abcdefghjkmnpqrstuwxyz";
@@ -236,17 +237,24 @@ function AllEars(readyCallback) {
 		this.nick = nick;
 	}
 
+	const _bestEffortDecode = function(src) {
+		const h = "0123456789abcdef";
+		let res = "Best effort decode:\n";
+		src.forEach(function(c) {res += (c == 9 || c == 10 || (c > 31 && c < 127)) ? String.fromCharCode(c) : "[" + h[((c & 240) >> 4)] + h[(c & 15)] + "]";});
+		return res;
+	}
+
 	// 42-bit millisecond timestamp, years 2025-2164
-	const _getBinTs = function() {
-		const ts = BigInt(Date.now()) - _AEM_TS_BEGIN;
+	const _getBinTs = function(ts) {
+		const t = ts? ts : (BigInt(Date.now()) - _AEM_TS_BEGIN);
 
 		return new Uint8Array([
-			Number(ts & 255n),
-			Number((ts >> 8n) & 255n),
-			Number((ts >> 16n) & 255n),
-			Number((ts >> 24n) & 255n),
-			Number((ts >> 32n) & 255n),
-			Number((ts >> 40n) & 3n)
+			Number(t & 255n),
+			Number((t >> 8n) & 255n),
+			Number((t >> 16n) & 255n),
+			Number((t >> 24n) & 255n),
+			Number((t >> 32n) & 255n),
+			Number((t >> 40n) & 3n)
 		]);
 	}
 
@@ -266,11 +274,11 @@ function AllEars(readyCallback) {
 			/* Key     */ key.slice(0, 32));
 	}
 
-	// Use the 280-bit ABK to generate a one-time 272-bit APK
-	const _aem_kdf_abk = function(addrHash, binTs) {
-		return sodium.crypto_stream_chacha20_ietf_xor_ic(new Uint8Array(34),
-			/* Nonce   */ new Uint8Array([binTs[1], binTs[2], binTs[3], binTs[4], addrHash[0], addrHash[1], addrHash[2], addrHash[3], addrHash[4], addrHash[5], addrHash[6], addrHash[7]]),
-			/* Counter */ (_own_abk[34] << 24) | (_own_abk[33] << 16) | (_own_abk[32] << 8) | binTs[0],
+	// Use the 342-bit ABK to generate a 342-bit APK; ASK=APK+binTs
+	const _aem_kdf_abk = function(binTs) {
+		return sodium.crypto_stream_chacha20_ietf_xor_ic(new Uint8Array(32),
+			/* Nonce   */ new Uint8Array([binTs[0], binTs[1], binTs[2], binTs[3], binTs[4], binTs[5] | (_own_abk[42] & 252), _own_abk[41], _own_abk[40], _own_abk[39], _own_abk[38], _own_abk[37], _own_abk[36]]),
+			/* Counter */ new Uint32Array([_own_abk[35], _own_abk[34], _own_abk[33], _own_abk[32]])[0],
 			/* Key     */ _own_abk.slice(0, 32));
 	}
 
@@ -299,51 +307,39 @@ function AllEars(readyCallback) {
 			});
 		} catch(e) {callback(0x02);}
 
-		callback(r? ((r.status === 200) ? new Uint8Array(await r.arrayBuffer()) : r.status) : 0x02);
+		callback(r? ((r.status === 200) ? new Uint8Array(await r.arrayBuffer()) : r.statusText.toUpperCase().charCodeAt(0) + 935) : 0x02);
 	};
 
-	const _fetchEncrypted = async function(cmd, flags, urlData, postData, callback) {
+	const _fetchEncrypted = async function(cmd, flags, urlData, postData, binTs, callback) {
 		await new Promise(resolve => setTimeout(resolve, 1)); // Ensure requests are never made within the same millisecond
 
-		// Create one-use keys
-		const binTs = _getBinTs();
-		const auth_key = _uak_derive(binTs, postData? true:false, _AEM_UAK_TYPE_URL_AUTH);
+		// Create one-time keys
+		if (!binTs) binTs = _getBinTs();
 		const data_key = _uak_derive(binTs, postData? true:false, _AEM_UAK_TYPE_URL_DATA);
+		const auth_key = _uak_derive(binTs, postData? true:false, _AEM_UAK_TYPE_URL_AUTH);
 
 		// Create URL Base
-		const urlBase = new Uint8Array(39);
+		const urlBase = new Uint8Array(42);
 		urlBase.set(binTs);
-		urlBase[5] |= ((cmd & 63) ^ (data_key[0] & 63)) << 2; // Encrypted CMD, 2 bits of BinTs
-		urlBase[6] = flags ^ data_key[1];
+		urlBase[5] |= (((cmd & 15) << 2) | ((flags & 3) << 6)) ^ (data_key[0] & 252); // 2: BinTs, 4: Enc-Cmd, 2: Enc-Flags
 
-		for (let i = 0; i < 16; i++) {
+		for (let i = 0; i < 20; i++) {
 			if (urlData && i < urlData.length) {
-				urlBase[7 + i] = urlData[i] ^ data_key[2 + i];
+				urlBase[6 + i] = urlData[i] ^ data_key[1 + i];
 			} else {
-				urlBase[7 + i] = data_key[2 + i];
+				urlBase[6 + i] = data_key[1 + i];
 			}
 		}
 
-		urlBase.set(sodium.crypto_onetimeauth(urlBase.slice(5, 23), auth_key), 23);
-
-		let post = null;
-		if (postData && (typeof(postData) === "object")) {
-			post = await window.crypto.subtle.encrypt(
-				{name: "AES-GCM", iv: new Uint8Array(12)},
-				await window.crypto.subtle.importKey("raw", _uak_derive(binTs, true, _AEM_UAK_TYPE_REQ_BODY), {"name": "AES-GCM"}, false, ["encrypt"]),
-				postData);
-		}
+		urlBase.set(sodium.crypto_onetimeauth(urlBase.slice(5, 26), auth_key), 26);
+		const post = (postData && (typeof(postData) === "object")) ? sodium.crypto_aead_aegis256_encrypt(postData, null, null, new Uint8Array(32), _uak_derive(binTs, true, _AEM_UAK_TYPE_REQ_BODY)) : null;
 
 		_fetchBinary(urlBase, post, async function(result) {
 			if (typeof(result) === "number") {callback(result); return;}
 
 			let dec;
-			try {
-				dec = await window.crypto.subtle.decrypt(
-					{name: "AES-GCM", iv: new Uint8Array(12)},
-					await window.crypto.subtle.importKey("raw", _uak_derive(binTs, postData? true:false, _AEM_UAK_TYPE_RES_BODY), {"name": "AES-GCM"}, false, ["decrypt"]),
-					result);
-			} catch(e) {callback(0x04); return;}
+			try {dec = sodium.crypto_aead_aegis256_decrypt(null, result, null, new Uint8Array(32), _uak_derive(binTs, postData? true:false, _AEM_UAK_TYPE_RES_BODY));}
+			catch(e) {callback(0x05); return;}
 
 			let u8 = new Uint8Array(dec);
 			u8 = u8.slice(1, u8.length - u8[0]);
@@ -1243,86 +1239,76 @@ function AllEars(readyCallback) {
 
 			case 1: { // IntMsg
 				const msgType = msgData[0] & 192;
-				// 32/16/8/4 unused
 
-				if (msgType == 192) { // System
-					// [0] unused
-
+				if (msgType == 0) { // System
 					let txt;
 					try {
 						txt = sodium.to_string(msgData.slice(1));
-					} catch(e) {txt = "(error)\nError decoding system message: " + e;}
+					} catch(e) {txt = "(error)\nError decoding system message: " + e + "\n\n" + _bestEffortDecode(msgData.slice(1));}
 
 					const sep = txt.indexOf("\n");
 					_intMsg.push(new _IntMsg(evpId, msgTs, "system", true, null, "system", "", txt.slice(0, sep), txt.slice(sep + 1)));
-				} else if (msgType == 128) { // Public
-					// [0] unused
-					const msgFrom = _addr32_decode(msgData.slice( 1, 11));
-					const replyAsk = msgData.slice(11, 50);
+				} else if (msgType == 64) { // Public
+					const msgFrom = _addr32_decode(msgData.slice(2, 12));
+
+					const msgAsk = new Uint8Array(38);
+					msgAsk.set(msgData.slice(12, 44));
+					msgAsk.set(_getBinTs(msgTs), 32);
 
 					let txt;
-					try {
-						txt = sodium.to_string(msgData.slice(50));
-					} catch(e) {txt = "(error)\nError decoding public message: " + e}
+					try {txt = sodium.to_string(msgData.slice(44));}
+					catch(e) {txt = "(error)\nError decoding public message: " + e + "\n\n" + _bestEffortDecode(msgData.slice(50));}
 
 					const sep = txt.indexOf("\n");
-					_intMsg.push(new _IntMsg(evpId, msgTs, "public", true, replyAsk, msgFrom, "", txt.slice(0, sep), txt.slice(sep + 1)));
-				} else if (msgType === 64) { // E2EE
-					const fromAdmin = msgData[0] & 1;
-					// [1][2] TODO
-					const msgFrom = _addr32_decode(msgData.slice(3, 13));
-					const msgTo = _addr32_decode(msgData.slice(13, 23));
-					const myBts = msgData.slice(23, 28);
-					const senderBts = msgData.slice(28, 33);
-
-					const myHash = _addr32toHash(msgData.slice(13, 23));
-					if (!myHash) break;
-					const apk = _aem_kdf_abk(myHash, myBts);
+					_intMsg.push(new _IntMsg(evpId, msgTs, "public", true, msgAsk, msgFrom, "", txt.slice(0, sep), txt.slice(sep + 1)));
+				} else if (msgType == 128) { // E2EE
+					const prevBts = msgData.slice(2, 8);
+					const msgBts = _getBinTs(msgTs);
+					const msgFrom = _addr32_decode(msgData.slice(8, 18));
+					const msgTo = _addr32_decode(msgData.slice(18, 28));
+					const fromAdmin = false; // TODO
 
 					// Decrypt
 					const nonce = new Uint8Array(12);
-					nonce.set(apk.slice(32));
-					nonce.set(myBts, 2);
-					nonce.set(senderBts, 7);
-
+					nonce.set(msgBts);
 					let dec;
 					try {
 						dec = new Uint8Array(await window.crypto.subtle.decrypt(
 							{name: "AES-GCM", iv: nonce},
-							await window.crypto.subtle.importKey("raw", apk.slice(0, 32), {"name": "AES-GCM"}, false, ["decrypt"]),
-							msgData.slice(33)
+							await window.crypto.subtle.importKey("raw", _aem_kdf_abk(prevBts), {"name": "AES-GCM"}, false, ["decrypt"]),
+							msgData.slice(28)
 						));
 					} catch(e) {
-						_intMsg.push(new _IntMsg(evpId, msgTs, "e2ee", fromAdmin, null, msgFrom, msgTo, "(error)", "Error decoding message: " + e));
+						_intMsg.push(new _IntMsg(evpId, msgTs, "e2ee", fromAdmin, null, msgFrom, msgTo, "(error)", "\n"+sodium.to_hex(prevBts)+"\n"+sodium.to_hex(_aem_kdf_abk(prevBts))+"\nError decrypting message: " + e));
 						return;
 					}
 
-					// Get data
-					const replyAsk = new Uint8Array(39);
-					replyAsk.set(dec.slice(0, 34));
-					replyAsk.set(senderBts, 34);
+					const msgAsk = new Uint8Array(38);
+					msgAsk.set(dec.slice(0, 32));
+					msgAsk.set(msgBts, 32);
 
 					let txt;
-					try {
-						txt = sodium.to_string(dec.slice(34));
-					} catch(e) {txt = "(error)\nError decoding message: " + e;}
+					try {txt = sodium.to_string(dec.slice(32));}
+					catch(e) {txt = "(error)\nError decoding E2EE message: " + e + "\n\n" + _bestEffortDecode(dec.slice(32));}
 
 					const sep = txt.indexOf("\n");
-					_intMsg.push(new _IntMsg(evpId, msgTs, "e2ee", fromAdmin, replyAsk, msgFrom, msgTo, txt.slice(0, sep), txt.slice(sep + 1)));
+					_intMsg.push(new _IntMsg(evpId, msgTs, "e2ee", fromAdmin, msgAsk, msgFrom, msgTo, txt.slice(0, sep), txt.slice(sep + 1)));
 				} else { // Non-E2EE
-					const fromAdmin = (msgData[0] & 1) === 1;
-					// [1][2] TODO
-					const msgFrom = _addr32_decode(msgData.slice( 3, 13));
-					const msgTo   = _addr32_decode(msgData.slice(13, 23));
-					const replyAsk = msgData.slice(23, 62);
+					const msgFrom = _addr32_decode(msgData.slice( 2, 12));
+					const msgTo   = _addr32_decode(msgData.slice(12, 22));
+					const fromAdmin = false; // TODO
+
+					const msgAsk = new Uint8Array(38);
+					msgAsk.set(msgData.slice(22, 54));
+					msgAsk.set(_getBinTs(msgTs), 32);
 
 					let txt;
 					try {
-						txt = sodium.to_string(msgData.slice(62));
-					} catch(e) {txt = "(error)\nError decoding message: " + e}
+						txt = sodium.to_string(msgData.slice(54));
+					} catch(e) {txt = "(error)\nError decoding message: " + e + "\n\n" + _bestEffortDecode(msgData.slice(54));}
 
 					const sep = txt.indexOf("\n");
-					_intMsg.push(new _IntMsg(evpId, msgTs, "plain", fromAdmin, replyAsk, msgFrom, msgTo, txt.slice(0, sep), txt.slice(sep + 1)));
+					_intMsg.push(new _IntMsg(evpId, msgTs, "plain", fromAdmin, msgAsk, msgFrom, msgTo, txt.slice(0, sep), txt.slice(sep + 1)));
 				}
 			break;}
 
@@ -1445,17 +1431,12 @@ function AllEars(readyCallback) {
 	this.getLimitNormalA = function(lvl) {if(typeof(lvl)!=="number"){return;} return _maxNormalA[lvl];};
 	this.getLimitShieldA = function(lvl) {if(typeof(lvl)!=="number"){return;} return _maxShieldA[lvl];};
 
-	this.getOwnAsk = function(addr) {if (typeof(addr)!=="string"){return;}
-		const a32 = _addr32_encode(addr);
-		if (!a32) return;
-		const hash = _addr32toHash(a32);
-		if (!hash) return;
-		const bts = _getBinTs();
-
-		const bin = new Uint8Array(39);
-		bin.set(_aem_kdf_abk(hash, bts));
-		bin.set(bts, 34);
-		return sodium.to_base64(bin, sodium.base64_variants.ORIGINAL);
+	this.getOwnAsk = function() {
+		const binTs = _getBinTs();
+		const ask = new Uint8Array(38);
+		ask.set(_aem_kdf_abk(binTs));
+		ask.set(binTs, 32);
+		return sodium.to_base64(ask, sodium.base64_variants.ORIGINAL_NO_PADDING);
 	};
 
 	this.getTotalMsgCount = function() {return _totalMsgCount;};
@@ -1608,10 +1589,10 @@ function AllEars(readyCallback) {
 			+ " with " + (_extMsg[num].esmtp ? "E" : "") + "SMTP" + (_extMsg[num].tls ? "S" : "")
 			+ " id " + _extMsg[num].id
 			+ " for <" + _extMsg[num].envTo + ">; "
-			+ new Date(_extMsg[num].ts * 1000).toUTCString().slice(0, 26) + "+0000" // TODO: Preserve timezone info
+			+ new Date(Number(_extMsg[num].ts + _AEM_TS_BEGIN)).toUTCString().slice(0, 26) + "+0000" // TODO: Preserve timezone info
 		+ "\r\nContent-Transfer-Encoding: 8bit"
 		+ "\r\nContent-Type: text/plain; charset=utf-8"
-		+ "\r\nDate: " + new Date((_extMsg[num].ts + _extMsg[num].hdrTs) * 1000).toUTCString().slice(0, 26) + "+0000" // TODO: Preserve timezone info
+		+ "\r\nDate: " + new Date(Number(_extMsg[num].ts + _extMsg[num].hdrTs + _AEM_TS_BEGIN)).toUTCString().slice(0, 26) + "+0000" // TODO: Preserve timezone info
 		+ "\r\nFrom: " + (_extMsg[num].dnFrom ? ("\"" + _extMsg[num].dnFrom + "\" <" + _extMsg[num].hdrFrom + ">") : _extMsg[num].hdrFrom)
 		+ "\r\nMIME-Version: 1.0"
 		+ (_extMsg[num].hdrId? ("\r\nMessage-ID: <" + _extMsg[num].hdrId + ">") : "")
@@ -1626,7 +1607,7 @@ function AllEars(readyCallback) {
 	this.exportIntMsg = function(num) {if(typeof(num)!=="number"){return;}
 		return "Content-Transfer-Encoding: 8bit"
 		+ "\r\nContent-Type: text/plain; charset=utf-8"
-		+ "\r\nDate: " + new Date(_intMsg[num].ts * 1000).toUTCString().slice(0, 26) + "+0000"
+		+ "\r\nDate: " + new Date(Number(_intMsg[num].ts + _AEM_TS_BEGIN)).toUTCString().slice(0, 26) + "+0000"
 		+ "\r\nFrom: " + _intMsg[num].from + "@" + _ourDomain
 		+ "\r\nMIME-Version: 1.0"
 		+ "\r\nMessage-ID: <" + _intMsg[num].id + "@int." + _ourDomain + ">"
@@ -1649,7 +1630,7 @@ function AllEars(readyCallback) {
 	};
 
 	this.printExtMsg = function(num) {if(typeof(num)!=="number"){return;}
-		const msgDate = new Date((_extMsg[num].ts * 1000) + ((new Date().getTimezoneOffset()) * -60000)).toISOString().slice(0, 19).replace("T", " ");
+		const msgDate = new Date(Number(_extMsg[num].ts + _AEM_TS_BEGIN) + ((new Date().getTimezoneOffset()) * -60000)).toISOString().slice(0, 19).replace("T", " ");
 
 		const elStyle = document.createElement("style");
 		const elPre = document.createElement("pre");
@@ -1678,7 +1659,7 @@ function AllEars(readyCallback) {
 	};
 
 	this.printIntMsg = function(num) {if(typeof(num)!=="number"){return;}
-		const msgDate = new Date((_intMsg[num].ts * 1000) + ((new Date().getTimezoneOffset()) * -60000)).toISOString().slice(0, 19).replace("T", " ");
+		const msgDate = new Date(Number(_intMsg[num].ts + _AEM_TS_BEGIN) + ((new Date().getTimezoneOffset()) * -60000)).toISOString().slice(0, 19).replace("T", " ");
 
 		const el = document.createElement("iframe");
 		el.hidden = true;
@@ -1692,13 +1673,13 @@ function AllEars(readyCallback) {
 	};
 
 	this.htmlExtMsg = function(num) {if(typeof(num)!=="number"){return;}
-		const msgDate = new Date((_extMsg[num].ts * 1000) + ((new Date().getTimezoneOffset()) * -60000)).toISOString().slice(0, 19).replace("T", " ");
+		const msgDate = new Date(Number(_extMsg[num].ts + _AEM_TS_BEGIN) + ((new Date().getTimezoneOffset()) * -60000)).toISOString().slice(0, 19).replace("T", " ");
 		const msg = "<html><body><pre>Date: " + msgDate + "\nFrom: " + _extMsg[num].hdrFrom + "\n  To: " + _extMsg[num].hdrTo + "</pre><h1>" + _extMsg[num].subj + "</h1><p>" + this.getExtMsgBody(num, true).replaceAll("\n", "<br>") + "</p></body></html>";
 		_downloadFile(_extMsg[num].subj + ".html", new Blob([msg]));
 	};
 
 	this.htmlIntMsg = function(num) {if(typeof(num)!=="number"){return;}
-		const msgDate = new Date((_intMsg[num].ts * 1000) + ((new Date().getTimezoneOffset()) * -60000)).toISOString().slice(0, 19).replace("T", " ");
+		const msgDate = new Date(Number(_intMsg[num].ts + _AEM_TS_BEGIN) + ((new Date().getTimezoneOffset()) * -60000)).toISOString().slice(0, 19).replace("T", " ");
 		const msg = "<!doctype html><html><body>\n<pre>"
 			+ "\nDate: " + msgDate
 			+ "\nFrom: " + _intMsg[num].from + "@" + _ourDomain
@@ -1710,13 +1691,13 @@ function AllEars(readyCallback) {
 	};
 
 	this.txtExtMsg = function(num, dl) {if(typeof(num)!=="number" || typeof(dl)!=="boolean"){return;}
-		const msgDate = new Date((_extMsg[num].ts * 1000) + ((new Date().getTimezoneOffset()) * -60000)).toISOString().slice(0, 19).replace("T", " ");
+		const msgDate = new Date(Number(_extMsg[num].ts + _AEM_TS_BEGIN) + ((new Date().getTimezoneOffset()) * -60000)).toISOString().slice(0, 19).replace("T", " ");
 		const msg = "Date: " + msgDate + "\nFrom: " + _extMsg[num].hdrFrom + "\nTo: " + _extMsg[num].hdrTo + "\nSubject: " + _extMsg[num].subj + "\n\n" + getPlainExtBody(num);
 		if (dl) {_downloadFile(_extMsg[num].subj + ".txt", new Blob([msg]));} else return msg;
 	};
 
 	this.txtIntMsg = function(num, dl) {if(typeof(num)!=="number" || typeof(dl)!=="boolean"){return;}
-		const msgDate = new Date((_intMsg[num].ts * 1000) + ((new Date().getTimezoneOffset()) * -60000)).toISOString().slice(0, 19).replace("T", " ");
+		const msgDate = new Date(Number(_intMsg[num].ts + _AEM_TS_BEGIN) + ((new Date().getTimezoneOffset()) * -60000)).toISOString().slice(0, 19).replace("T", " ");
 		const msg = "Date: " + msgDate
 			+ "\nFrom: " + _intMsg[num].from
 			+ (_intMsg[num].to? ("@" + _ourDomain + "\nTo: " + _intMsg[num].to + "@" + _ourDomain) : "")
@@ -1736,7 +1717,7 @@ function AllEars(readyCallback) {
 	this.getIntMsgCount = function() {return _intMsg.length;};
 	this.getIntMsgId     = function(num) {if(typeof(num)!=="number"){return;} return _intMsg[num].id;};
 	this.getIntMsgTime   = function(num) {if(typeof(num)!=="number"){return;} return _intMsg[num].ts + _AEM_TS_BEGIN;};
-	this.getIntMsgAsk    = function(num) {if(typeof(num)!=="number"){return;} return _intMsg[num].ask? sodium.to_base64(_intMsg[num].ask, sodium.base64_variants.ORIGINAL) : "";};
+	this.getIntMsgAsk    = function(num) {if(typeof(num)!=="number"){return;} return _intMsg[num].ask? sodium.to_base64(_intMsg[num].ask, sodium.base64_variants.ORIGINAL_NO_PADDING) : "";};
 	this.getIntMsgFrom   = function(num) {if(typeof(num)!=="number"){return;} return _intMsg[num].from;};
 	this.getIntMsgTo     = function(num) {if(typeof(num)!=="number"){return;} return _intMsg[num].to;};
 	this.getIntMsgTitle  = function(num) {if(typeof(num)!=="number"){return;} return _intMsg[num].title;};
@@ -1851,7 +1832,7 @@ function AllEars(readyCallback) {
 		_own_esk = _aem_kdf_umk(32, _AEM_KDF_KEYID_UMK_ESK, umk);
 		_own_ehk = _aem_kdf_umk(43, _AEM_KDF_KEYID_UMK_EHK, umk);
 		_own_pfk = _aem_kdf_umk(40, _AEM_KDF_KEYID_UMK_PFK, umk);
-		_own_abk = _aem_kdf_umk(35, _AEM_KDF_KEYID_UMK_ABK, umk);
+		_own_abk = _aem_kdf_umk(43, _AEM_KDF_KEYID_UMK_ABK, umk);
 		_own_uid = new Uint16Array(_aem_kdf_sub(2, _AEM_KDF_KEYID_UAK_UID, _own_uak).buffer)[0] & 4095;
 
 		callback(true);
@@ -1859,7 +1840,7 @@ function AllEars(readyCallback) {
 
 	// API functions
 	this.Account_Browse = function(callback) {if(typeof(callback)!=="function"){return;}
-		_fetchEncrypted(_AEM_API_ACCOUNT_BROWSE, 0, null, null, function(response) {
+		_fetchEncrypted(_AEM_API_ACCOUNT_BROWSE, 0, null, null, null, function(response) {
 			if (typeof(response) === "number") {callback(response); return;}
 			if (response.length === 1) {callback(response[0]); return;}
 
@@ -1893,30 +1874,8 @@ function AllEars(readyCallback) {
 		});
 	};
 
-	this.Account_Create = function(uak_hex, epk_hex, callback) {if(typeof(uak_hex)!=="string" || uak_hex.length!==74 || typeof(epk_hex)!=="string" || epk_hex.length!==64 || typeof(callback)!=="function"){return;}
-		let data = new Uint8Array(69);
-		data.set(sodium.from_hex(uak_hex));
-		data.set(sodium.from_hex(epk_hex), 37);
-
-		_fetchEncrypted(_AEM_API_ACCOUNT_CREATE, 0, null, data, function(response) {
-			if (typeof(response) === "number") {callback(response); return;}
-			if (response.length !== 1) {callback(0x04); return;}
-			if (response[0] !== 0x00) {callback(response[0]); return;}
-
-			const new_uid = new Uint16Array(_aem_kdf_sub(2, _AEM_KDF_KEYID_UAK_UID, sodium.from_hex(uak_hex)).buffer)[0] & 4095;
-
-			_admin_userUid.push(new_uid);
-			_admin_userLvl.push(0);
-			_admin_userKib.push(0);
-			_admin_userNrm.push(0);
-			_admin_userShd.push(0);
-
-			callback(0);
-		});
-	};
-
 	this.Account_Delete = function(uid, callback) {if(typeof(uid)!=="number" || typeof(callback)!=="function"){return;}
-		_fetchEncrypted(_AEM_API_ACCOUNT_DELETE, 0, new Uint8Array(new Uint16Array([uid]).buffer), null, function(response) {
+		_fetchEncrypted(_AEM_API_ACCOUNT_DELETE, 0, new Uint8Array(new Uint16Array([uid]).buffer), null, null, function(response) {
 			if (typeof(response) === "number") {callback(response); return;}
 			if (response.length !== 1) {callback(0x04); return;}
 			if (response[0] !== 0) {callback(response[0]); return;}
@@ -1941,6 +1900,32 @@ function AllEars(readyCallback) {
 		});
 	};
 
+	this.Account_Keyset = function(callback) {if(typeof(callback)!=="function"){return;}
+		let keyset = new Uint8Array(64); // USK:32, PWK:32
+		// TODO: usk + uak/psk/pqk
+		keyset.set(sodium.crypto_scalarmult_base(_own_esk), 32);
+
+		_fetchEncrypted(_AEM_API_ACCOUNT_KEYSET, 0, null, keyset, null, function(response) {
+			if (typeof(response) === "number") {callback(response); return;}
+			if (response.length !== 1) {callback(0x04); return;}
+			if (response[0] !== 0) {callback(response[0]); return;}
+			callback(true);
+		});
+	};
+
+	this.Account_Permit = function(callback) {if(typeof(callback)!=="function"){return;}
+		const binTs = _getBinTs();
+		_fetchEncrypted(_AEM_API_ACCOUNT_PERMIT, 0, null, null, binTs, function(response) {
+			if (typeof(response) === "number") {callback(response); return;}
+			if (response.length !== 32) {callback(0x04); return;}
+
+			const permit = new Uint8Array(38);
+			permit.set(response);
+			permit.set(binTs, 32);
+			callback(0, sodium.to_base64(permit, sodium.base64_variants.ORIGINAL_NO_PADDING).substr(0, 50));
+		});
+	};
+
 	this.Account_Update = function(uid, level, callback) {if(typeof(uid)!=="number" || typeof(level)!=="number" || typeof(callback)!=="function"){return;}
 		if (level < 0 || level > _AEM_USER_MAXLEVEL) {callback(0x01); return;}
 
@@ -1948,7 +1933,7 @@ function AllEars(readyCallback) {
 		data.set(new Uint8Array(new Uint16Array([uid]).buffer));
 		data[2] = level;
 
-		_fetchEncrypted(_AEM_API_ACCOUNT_UPDATE, 0, data, null, function(response) {
+		_fetchEncrypted(_AEM_API_ACCOUNT_UPDATE, 0, data, null, null, function(response) {
 			if (typeof(response) === "number") {callback(response); return;}
 			if (response.length !== 1) {callback(0x04); return;}
 			if (response[0] !== 0) {callback(response[0]); return;}
@@ -1976,7 +1961,7 @@ function AllEars(readyCallback) {
 		if (this.getPrivateExtraSpaceMax() - this.getPrivateExtraSpace() < 18) {callback(0x09); return;}
 
 		if (addr === "SHIELD") {
-			_fetchEncrypted(_AEM_API_ADDRESS_CREATE, 0, null, null, function(response) {
+			_fetchEncrypted(_AEM_API_ADDRESS_CREATE, 0, null, null, null, function(response) {
 				if (typeof(response) === "number") {callback(response); return;}
 				if (response.length !== 18) {callback(0x04); return;}
 
@@ -2004,7 +1989,7 @@ function AllEars(readyCallback) {
 				]);
 			}
 
-			_fetchEncrypted(_AEM_API_ADDRESS_CREATE, 0, hash, null, function(response) {
+			_fetchEncrypted(_AEM_API_ADDRESS_CREATE, 0, hash, null, null, function(response) {
 				if (typeof(response) === "number") {callback(response); return;}
 				if (response.length !== 1) {callback(0x04); return;}
 				if (response[0] !== 0) {callback(response[0]); return;}
@@ -2016,7 +2001,7 @@ function AllEars(readyCallback) {
 	};
 
 	this.Address_Delete = function(num, callback) {if(typeof(num)!=="number" || typeof(callback)!=="function"){return;}
-		_fetchEncrypted(_AEM_API_ADDRESS_DELETE, _own_addr[num].addr32[0] & 128, _own_addr[num].hash, null, function(response) {
+		_fetchEncrypted(_AEM_API_ADDRESS_DELETE, _own_addr[num].addr32[0] & 128, _own_addr[num].hash, null, null, function(response) {
 			if (typeof(response) === "number") {callback(response); return;}
 			if (response.length !== 1) {callback(0x04); return;}
 			if (response[0] !== 0) {callback(response[0]); return;}
@@ -2027,37 +2012,10 @@ function AllEars(readyCallback) {
 	};
 
 	this.Address_Update = function(callback) {if(typeof(callback)!=="function"){return;}
-		const x = new Uint8Array(31);
-		_own_addr.forEach(function(adr, n) {x[n] = adr.flags;});
+		const postData = new Uint8Array(31);
+		_own_addr.forEach(function(adr, n) {postData[n] = adr.flags;});
 
-		const data = new Uint8Array([
-			(x[0]  & 63) | ((x[1]  & 48) << 2),
-			(x[1]  & 15) | ((x[2]  & 60) << 2),
-			(x[2]  &  3) | ((x[3]  & 63) << 2),
-			(x[4]  & 63) | ((x[5]  & 48) << 2),
-			(x[5]  & 15) | ((x[6]  & 60) << 2),
-			(x[6]  &  3) | ((x[7]  & 63) << 2),
-			(x[8]  & 63) | ((x[9]  & 48) << 2),
-			(x[9]  & 15) | ((x[10] & 60) << 2),
-			(x[10] &  3) | ((x[11] & 63) << 2),
-			(x[12] & 63) | ((x[13] & 48) << 2),
-			(x[13] & 15) | ((x[14] & 60) << 2),
-			(x[14] &  3) | ((x[15] & 63) << 2),
-			(x[16] & 63) | ((x[17] & 48) << 2),
-			(x[17] & 15) | ((x[18] & 60) << 2),
-			(x[18] &  3) | ((x[19] & 63) << 2),
-			(x[20] & 63) | ((x[21] & 48) << 2),
-			(x[21] & 15) | ((x[22] & 60) << 2),
-			(x[22] &  3) | ((x[23] & 63) << 2),
-			(x[24] & 63) | ((x[25] & 48) << 2),
-			(x[25] & 15) | ((x[26] & 60) << 2),
-			(x[26] &  3) | ((x[27] & 63) << 2),
-			(x[28] & 63) | ((x[29] & 48) << 2),
-			(x[29] & 15) | ((x[30] & 60) << 2),
-			(x[30] &  3) // Last 6 bits unused
-		]);
-
-		_fetchEncrypted(_AEM_API_ADDRESS_UPDATE, 0, data, null, function(response) {
+		_fetchEncrypted(_AEM_API_ADDRESS_UPDATE, 0, null, postData, null, function(response) {
 			if (typeof(response) === "number") {callback(response); return;}
 			if (response.length !== 1) {callback(0x04); return;}
 			callback(response[0]);
@@ -2068,7 +2026,7 @@ function AllEars(readyCallback) {
 		const startId = _newestMsgTs? sodium.from_hex(newest? _newestEvpId : _oldestEvpId) : null;
 		const flags = (u_info? _AEM_FLAG_UINFO : 0) | (newest? 0 : _AEM_FLAG_OLDER);
 
-		_fetchEncrypted(_AEM_API_MESSAGE_BROWSE, flags, startId, null, async function(response) {
+		_fetchEncrypted(_AEM_API_MESSAGE_BROWSE, flags, startId, null, null, async function(response) {
 			if (response.length === 1 && response[0] === 0xB0 && startId) {callback(0); return;} // No more message data
 			if (typeof(response) === "number") {callback(response); return;}
 			if (response.length === 1) {callback(response[0]); return;}
@@ -2148,7 +2106,7 @@ function AllEars(readyCallback) {
 			}
 
 			const post = sodium.from_string(addr_to + "\n" + replyId + "\n" + subject + "\n" + body);
-			_fetchEncrypted(_AEM_API_MESSAGE_CREATE, _AEM_FLAG_EMAIL, sodium.from_string(addr_from), post, function(response) {
+			_fetchEncrypted(_AEM_API_MESSAGE_CREATE, _AEM_FLAG_EMAIL, sodium.from_string(addr_from), post, null, function(response) {
 				if (typeof(response) === "number") {callback(response); return;}
 				if (response.length === 1) {callback(response[0]); return;}
 				callback(0x04);
@@ -2161,22 +2119,15 @@ function AllEars(readyCallback) {
 		const addr32_from = _addr32_encode(addr_from);
 		if (!addr32_from) {callback(0x11); return;}
 
-		const ourHash = _addr32toHash(addr32_from);
-		if (!ourHash) return 0x01;
-
-		const bts = _getBinTs();
+		const binTs = _getBinTs();
 		const txt = sodium.from_string(subject + "\n" + body);
 
-		const url = new Uint8Array(24);
-		url.set(addr32_from);
-
 		if (addr_to === "All Users") {
-			const post = new Uint8Array(39 + txt.length);
-			post.set(_aem_kdf_abk(ourHash, bts));
-			post.set(bts, 34);
-			post.set(txt, 39);
+			const post = new Uint8Array(32 + txt.length);
+			post.set(_aem_kdf_abk(binTs));
+			post.set(txt, 32);
 
-			_fetchEncrypted(_AEM_API_MESSAGE_CREATE, _AEM_FLAG_PUB, url, post, function(response) {
+			_fetchEncrypted(_AEM_API_MESSAGE_CREATE, _AEM_FLAG_PUB, addr32_from, post, binTs, function(response) {
 				if (typeof(response) === "number") {callback(response); return;}
 				if (response.length === 1) {callback(response[0]); return;}
 				callback(0x04);
@@ -2184,38 +2135,40 @@ function AllEars(readyCallback) {
 		} else {
 			const addr32_to = _addr32_encode(addr_to);
 			if (!addr32_to) {callback(0x11); return;}
+
+			const url = new Uint8Array(20);
+			url.set(addr32_from);
 			url.set(addr32_to, 10);
 
 			let post;
 			if (to_ask) { // E2EE
-				// Encrypted part with our APK for reply
-				const plain = new Uint8Array(txt.length + 34);
-				plain.set(_aem_kdf_abk(ourHash, bts));
-				plain.set(txt, 34);
+				const plain = new Uint8Array(32 + txt.length);
+				plain.set(_aem_kdf_abk(binTs));
+				plain.set(txt, 32);
 
-				const ask = sodium.from_base64(to_ask, sodium.base64_variants.ORIGINAL);
-				const nonce = new Uint8Array(12); // 2 key bytes, their bts, our bts
-				nonce.set(ask.slice(32));
-				nonce.set(bts, 7);
+				const toAsk = sodium.from_base64(to_ask, sodium.base64_variants.ORIGINAL_NO_PADDING);
+				const toAsk_key = toAsk.slice(0, 32);
+				const toAsk_binTs = toAsk.slice(32, 38);
+
+				const nonce = new Uint8Array(12);
+				nonce.set(binTs);
 
 				const enc = new Uint8Array(await window.crypto.subtle.encrypt(
 					{name: "AES-GCM", iv: nonce},
-					await window.crypto.subtle.importKey("raw", ask.slice(0, 32), {"name": "AES-GCM"}, false, ["encrypt"]),
+					await window.crypto.subtle.importKey("raw", toAsk_key, {"name": "AES-GCM"}, false, ["encrypt"]),
 					plain
 				));
 
-				post = new Uint8Array(10 + enc.length);
-				post.set(ask.slice(34));
-				post.set(bts, 5);
-				post.set(enc, 10);
+				post = new Uint8Array(8 + enc.length);
+				post.set(toAsk_binTs);
+				post.set(enc, 8);
 			} else { // Non-E2EE
-				post = new Uint8Array(39 + txt.length);
-				post.set(_aem_kdf_abk(ourHash, bts));
-				post.set(bts, 34);
-				post.set(txt, 39);
+				post = new Uint8Array(32 + txt.length);
+				post.set(_aem_kdf_abk(binTs));
+				post.set(txt, 32);
 			}
 
-			_fetchEncrypted(_AEM_API_MESSAGE_CREATE, to_ask? _AEM_FLAG_E2EE : 0, url, post, function(response) {
+			_fetchEncrypted(_AEM_API_MESSAGE_CREATE, to_ask? _AEM_FLAG_E2EE : 0, url, post, binTs, function(response) {
 				if (typeof(response) === "number") {callback(response); return;}
 				if (response.length === 1) {callback(response[0]); return;}
 				callback(0x04);
@@ -2225,7 +2178,7 @@ function AllEars(readyCallback) {
 
 	this.Message_Delete = function(hexId, callback) {if(typeof(callback)!=="function"){return;}
 		if (hexId === "ALL") {
-			_fetchEncrypted(_AEM_API_MESSAGE_DELETE, _AEM_FLAG_EMPTY, null, null, function(response) {
+			_fetchEncrypted(_AEM_API_MESSAGE_DELETE, _AEM_FLAG_EMPTY, null, null, null, function(response) {
 				if (typeof(response) === "number") {callback(response); return;}
 				if (response.length !== 1) {callback(0x04); return;}
 				if (response[0] !== 0) {callback(response[0]); return;}
@@ -2246,7 +2199,7 @@ function AllEars(readyCallback) {
 			if (hexId.length !== 4) {callback(0x01); return;}
 			if (hexId === "0000") {	callback(0x10); return;}
 
-			_fetchEncrypted(_AEM_API_MESSAGE_DELETE, 0, sodium.from_hex(hexId), null, function(response) {
+			_fetchEncrypted(_AEM_API_MESSAGE_DELETE, 0, sodium.from_hex(hexId), null, null, function(response) {
 				if (typeof(response) === "number") {callback(response); return;}
 				if (response.length !== 1) {callback(0x04); return;}
 				if (response[0] !== 0) {callback(response[0]); return;}
@@ -2266,7 +2219,7 @@ function AllEars(readyCallback) {
 		// TODO
 		if (msgId.length !== 64) {callback(0x01); return;}
 
-		_fetchEncrypted(_AEM_API_MESSAGE_SENDER, 0, null, sodium.from_string(msgId), function(response) {
+		_fetchEncrypted(_AEM_API_MESSAGE_SENDER, 0, null, sodium.from_string(msgId), null, function(response) {
 			//callback(fetchErr, (fetchErr === 0 && result) ? sodium.to_hex(result) : null);
 		});
 	};
@@ -2297,7 +2250,7 @@ function AllEars(readyCallback) {
 			rawData)
 		);
 
-		_fetchEncrypted(_AEM_API_MESSAGE_UPLOAD, 0, fileTs, encData, function(response) {
+		_fetchEncrypted(_AEM_API_MESSAGE_UPLOAD, 0, fileTs, encData, null, function(response) {
 			if (typeof(response) === "number") {callback(response); return;}
 			if (response.length !== 1) {callback(0x04); return;}
 			if (response[0] !== 0) {callback(response[0]); return;}
@@ -2377,7 +2330,7 @@ function AllEars(readyCallback) {
 		post.set(encData, 48);
 
 		// Send the request
-		_fetchEncrypted(_AEM_API_PRIVATE_UPDATE, 0, null, post, function(response) {
+		_fetchEncrypted(_AEM_API_PRIVATE_UPDATE, 0, null, post, null, function(response) {
 			if (typeof(response) === "number") {callback(response); return;}
 			if (response.length !== 1) {callback(0x04); return;}
 			callback(response[0]);
@@ -2392,7 +2345,7 @@ function AllEars(readyCallback) {
 			mib[3], nrm[3], shd[3]
 		]);
 
-		_fetchEncrypted(_AEM_API_SETTING_LIMITS, 0, data, null, function(fetchErr) {
+		_fetchEncrypted(_AEM_API_SETTING_LIMITS, 0, data, null, null, function(fetchErr) {
 			if (fetchErr === 0) {
 				for (let i = 0; i < 4; i++) {
 					_maxStorage[i] = mib[i];
@@ -2404,6 +2357,72 @@ function AllEars(readyCallback) {
 			callback(fetchErr);
 		});
 	};
+
+	// Registration
+	this.reg_genUmk = function(uid) {
+		let target_uid = 0;
+
+		if (typeof(uid) === "string") {
+			if (uid.length !== 3) return;
+			target_uid = (uid.charCodeAt(0) - 97) | ((uid.charCodeAt(1) - 97) << 4) | ((uid.charCodeAt(2) - 97) << 8);
+		} else if (typeof(uid) === "number") target_uid = uid;
+		if (target_uid < 1 || target_uid > 4095) return;
+
+		for (;;) {
+			const new_umk = window.crypto.getRandomValues(new Uint8Array(45));
+			const new_uak = _aem_kdf_umk(40, _AEM_KDF_KEYID_UMK_UAK, new_umk);
+			const new_uid = new Uint16Array(_aem_kdf_sub(2, _AEM_KDF_KEYID_UAK_UID, new_uak).buffer)[0] & 4095;
+			if (new_uid === target_uid) return sodium.to_base64(new_umk, sodium.base64_variants.ORIGINAL);
+		}
+	}
+
+	this.reg_register = async function(permit, umk, callback) {
+		const p = sodium.from_base64(permit + "A", sodium.base64_variants.ORIGINAL_NO_PADDING);
+		const urk = p.slice(0, 32);
+		const ts_server = (BigInt(p[32])) | (BigInt(p[33]) << 8n) | (BigInt(p[34]) << 16n) | (BigInt(p[35]) << 24n) | (BigInt(p[36]) << 32n) | (BigInt(p[37] & 3) << 40n);
+		const ts_offset = Number((BigInt(Date.now()) - _AEM_TS_BEGIN) - ts_server);
+
+		// Create URL Base
+		const nonce = new Uint8Array(32);
+		nonce.set(p.slice(32));
+		nonce[5] |= (ts_offset & 63) << 2;
+		nonce[6] |= (ts_offset >> 6) & 255;
+		nonce[7] |= (ts_offset >> 14) & 255;
+		nonce[8] |= (ts_offset >> 22) & 255;
+
+		const uak = _aem_kdf_umk(40, _AEM_KDF_KEYID_UMK_UAK, sodium.from_base64(umk, sodium.base64_variants.ORIGINAL));
+		const urlBase = new Uint8Array(81);
+		urlBase.set(nonce);
+		urlBase.set(sodium.crypto_aead_aegis256_encrypt(uak, null, null, nonce, urk), 9);
+
+		let r;
+		try {
+			r = await fetch("http://" + _AEM_PROVIDER + ":304" + "/" + sodium.to_base64(urlBase, sodium.base64_variants.URLSAFE), {
+				method: "HEAD",
+				credentials: "omit",
+				headers: new Headers({
+					"Accept": "",
+					"Accept-Language": ""
+				}),
+				keepalive: "false",
+				mode: "cors",
+				redirect: "error",
+				referrerPolicy: "no-referrer"
+			});
+		} catch(e) {callback(e); return;}
+
+		if (r.status === 200) {
+			const ct = sodium.from_base64(r.statusText, sodium.base64_variants.URLSAFE);
+			nonce.fill(0xFF, 9);
+			let d = "Invalid response";
+			try {
+				d = sodium.crypto_aead_aegis256_decrypt(null, ct, null, nonce, urk);
+			} catch(e) {callback(e);}
+			callback(d);
+		} else {
+			callback("Request failed");
+		}
+	}
 
 	// Extras
 	this.shieldMix = function(addr, extreme) {if(typeof(addr)!=="string"){return;}
@@ -2437,13 +2456,20 @@ function AllEars(readyCallback) {
 
 	this.getErrorMessage = function(err) {if(typeof(err)!=="number"){return;}
 		switch (err) {
-			// 400+ Unauthenticated
-			case 400: return "Bad request";
-			case 403: return "Authentication failed";
-			case 404: return "Time difference too big";
-			case 408: return "Connection error";
-			case 500: return "Internal server error";
+			// 1000+ Unauthenticated response codes
+			case 1000: return "Authentication failed";
+			case 1001: return "Account not registered";
+			case 1002: return "Time difference too big";
+			case 1003: return "Suspected replay attack";
+			case 1008: return "Internal server error";
+			case 1009: return "INTERNAL_AUTHRESPONSE";
+			case 1010: return "INTERNAL_CONTINUE_INVALID";
+			case 1011: return "INTERNAL_CONTINUE_OVERSIZE";
+			case 1012: return "INTERNAL_CONTINUE_BADRESP";
+			case 1016: return "Failed to send POST body";
+			case 1025: return "Keyset missing";
 
+			// Authenticated response codes
 			// 0x00: OK
 
 			// 0x01-0x1F	Client
@@ -2460,7 +2486,7 @@ function AllEars(readyCallback) {
 			case 0x11: return "Invalid address";
 			case 0x12: return "Cannot update Private field without fetching it first";
 
-			// 0xA0-0xAF	Basic
+			// 0xA0-0xA9	Basic
 			case 0xA0: return ["INTERNAL", "Internal server error"];
 			case 0xA1: return ["CMD",      "Invalid API command"];
 			case 0xA2: return ["PARAM",    "Invalid API parameters"];
@@ -2469,56 +2495,61 @@ function AllEars(readyCallback) {
 			case 0xA5: return ["DECRYPT",  "Server failed to decrypt POST body"];
 			case 0xA6: return ["LEVEL",    "Insufficient account level"];
 
-			// 0xB0-0xBF	General
-			case 0xB0: return ["MESSAGE_BROWSE_NOMORE",   "No more message data"];
-			case 0xB1: return ["MESSAGE_BROWSE_NOTFOUND", "Message not found"];
-			case 0xB2: return ["MESSAGE_DELETE_NOTFOUND", "Failed deleting message: not found"];
+			// 0xAA-0xAF	General
+			case 0xAA: return ["MESSAGE_BROWSE_NOMORE",   "No more message data"];
+			case 0xAB: return ["MESSAGE_BROWSE_NOTFOUND", "Message not found"];
+			case 0xAC: return ["MESSAGE_DELETE_NOTFOUND", "Failed deleting message: not found"];
 
-			// 0xC0-0xC9	Account
-			case 0xC0: return ["ACCOUNT_CREATE_EXIST",        "Account already exists"];
-			case 0xC1: return ["ACCOUNT_DELETE_NOTEXIST",     "Account not found"];
-			case 0xC2: return ["ACCOUNT_DELETE_FORBIDMASTER", "The Master Administrator cannot be deleted or demoted"];
-			case 0xC3: return ["ACCOUNT_DELETE_NOSTORAGE",    "Account data was deleted, but deleting message data failed due to an internal error"];
+			// 0xB0-0xB9	Account
+			case 0xB0: return ["ACCOUNT_CREATE_EXIST",        "Account already exists"];
+			case 0xB1: return ["ACCOUNT_DELETE_NOTEXIST",     "Account not found"];
+			case 0xB2: return ["ACCOUNT_DELETE_FORBIDMASTER", "The Master Administrator cannot be deleted or demoted"];
+			case 0xB3: return ["ACCOUNT_DELETE_NOSTORAGE",    "Account data was deleted, but deleting message data failed due to an internal error"];
 
-			// 0xDA-0xDF	Address/Create|Delete|Update
-			case 0xDA: return ["ADDRESS_CREATE_INUSE",     "Address already taken"];
-			case 0xDB: return ["ADDRESS_CREATE_ATLIMIT",   "Limit reached - unable to register additional addresses"];
-			case 0xDC: return ["ADDRESS_DELETE_SOMEFOUND", "Delete successful, but some addresses were not found"];
-			case 0xDD: return ["ADDRESS_DELETE_NONEFOUND", "No such address(es)"];
+			// 0xBA-0xBF	Address/Create|Delete|Update
+			case 0xBA: return ["ADDRESS_CREATE_INUSE",     "Address already taken"];
+			case 0xBB: return ["ADDRESS_CREATE_ATLIMIT",   "Limit reached - unable to register additional addresses"];
+			case 0xBC: return ["ADDRESS_DELETE_SOMEFOUND", "Delete successful, but some addresses were not found"];
+			case 0xBD: return ["ADDRESS_DELETE_NONEFOUND", "No such address(es)"];
+			case 0xBE: return ["ADDRESS_UPDATE_SOMEFOUND", "Delete successful, but some addresses were not found"];
+			case 0xBF: return ["ADDRESS_UPDATE_NONEFOUND", "No such address(es)"];
 
-			// 0xE0-0xE9	Message/Create
-			case 0xE0: return ["MESSAGE_CREATE_EXT_MINLEVEL", "Account level too low"];
-			case 0xE1: return ["MESSAGE_CREATE_EXT_HDR_ADFR", "Malformed from-address"];
-			case 0xE2: return ["MESSAGE_CREATE_EXT_HDR_ADTO", "Malformed to-address"];
-			case 0xE3: return ["MESSAGE_CREATE_EXT_HDR_RPLY", "Malformed reply-id"];
-			case 0xE4: return ["MESSAGE_CREATE_EXT_HDR_SUBJ", "Malformed subject"];
-			case 0xE5: return ["MESSAGE_CREATE_EXT_BDY_UTF8", "Body must be UTF-8"];
-			case 0xE6: return ["MESSAGE_CREATE_EXT_BDY_CTRL", "Body must not contain control characters"];
-			case 0xE7: return ["MESSAGE_CREATE_EXT_BDY_SIZE", "Body too long or short"];
-			case 0xE8: return ["MESSAGE_CREATE_EXT_BDY_LONG", "Body exceeds line-length limit"];
-			case 0xE9: return ["MESSAGE_CREATE_EXT_MYDOMAIN", "Remove @" + _ourDomain + " to send internally"];
-			case 0xEE: return ["MESSAGE_CREATE_INT_OWN_ADDR", "Own address invalid"];
-			case 0xEF: return ["MESSAGE_CREATE_INT_REC_DENY", "Message denied by receiver"];
+			// 0xC0-0xCF	Message/Upload
+			case 0xc0: return ["AEM_API_ERR_MESSAGE_UPLOAD_TIMEDIFF", "Time difference too big"];
 
-			// 0xF0-0xF9	Message/Create sendMail()
-			case 0xF0: return ["MESSAGE_CREATE_SENDMAIL_GREET", "Failed greeting receiver server"];
-			case 0xF1: return ["MESSAGE_CREATE_SENDMAIL_EHLO",  "EHLO command failed"];
-			case 0xF2: return ["MESSAGE_CREATE_SENDMAIL_STLS",  "STARTTLS command failed"];
-			case 0xF3: return ["MESSAGE_CREATE_SENDMAIL_SHAKE", "TLS handshake failed"];
-			case 0xF4: return ["MESSAGE_CREATE_SENDMAIL_NOTLS", "TLS not available"];
-			case 0xF5: return ["MESSAGE_CREATE_SENDMAIL_MAIL",  "MAIL command failed"];
-			case 0xF6: return ["MESSAGE_CREATE_SENDMAIL_RCPT",  "RCPT command failed"];
-			case 0xF7: return ["MESSAGE_CREATE_SENDMAIL_DATA",  "DATA command failed"];
-			case 0xF8: return ["MESSAGE_CREATE_SENDMAIL_BODY",  "Sending body failed"];
-	//		case 0xF9: return ["", ""];
+			// 0xD0-0xD9	Message/Create
+			case 0xD0: return ["MESSAGE_CREATE_EXT_MINLEVEL", "Account level too low"];
+			case 0xD1: return ["MESSAGE_CREATE_EXT_HDR_ADFR", "Malformed from-address"];
+			case 0xD2: return ["MESSAGE_CREATE_EXT_HDR_ADTO", "Malformed to-address"];
+			case 0xD3: return ["MESSAGE_CREATE_EXT_HDR_RPLY", "Malformed reply-id"];
+			case 0xD4: return ["MESSAGE_CREATE_EXT_HDR_SUBJ", "Malformed subject"];
+			case 0xD5: return ["MESSAGE_CREATE_EXT_BDY_UTF8", "Body must be UTF-8"];
+			case 0xD6: return ["MESSAGE_CREATE_EXT_BDY_CTRL", "Body must not contain control characters"];
+			case 0xD7: return ["MESSAGE_CREATE_EXT_BDY_SIZE", "Body too long or short"];
+			case 0xD8: return ["MESSAGE_CREATE_EXT_BDY_LONG", "Body exceeds line-length limit"];
+			case 0xD9: return ["MESSAGE_CREATE_EXT_MYDOMAIN", "Remove @" + _ourDomain + " to send internally"];
 
-			// 0xFA-0xFF	Message/Create Int
-			case 0xFA: return ["MESSAGE_CREATE_INT_TOOSHORT",     "Message too short"];
-			case 0xFB: return ["MESSAGE_CREATE_INT_TS_INVALID",   "Invalid timestamp"];
-			case 0xFC: return ["MESSAGE_CREATE_INT_SUBJECT_SIZE", "Subject too long or short"];
-			case 0xFD: return ["MESSAGE_CREATE_INT_ADDR_NOTOWN",  "Sender address not owned"];
-			case 0xFE: return ["MESSAGE_CREATE_INT_TO_NOTACCEPT", "Receiver address does not accept messages"];
-			case 0xFF: return ["MESSAGE_CREATE_INT_TO_SELF",      "Sending to own account not allowed"];
+			// 0xE0-0xE9	Message/Create sendMail()
+			case 0xE0: return ["MESSAGE_CREATE_SENDMAIL_GREET", "Failed greeting receiver server"];
+			case 0xE1: return ["MESSAGE_CREATE_SENDMAIL_EHLO",  "EHLO command failed"];
+			case 0xE2: return ["MESSAGE_CREATE_SENDMAIL_STLS",  "STARTTLS command failed"];
+			case 0xE3: return ["MESSAGE_CREATE_SENDMAIL_SHAKE", "TLS handshake failed"];
+			case 0xE4: return ["MESSAGE_CREATE_SENDMAIL_NOTLS", "TLS not available"];
+			case 0xE5: return ["MESSAGE_CREATE_SENDMAIL_MAIL",  "MAIL command failed"];
+			case 0xE6: return ["MESSAGE_CREATE_SENDMAIL_RCPT",  "RCPT command failed"];
+			case 0xE7: return ["MESSAGE_CREATE_SENDMAIL_DATA",  "DATA command failed"];
+			case 0xE8: return ["MESSAGE_CREATE_SENDMAIL_BODY",  "Sending body failed"];
+//			case 0xE9: return ["", ""];
+
+			// 0xF0-0xF9	Message/Create Int
+			case 0xF0: return ["MESSAGE_CREATE_INT_TOOSHORT",     "Message too short"];
+			case 0xF1: return ["MESSAGE_CREATE_INT_TS_INVALID",   "Invalid timestamp"];
+			case 0xF2: return ["MESSAGE_CREATE_INT_SUBJECT_SIZE", "Subject too long or short"];
+			case 0xF3: return ["MESSAGE_CREATE_INT_ADDR_NOT_OWN", "Sender address not owned"];
+			case 0xF4: return ["MESSAGE_CREATE_INT_TO_INVALID",   "Receiver address invalid"];
+			case 0xF5: return ["MESSAGE_CREATE_INT_TO_NOTREG",    "Receiver address not registered"];
+			case 0xF6: return ["MESSAGE_CREATE_INT_TO_DECLINE",   "Receiver address declined the message"];
+			case 0xF7: return ["MESSAGE_CREATE_INT_TO_SELF",      "Sending to own account not allowed"];
 
 			default: return ["???", "Unknown error"];
 		}

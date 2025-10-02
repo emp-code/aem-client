@@ -5,7 +5,8 @@
 		<link rel="license" href="https://www.gnu.org/licenses/gpl-3.0.html" hreflang="en-US">
 		<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/gh/emp-code/aem-client@a61b7c332599a055e6243a45c9349baf4212aed6/modern/main.css" integrity="sha384-NBZuWx1EY4cAkG1Hwl++3a1I8m1RcbTfwyqvY/6rlXVxJ9ItpFuylIQjXmL4SKmf" crossorigin="anonymous">
 
-		<meta name="aem.url.api" content="">
+		<meta name="aem.subtitle" content="Private email service">
+		<meta name="aem.provider" content="">
 		<meta name="postvault.url" content="">
 
 		<meta name="author" content="EMPcode">
@@ -18,25 +19,78 @@
 	</head>
 
 	<body>
-		<div id="div_begin">
-			<div>
-				<header>
-					<h1>All-Ears Mail</h1>
-					<p><span id="greeting">Private email</span><noscript> - Javascript required</noscript></p>
-				</header>
+		<section id="s_entry">
+			<header>
+				<h1>All-Ears Mail</h1>
+				<p id="greeting">Loading - Javascript required</p>
+			</header>
 
-				<main>
+			<main>
+				<fieldset>
 					<input type="password" id="txt_umk" maxlength="0" pattern="[0-9A-Za-z+\/]{60}" required autocomplete="current-password" autofocus>
-					<button type="button" id="btn_enter"></button>
-				</main>
+					<button type="button" id="btn_entry"></button>
+				</fieldset>
+			</main>
 
-				<footer>
-					<p>Powered by <a href="https://github.com/emp-code/aem-server" rel="noopener">All-Ears Mail</a></p>
-				</footer>
+			<footer>
+				<p><span id="btn_reg">Register</span> &bullet; <a href="https://github.com/emp-code/aem-client" rel="noopener">Clients</a></p>
+				<p>Powered by <a href="https://github.com/emp-code/aem-server" rel="noopener">All-Ears Mail</a></p>
+			</footer>
+		</section>
+
+		<section id="s_reg" hidden>
+			<div id="div_reg1">
+				<p>Provider: <span id="reg_provider"></span></p>
+
+				<p>Registration in All-Ears Mail requires a <b>Registration Permit.</b><br>Permits are obtainable through an administrator-only API.</p>
+				<p><input type="password" id="reg_permit" size="50" maxlength="50" minlength="50" id="txt_permit" placeholder="Registration Permit (50 characters)" pattern="[0-9A-Za-z+\/]{50}" required autocomplete="off"></p>
+
+				<p id="reg_expire">Enter a valid permit to continue.</p>
+				<hr>
+
+				<div>
+				<h1>Do not share or store your Permit</h1>
+				<p>Do not use a Permit unless you are certain only you and the administrator know it.<br>Once registered, the Permit serves no purpose. Any remaining records of it are a security risk.</p>
+
+				<h1>Safely store your UMK</h1>
+				<p>You alone are responsible for safekeeping your User Master Key (UMK).<br>If lost, the UMK <b>cannot be recovered</b>, and it is the only way to access the account.<br>If anyone else discovers your UMK, they gain <b>irrevocable full access</b> to your account.</p>
+
+				<h1>Welcome message</h1>
+				<p>On creation, your account contains a welcome message set by your chosen provider.<br>You must carefully read it before using the service for anything else.</p>
+				</div>
+
+				<button id="reg_cont" autocomplete="off" disabled="disabled">I understand the above</button>
 			</div>
-		</div>
+			<div id="div_reg2" hidden>
+				<div>
+					Choose your name:<br>
+					<select><option>a</option><option>b</option><option>c</option><option>d</option><option>e</option><option>f</option><option>g</option><option>h</option><option>i</option><option>j</option><option>k</option><option>l</option><option>m</option><option>n</option><option>o</option><option>p</option></select>
+					<select><option>a</option><option>b</option><option>c</option><option>d</option><option>e</option><option>f</option><option>g</option><option>h</option><option>i</option><option>j</option><option>k</option><option>l</option><option>m</option><option>n</option><option>o</option><option>p</option></select>
+					<select><option>a</option><option>b</option><option>c</option><option>d</option><option>e</option><option>f</option><option>g</option><option>h</option><option>i</option><option>j</option><option>k</option><option>l</option><option>m</option><option>n</option><option>o</option><option>p</option></select>
+					<br>
+					<button type="button" id="btn_reg_rnd">Random</button>
+				</div>
 
-		<div id="div_main" hidden>
+				<div>
+					<div>
+						<button type="button" id="btn_reg_shw" disabled autocomplete="off">Show</button>
+						<button type="button" id="btn_reg_gen">Generate</button>
+						<button type="button" id="btn_reg_cpy" disabled autocomplete="off">Copy</button>
+					</div>
+
+					Your User Master Key (UMK):
+					<br>
+					<input type="password" readonly="readonly" size="60" id="reg_umk" placeholder="Press Generate" autocomplete="off">
+				</div>
+
+				<div>
+					<button id="btn_reg_reg" disabled autocomplete="off">Register</button>
+					<p id="reg_status">Status</p>
+				</div>
+			</div>
+		</section>
+
+		<section id="s_main" hidden>
 			<div id="main1" class="main">
 				<nav>
 					<button type="button" id="btn_inbox" autocomplete="off" disabled><svg viewbox="0 0 96 64"><use xlink:href="#svg_inbx"/></svg></button>
@@ -75,7 +129,7 @@
 						</div>
 
 						<div id="div_write_2" hidden>
-							<p id="write2_ask"><input type="text" pattern="[0-9A-Za-z+/]{52}" size="52" minlength="52" maxlength="52" autocomplete="off" placeholder="Receiver ASK (enables E2EE)"></p>
+							<p id="write2_ask"><input type="text" pattern="[0-9A-Za-z+/]{51}" size="51" minlength="51" maxlength="51" autocomplete="off" placeholder="Receiver ASK (enables E2EE)"></p>
 							<p id="write2_send"><button type="button"><span id="write2_btntxt">Send to</span> <span id="write2_recv"></span></button></p>
 							<hr>
 							<p id="write2_from"></p>
@@ -222,9 +276,8 @@
 								<hr>
 
 								<div class="center">
-									<p><input type="text" id="txt_reg_uak" minlength="74" maxlength="74" pattern="[0-9a-f]{74}" required autocomplete="off" placeholder="UAK"></p>
-									<p><input type="text" id="txt_reg_epk" minlength="64" maxlength="64" pattern="[0-9a-f]{64}" required autocomplete="off" placeholder="EPK"></p>
-									<p><button type="button" id="btn_reg" autocomplete="off">Register</button></p>
+									<p><button type="button" id="btn_permit" autocomplete="off">Get Registration Permit</button></p>
+									<p><input type="text" id="txt_permit" minlength="50" maxlength="50" readonly="readonly" autocomplete="off"></p>
 								</div>
 							</fieldset>
 
@@ -241,8 +294,8 @@
 								<hr>
 
 								<div>
-									<select id="getask_addr"></select>
-									<output id="getask_result" for="getask_addr" class="half">(ASK for <abbr title="End-to-end encrypted">E2EE</abbr> internal mail)               </output>
+									<button id="btn_ask">Generate ASK</button>
+									<output id="txt_ask" class="half">(ASK for <abbr title="End-to-end encrypted">E2EE</abbr> internal mail)</output>
 								</div>
 
 								<hr>
@@ -351,7 +404,7 @@
 					<button type="button" id="btn_bot25" autocomplete="off" disabled><svg viewbox="0 0 96 64"><use xlink:href="#svg_updt"/></svg></button>
 				</nav>
 			</div>
-		</div>
+		</section>
 
 		<svg>
 			<symbol id="svg_inbx" stroke-width="0" fill="#fff">
@@ -416,7 +469,7 @@
 		</svg>
 
 		<script src="https://cdn.jsdelivr.net/gh/google/brotli@1.0.7/js/decode.min.js" integrity="sha384-D02d+8Zt5n4/7mnD+GctnXcW7NBcKHdgDsl3msmWdkOG3094pdP0ceN/4c/zChml" crossorigin="anonymous"></script>
-		<script src="https://cdn.jsdelivr.net/gh/jedisct1/libsodium.js@0.7.15/dist/browsers-sumo/sodium.js" integrity="sha384-gGYV982xpPN0FT3jBLUdgauCKNmZ8dJY7eay5p63OUi4jYLv0a3WButiin4OnI5w" crossorigin="anonymous"></script>
+		<script src="https://cdn.jsdelivr.net/gh/emp-code/libsodium.js/dist/browsers-sumo/sodium.js" integrity="sha384-rcw2LBMSpnX4HFY+md42L1aJ+phy3xFtydixbQPd9mt9H4F85shsmqvaGg7maGzf" crossorigin="anonymous"></script>
 		<script src="https://cdn.jsdelivr.net/gh/emp-code/PV-Client@88c875d477a85a036ede319c83f3d5aa121c54ce/PostVault.js" integrity="sha384-XOI12pifcDnhGDuDP0M8qUnwf4qfBa/sMfm4Y9l9rdn+Uv1BMeq64BahjmTP1JzP" crossorigin="anonymous"></script>
 		<script src="https://cdn.jsdelivr.net/gh/emp-code/aem-client@a61b7c332599a055e6243a45c9349baf4212aed6/all-ears.js" integrity="sha384-tee8s/2o1TYZC+sUf2SC3zoAn84bvgcZ0G6S0wnfxakZHgYDCOvMt8wsnPLrVCVM" crossorigin="anonymous"></script>
 		<script src="https://cdn.jsdelivr.net/gh/emp-code/aem-client@a61b7c332599a055e6243a45c9349baf4212aed6/modern/main.js" integrity="sha384-h9k1AJDx3FQT6CwGmaockkHF0O7+bHiXmAWQJMwZzUQDvluifyCWp7LMSBMxGStC" crossorigin="anonymous"></script>

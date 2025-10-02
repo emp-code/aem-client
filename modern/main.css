@@ -7,7 +7,11 @@ body {
 	margin: 0;
 	padding: 0;
 	height: 100%;
-	background: #00000a;
+	background-image: radial-gradient(circle, #000016, #000);
+}
+
+body {
+	display: flex;
 }
 
 [hidden] {
@@ -82,7 +86,7 @@ dialog p {
 
 fieldset {
 	border: 1px solid #ffffff40;
-	border-radius: 1em;
+	border-radius: 1rem;
 	margin: auto;
 	width: fit-content;
 }
@@ -108,7 +112,7 @@ output {
 	white-space: break-spaces;
 	word-break: break-all;
 	display: block;
-	margin: 1em 0 1em 0;
+	margin: 1rem 0 1rem 0;
 }
 
 #main1 table,
@@ -118,7 +122,7 @@ output {
 }
 
 #main1 tr {
-	height: 1.5em;
+	height: 1.5rem;
 	overflow: hidden;
 }
 
@@ -132,7 +136,7 @@ textarea {
 
 .double {
 	display: grid;
-	grid-template-columns: 1fr 3em;
+	grid-template-columns: 1fr 3rem;
 	grid-template-rows: auto;
 	justify-items: center;
 }
@@ -143,6 +147,10 @@ textarea {
 
 .flex1 {
 	flex: 1 1 auto;
+}
+
+#div_inbox {
+	overflow: hidden;
 }
 
 #div_notepad > p {
@@ -183,73 +191,138 @@ textarea {
 	font-family: sans-serif;
 }
 
-/* Begin */
+/* Reg */
+#s_reg {
+	margin: auto;
+	text-align: center;
+	color: #b4b4b4;
 
-#div_begin,
-#div_begin a {
+	background: #121212;
+	padding: 0.6rem;
+
+	border: 0.4rem double #5a5a5a;
+	border-radius: 2rem;
+	padding: 2rem;
+}
+#s_reg p:first-of-type {
+	margin: 0;
+}
+
+#s_reg h1 {
+	font-size: 1.25rem;
+}
+
+#s_reg input {
+	text-align: center;
+}
+
+#s_reg select,
+#s_reg input {
+	font-family: monospace;
+}
+
+#div_reg2 div:nth-of-type(2) {
+	margin: 2em 0 2em 0;
+}
+
+/* Entry */
+
+#s_entry {
+	display: grid;
+	grid-template-columns: auto;
+	grid-template-rows: 5rem 10rem 5rem;
+	place-items: center center;
+	place-content: center center;
+	background: #120c06;
+	padding: 0.6rem;
+
+	width: fit-content;
+	margin: auto;
+	border: 0.4rem double #5a3c1e;
+	border-radius: 2rem;
+}
+
+#s_entry > * {
+	height: 100%;
+	width: 100%;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-evenly;
+	text-align: center;
+}
+
+#s_entry h1 {
+	font-size: 1.5rem;
+}
+
+#s_entry h1,
+#s_entry p,
+#s_entry a,
+#btn_reg {
+	margin: 0;
 	color: #b4783c;
 }
 
-#div_begin > div {
-	display: inline-grid;
-	grid-template-columns: auto;
-	grid-template-rows: 1fr auto 1fr;
-	place-items: center center;
-	place-content: center center;
-	padding: 0 2em;
-	border: 0.4em double #642;
-	box-shadow: 0 0.4em #321;
-	background: #0d0804;
-	border-radius: 2em;
+#btn_reg {
+	text-decoration: underline;
+	cursor: pointer;
 }
 
-#div_begin :is(header, footer) {
-	margin: 1.25em 0;
-}
-
-#div_begin > div > header * {
+#s_entry main fieldset {
+	display: flex;
+	flex-direction: column;
+	justify-content: space-evenly;
+	align-items: center;
+	height: 100%;
 	margin: 0;
-	padding: 0;
+	padding: 0 1.5rem 0 1.5rem;
+	margin: 0 1rem 0 1rem;
+	background: #090912;
+	border: 0.2rem double #2d2d5a;
+	border-radius: 1rem;
 }
 
-#div_begin main {
-	border: 0.2em double #446;
-	box-shadow: 0 0.2em #223;
-	background: #09090d;
-	border-radius: 1em;
+#s_entry header div,
+#s_entry footer div {
+	display: flex;
+	flex-direction: column;
+	height: 50%;
+	justify-content: space-evenly;
+	text-align: center;
 }
 
-#div_begin main button {
+#btn_entry {
 	background-image: radial-gradient(circle, #446, #09090d);
-	border-radius: 3em;
-	width: 3em;
-	height: 3em;
-	margin-bottom: 2em;
+	height: 3rem;
+	width: 3.3rem;
+	border-radius: 3rem;
+	display: block;
 }
 
 #txt_umk {
 	display: block;
-	margin: 2em;
 	text-align: center;
-	border: 0.25em solid #233;
-	border-radius: 1em;
-	color: #233;
+	border: 0.2rem solid #1e2d2d;
+	border-radius: 1rem;
+	color: #1e2d2d;
+	width: 92.5%;
 	transition: background-color 0.5s ease-out;
 }
 
 #txt_umk:disabled,
 #txt_umk[maxlength="0"] {
-	background-color: #233;
+	background-color: #1e2d2d;
 }
 
 #txt_umk:not(:disabled)[maxlength="60"] {
-	background-color: #466;
+	background-color: #3c5a5a;
 }
 
 /* Main */
 
-#div_main {
+#s_main {
 	height: 100%;
+	width: 100%;
 	display: grid;
 	background-image: radial-gradient(ellipse, #110a04, #080502);
 	box-sizing: border-box;
@@ -260,7 +333,7 @@ textarea {
 	background: #001;
 	overflow: hidden;
 	display: grid;
-	grid-template-rows: 3em auto 3em;
+	grid-template-rows: 3rem auto 3rem;
 }
 
 nav {
@@ -270,14 +343,14 @@ nav {
 }
 
 nav svg {
-	height: 1.5em;
+	height: 1.3rem;
 }
 
 nav > button {
 	background: #001;
 	padding: 0;
 	border: 0;
-	height: 1.5em;
+	height: 1.5rem;
 	transition: opacity 0.2s;
 }
 
@@ -319,7 +392,7 @@ dialog,
 .mid :is(button, input, select, textarea) {
 	background: #000;
 	border: 1px solid #555;
-	font-size: 1em;
+	font-size: 1rem;
 }
 
 .mid :is(button:not([data-msgid]), input, select) {
@@ -369,13 +442,13 @@ dialog,
 
 .rowfile td:nth-child(2) {
 	font-family: monospace, monospace;
-	margin: 0 1em 0 1em;
+	margin: 0 1rem 0 1rem;
 	text-align: right;
 	white-space: pre;
 }
 
 .rowfile td:nth-child(4) {
-	margin: 0 0 0 1em;
+	margin: 0 0 0 1rem;
 }
 
 #tbl_inbox tr > td:nth-child(2n) {
@@ -398,7 +471,7 @@ dialog,
 #div_notepad {
 	display: flex;
 	flex-flow: column;
-	padding: 0 1em;
+	padding: 0 1rem;
 	height: 100%;
 }
 
@@ -455,7 +528,7 @@ dialog,
 #table_addrs td:not(:first-of-type),
 #tbl_accs :is(th, td):not(:first-of-type) {
 	text-align: center;
-	width: 3em;
+	width: 3rem;
 }
 
 /* Tab 5/5: Tools */
@@ -474,7 +547,7 @@ dialog,
 }
 
 #table_reg {
-	padding-top: 0.5em;
+	padding-top: 0.5rem;
 }
 
 #table_reg button {
@@ -495,7 +568,7 @@ dialog,
 #table_reg input {
 	font-family: monospace, monospace;
 	text-align: right;
-	font-size: 1em;
+	font-size: 1rem;
 }
 
 #tbl_addrs td:first-of-type input[readonly] {
@@ -534,7 +607,7 @@ dialog,
 
 #tbl_limits input {
 	width: 100%;
-	max-width: 5em;
+	max-width: 5rem;
 }
 
 #tbl_accs {
@@ -591,7 +664,7 @@ dialog,
 	display: grid;
 	opacity: 0.5;
 	font-family: monospace, monospace;
-	padding-bottom: 0.25em;
+	padding-bottom: 0.25rem;
 	border-bottom: 1px solid #555;
 	flex: none;
 	grid-template-columns: 1fr;
@@ -602,7 +675,7 @@ dialog,
 	display: grid;
 	opacity: 0.5;
 	font-family: monospace, monospace;
-	padding-bottom: 0.25em;
+	padding-bottom: 0.25rem;
 	border-bottom: 1px solid #555;
 	flex: none;
 	grid-template-columns: 1fr;
@@ -616,12 +689,22 @@ dialog,
 
 #readmsg_main > pre {
 	margin: 0;
-	padding: 0 1em;
+	padding: 0 1rem;
 	opacity: 0.55;
 	white-space: pre-wrap;
 	word-wrap: break-word;
 	font-family: sans-serif;
 	text-rendering: optimizeLegibility;
+}
+
+#readmsg_main > pre a {
+	font-size: medium;
+	font-style: normal;
+	font-weight: normal;
+	text-decoration: none;
+	/*color: lime;*/
+	background: hsl(120, 20%, 20%);
+	border-radius: 0.5rem;
 }
 
 #readmsg_main > pre table {
@@ -637,7 +720,7 @@ dialog,
 }
 
 #readmsg_main > pre > p:nth-child(2) {
-	margin-bottom: 0.5em;
+	margin-bottom: 0.5rem;
 }
 
 #readmsg_main > pre strong {
@@ -666,7 +749,7 @@ dialog,
 	min-width: 90%;
 }
 
-@media (min-width: 80em) {
+@media (min-width: 80rem) {
 	#div_begin {
 		height: 100%;
 		background: radial-gradient(#00000a, #001);
@@ -674,29 +757,29 @@ dialog,
 		box-sizing: border-box;
 	}
 
-	#div_main {
+	#s_main {
 		grid-template-columns: 1fr 1fr;
-		padding: 2em;
+		padding: 2vw;
 	}
 
 	#main1 {
-		box-shadow: -0.25em 0.25em black;
-		margin-right: 0.5em;
+		box-shadow: -0.25vw 0.25vw black;
+		margin-right: 0.5vw;
 	}
 
 	#main2 {
-		box-shadow: 0.25em 0.25em black;
-		margin-left: 0.5em;
+		box-shadow: 0.25vw 0.25vw black;
+		margin-left: 0.5vw;
 	}
 
 	.main {
-		border-radius: 3em;
+		border-radius: 3vw;
 	}
 
 	.mid {
-		border-left: 1em solid #001;
-		border-right: 1em solid #001;
-		border-radius: 2em;
+		border-left: 1vw solid #001;
+		border-right: 1vw solid #001;
+		border-radius: 2vw;
 	}
 
 	#readmsg_info {
@@ -720,14 +803,14 @@ dialog,
 	}
 
 	#div_begin > div {
-		border: 0.4em double #b4783c;
-		box-shadow: 0 0.4em #b4783c;
+		border: 0.4rem double #b4783c;
+		box-shadow: 0 0.4rem #b4783c;
 		background: #fcd2a8;
 	}
 
 	#div_begin main {
-		border: 0.2em double #3c3cb4;
-		box-shadow: 0 0.2em #3c3cb4;
+		border: 0.2rem double #3c3cb4;
+		box-shadow: 0 0.2rem #3c3cb4;
 		background: #e0e0fc;
 	}
 
@@ -736,17 +819,13 @@ dialog,
 	}
 
 	#txt_umk {
-		border: 0.25em solid #78b43c;
+		border: 0.25rem solid #78b43c;
 		color: #78b43c;
 	}
 
 	#txt_umk:disabled,
 	#txt_umk[maxlength="0"] {
 		background-color: #78b43c;
-	}
-
-	#txt_umk:not(:disabled)[maxlength="43"] {
-		background-color: #f5fcee;
 	}
 
 	#readmsg_main > table {
@@ -793,16 +872,16 @@ dialog,
 		background: #eef;
 	}
 
-	#div_main {
+	#s_main {
 		background-image: radial-gradient(ellipse, #fceee0, #b4aaa0);
 	}
 
 	#main1 {
-		box-shadow: -0.25em 0.25em #bebecc;
+		box-shadow: -0.25rem 0.25rem #bebecc;
 	}
 
 	#main2 {
-		box-shadow: 0.25em 0.25em #bebecc;
+		box-shadow: 0.25rem 0.25rem #bebecc;
 	}
 
 	svg {
@@ -810,13 +889,13 @@ dialog,
 	}
 }
 
-@media (prefers-color-scheme: light) and (min-width: 80em) {
+@media (prefers-color-scheme: light) and (min-width: 80rem) {
 	#div_begin {
 		background: radial-gradient(#eff6fc, #e3f0fc);
 	}
 
 	.mid {
-		border-left: 1em solid #eef;
-		border-right: 1em solid #eef;
+		border-left: 1rem solid #eef;
+		border-right: 1rem solid #eef;
 	}
 }

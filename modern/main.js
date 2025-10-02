@@ -19,12 +19,17 @@ const ae = new AllEars(function(ok) {
 		if (localStorage.greeting) {
 			document.getElementById("greeting").textContent = localStorage.greeting;
 			document.getElementById("txt_pg").value = localStorage.greeting;
-		} else localStorage.greeting = document.getElementById("greeting").textContent;
+		} else {
+			localStorage.greeting = document.head.querySelector("meta[name='aem.subtitle']").content;
+			document.getElementById("greeting").textContent = localStorage.greeting;
+			document.getElementById("txt_pg").value = localStorage.greeting;
+		}
 	} catch(e) {
 		document.getElementById("btn_pg").disabled = true;
 		document.getElementById("txt_pg").disabled = true;
 		document.getElementById("txt_pg").className = "ita";
 		document.getElementById("txt_pg").value = "LocalStorage inaccessible";
+		document.getElementById("greeting").textContent = document.head.querySelector("meta[name='aem.subtitle']").content;
 	}
 
 	document.getElementById("txt_umk").maxLength = "60";
@@ -95,6 +100,78 @@ function errorDialog(err, focusAfter) {
 		if (focusAfter) focusAfter.focus();
 	};
 }
+
+/* Reg */
+document.getElementById("btn_reg").onclick = function() {
+	document.getElementById("reg_provider").textContent = document.head.querySelector("meta[name='aem.provider']").content? document.head.querySelector("meta[name='aem.provider']").content : document.domain;
+	document.getElementById("s_entry").hidden = true;
+	document.getElementById("s_reg").hidden = false;
+};
+
+document.getElementById("reg_permit").onchange = function() {
+	document.getElementById("reg_cont").disabled = !(this.reportValidity());
+	if (!this.reportValidity()) {document.getElementById("reg_expire").textContent = "Enter a valid permit to continue."; return false;}
+
+	const p = sodium.from_base64(this.value + "A", sodium.base64_variants.ORIGINAL_NO_PADDING);
+	const ts = (BigInt(p[32]))
+	| (BigInt(p[33]) << 8n)
+	| (BigInt(p[34]) << 16n)
+	| (BigInt(p[35]) << 24n)
+	| (BigInt(p[36]) << 32n)
+	| (BigInt(p[37] & 3) << 40n);
+
+	const hours = (((ts - (BigInt(Date.now()) - 1735689600000n)) + 1073741824n) / 1000n / 60n / 60n);
+	document.getElementById("reg_expire").textContent = (hours > 300) ? "Invalid permit." : ((hours > 0) ? "Permit expires in " + hours + " hours" : "Permit expired.");
+};
+
+document.getElementById("reg_cont").onclick = function() {
+	document.getElementById("div_reg1").hidden = true;
+	document.getElementById("div_reg2").hidden = false;
+};
+
+document.getElementById("btn_reg_rnd").onclick = function() {
+	document.querySelectorAll("#s_reg select")[0].selectedIndex = Math.floor(Math.random() * 16);
+	document.querySelectorAll("#s_reg select")[1].selectedIndex = Math.floor(Math.random() * 16);
+	document.querySelectorAll("#s_reg select")[2].selectedIndex = Math.floor(Math.random() * 16);
+}
+
+document.getElementById("btn_reg_gen").onclick = function() {
+	const uid = document.querySelectorAll("#s_reg select")[0].value + document.querySelectorAll("#s_reg select")[1].value + document.querySelectorAll("#s_reg select")[2].value;
+	document.getElementById("reg_umk").value = ae.reg_genUmk(uid);
+	document.getElementById("btn_reg_shw").disabled = false;
+	document.getElementById("btn_reg_cpy").disabled = false;
+	document.getElementById("btn_reg_reg").disabled = false;
+}
+
+document.getElementById("btn_reg_cpy").onclick = function() {
+	navigator.clipboard.writeText(document.getElementById("reg_umk").value);
+}
+
+document.getElementById("btn_reg_shw").onclick = function() {
+	if (document.getElementById("btn_reg_shw").textContent === "Show") {
+		document.getElementById("btn_reg_shw").textContent = "Hide";
+		document.getElementById("reg_umk").type = "text";
+	} else {
+		document.getElementById("btn_reg_shw").textContent = "Show";
+		document.getElementById("reg_umk").type = "password";
+	}
+}
+
+document.getElementById("btn_reg_reg").onclick = function() {
+	this.disabled = true;
+
+	ae.reg_register(document.getElementById("reg_permit").value, document.getElementById("reg_umk").value, function(status) {
+		if (status == 1) {
+			document.getElementById("reg_status").textContent = "Registered OK";
+			document.getElementById("btn_reg_reg").disabled = false;
+		} else {
+			document.getElementById("btn_reg_reg").disabled = false;
+			document.getElementById("reg_status").textContent = "Error: " + status;
+		}
+	});
+}
+
+/* Main */
 
 function getCountryFlag(countryCode) {
 	return (!countryCode || countryCode.length !== 2 || countryCode === "??") ? "❔" : sodium.to_string(new Uint8Array([
@@ -1006,14 +1083,6 @@ function deleteAddress(addr) {
 		document.getElementById("tbl_addrs").deleteRow(addressToDelete);
 		document.getElementById("write_from").remove(addressToDelete);
 
-		const askList = document.getElementById("getask_addr");
-		for (let i = 0; i < askList.children.length; i++) {
-			if (askList.children[i].value === addr) {
-				askList.remove(i);
-				break;
-			}
-		}
-
 		updateAddressCounts();
 
 		ae.Private_Update(function(error2) {
@@ -1272,18 +1341,12 @@ function addAddress(num) {
 	el.value = pref;
 	el.textContent = pref + "@" + ae.getDomainEml();
 	document.getElementById("write_from").appendChild(el);
-
-	el = document.createElement("option");
-	el.value = addr;
-	el.textContent = addr;
-	document.getElementById("getask_addr").appendChild(el);
 }
 
 function addAddresses() {
 	const si = Math.max(0, document.getElementById("write_from").selectedIndex);
 
 	document.getElementById("tbl_addrs").replaceChildren();
-	document.getElementById("getask_addr").replaceChildren();
 	document.getElementById("write_from").replaceChildren();
 
 	for (let i = 0; i < ae.getAddressCount(); i++) {
@@ -1522,26 +1585,16 @@ document.getElementById("txt_sender").onkeyup = function(event) {
 	document.getElementById("btn_sender").click();
 };
 
-document.getElementById("btn_reg").onclick = function() {
-	const btn = document.getElementById("btn_reg");
-	const uak = document.getElementById("txt_reg_uak");
-	const epk = document.getElementById("txt_reg_epk");
-
-	if (!uak.reportValidity() || !epk.reportValidity()) return;
+document.getElementById("btn_permit").onclick = function() {
+	const btn = this;
 	btn.disabled = true;
-	uak.disabled = true;
-	epk.disabled = true;
 
-	ae.Account_Create(uak.value, epk.value, function(error) {
+	ae.Account_Permit(function(error, result) {
 		if (error === 0) {
-			addAccountToTable(ae.admin_getUserCount() - 1);
-			uak.value = "";
-			epk.value = "";
+			document.getElementById("txt_permit").value = result;
 		} else errorDialog(error);
 
 		btn.disabled = false;
-		uak.disabled = false;
-		epk.disabled = false;
 	});
 };
 
@@ -1716,8 +1769,8 @@ document.getElementById("btn_limits").onclick = function() {
 	});
 };
 
-document.getElementById("getask_addr").onchange = function() {
-	document.getElementById("getask_result").textContent = ae.getOwnAsk(document.getElementById("getask_addr").value);
+document.getElementById("btn_ask").onclick = function() {
+	document.getElementById("txt_ask").textContent = ae.getOwnAsk();
 };
 
 document.getElementById("txt_umk").onfocus = function() {
@@ -1727,10 +1780,10 @@ document.getElementById("txt_umk").onfocus = function() {
 document.getElementById("txt_umk").onkeyup = function(event) {
 	if (event.key !== "Enter") return;
 	event.preventDefault();
-	document.getElementById("btn_enter").click();
+	document.getElementById("btn_entry").click();
 };
 
-document.getElementById("btn_enter").onclick = function() {
+document.getElementById("btn_entry").onclick = function() {
 	const txtUmk = document.getElementById("txt_umk");
 
 	if (txtUmk.value === "") {
@@ -1768,7 +1821,18 @@ document.getElementById("btn_enter").onclick = function() {
 		ae.Message_Browse(true, true, function(errorBrowse) {
 			document.body.style.cursor = "";
 
-			if (errorBrowse !== 0 && errorBrowse !== 0x09) {
+			if (errorBrowse === 1025) {
+				document.getElementById("greeting").textContent = "Please wait..."
+
+				ae.Account_Keyset(function(status) {
+					btn.disabled = false;
+					btn.focus();
+					document.getElementById("greeting").textContent = (status === true) ? "OK - try again" : "Keyset error: " + status;
+					return;
+				});
+
+				return;
+			} else if (errorBrowse !== 0 && errorBrowse !== 0x09) {
 				let errorMsg = ae.getErrorMessage(errorBrowse);
 				if (typeof(errorMsg) == "object") errorMsg = errorMsg[1];
 
@@ -1780,8 +1844,8 @@ document.getElementById("btn_enter").onclick = function() {
 			}
 
 			txtUmk.value = "";
-			document.getElementById("div_begin").hidden = true;
-			document.getElementById("div_main").hidden = false;
+			document.getElementById("s_entry").hidden = true;
+			document.getElementById("s_main").hidden = false;
 			isReady = true;
 			reloadAccount();
 			history.replaceState({tab: 0, page: 0, msg: msgDisplay}, null);
