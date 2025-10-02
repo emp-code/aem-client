@@ -109,7 +109,6 @@ document.getElementById("btn_reg").onclick = function() {
 };
 
 document.getElementById("reg_permit").onchange = function() {
-	document.getElementById("reg_cont").disabled = !(this.reportValidity());
 	if (!this.reportValidity()) {document.getElementById("reg_expire").textContent = "Enter a valid permit to continue."; return false;}
 
 	const p = sodium.from_base64(this.value + "A", sodium.base64_variants.ORIGINAL_NO_PADDING);
@@ -120,8 +119,17 @@ document.getElementById("reg_permit").onchange = function() {
 	| (BigInt(p[36]) << 32n)
 	| (BigInt(p[37] & 3) << 40n);
 
-	const hours = (((ts - (BigInt(Date.now()) - 1735689600000n)) + 1073741824n) / 1000n / 60n / 60n);
-	document.getElementById("reg_expire").textContent = (hours > 300) ? "Invalid permit." : ((hours > 0) ? "Permit expires in " + hours + " hours" : "Permit expired.");
+	const ms = (ts - (BigInt(Date.now()) - 1735689600000n)) + 1073741824n;
+	if (ms > 1073741824n) {
+		document.getElementById("reg_expire").textContent = "Invalid permit.";
+		document.getElementById("reg_cont").disabled = true;
+	} else if (ms < 0) {
+		document.getElementById("reg_cont").disabled = true;
+		document.getElementById("reg_expire").textContent = "Permit expired.";
+	} else {
+		document.getElementById("reg_cont").disabled = false;
+		document.getElementById("reg_expire").textContent = "Permit expires in " +  (ms / 3600000n) + " hours";
+	}
 };
 
 document.getElementById("reg_cont").onclick = function() {
