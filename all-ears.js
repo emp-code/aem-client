@@ -49,6 +49,7 @@ function AllEars(readyCallback) {
 	const _AEM_KDF_KEYID_UMK_EHK = 3;
 	const _AEM_KDF_KEYID_UMK_PFK = 4;
 	const _AEM_KDF_KEYID_UMK_ABK = 5;
+	const _AEM_KDF_KEYID_UMK_USK = 6;
 
 	const _AEM_KDF_KEYID_UAK_UID = new Uint8Array([0x01,0,0,0,0,0,0,0]);
 
@@ -103,6 +104,7 @@ function AllEars(readyCallback) {
 
 	// User keys shared with the Server
 	let _own_uak; // User Access Key
+	let _own_usk; // User Signature Key
 
 	// Private user keys
 	let _own_abk; // Address Base Key
@@ -1829,6 +1831,7 @@ function AllEars(readyCallback) {
 		}
 
 		_own_uak = _aem_kdf_umk(40, _AEM_KDF_KEYID_UMK_UAK, umk);
+		_own_usk = _aem_kdf_umk(32, _AEM_KDF_KEYID_UMK_USK, umk);
 		_own_esk = _aem_kdf_umk(32, _AEM_KDF_KEYID_UMK_ESK, umk);
 		_own_ehk = _aem_kdf_umk(43, _AEM_KDF_KEYID_UMK_EHK, umk);
 		_own_pfk = _aem_kdf_umk(40, _AEM_KDF_KEYID_UMK_PFK, umk);
@@ -1902,7 +1905,8 @@ function AllEars(readyCallback) {
 
 	this.Account_Keyset = function(callback) {if(typeof(callback)!=="function"){return;}
 		let keyset = new Uint8Array(64); // USK:32, PWK:32
-		// TODO: usk + uak/psk/pqk
+		// TODO: uak/psk/pqk
+		keyset.set(sodium.crypto_scalarmult_base(_own_usk));
 		keyset.set(sodium.crypto_scalarmult_base(_own_esk), 32);
 
 		_fetchEncrypted(_AEM_API_ACCOUNT_KEYSET, 0, null, keyset, null, function(response) {
