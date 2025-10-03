@@ -1249,7 +1249,7 @@ function AllEars(readyCallback) {
 					} catch(e) {txt = "(error)\nError decoding system message: " + e + "\n\n" + _bestEffortDecode(msgData.slice(1));}
 
 					const sep = txt.indexOf("\n");
-					_intMsg.push(new _IntMsg(evpId, msgTs, "system", true, null, "system", "", txt.slice(0, sep), txt.slice(sep + 1)));
+					_intMsg.push(new _IntMsg(evpId, msgTs, "system", true, null, "System", "", txt.slice(0, sep), txt.slice(sep + 1)));
 				} else if (msgType == 64) { // Public
 					const msgFrom = _addr32_decode(msgData.slice(2, 12));
 
