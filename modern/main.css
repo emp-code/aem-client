@@ -558,6 +558,10 @@ dialog,
 	opacity: 0.55;
 }
 
+#btn_ask {
+	width: 100%;
+}
+
 #tbl_addrs td:first-of-type {
 	padding-right: 2px;
 }
