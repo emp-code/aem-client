@@ -558,6 +558,8 @@ dialog,
 	opacity: 0.55;
 }
 
+#btn_permit,
+#txt_permit,
 #btn_ask {
 	width: 100%;
 }
