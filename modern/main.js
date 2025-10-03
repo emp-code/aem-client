@@ -434,8 +434,8 @@ function displayMsg(isHistory, isInt, num) {
 
 		let symbol = document.createElement("span");
 		switch(ae.getIntMsgType(num)) {
-			case "system": symbol.title = "System message"; symbol.textContent = "S"; break;
-			case "public": symbol.title = "Public announcement"; symbol.textContent = "P"; break;
+			case "system": symbol.title = "System message"; symbol.textContent = "⚙️"; break;
+			case "public": symbol.title = "Public announcement"; symbol.textContent = "📢"; break;
 			case "e2ee": symbol.title = "End-to-end encrypted message"; symbol.textContent = "🔒"; break;
 			case "plain": symbol.title = "Plain message"; symbol.textContent = "-"; break;
 			default: symbol.title = "Unrecognized type: " + ae.getIntMsgType(num); symbol.textContent = "?";
