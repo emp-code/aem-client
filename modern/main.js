@@ -1479,7 +1479,7 @@ document.getElementById("btn_updt").onclick = function() {
 			btn.disabled = false;
 			document.getElementById("tbl_inbox").style.opacity = 1;
 
-			if (error === 0) {
+			if (error === 0xAA) {
 				showInbox();
 			} else {
 				errorDialog(error);
