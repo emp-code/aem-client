@@ -84,7 +84,7 @@ dialog p {
 	margin-bottom: 0;
 }
 
-fieldset {
+.main fieldset {
 	border: 1px solid #ffffff40;
 	border-radius: 1rem;
 	margin: auto;
@@ -231,13 +231,13 @@ textarea {
 	grid-template-rows: 5rem 10rem 5rem;
 	place-items: center center;
 	place-content: center center;
-	background: #120c06;
 	padding: 0.6rem;
-
 	width: fit-content;
 	margin: auto;
-	border: 0.4rem double #5a3c1e;
 	border-radius: 2rem;
+
+	background: #120c06;
+	border: 0.4rem double #5a3c1e;
 }
 
 #s_entry > * {
@@ -266,7 +266,7 @@ textarea {
 	cursor: pointer;
 }
 
-#s_entry main fieldset {
+#s_entry fieldset {
 	display: flex;
 	flex-direction: column;
 	justify-content: space-evenly;
@@ -299,11 +299,12 @@ textarea {
 #txt_umk {
 	display: block;
 	text-align: center;
-	border: 0.2rem solid #1e2d2d;
 	border-radius: 1rem;
-	color: #1e2d2d;
 	width: 92.5%;
 	transition: background-color 0.5s ease-out;
+
+	border: 0.2rem solid #1e2d2d;
+	color: #1e2d2d;
 }
 
 #txt_umk:disabled,
@@ -794,24 +795,25 @@ dialog,
 		background: #eff6fc;
 	}
 
-	#div_begin,
-	#div_begin a {
+	#s_entry h1,
+	#s_entry p,
+	#s_entry a,
+	#btn_reg {
+		margin: 0;
 		color: #5a3c1e;
 	}
 
-	#div_begin > div {
+	#s_entry {
 		border: 0.4rem double #b4783c;
-		box-shadow: 0 0.4rem #b4783c;
 		background: #fcd2a8;
 	}
 
-	#div_begin main {
+	#s_entry fieldset {
 		border: 0.2rem double #3c3cb4;
-		box-shadow: 0 0.2rem #3c3cb4;
 		background: #e0e0fc;
 	}
 
-	#div_begin main button {
+	#s_entry main button {
 		background-image: radial-gradient(circle, #e0e0fc, #3c3cb4);
 	}
 
@@ -825,6 +827,10 @@ dialog,
 		background-color: #78b43c;
 	}
 
+	#txt_umk:not(:disabled)[maxlength="60"] {
+		background-color: #3c5a5a;
+	}
+
 	#readmsg_main > table {
 		border-bottom: 1px solid #aaa;
 	}
@@ -835,6 +841,10 @@ dialog,
 
 	#div_notes > div:first-of-type > table {
 		border-bottom: 1px solid #ccc;
+	}
+
+	#readmsg_main > pre a {
+		background-color: #ddd;
 	}
 
 	:is(#tbl_ctact, #tbl_drbox, #tbl_files, #tbl_inbox) tr:hover {
