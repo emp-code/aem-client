@@ -24,7 +24,7 @@ const ae = new AllEars(function(ok) {
 			document.getElementById("greeting").textContent = localStorage.greeting;
 			document.getElementById("txt_pg").value = localStorage.greeting;
 		}
-	} catch(e) {
+	} catch {
 		document.getElementById("btn_pg").disabled = true;
 		document.getElementById("txt_pg").disabled = true;
 		document.getElementById("txt_pg").className = "ita";
