@@ -480,12 +480,12 @@ dialog,
 }
 
 #write2_send,
-#write2_pkey {
+#write2_ask {
 	width: 100%;
 	text-align: center;
 }
 
-#write2_pkey input {
+#write2_ask input {
 	font-family: monospace;
 	text-align: center;
 }
