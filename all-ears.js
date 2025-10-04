@@ -2219,12 +2219,14 @@ function AllEars(readyCallback) {
 		}
 	};
 
-	this.Message_Sender = function(msgId, callback) {if(typeof(hash)!=="string" || typeof(callback)!=="function"){return;}
-		// TODO
-		if (msgId.length !== 64) {callback(0x01); return;}
+	this.Message_Sender = function(msgId, callback) {if(typeof(msgId)!=="string" || typeof(callback)!=="function"){return;}
+		if (msgId.length !== 26) {callback(0x01); return;}
 
 		_fetchEncrypted(_AEM_API_MESSAGE_SENDER, 0, null, sodium.from_string(msgId), null, function(response) {
-			//callback(fetchErr, (fetchErr === 0 && result) ? sodium.to_hex(result) : null);
+			if (typeof(response) === "number") {callback(response); return;}
+			if (response.length !== 16) {callback(0x04); return;}
+			const uid = (new Uint16Array(response.slice(4,6).buffer)[0]) & 4095;
+			callback(String.fromCharCode(97 + (uid & 15)) + String.fromCharCode(97 + ((uid >> 4) & 15)) + String.fromCharCode(97 + ((uid >> 8) & 15)));
 		});
 	};
 
