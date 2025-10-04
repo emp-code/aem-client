@@ -561,6 +561,10 @@ dialog,
 	flex-direction: column;
 }
 
+.div_genbtn input {
+	font-family: monospace;
+}
+
 #tbl_addrs td:first-of-type {
 	padding-right: 2px;
 }
