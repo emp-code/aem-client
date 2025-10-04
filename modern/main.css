@@ -558,10 +558,9 @@ dialog,
 	opacity: 0.55;
 }
 
-#btn_permit,
-#txt_permit,
-#btn_ask {
-	width: 100%;
+.div_genbtn {
+	display: flex;
+	flex-direction: column;
 }
 
 #tbl_addrs td:first-of-type {

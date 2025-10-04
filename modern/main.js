@@ -1775,7 +1775,7 @@ document.getElementById("btn_limits").onclick = function() {
 };
 
 document.getElementById("btn_ask").onclick = function() {
-	document.getElementById("txt_ask").textContent = ae.getOwnAsk();
+	document.getElementById("txt_ask").value = ae.getOwnAsk();
 };
 
 document.getElementById("txt_umk").onfocus = function() {
