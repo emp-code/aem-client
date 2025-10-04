@@ -133,6 +133,7 @@ document.getElementById("reg_permit").onchange = function() {
 };
 
 document.getElementById("reg_cont").onclick = function() {
+	document.getElementById("btn_reg_rnd").click();
 	document.getElementById("div_reg1").hidden = true;
 	document.getElementById("div_reg2").hidden = false;
 };
