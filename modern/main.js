@@ -1707,7 +1707,7 @@ document.getElementById("btn_upload").onclick = function() {
 };
 
 document.getElementById("btn_pg").onclick = function() {
-//	localStorage.greeting = document.getElementById("txt_pg").value;
+	localStorage.greeting = document.getElementById("txt_pg").value;
 };
 
 document.querySelector("#write2_send > button").onclick = function() {
@@ -1780,7 +1780,7 @@ document.getElementById("btn_ask").onclick = function() {
 };
 
 document.getElementById("txt_umk").onfocus = function() {
-//	document.getElementById("greeting").textContent = localStorage.greeting;
+	document.getElementById("greeting").textContent = localStorage.greeting;
 };
 
 document.getElementById("txt_umk").onkeyup = function(event) {
