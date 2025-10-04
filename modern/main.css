@@ -168,7 +168,7 @@ textarea {
 :is(#tbl_drbox, .rowfile, #tbl_inbox) td:first-child,
 #txt_reg,
 #write_recv {
-	font-family: monospace, monospace;
+	font-family: monospace;
 }
 
 .center,
@@ -439,7 +439,7 @@ dialog,
 }
 
 .rowfile td:nth-child(2) {
-	font-family: monospace, monospace;
+	font-family: monospace;
 	margin: 0 1rem 0 1rem;
 	text-align: right;
 	white-space: pre;
@@ -492,7 +492,7 @@ dialog,
 }
 
 #write2_pkey input {
-	font-family: monospace, monospace;
+	font-family: monospace;
 	text-align: center;
 }
 
@@ -573,7 +573,7 @@ dialog,
 
 #tbl_addrs td:first-of-type input,
 #table_reg input {
-	font-family: monospace, monospace;
+	font-family: monospace;
 	text-align: right;
 	font-size: 1rem;
 }
@@ -597,7 +597,7 @@ dialog,
 }
 
 #tbd_accs td {
-	font-family: monospace, monospace;
+	font-family: monospace;
 }
 
 #tbd_accs td:nth-child(1),
@@ -670,7 +670,7 @@ dialog,
 	width: 100%;
 	display: grid;
 	opacity: 0.5;
-	font-family: monospace, monospace;
+	font-family: monospace;
 	padding-bottom: 0.25rem;
 	border-bottom: 1px solid #555;
 	flex: none;
@@ -681,7 +681,7 @@ dialog,
 	width: 100%;
 	display: grid;
 	opacity: 0.5;
-	font-family: monospace, monospace;
+	font-family: monospace;
 	padding-bottom: 0.25rem;
 	border-bottom: 1px solid #555;
 	flex: none;
