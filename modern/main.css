@@ -161,6 +161,7 @@ textarea {
 #txt_reg,
 #write_recv {
 	font-family: monospace;
+	font-size: 1rem;
 }
 
 .center,
@@ -432,6 +433,7 @@ dialog,
 
 .rowfile td:nth-child(2) {
 	font-family: monospace;
+	font-size: 1rem;
 	margin: 0 1rem 0 1rem;
 	text-align: right;
 	white-space: pre;
@@ -566,8 +568,8 @@ dialog,
 #tbl_addrs td:first-of-type input,
 #table_reg input {
 	font-family: monospace;
-	text-align: right;
 	font-size: 1rem;
+	text-align: right;
 }
 
 #tbl_addrs td:first-of-type input[readonly] {
@@ -664,6 +666,7 @@ dialog,
 	display: grid;
 	opacity: 0.5;
 	font-family: monospace;
+	font-size: 1rem;
 	padding-bottom: 0.25rem;
 	border-bottom: 1px solid #555;
 	flex: none;
@@ -675,6 +678,7 @@ dialog,
 	display: grid;
 	opacity: 0.5;
 	font-family: monospace;
+	font-size: 1rem;
 	padding-bottom: 0.25rem;
 	border-bottom: 1px solid #555;
 	flex: none;
