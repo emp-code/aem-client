@@ -2467,6 +2467,7 @@ function AllEars(readyCallback) {
 			case 1001: return "Account not registered";
 			case 1002: return "Time difference too big";
 			case 1003: return "Suspected replay attack";
+			case 1004: return "Insufficient account level";
 			case 1008: return "Internal server error";
 			case 1009: return "INTERNAL_AUTHRESPONSE";
 			case 1010: return "INTERNAL_CONTINUE_INVALID";
