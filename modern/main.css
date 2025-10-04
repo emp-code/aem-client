@@ -107,14 +107,6 @@ thead {
 	opacity: 0.4125;
 }
 
-output {
-	font-family: monospace;
-	white-space: break-spaces;
-	word-break: break-all;
-	display: block;
-	margin: 1rem 0 1rem 0;
-}
-
 #main1 table,
 #main1 td {
 	white-space: nowrap;
