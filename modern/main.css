@@ -590,6 +590,7 @@ dialog,
 
 #tbd_accs td {
 	font-family: monospace;
+	font-size: 1rem;
 }
 
 #tbd_accs td:nth-child(1),
