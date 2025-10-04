@@ -1780,7 +1780,8 @@ document.getElementById("btn_ask").onclick = function() {
 };
 
 document.getElementById("txt_umk").onfocus = function() {
-	document.getElementById("greeting").textContent = localStorage.greeting;
+	try {document.getElementById("greeting").textContent = localStorage.greeting;}
+	catch {document.getElementById("greeting").textContent = document.head.querySelector("meta[name='aem.subtitle']").content;}
 };
 
 document.getElementById("txt_umk").onkeyup = function(event) {
