@@ -558,6 +558,10 @@ dialog,
 	opacity: 0.55;
 }
 
+#txt_sender {
+	font-family: monospace;
+}
+
 .div_genbtn {
 	display: flex;
 	flex-direction: column;
