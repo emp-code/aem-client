@@ -2085,7 +2085,7 @@ function AllEars(readyCallback) {
 				const msgTs = (BigInt(evpDec[27] & 192) >> 6n) | (BigInt(evpDec[28]) << 2n) | (BigInt(evpDec[29]) << 10n) | (BigInt(evpDec[30]) << 18n) | (BigInt(evpDec[31]) << 26n) | (BigInt(evpDec[32]) << 34n);
 				const msgData = evpDec.slice(33, evpDec.length - lenPadding);
 
-				_addMessage(msgData, msgTs, msgType, msgSig, evpId);
+				await _addMessage(msgData, msgTs, msgType, msgSig, evpId);
 
 				_readyMsgBytes += evpBytes;
 				offset += evpBytes;
