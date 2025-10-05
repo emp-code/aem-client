@@ -374,7 +374,7 @@ function displayMsg(isHistory, isInt, num) {
 		document.getElementById("btn_reply").onclick = function() {
 			document.getElementById("write_recv").value = isInt? ae.getIntMsgFrom(num) : ae.getExtMsgReplyAddress(num);
 			document.getElementById("write_subj").value = isInt? ae.getIntMsgTitle(num) : ae.getExtMsgTitle(num);
-			if (!document.getElementById("write_subj").value.startsWith("Re:")) document.getElementById("write_subj").value = "Re: " + document.getElementById("write_subj").value;
+			if (!document.getElementById("write_subj").value.toLowerCase().startsWith("re:")) document.getElementById("write_subj").value = "Re: " + document.getElementById("write_subj").value;
 			document.querySelector("#write2_ask > input").value = isInt? ae.getIntMsgAsk(num) : "";
 
 			document.getElementById("write_recv").readOnly = !isInt;
