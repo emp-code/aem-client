@@ -1727,7 +1727,7 @@ function AllEars(readyCallback) {
 		});
 
 		_own_addr.forEach(function(n) {
-			if (_addr32_decode(n.addr32) === r) r = n.nick;
+			if (n.nick && _addr32_decode(n.addr32) === r) r = n.nick;
 		});
 
 		return r;
