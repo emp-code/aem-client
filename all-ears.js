@@ -1723,7 +1723,7 @@ function AllEars(readyCallback) {
 	this.getIntMsgFrom   = function(num) {if(typeof(num)!=="number"){return;}
 		let r = _intMsg[num].from;
 		_contactName.forEach(function(n) {
-			if (n.toLowerCase().replaceAll("o", "0").replaceAll("i", "1").replaceAll("l", "1").replaceAll("v", "w") === _intMsg[num].from) r = n;
+			if (n.toLowerCase().replaceAll("o", "0").replaceAll("i", "1").replaceAll("l", "1").replaceAll("v", "w") === r) r = n;
 		});
 		return r;
 	};
