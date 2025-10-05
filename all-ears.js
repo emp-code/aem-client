@@ -1725,6 +1725,11 @@ function AllEars(readyCallback) {
 		_contactName.forEach(function(n) {
 			if (n.toLowerCase().replaceAll("o", "0").replaceAll("i", "1").replaceAll("l", "1").replaceAll("v", "w") === r) r = n;
 		});
+
+		_own_addr.forEach(function(n) {
+			if (_addr32_decode(n.addr32) === r) r = n.nick;
+		});
+
 		return r;
 	};
 	this.getIntMsgTo     = function(num) {if(typeof(num)!=="number"){return;} return _intMsg[num].to;};
