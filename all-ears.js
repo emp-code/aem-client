@@ -1732,7 +1732,14 @@ function AllEars(readyCallback) {
 
 		return r;
 	};
-	this.getIntMsgTo     = function(num) {if(typeof(num)!=="number"){return;} return _intMsg[num].to;};
+	this.getIntMsgTo     = function(num) {if(typeof(num)!=="number"){return;}
+		let r = _intMsg[num].to;
+		_own_addr.forEach(function(n) {
+			if (n.nick && _addr32_decode(n.addr32) === r) r = n.nick;
+		});
+
+		return r;
+	};
 	this.getIntMsgTitle  = function(num) {if(typeof(num)!=="number"){return;} return _intMsg[num].title;};
 	this.getIntMsgBody   = function(num) {if(typeof(num)!=="number"){return;} return _intMsg[num].body;};
 	this.getIntMsgAdmin  = function(num) {if(typeof(num)!=="number"){return;} return _intMsg[num].admin;};
