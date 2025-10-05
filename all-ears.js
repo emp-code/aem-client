@@ -1720,7 +1720,13 @@ function AllEars(readyCallback) {
 	this.getIntMsgId     = function(num) {if(typeof(num)!=="number"){return;} return _intMsg[num].id;};
 	this.getIntMsgTime   = function(num) {if(typeof(num)!=="number"){return;} return _intMsg[num].ts + _AEM_TS_BEGIN;};
 	this.getIntMsgAsk    = function(num) {if(typeof(num)!=="number"){return;} return _intMsg[num].ask? sodium.to_base64(_intMsg[num].ask, sodium.base64_variants.ORIGINAL_NO_PADDING) : "";};
-	this.getIntMsgFrom   = function(num) {if(typeof(num)!=="number"){return;} return _intMsg[num].from;};
+	this.getIntMsgFrom   = function(num) {if(typeof(num)!=="number"){return;}
+		let r = _intMsg[num].from;
+		_contactName.forEach(function(n) {
+			if (n.toLowerCase().replaceAll("o", "0").replaceAll("i", "1").replaceAll("l", "1").replaceAll("v", "w") === _intMsg[num].from) r = n;
+		});
+		return r;
+	};
 	this.getIntMsgTo     = function(num) {if(typeof(num)!=="number"){return;} return _intMsg[num].to;};
 	this.getIntMsgTitle  = function(num) {if(typeof(num)!=="number"){return;} return _intMsg[num].title;};
 	this.getIntMsgBody   = function(num) {if(typeof(num)!=="number"){return;} return _intMsg[num].body;};
