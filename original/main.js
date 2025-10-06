@@ -60,10 +60,10 @@ function addIntMessage(i) {
 	const tbl = document.getElementById("tbd_inbox");
 	const row = tbl.insertRow(-1);
 
-	const ts = ae.getIntMsgTime(i);
+	const ts = Number(ae.getIntMsgTime(i));
 	let cell = row.insertCell(-1);
 	cell.setAttribute("data-ts", ts);
-	cell.textContent = new Date(ts * 1000).toISOString().slice(0, 16).replace("T", " ");
+	cell.textContent = new Date(ts).toISOString().slice(0, 16).replace("T", " ");
 	cell.className = "mono";
 
 	cell = row.insertCell(-1);
@@ -100,7 +100,7 @@ function addIntMessage(i) {
 	const el = document.createElement("input");
 	el.className = "delMsg";
 	el.type = "checkbox";
-	el.setAttribute("data-id", ae.getIntMsgIdHex(i));
+	el.setAttribute("data-id", ae.getIntMsgId(i));
 	el.onchange = function() {deleteButtonShow(this.checked);};
 	cell.appendChild(el);
 }
@@ -109,10 +109,10 @@ function addExtMessage(i) {
 	const tbl = document.getElementById("tbd_inbox");
 	const row = tbl.insertRow(-1);
 
-	const ts = ae.getExtMsgTime(i);
+	const ts = Number(ae.getExtMsgTime(i));
 	let cell = row.insertCell(-1);
 	cell.setAttribute("data-ts", ts);
-	cell.textContent = new Date(ts * 1000).toISOString().slice(0, 16).replace("T", " ");
+	cell.textContent = new Date(ts).toISOString().slice(0, 16).replace("T", " ");
 	cell.className = "mono";
 
 	cell = row.insertCell(-1);
@@ -171,7 +171,7 @@ function addExtMessage(i) {
 	el = document.createElement("input");
 	el.className = "delMsg";
 	el.type = "checkbox";
-	el.setAttribute("data-id", ae.getExtMsgIdHex(i));
+	el.setAttribute("data-id", ae.getExtMsgId(i));
 	el.onchange = function() {deleteButtonShow(this.checked);};
 	cell.appendChild(el);
 }
