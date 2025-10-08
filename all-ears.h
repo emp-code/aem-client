@@ -5,7 +5,6 @@
 #include <sodium.h>
 
 #include "Include/AEM_KDF.h"
-#include "Include/Error.h"
 
 #define AEM_ADDR_FLAG_SHIELD 128
 // 64 unused
@@ -23,26 +22,25 @@
 #define X25519_SKBYTES crypto_scalarmult_SCALARBYTES
 
 enum aem_api_command_get {
-	AEM_API_ACCOUNT_BROWSE,
-	AEM_API_ACCOUNT_DELETE,
-	AEM_API_ACCOUNT_UPDATE,
-	AEM_API_ADDRESS_CREATE,
-	AEM_API_ADDRESS_DELETE,
-	AEM_API_ADDRESS_LOOKUP,
-	AEM_API_ADDRESS_UPDATE,
-	AEM_API_MESSAGE_BROWSE,
-	AEM_API_MESSAGE_DELETE,
-	AEM_API_MESSAGE_SENDER,
-	AEM_API_SETTING_LIMITS
+	AEM_API_ACCOUNT_BROWSE, // 0
+	AEM_API_ACCOUNT_DELETE, // 1
+	AEM_API_ACCOUNT_PERMIT, // 2
+	AEM_API_ACCOUNT_UPDATE, // 3
+	AEM_API_ADDRESS_CREATE, // 4
+	AEM_API_ADDRESS_DELETE, // 5
+	AEM_API_MESSAGE_BROWSE, // 6
+	AEM_API_MESSAGE_DELETE, // 7
+	AEM_API_SETTING_LIMITS  // 8
 };
 
 enum aem_api_command_post {
-	AEM_API_ACCOUNT_CREATE,
-	AEM_API_MESSAGE_CREATE,
-	AEM_API_MESSAGE_PUBLIC,
-	AEM_API_MESSAGE_UPLOAD,
-	AEM_API_MESSAGE_VERIFY,
-	AEM_API_PRIVATE_UPDATE
+	AEM_API_ACCOUNT_KEYSET, // 0
+	AEM_API_ADDRESS_UPDATE, // 1
+	AEM_API_MESSAGE_CREATE, // 2
+	AEM_API_MESSAGE_SENDER, // 3
+	AEM_API_MESSAGE_UPLOAD, // 4
+	AEM_API_MESSAGE_VERIFY, // 5
+	AEM_API_PRIVATE_UPDATE  // 6
 };
 
 /*
@@ -90,16 +88,17 @@ void aem_free(void);
 uint8_t aem_getUserLevel(const uint16_t uid);
 
 // API functions
+int aem_address_create(const char * const addr, const size_t lenAddr);
+int aem_address_delete(const char * const addr, const size_t lenAddr);
+
+/*
 int aem_account_browse(void);
 int aem_account_create(const unsigned char uak[AEM_KDF_SUB_KEYLEN], const unsigned char epk[X25519_PKBYTES]);
 int aem_account_update(const uint16_t uid, const uint8_t level);
 int aem_account_delete(const uint16_t uid);
-int aem_address_create(const char * const addr, const size_t lenAddr);
 
-/*
 struct aem_intMsg *aem_intmsg(const int num);
 
-int aem_address_delete(const uint64_t hash);
 int aem_address_update(struct aem_address * const addr, const int count);
 int aem_message_browse();
 int aem_message_create(const char * const title, const size_t lenTitle, const char * const body, const size_t lenBody, const char * const addrFrom, const size_t lenAddrFrom, const char * const addrTo, const size_t lenAddrTo, const char * const replyId, const size_t lenReplyId, const unsigned char toPubkey[crypto_kx_PUBLICKEYBYTES], unsigned char * const msgId);
