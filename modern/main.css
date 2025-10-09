@@ -189,7 +189,7 @@ textarea {
 	margin: auto;
 	text-align: center;
 
-	padding: 2rem;
+	padding: 1rem;
 
 	--lt-tx: oklch(0.450 0 0);
 	--lt-br: oklch(0.650 0 0);
