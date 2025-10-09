@@ -1430,9 +1430,6 @@ function writeVerify() {
 }
 
 // Interface elements
-if (window.matchMedia("(prefers-color-scheme: light)").matches) document.querySelector("head > meta[name='theme-color']").content = "#eef";
-window.matchMedia("(prefers-color-scheme: light)").onchange = function() {document.querySelector("head > meta[name='theme-color']").content = window.matchMedia("(prefers-color-scheme: light)").matches? "#eef" : "#001";};
-
 window.onpopstate = function(event) {
 	if (!isReady || !event.state) return;
 	setTab(true, event.state.tab, event.state.page);
