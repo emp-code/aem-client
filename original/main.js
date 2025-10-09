@@ -267,7 +267,7 @@ function setAccountLevel(uid, level) {
 	let rowid = -1;
 
 	for (let i = 0; i < tbl.rows.length; i++) {
-		if (tbl.rows[i].cells[0].textContent === uid) {
+		if (tbl.rows[i].cells[0].textContent === ae.uidToName(uid)) {
 			rowid = i;
 			break;
 		}
