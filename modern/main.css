@@ -7,11 +7,15 @@ body {
 	margin: 0;
 	padding: 0;
 	height: 100%;
-	background-image: radial-gradient(circle, #000016, #000);
+	background-image: radial-gradient(circle, oklch(0.125 0.05 260), #000);
 }
 
 body {
 	display: flex;
+}
+
+a {
+	color: inherit;
 }
 
 [hidden] {
@@ -188,12 +192,16 @@ textarea {
 #s_reg {
 	margin: auto;
 	text-align: center;
-	color: #b4b4b4;
-	background: #121212;
 
-	border: 0.4rem double #5a5a5a;
-	border-radius: 2rem;
 	padding: 2rem;
+
+	--lt-tx: oklch(0.450 0 0);
+	--lt-br: oklch(0.650 0 0);
+	--lt-bg: oklch(0.850 0 0);
+
+	--dk-tx: oklch(0.600 0 0);
+	--dk-br: oklch(0.300 0 0);
+	--dk-bg: oklch(0.150 0 0);
 }
 #s_reg p:first-of-type {
 	margin: 0;
@@ -217,7 +225,6 @@ textarea {
 }
 
 /* Entry */
-
 #s_entry {
 	display: grid;
 	grid-template-columns: auto;
@@ -227,10 +234,23 @@ textarea {
 	padding: 0.6rem;
 	width: fit-content;
 	margin: auto;
+
+	--lt-tx: oklch(0.450 0.100 60); /* Contrast: 4.81 (AA: 4.5+) */
+	--lt-br: oklch(0.650 0.060 60);
+	--lt-bg: oklch(0.850 0.030 60);
+
+	--dk-tx: oklch(0.600 0.100 60); /* Contrast: 4.87 */
+	--dk-br: oklch(0.300 0.060 60);
+	--dk-bg: oklch(0.150 0.030 60);
+}
+
+#s_reg,
+#s_entry {
 	border-radius: 2rem;
 
-	background: #120c06;
-	border: 0.4rem double #5a3c1e;
+	color: light-dark(var(--lt-tx), var(--dk-tx));
+	border: 0.4rem double light-dark(var(--lt-br), var(--dk-br));
+	background: light-dark(var(--lt-bg), var(--dk-bg));
 }
 
 #s_entry > * {
@@ -251,7 +271,6 @@ textarea {
 #s_entry a,
 #btn_reg {
 	margin: 0;
-	color: #b4783c;
 }
 
 #btn_reg {
@@ -267,9 +286,16 @@ textarea {
 	height: 100%;
 	padding: 0 1.5rem 0 1.5rem;
 	margin: 0 1rem 0 1rem;
-	background: #090912;
-	border: 0.2rem double #2d2d5a;
 	border-radius: 1rem;
+
+	--lt-br: oklch(0.650 0.040 280);
+	--lt-bg: oklch(0.850 0.020 280);
+
+	--dk-br: oklch(0.300 0.040 280);
+	--dk-bg: oklch(0.150 0.020 280);
+
+	border: 0.2rem double light-dark(var(--lt-br), var(--dk-br));
+	background: light-dark(var(--lt-bg), var(--dk-bg));
 }
 
 #s_entry header div,
@@ -282,7 +308,13 @@ textarea {
 }
 
 #btn_entry {
-	background-image: radial-gradient(circle, #446, #09090d);
+	--lt-b1: oklch(0.80 0.06 280);
+	--lt-b2: oklch(0.50 0.01 280);
+
+	--dk-b1: oklch(0.45 0.06 280);
+	--dk-b2: oklch(0.15 0.01 280);
+
+	background-image: radial-gradient(circle, light-dark(var(--lt-b1), var(--dk-b1)), light-dark(var(--lt-b2), var(--dk-b2)));
 	height: 3rem;
 	width: 3.3rem;
 	border-radius: 3rem;
@@ -296,17 +328,26 @@ textarea {
 	width: 92.5%;
 	transition: background-color 0.5s ease-out;
 
-	border: 0.2rem solid #1e2d2d;
-	color: #1e2d2d;
+	--lt-tx: oklch(0.650 0.030 200);
+	--lt-br: oklch(0.700 0.030 200);
+
+	--dk-tx: oklch(0.300 0.030 200);
+	--dk-br: oklch(0.300 0.030 200);
+
+	border: 0.2rem solid light-dark(var(--lt-br), var(--dk-br));
+	color: light-dark(var(--lt-tx), var(--dk-tx));
+	background-color: light-dark(var(--lt-bg), var(--dk-bg));
 }
 
 #txt_umk:disabled,
 #txt_umk[maxlength="0"] {
-	background-color: #1e2d2d;
+	--lt-bg: oklch(0.800 0.030 200);
+	--dk-bg: oklch(0.400 0.030 200);
 }
 
 #txt_umk:not(:disabled)[maxlength="60"] {
-	background-color: #3c5a5a;
+	--lt-bg: oklch(0.900 0.030 200);
+	--dk-bg: oklch(0.500 0.030 200);
 }
 
 /* Main */
@@ -710,7 +751,6 @@ dialog,
 	font-style: normal;
 	font-weight: normal;
 	text-decoration: none;
-	/*color: lime;*/
 	background: hsl(120, 20%, 20%);
 	border-radius: 0.5rem;
 }
@@ -802,43 +842,7 @@ dialog,
 @media (prefers-color-scheme: light) {
 	html,
 	body {
-		background: #eff6fc;
-	}
-
-	#s_entry h1,
-	#s_entry p,
-	#s_entry a,
-	#btn_reg {
-		margin: 0;
-		color: #5a3c1e;
-	}
-
-	#s_entry {
-		border: 0.4rem double #b4783c;
-		background: #fcd2a8;
-	}
-
-	#s_entry fieldset {
-		border: 0.2rem double #3c3cb4;
-		background: #e0e0fc;
-	}
-
-	#s_entry main button {
-		background-image: radial-gradient(circle, #e0e0fc, #3c3cb4);
-	}
-
-	#txt_umk {
-		border: 0.25rem solid #78b43c;
-		color: #78b43c;
-	}
-
-	#txt_umk:disabled,
-	#txt_umk[maxlength="0"] {
-		background-color: #78b43c;
-	}
-
-	#txt_umk:not(:disabled)[maxlength="60"] {
-		background-color: #3c5a5a;
+		background-image: radial-gradient(circle, #ccc, #fff);
 	}
 
 	#readmsg_main > table {
