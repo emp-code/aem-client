@@ -17,7 +17,7 @@ function AllEars(readyCallback) {
 	const _AEM_APIURL = (document.URL.startsWith("http://") ? "http://" : "https://") + _AEM_PROVIDER + ":302";
 	const _AEM_USERCOUNT = 4096;
 	const _AEM_MAXLEN_OURDOMAIN = 32;
-	const _AEM_TS_BEGIN = 1735689600000n // 2025-01-01 00:00:00 UTC
+	const _AEM_TS_BEGIN = 1735689600000n; // 2025-01-01 00:00:00 UTC
 
 	// GET
 	const _AEM_API_ACCOUNT_BROWSE = 0;
