@@ -294,10 +294,8 @@ function setAccountLevel(uid, level) {
 			tbl.rows[rowid].cells[6].children[0].disabled = false;
 		}
 
-		const uid = ae.admin_getUserUid(rowid);
-		const currentLevel = ae.admin_getUserLvl(rowid);
-		tbl.rows[rowid].cells[5].children[0].onclick = function() {setAccountLevel(uid, currentLevel + 1);};
-		tbl.rows[rowid].cells[6].children[0].onclick = function() {setAccountLevel(uid, currentLevel - 1);};
+		tbl.rows[rowid].cells[5].children[0].onclick = function() {setAccountLevel(uid, level + 1);};
+		tbl.rows[rowid].cells[6].children[0].onclick = function() {setAccountLevel(uid, level - 1);};
 	});
 }
 
