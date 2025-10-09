@@ -1840,7 +1840,7 @@ document.getElementById("btn_entry").onclick = function() {
 				let errorMsg = ae.getErrorMessage(errorBrowse);
 				if (typeof(errorMsg) == "object") errorMsg = errorMsg[1];
 
-				document.getElementById("greeting").textContent = errorMsg + " ("+ ((errorBrowse >= 400) ? errorBrowse : "0x" + errorBrowse.toString(16).padStart(2, "0").toUpperCase()) + ")";
+				document.getElementById("greeting").textContent = (errorBrowse < 1000) ? (errorMsg + " (0x" + errorBrowse.toString(16).padStart(2, "0").toUpperCase() + ")") : errorMsg;
 				document.getElementById("txt_umk").disabled = false;
 				btn.disabled = false;
 				btn.focus();
