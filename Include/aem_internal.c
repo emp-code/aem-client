@@ -20,18 +20,16 @@
 
 // Must match server
 #define AEM_BINTS_BEGIN 1735689600000
-#define AEM_UAK_TYPE_URL_AUTH 0ULL
-#define AEM_UAK_TYPE_URL_DATA 35184372088832ULL
-#define AEM_UAK_TYPE_REQ_BODY 70368744177664ULL
-#define AEM_UAK_TYPE_RES_BODY 105553116266496ULL
-#define AEM_UAK_GET 0ULL
-#define AEM_UAK_POST 140737488355328ULL
+#define AEM_UAK_TYPE_URL_AUTH 0
+#define AEM_UAK_TYPE_URL_DATA 16
+#define AEM_UAK_TYPE_REQ_BODY 32
+#define AEM_UAK_TYPE_RES_BODY 48
 
-static unsigned char uak[AEM_KDF_SUB_KEYLEN];
+static unsigned char uak[AEM_KDF_UAK_KEYLEN];
 static char onionId[56];
 
-void apiFetch_setUak(const unsigned char new[AEM_KDF_SUB_KEYLEN]) {
-	memcpy(uak, new, AEM_KDF_SUB_KEYLEN);
+void apiFetch_setUak(const unsigned char new[AEM_KDF_UAK_KEYLEN]) {
+	memcpy(uak, new, AEM_KDF_UAK_KEYLEN);
 }
 
 void apiFetch_setOnionId(const unsigned char new[56]) {
@@ -39,7 +37,7 @@ void apiFetch_setOnionId(const unsigned char new[56]) {
 }
 
 void apiFetch_clear(void) {
-	sodium_memzero(uak, AEM_KDF_SUB_KEYLEN);
+	sodium_memzero(uak, AEM_KDF_UAK_KEYLEN);
 	sodium_memzero(onionId, 56);
 }
 
@@ -108,10 +106,6 @@ static int numberOfDigits(const size_t x) {
 		10)))))))));
 }
 
-static void uak_derive(unsigned char * const out, const size_t lenOut, const uint64_t binTs, const uint64_t method, const uint64_t type) {
-	aem_kdf_sub(out, lenOut, binTs | method | type, uak);
-}
-
 static uint64_t getBinTs(void) {
 	struct timespec t;
 	clock_gettime(CLOCK_REALTIME, &t);
@@ -120,11 +114,10 @@ static uint64_t getBinTs(void) {
 
 static int api_send(const int sock, const int cmd, const int flags, const unsigned char * const urlData, const unsigned char * const post, const size_t lenPost, const uint64_t binTs) {
 	if (cmd < 0 || cmd > 15 || flags < 0 || flags > 3 || lenPost > 9999999) return -1;
-	const uint64_t req_method = (post != NULL) ? AEM_UAK_POST : AEM_UAK_GET;
 
 	// Create the URL
 	unsigned char data_key[1 + AEM_API_REQ_DATA_LEN];
-	uak_derive(data_key, 1 + AEM_API_REQ_DATA_LEN, binTs, req_method, AEM_UAK_TYPE_URL_DATA);
+	aem_kdf_uak(data_key, 1 + AEM_API_REQ_DATA_LEN, binTs, (post != NULL), AEM_UAK_TYPE_URL_DATA, uak);
 
 	unsigned char urlBase[42];
 	bzero(urlBase, 42);
@@ -141,7 +134,7 @@ static int api_send(const int sock, const int cmd, const int flags, const unsign
 
 	// Add authentication
 	unsigned char auth_key[crypto_onetimeauth_KEYBYTES];
-	uak_derive(auth_key, crypto_onetimeauth_KEYBYTES, binTs, req_method, AEM_UAK_TYPE_URL_AUTH);
+	aem_kdf_uak(auth_key, crypto_onetimeauth_KEYBYTES, binTs, (post != NULL), AEM_UAK_TYPE_URL_AUTH, uak);
 	crypto_onetimeauth(urlBase + 26, urlBase + 5, 21, auth_key);
 
 	// Encode to Base64 and send
@@ -157,13 +150,10 @@ static int api_send(const int sock, const int cmd, const int flags, const unsign
 		unsigned char req[lenReq + 1];
 		sprintf((char*)req, "POST /%.56s HTTP/1.0\r\nContent-Length: %zu\r\n\r\n", url, lenPost + crypto_aead_aegis256_ABYTES);
 
-		unsigned char body_nonce[crypto_aead_aegis256_NPUBBYTES];
-		bzero(body_nonce, crypto_aead_aegis256_NPUBBYTES);
+		unsigned char nk[crypto_aead_aegis256_NPUBBYTES + crypto_aead_aegis256_KEYBYTES];
+		aem_kdf_uak(nk, crypto_aead_aegis256_NPUBBYTES + crypto_aead_aegis256_KEYBYTES, binTs, (post != NULL), AEM_UAK_TYPE_REQ_BODY, uak);
 
-		unsigned char body_key[crypto_aead_aegis256_KEYBYTES];
-		uak_derive(body_key, crypto_aead_aegis256_KEYBYTES, binTs, req_method, AEM_UAK_TYPE_REQ_BODY);
-
-		crypto_aead_aegis256_encrypt(req + 93 + numberOfDigits(lenPost), NULL, post, lenPost, NULL, 0, NULL, body_nonce, body_key);
+		crypto_aead_aegis256_encrypt(req + 93 + numberOfDigits(lenPost), NULL, post, lenPost, NULL, 0, NULL, nk, nk + crypto_aead_aegis256_NPUBBYTES);
 		if (send(sock, req, lenReq, 0) != lenReq) {close(sock); return -5;}
 	}
 
@@ -171,7 +161,7 @@ static int api_send(const int sock, const int cmd, const int flags, const unsign
 }
 
 // null out if expecting a 1-byte status response
-static int api_recv(const int sock, unsigned char ** const out, const uint64_t binTs, const uint64_t req_method) {
+static int api_recv(const int sock, unsigned char ** const out, const uint64_t binTs, const bool post) {
 	unsigned char raw[73 + 257 + crypto_aead_aegis256_ABYTES];
 	const ssize_t lenRaw = recv(sock, raw, 73 + 257 + crypto_aead_aegis256_ABYTES, 0);
 	close(sock);
@@ -181,16 +171,13 @@ static int api_recv(const int sock, unsigned char ** const out, const uint64_t b
 	if (lenRaw == 50) {return (memeq(raw, "HTTP/1.0 204 ", 13) && raw[13] >= 'A' && raw[13] <= 'Z') ? 1000 + (raw[13] - 'A') : -3;}
 	if (lenRaw < 362 || (lenRaw - 106) % 256 != 0 || memcmp(raw, "HTTP/1.0 200 aem\r\n", 18) != 0) return -4;
 
-	unsigned char nonce[crypto_aead_aegis256_NPUBBYTES];
-	bzero(nonce, crypto_aead_aegis256_NPUBBYTES);
+	unsigned char nk[crypto_aead_aegis256_NPUBBYTES + crypto_aead_aegis256_KEYBYTES];
+	aem_kdf_uak(nk, crypto_aead_aegis256_NPUBBYTES + crypto_aead_aegis256_KEYBYTES, binTs, post, AEM_UAK_TYPE_RES_BODY, uak);
 
-	unsigned char key[crypto_aead_aegis256_KEYBYTES];
-	uak_derive(key, crypto_aead_aegis256_KEYBYTES, binTs, req_method, AEM_UAK_TYPE_RES_BODY);
-
-	size_t lenDec = lenRaw - 73 - crypto_aead_aegis256_NPUBBYTES;
+	size_t lenDec = lenRaw - 73 - crypto_aead_aegis256_ABYTES;
 	unsigned char *dec = malloc(lenDec);
 	if (dec == NULL) return -5;
-	if (crypto_aead_aegis256_decrypt(dec, NULL, NULL, raw + 73, lenRaw - 73, NULL, 0, nonce, key) != 0) {free(dec); return -6;}
+	if (crypto_aead_aegis256_decrypt(dec, NULL, NULL, raw + 73, lenRaw - 73, NULL, 0, nk, nk + crypto_aead_aegis256_NPUBBYTES) != 0) {free(dec); return -6;}
 
 	if (out == NULL) {
 		const int ret = (lenDec == 257 && dec[0] == 255) ? dec[1] : -7;
@@ -211,5 +198,5 @@ int apiFetch(const int cmd, const int flags, const unsigned char * const urlData
 	int ret = api_send(sock, cmd, flags, urlData, post, lenPost, binTs);
 	if (ret < 0) return ret;
 
-	return api_recv(sock, out, binTs, (post != NULL) ? AEM_UAK_POST : AEM_UAK_GET);
+	return api_recv(sock, out, binTs, (post != NULL));
 }

@@ -4,13 +4,13 @@
 
 #include "AEM_KDF.h"
 
-// Use the 360-bit User Master Key (UMK) with a 16-bit nonce to generate up to 16 KiB
-void aem_kdf_umk(unsigned char * const out, const size_t lenOut, const uint16_t n, const unsigned char umk[AEM_KDF_UMK_KEYLEN]) {
+// Use the 338-bit UAK to generate up to 64 bytes
+void aem_kdf_uak(unsigned char * const out, const size_t lenOut, const uint64_t binTs, const bool post, const uint8_t type, const unsigned char key[AEM_KDF_UAK_KEYLEN]) {
 	bzero(out, lenOut);
 	crypto_stream_chacha20_ietf_xor_ic(out, out, lenOut,
-	/* Nonce */ umk + 32,
-	/* Counter */ (umk[44] << 24) | (n << 8),
-	umk);
+	/* Nonce */ (const uint8_t[]){(binTs >> 32) & 255, ((binTs >> 40) & 3) | (post? AEM_UAK_POST : 0) | type | (key[42] & 12), key[41], key[40], key[39], key[38], key[37], key[36], key[35], key[34], key[33], key[32]},
+	/* Counter */ binTs & UINT32_MAX,
+	key);
 }
 
 // Use the 320-bit subkey with a 56-bit nonce to generate up to 16 KiB
@@ -23,8 +23,17 @@ void aem_kdf_sub(unsigned char * const out, const size_t lenOut, const uint64_t 
 }
 
 // Get UserID from UAK
-uint16_t aem_getUserId(const unsigned char uak[AEM_KDF_SUB_KEYLEN]) {
+uint16_t aem_getUserId(const unsigned char uak[AEM_KDF_UAK_KEYLEN]) {
 	uint16_t uid;
-	aem_kdf_sub((unsigned char*)&uid, sizeof(uint16_t), AEM_KDF_KEYID_UAK_UID, uak);
+	aem_kdf_uak((unsigned char*)&uid, sizeof(uint16_t), 0, false, 0, uak);
 	return uid & 4095;
+}
+
+// Use the 360-bit User Master Key (UMK) with a 16-bit nonce to generate up to 16 KiB
+void aem_kdf_umk(unsigned char * const out, const size_t lenOut, const uint16_t n, const unsigned char umk[AEM_KDF_UMK_KEYLEN]) {
+	bzero(out, lenOut);
+	crypto_stream_chacha20_ietf_xor_ic(out, out, lenOut,
+	/* Nonce */ umk + 32,
+	/* Counter */ (umk[44] << 24) | (n << 8),
+	umk);
 }

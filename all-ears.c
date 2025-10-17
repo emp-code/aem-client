@@ -7,7 +7,6 @@
 #include "all-ears.h"
 
 // Server settings - must match server
-#define AEM_EVP_MINBLOCKS 3
 #define AEM_LEVEL_MAX 3
 #define AEM_USERCOUNT 4096
 #define AEM_ADDRESSES_PER_USER 31
@@ -28,7 +27,7 @@ struct {
 } users[AEM_USERCOUNT];
 
 // User data
-static unsigned char own_esk[X25519_SKBYTES]; // Envelope Secret Key
+static unsigned char own_ews[X25519_SKBYTES]; // Envelope Weak Secret
 static unsigned char own_ehk[crypto_aead_aes256gcm_KEYBYTES]; // Envelope Hidden Key
 static unsigned char own_pfk[AEM_KDF_SUB_KEYLEN]; // Private Field Key
 static uint16_t own_uid = UINT16_MAX; // UserID
@@ -426,13 +425,13 @@ uint8_t aem_getUserLevel(const uint16_t uid) {
 void aem_init(const char newOnionId[56], const unsigned char umk[AEM_KDF_UMK_KEYLEN]) {
 	apiFetch_setOnionId((const unsigned char * const)newOnionId);
 
-	unsigned char new_uak[AEM_KDF_SUB_KEYLEN];
-	aem_kdf_umk(new_uak, AEM_KDF_SUB_KEYLEN, AEM_KDF_KEYID_UMK_UAK, umk);
+	unsigned char new_uak[AEM_KDF_UAK_KEYLEN];
+	aem_kdf_umk(new_uak, AEM_KDF_UAK_KEYLEN, AEM_KDF_KEYID_UMK_UAK, umk);
 	apiFetch_setUak(new_uak);
 	own_uid = aem_getUserId(new_uak);
-	sodium_memzero(new_uak, AEM_KDF_SUB_KEYLEN);
+	sodium_memzero(new_uak, AEM_KDF_UAK_KEYLEN);
 
-	aem_kdf_umk(own_esk, X25519_SKBYTES,                 AEM_KDF_KEYID_UMK_ESK, umk);
+	aem_kdf_umk(own_ews, X25519_SKBYTES,                 AEM_KDF_KEYID_UMK_EWS, umk);
 //	aem_kdf_umk(own_ehk, crypto_aead_aes256gcm_KEYBYTES, AEM_KDF_KEYID_UMK_EHK, umk);
 //	aem_kdf_umk(own_pfk, AEM_KDF_SUB_KEYLEN,             AEM_KDF_KEYID_UMK_PFK, umk);
 
@@ -442,7 +441,7 @@ void aem_init(const char newOnionId[56], const unsigned char umk[AEM_KDF_UMK_KEY
 void aem_free(void) {
 	apiFetch_clear();
 
-	sodium_memzero(own_esk, X25519_SKBYTES);
+	sodium_memzero(own_ews, X25519_SKBYTES);
 	sodium_memzero(own_ehk, crypto_aead_aes256gcm_KEYBYTES);
 	sodium_memzero(own_pfk, AEM_KDF_SUB_KEYLEN);
 	sodium_memzero(saltNm, crypto_pwhash_SALTBYTES);
