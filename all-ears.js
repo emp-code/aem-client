@@ -39,19 +39,20 @@ function AllEars(readyCallback) {
 	const _AEM_API_PRIVATE_UPDATE = 6;
 
 	const _AEM_UAK_TYPE_URL_AUTH  = 0;
-	const _AEM_UAK_TYPE_URL_DATA = 32;
-	const _AEM_UAK_TYPE_REQ_BODY = 64;
-	const _AEM_UAK_TYPE_RES_BODY = 96;
-	const _AEM_UAK_POST = 128;
+	const _AEM_UAK_TYPE_URL_DATA = 16;
+	const _AEM_UAK_TYPE_REQ_BODY = 32;
+	const _AEM_UAK_TYPE_RES_BODY = 48;
+	const _AEM_UAK_POST = 64;
 
 	const _AEM_KDF_KEYID_UMK_UAK = 1;
-	const _AEM_KDF_KEYID_UMK_ESK = 2;
-	const _AEM_KDF_KEYID_UMK_EHK = 3;
+	const _AEM_KDF_KEYID_UMK_SBX = 10;
+	const _AEM_KDF_KEYID_UMK_EHK = 11;
+	const _AEM_KDF_KEYID_UMK_EWS = 12;
+	const _AEM_KDF_KEYID_UMK_ESS = 13;
+	const _AEM_KDF_KEYID_UMK_EQS = 14;
 	const _AEM_KDF_KEYID_UMK_PFK = 4;
 	const _AEM_KDF_KEYID_UMK_ABK = 5;
 	const _AEM_KDF_KEYID_UMK_USK = 6;
-
-	const _AEM_KDF_KEYID_UAK_UID = new Uint8Array([0x01,0,0,0,0,0,0,0]);
 
 	// 128 reserved, 64 unused
 	const _AEM_ADDR_FLAG_ORIGIN =  32;
@@ -71,7 +72,7 @@ function AllEars(readyCallback) {
 
 	const _AEM_ADDR32_CHARS = "0123456789abcdefghjkmnpqrstuwxyz";
 	const _AEM_ADDRESSES_PER_USER = 31;
-	const _AEM_LEN_PRIVATE = 6177;
+	const _AEM_LEN_PRIVATE = 6174;
 	const _AEM_BLOCKSIZE = 32;
 	const _AEM_MSG_HDR_SIZE = 32;
 	const _AEM_MSG_MINBLOCKS = 3;
@@ -103,12 +104,12 @@ function AllEars(readyCallback) {
 	const _maxShieldA = [];
 
 	// User keys shared with the Server
-	let _own_uak; // User Access Key
+	let _own_uak; // User API Key
 	let _own_usk; // User Signature Key
 
 	// Private user keys
 	let _own_abk; // Address Base Key
-	let _own_esk; // Envelope Secret Key
+	let _own_ews; // Envelope Weak Secret
 	let _own_ehk; // Envelope Hidden Key
 	let _own_pfk; // Private Field Key
 
@@ -272,23 +273,24 @@ function AllEars(readyCallback) {
 	const _aem_kdf_sub = function(size, n, key) {
 		return sodium.crypto_stream_chacha20_ietf_xor_ic(new Uint8Array(size),
 			/* Nonce   */ new Uint8Array([key[32], key[33], key[34], key[35], key[36], key[37], key[38], key[39], n[0], n[1], n[2], n[3]]),
-			/* Counter */ new Uint32Array([(n[4] << 8) | (n[5] << 16), (n[6] << 24)])[0],
+			/* Counter */ new Uint32Array(new Uint8Array([0, n[4], n[5], n[6]]).buffer)[0],
 			/* Key     */ key.slice(0, 32));
 	}
 
-	// Use the 342-bit ABK to generate a 342-bit APK; ASK=APK+binTs
+	// Use the 342-bit ABK to generate a 256-bit APK; ASK=APK+binTs
 	const _aem_kdf_abk = function(binTs) {
 		return sodium.crypto_stream_chacha20_ietf_xor_ic(new Uint8Array(32),
-			/* Nonce   */ new Uint8Array([binTs[0], binTs[1], binTs[2], binTs[3], binTs[4], binTs[5] | (_own_abk[42] & 252), _own_abk[41], _own_abk[40], _own_abk[39], _own_abk[38], _own_abk[37], _own_abk[36]]),
-			/* Counter */ new Uint32Array([_own_abk[35], _own_abk[34], _own_abk[33], _own_abk[32]])[0],
+			/* Nonce   */ new Uint8Array([binTs[0], binTs[1], binTs[2], binTs[3], binTs[4], (binTs[5] & 3) | (_own_abk[42] & 252), _own_abk[41], _own_abk[40], _own_abk[39], _own_abk[38], _own_abk[37], _own_abk[36]]),
+			/* Counter */ new Uint32Array(new Uint8Array([_own_abk[35], _own_abk[34], _own_abk[33], _own_abk[32]]).buffer)[0],
 			/* Key     */ _own_abk.slice(0, 32));
 	}
 
-	const _uak_derive = function(binTs, post, type) {
-		const nonce = new Uint8Array(7);
-		nonce.set(binTs);
-		nonce[5] |= (post? _AEM_UAK_POST : 0) | type;
-		return _aem_kdf_sub(32, nonce, _own_uak);
+	// Use the 338-bit UAK to generate a 1-64 byte key
+	const _aem_kdf_uak = function(size, binTs, post, type) {
+		return sodium.crypto_stream_chacha20_ietf_xor_ic(new Uint8Array(size),
+			/* Nonce   */ new Uint8Array([binTs[4], (binTs[5] & 3) | (post? _AEM_UAK_POST : 0) | type | (_own_uak[42] & 12), _own_uak[41], _own_uak[40], _own_uak[39], _own_uak[38], _own_uak[37], _own_uak[36], _own_uak[35], _own_uak[34], _own_uak[33], _own_uak[32]]),
+			/* Counter */ new Uint32Array([binTs[0] | (binTs[1] << 8) | (binTs[2] << 16) | (binTs[3] << 24)])[0],
+			/* Key     */ _own_uak.slice(0, 32));
 	}
 
 	const _fetchBinary = async function(urlBase, postData, callback) {
@@ -317,8 +319,8 @@ function AllEars(readyCallback) {
 
 		// Create one-time keys
 		if (!binTs) binTs = _getBinTs();
-		const data_key = _uak_derive(binTs, postData? true:false, _AEM_UAK_TYPE_URL_DATA);
-		const auth_key = _uak_derive(binTs, postData? true:false, _AEM_UAK_TYPE_URL_AUTH);
+		const data_key = _aem_kdf_uak(21, binTs, postData? true:false, _AEM_UAK_TYPE_URL_DATA);
+		const auth_key = _aem_kdf_uak(32, binTs, postData? true:false, _AEM_UAK_TYPE_URL_AUTH);
 
 		// Create URL Base
 		const urlBase = new Uint8Array(42);
@@ -334,13 +336,18 @@ function AllEars(readyCallback) {
 		}
 
 		urlBase.set(sodium.crypto_onetimeauth(urlBase.slice(5, 26), auth_key), 26);
-		const post = (postData && (typeof(postData) === "object")) ? sodium.crypto_aead_aegis256_encrypt(postData, null, null, new Uint8Array(32), _uak_derive(binTs, true, _AEM_UAK_TYPE_REQ_BODY)) : null;
+		let post = null;
+		if (postData && (typeof(postData) === "object")) {
+			const kn = _aem_kdf_uak(64, binTs, true, _AEM_UAK_TYPE_REQ_BODY);
+			post = sodium.crypto_aead_aegis256_encrypt(postData, null, null, kn.slice(0, 32), kn.slice(32));
+		}
 
 		_fetchBinary(urlBase, post, async function(result) {
 			if (typeof(result) === "number") {callback(result); return;}
 
+			const kn = _aem_kdf_uak(64, binTs, postData? true:false, _AEM_UAK_TYPE_RES_BODY);
 			let dec;
-			try {dec = sodium.crypto_aead_aegis256_decrypt(null, result, null, new Uint8Array(32), _uak_derive(binTs, postData? true:false, _AEM_UAK_TYPE_RES_BODY));}
+			try {dec = sodium.crypto_aead_aegis256_decrypt(null, result, null, kn.slice(0, 32), kn.slice(32));}
 			catch(e) {callback(0x05); return;}
 
 			let u8 = new Uint8Array(dec);
@@ -1281,7 +1288,7 @@ function AllEars(readyCallback) {
 							msgData.slice(28)
 						));
 					} catch(e) {
-						_intMsg.push(new _IntMsg(evpId, msgTs, "e2ee", fromAdmin, null, msgFrom, msgTo, "(error)", "\n"+sodium.to_hex(prevBts)+"\n"+sodium.to_hex(_aem_kdf_abk(prevBts))+"\nError decrypting message: " + e));
+						_intMsg.push(new _IntMsg(evpId, msgTs, "e2ee", fromAdmin, null, msgFrom, msgTo, "(error)", "Error decrypting message: " + e));
 						return;
 					}
 
@@ -1841,20 +1848,16 @@ function AllEars(readyCallback) {
 		}
 
 		let umk;
-		try {
-			umk = sodium.from_base64(umk_b64, sodium.base64_variants.ORIGINAL);
-		} catch(e) {
-			callback(false);
-			return;
-		}
+		try {umk = sodium.from_base64(umk_b64, sodium.base64_variants.ORIGINAL);}
+		catch(e) {callback(false); return;}
 
-		_own_uak = _aem_kdf_umk(40, _AEM_KDF_KEYID_UMK_UAK, umk);
+		_own_uak = _aem_kdf_umk(43, _AEM_KDF_KEYID_UMK_UAK, umk);
 		_own_usk = _aem_kdf_umk(32, _AEM_KDF_KEYID_UMK_USK, umk);
-		_own_esk = _aem_kdf_umk(32, _AEM_KDF_KEYID_UMK_ESK, umk);
+		_own_ews = _aem_kdf_umk(32, _AEM_KDF_KEYID_UMK_EWS, umk);
 		_own_ehk = _aem_kdf_umk(43, _AEM_KDF_KEYID_UMK_EHK, umk);
 		_own_pfk = _aem_kdf_umk(40, _AEM_KDF_KEYID_UMK_PFK, umk);
 		_own_abk = _aem_kdf_umk(43, _AEM_KDF_KEYID_UMK_ABK, umk);
-		_own_uid = new Uint16Array(_aem_kdf_sub(2, _AEM_KDF_KEYID_UAK_UID, _own_uak).buffer)[0] & 4095;
+		_own_uid = new Uint16Array(_aem_kdf_uak(2, 0, false, 0).buffer)[0] & 4095;
 
 		callback(true);
 	};
@@ -1922,10 +1925,10 @@ function AllEars(readyCallback) {
 	};
 
 	this.Account_Keyset = function(callback) {if(typeof(callback)!=="function"){return;}
-		let keyset = new Uint8Array(64); // USK:32, PWK:32
-		// TODO: uak/psk/pqk
+		let keyset = new Uint8Array(64); // USK:32, EWS:32
+		// TODO: ESS/EQS
 		keyset.set(sodium.crypto_scalarmult_base(_own_usk));
-		keyset.set(sodium.crypto_scalarmult_base(_own_esk), 32);
+		keyset.set(sodium.crypto_scalarmult_base(_own_ews), 32);
 
 		_fetchEncrypted(_AEM_API_ACCOUNT_KEYSET, 0, null, keyset, null, function(response) {
 			if (typeof(response) === "number") {callback(response); return;}
@@ -2084,8 +2087,8 @@ function AllEars(readyCallback) {
 
 				// Create the base for the hash
 				const base = new Uint8Array(sodium.crypto_scalarmult_BYTES + _X25519_PKBYTES + 2);
-				base.set(sodium.crypto_scalarmult(_own_esk, evpData.slice(0, _X25519_PKBYTES))); // Recreate the shared secret - this step cannot be done by the server
-				base.set(sodium.crypto_scalarmult_base(_own_esk), sodium.crypto_scalarmult_BYTES);
+				base.set(sodium.crypto_scalarmult(_own_ews, evpData.slice(0, _X25519_PKBYTES))); // Recreate the shared secret - this step cannot be done by the server
+				base.set(sodium.crypto_scalarmult_base(_own_ews), sodium.crypto_scalarmult_BYTES);
 				base.set(new Uint8Array(new Uint16Array([evpBlocks]).buffer), sodium.crypto_scalarmult_BYTES + _X25519_PKBYTES);
 
 				// Re-create the 368 bits of nonce-counter-key to retrieve the Message from the Envelope
@@ -2394,8 +2397,9 @@ function AllEars(readyCallback) {
 
 		for (;;) {
 			const new_umk = window.crypto.getRandomValues(new Uint8Array(45));
-			const new_uak = _aem_kdf_umk(40, _AEM_KDF_KEYID_UMK_UAK, new_umk);
-			const new_uid = new Uint16Array(_aem_kdf_sub(2, _AEM_KDF_KEYID_UAK_UID, new_uak).buffer)[0] & 4095;
+			_own_uak = _aem_kdf_umk(43, _AEM_KDF_KEYID_UMK_UAK, new_umk);
+
+			const new_uid = new Uint16Array(_aem_kdf_uak(2, 0, false, 0).buffer)[0] & 4095;
 			if (new_uid === target_uid) return sodium.to_base64(new_umk, sodium.base64_variants.ORIGINAL);
 		}
 	}
@@ -2414,8 +2418,8 @@ function AllEars(readyCallback) {
 		nonce[7] |= (ts_offset >> 14) & 255;
 		nonce[8] |= (ts_offset >> 22) & 255;
 
-		const uak = _aem_kdf_umk(40, _AEM_KDF_KEYID_UMK_UAK, sodium.from_base64(umk, sodium.base64_variants.ORIGINAL));
-		const urlBase = new Uint8Array(81);
+		const uak = _aem_kdf_umk(43, _AEM_KDF_KEYID_UMK_UAK, sodium.from_base64(umk, sodium.base64_variants.ORIGINAL));
+		const urlBase = new Uint8Array(84);
 		urlBase.set(nonce);
 		urlBase.set(sodium.crypto_aead_aegis256_encrypt(uak, null, null, nonce, urk), 9);
 
