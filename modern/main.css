@@ -375,7 +375,8 @@ nav svg {
 }
 
 nav button {
-	background: #001;
+	background: transparent;
+	fill: transparent;
 	padding: 0;
 	border: 0;
 	height: 1.5rem;
@@ -883,10 +884,6 @@ dialog,
 	.mid :is(button, input, select, textarea) {
 		background: #fff;
 		border: 1px solid #aaa;
-	}
-
-	nav > button {
-		background: #eef;
 	}
 
 	.main {
