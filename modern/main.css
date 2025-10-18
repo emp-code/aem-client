@@ -594,12 +594,17 @@ dialog,
 }
 
 .div_genbtn {
-	display: flex;
-	flex-direction: column;
+	display: grid;
+	grid-template-rows: 2;
 }
 
 .div_genbtn input {
 	font-family: monospace;
+	border: 0;
+}
+
+.div_genbtn button:first-of-type {
+	grid-column: span 2;
 }
 
 #tbl_addrs td:first-of-type {

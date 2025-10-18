@@ -1591,17 +1591,22 @@ document.getElementById("txt_sender").onkeyup = function(event) {
 	document.getElementById("btn_sender").click();
 };
 
-document.getElementById("btn_permit").onclick = function() {
+document.getElementById("btn_permit_gen").onclick = function() {
 	const btn = this;
 	btn.disabled = true;
 
 	ae.Account_Permit(function(error, result) {
 		if (error === 0) {
 			document.getElementById("txt_permit").value = result;
+			document.getElementById("btn_permit_cpy").disabled = false;
 		} else errorDialog(error);
 
 		btn.disabled = false;
 	});
+};
+
+document.getElementById("btn_permit_cpy").onclick = function() {
+	navigator.clipboard.writeText(document.getElementById("txt_permit").value);
 };
 
 document.getElementById("chk_dng_usr").onclick = function() {
@@ -1772,8 +1777,13 @@ document.getElementById("btn_limits").onclick = function() {
 	});
 };
 
-document.getElementById("btn_ask").onclick = function() {
+document.getElementById("btn_ask_gen").onclick = function() {
 	document.getElementById("txt_ask").value = ae.getOwnAsk();
+	document.getElementById("btn_ask_cpy").disabled = false;
+};
+
+document.getElementById("btn_ask_cpy").onclick = function() {
+	navigator.clipboard.writeText(document.getElementById("txt_ask").value);
 };
 
 document.getElementById("txt_umk").onfocus = function() {
