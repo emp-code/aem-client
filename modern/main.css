@@ -374,7 +374,7 @@ nav svg {
 	height: 1.3rem;
 }
 
-nav > button {
+nav button {
 	background: #001;
 	padding: 0;
 	border: 0;
@@ -382,19 +382,19 @@ nav > button {
 	transition: opacity 0.2s;
 }
 
-nav > button:disabled {
+nav button:disabled {
 	opacity: 0.0625;
 }
 
-nav > button:enabled {
+nav button:enabled {
 	opacity: 0.25;
 }
 
-nav > button:enabled:hover {
+nav button:enabled:hover {
 	opacity: 0.5;
 }
 
-nav > button:enabled:focus {
+nav button:enabled:focus {
 	opacity: 0.75;
 }
 
