@@ -72,14 +72,14 @@ function addIntMessage(i) {
 		navMenu(-1);
 		document.getElementById("div_readmsg").hidden = false;
 		document.getElementById("readmsg_head").hidden = false;
-		document.getElementById("readmsg_levelinfo").hidden = false;
+		document.getElementById("readmsg_level").hidden = false;
 		document.getElementById("readmsg_extmsg").hidden = true;
 
 		document.getElementById("readmsg_title").textContent = ae.getIntMsgTitle(i);
 		document.getElementById("readmsg_from").textContent  = ae.getIntMsgFrom(i);
 		document.getElementById("readmsg_to").textContent    = ae.getIntMsgTo(i);
 		document.getElementById("readmsg_body").textContent  = ae.getIntMsgBody(i);
-		document.getElementById("readmsg_level").textContent = ae.getIntMsgLevel(i);
+		document.getElementById("readmsg_level").textContent = ae.getIntMsgAdmin(i) ? " (Administrator)" : "";
 
 		document.getElementById("readmsg_from").className = (ae.getIntMsgFrom(i).length === 16) ? "mono" : "";
 		document.getElementById("readmsg_to").className = (ae.getIntMsgTo(i).length === 16) ? "mono" : "";
@@ -121,7 +121,7 @@ function addExtMessage(i) {
 		navMenu(-1);
 		document.getElementById("div_readmsg").hidden = false;
 		document.getElementById("readmsg_head").hidden = false;
-		document.getElementById("readmsg_levelinfo").hidden = true;
+		document.getElementById("readmsg_level").hidden = true;
 		document.getElementById("readmsg_extmsg").hidden = false;
 		document.getElementById("readmsg_greet").textContent = ae.getExtMsgGreet(i);
 		document.getElementById("readmsg_tls").textContent = ae.getExtMsgTLS(i);
