@@ -188,6 +188,7 @@ textarea {
 #s_reg {
 	margin: auto;
 	text-align: center;
+	max-width: calc(100% - 2.8rem);
 
 	padding: 1rem;
 
@@ -209,6 +210,7 @@ textarea {
 
 #s_reg input {
 	text-align: center;
+	max-width: calc(100% - 1rem);
 }
 
 #s_reg select,
