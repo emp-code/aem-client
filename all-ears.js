@@ -2425,7 +2425,7 @@ function AllEars(readyCallback) {
 
 		let r;
 		try {
-			r = await fetch("http://" + _AEM_PROVIDER + ":304" + "/" + sodium.to_base64(urlBase, sodium.base64_variants.URLSAFE), {
+			r = await fetch(_AEM_APIURL + "/" + sodium.to_base64(urlBase, sodium.base64_variants.URLSAFE), {
 				method: "HEAD",
 				credentials: "omit",
 				headers: new Headers({
