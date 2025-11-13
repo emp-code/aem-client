@@ -310,7 +310,7 @@ function AllEars(readyCallback) {
 			});
 		} catch(e) {callback(0x02);}
 
-		callback(r? ((r.status === 200) ? new Uint8Array(await r.arrayBuffer()) : r.status) : 0x02);
+		callback(r? ((r.status === 200) ? await r.bytes() : r.status) : 0x02);
 	};
 
 	const _fetchEncrypted = async function(cmd, flags, urlData, postData, binTs, callback) {
