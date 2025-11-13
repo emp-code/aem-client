@@ -1835,7 +1835,7 @@ document.getElementById("btn_entry").onclick = function() {
 		ae.Message_Browse(true, true, function(errorBrowse) {
 			document.body.style.cursor = "";
 
-			if (errorBrowse === 1025) {
+			if (errorBrowse === 418) {
 				document.getElementById("greeting").textContent = "Please wait..."
 
 				ae.Account_Keyset(function(status) {
@@ -1850,7 +1850,7 @@ document.getElementById("btn_entry").onclick = function() {
 				let errorMsg = ae.getErrorMessage(errorBrowse);
 				if (typeof(errorMsg) == "object") errorMsg = errorMsg[1];
 
-				document.getElementById("greeting").textContent = (errorBrowse < 1000) ? (errorMsg + " (0x" + errorBrowse.toString(16).padStart(2, "0").toUpperCase() + ")") : errorMsg;
+				document.getElementById("greeting").textContent = (errorBrowse <= 200) ? (errorMsg + " (0x" + errorBrowse.toString(16).padStart(2, "0").toUpperCase() + ")") : errorMsg;
 				document.getElementById("txt_umk").disabled = false;
 				btn.disabled = false;
 				btn.focus();

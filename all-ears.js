@@ -311,7 +311,7 @@ function AllEars(readyCallback) {
 			});
 		} catch(e) {callback(0x02);}
 
-		callback(r? ((r.status === 200) ? new Uint8Array(await r.arrayBuffer()) : r.statusText.toUpperCase().charCodeAt(0) + 935) : 0x02);
+		callback(r? ((r.status === 200) ? new Uint8Array(await r.arrayBuffer()) : r.status) : 0x02);
 	};
 
 	const _fetchEncrypted = async function(cmd, flags, urlData, postData, binTs, callback) {
@@ -2484,19 +2484,19 @@ function AllEars(readyCallback) {
 
 	this.getErrorMessage = function(err) {if(typeof(err)!=="number"){return;}
 		switch (err) {
-			// 1000+ Unauthenticated response codes
-			case 1000: return "Authentication failed";
-			case 1001: return "Account not registered";
-			case 1002: return "Time difference too big";
-			case 1003: return "Suspected replay attack";
-			case 1004: return "Insufficient account level";
-			case 1008: return "Internal server error";
-			case 1009: return "INTERNAL_AUTHRESPONSE";
-			case 1010: return "INTERNAL_CONTINUE_INVALID";
-			case 1011: return "INTERNAL_CONTINUE_OVERSIZE";
-			case 1012: return "INTERNAL_CONTINUE_BADRESP";
-			case 1016: return "Failed to send POST body";
-			case 1025: return "Keyset missing";
+			// 201+ Unauthenticated response codes
+			case 204: return "Authentication failed";
+			case 205: return "Account not registered";
+			case 403: return "Insufficient account level";
+			case 404: return "Time difference too big";
+			case 408: return "Failed to send POST body";
+			case 410: return "Suspected replay attack";
+			case 418: return "Keyset missing";
+			case 500: return "Internal server error";
+			case 596: return "INTERNAL_AUTHRESPONSE";
+			case 597: return "INTERNAL_CONTINUE_INVALID";
+			case 598: return "INTERNAL_CONTINUE_OVERSIZE";
+			case 599: return "INTERNAL_CONTINUE_BADRESP";
 
 			// Authenticated response codes
 			// 0x00: OK
