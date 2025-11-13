@@ -4,11 +4,6 @@ sodium.ready.then(function() {
 
 let isReady = true;
 
-let vaultPage = -4;
-const vault = new PostVault(function(ok) {
-	if (ok) vaultPage = -3;
-});
-
 const ae = new AllEars(function(ok) {
 	if (!ok) {
 		document.getElementById("greeting").textContent = "Failed loading All-Ears";
@@ -879,7 +874,7 @@ function showFiles() {
 	const tbl = document.getElementById("tbl_files");
 	if (!document.getElementById("main1").hidden) setRowsPerPage(tbl);
 
-	const msgCount = ae.getUplMsgCount() + ((vaultPage >= 0) ? vault.getTotalFiles() : 0);
+	const msgCount = ae.getUplMsgCount();
 	const loadMore = ae.getReadyMsgBytes() < ae.getTotalMsgBytes();
 
 	if (msgCount > 0) {
@@ -937,49 +932,6 @@ function showFiles() {
 			cell.appendChild(btn);
 
 			numAdd++;
-		}
-
-		if (vaultPage >= 0) {
-			for (let i = 0; numAdd < rowsPerPage && i < 256; i++) {
-				if (vault.getFileSize(i) < 1) continue;
-
-				if (skipMsgs > 0) {
-					skipMsgs--;
-					continue;
-				}
-
-				const row = tbl.insertRow(-1);
-				row.className = "rowfile";
-
-				let cell = row.insertCell(-1);
-				cell.textContent = new Date(vault.getFileTime(i) * 1000).toISOString().slice(0, 10);
-
-				cell = row.insertCell(-1);
-				cell.textContent = (vault.getFileSize(i) / 1024).toFixed(0).padStart(4, " ");
-
-				cell = row.insertCell(-1);
-				cell.textContent = "Vault";
-
-				cell = row.insertCell(-1);
-				cell.textContent = vault.getFilePath(i);
-				cell.onclick = function() {vault.downloadFile(i, function(m,p){}, function(msg) {
-					if (msg !== "Done") errorDialog(404);
-				});};
-
-				cell = row.insertCell(-1);
-				const btn = document.createElement("button");
-				btn.type = "button";
-				btn.textContent = "X";
-				btn.onclick = function() {
-					vault.deleteFile(i, function(error) {
-						if (error === 0) showFiles();
-						else errorDialog(error);
-					});
-				};
-				cell.appendChild(btn);
-
-				numAdd++;
-			}
 		}
 	} else tabs[TAB_NOTES].max = 2;
 
@@ -1130,16 +1082,6 @@ function setTab(isHistory, tabNum, pageNum) {
 		break;
 
 		case TAB_NOTES:
-			if (vaultPage === -2) {
-				vaultPage = -1;
-
-				vault.downloadIndex(function(err) {
-					if (err === 0) {
-						vaultPage = 0;
-					}
-				});
-			}
-
 			switch (tabs[tab].cur) {
 				case 0:
 					document.getElementById("div_notes").children[0].hidden = false;
@@ -1825,12 +1767,6 @@ document.getElementById("btn_entry").onclick = function() {
 
 		document.body.style.cursor = "wait";
 		document.getElementById("greeting").textContent = "Connecting...";
-
-		if (vaultPage === -3) {
-			vault.setKeys(txtUmk.value, function(vaultKeysOk) {
-				if (vaultKeysOk) vaultPage = -2;
-			});
-		}
 
 		ae.Message_Browse(true, true, function(errorBrowse) {
 			document.body.style.cursor = "";
