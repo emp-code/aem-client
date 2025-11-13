@@ -302,7 +302,7 @@ function AllEars(readyCallback) {
 					"Accept": "",
 					"Accept-Language": ""
 				}),
-				mode: "cors",
+				mode: (document.URL == _AEM_APIURL) ? "same-origin" : "cors",
 				redirect: "error",
 				referrer: "",
 				referrerPolicy: "no-referrer",
@@ -2432,7 +2432,7 @@ function AllEars(readyCallback) {
 					"Accept-Language": ""
 				}),
 				keepalive: "false",
-				mode: "cors",
+				mode: (document.URL == _AEM_APIURL) ? "same-origin" : "cors",
 				redirect: "error",
 				referrerPolicy: "no-referrer"
 			});
