@@ -13,8 +13,7 @@ function AllEars(readyCallback) {
 	} catch(e) {return readyCallback(false);}
 
 // Private constants - must match server
-	const _AEM_PROVIDER = document.head.querySelector("meta[name='aem.provider']").content? document.head.querySelector("meta[name='aem.provider']").content : document.domain;
-	const _AEM_APIURL = (document.URL.startsWith("http://") ? "http://" : "https://") + _AEM_PROVIDER;
+	const _AEM_APIURL = (document.URL.startsWith("http://") ? "http://" : "https://") + (document.head.querySelector("meta[name='aem.provider']").content || document.domain) + "/";
 	const _AEM_USERCOUNT = 4096;
 	const _AEM_MAXLEN_OURDOMAIN = 32;
 	const _AEM_TS_BEGIN = 1735689600000n; // 2025-01-01 00:00:00 UTC
@@ -296,7 +295,7 @@ function AllEars(readyCallback) {
 	const _fetchBinary = async function(urlBase, postData, callback) {
 		let r;
 		try {
-			r = await fetch(_AEM_APIURL + "/" + sodium.to_base64(urlBase, sodium.base64_variants.URLSAFE), {
+			r = await fetch(_AEM_APIURL + sodium.to_base64(urlBase, sodium.base64_variants.URLSAFE), {
 				method: postData? "POST" : "GET",
 				credentials: "omit",
 				headers: new Headers({
@@ -2425,7 +2424,7 @@ function AllEars(readyCallback) {
 
 		let r;
 		try {
-			r = await fetch(_AEM_APIURL + "/" + sodium.to_base64(urlBase, sodium.base64_variants.URLSAFE), {
+			r = await fetch(_AEM_APIURL + sodium.to_base64(urlBase, sodium.base64_variants.URLSAFE), {
 				method: "HEAD",
 				credentials: "omit",
 				headers: new Headers({
