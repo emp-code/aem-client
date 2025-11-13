@@ -164,14 +164,9 @@ document.getElementById("btn_reg_shw").onclick = function() {
 document.getElementById("btn_reg_reg").onclick = function() {
 	this.disabled = true;
 
-	ae.reg_register(document.getElementById("reg_permit").value, document.getElementById("reg_umk").value, function(status) {
-		if (status == 1) {
-			document.getElementById("reg_status").textContent = "Registered OK";
-			document.getElementById("btn_reg_reg").disabled = false;
-		} else {
-			document.getElementById("btn_reg_reg").disabled = false;
-			document.getElementById("reg_status").textContent = "Error: " + status;
-		}
+	ae.reg_register(document.getElementById("reg_permit").value, document.getElementById("reg_umk").value, function(ok) {
+		document.getElementById("btn_reg_reg").disabled = false;
+		document.getElementById("reg_status").textContent = ok? "Registered OK" : "Failed to register";
 	});
 }
 

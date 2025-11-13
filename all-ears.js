@@ -2424,24 +2424,13 @@ function AllEars(readyCallback) {
 					"Accept": "",
 					"Accept-Language": ""
 				}),
-				keepalive: "false",
 				mode: (document.URL == _AEM_APIURL) ? "same-origin" : "cors",
 				redirect: "error",
 				referrerPolicy: "no-referrer"
 			});
-		} catch(e) {callback(e); return;}
+		} catch(e) {callback(false); return;}
 
-		if (r.status === 200) {
-			const ct = sodium.from_base64(r.statusText, sodium.base64_variants.URLSAFE);
-			nonce.fill(0xFF, 9);
-			let d = "Invalid response";
-			try {
-				d = sodium.crypto_aead_aegis256_decrypt(null, ct, null, nonce, urk);
-			} catch(e) {callback(e);}
-			callback(d);
-		} else {
-			callback("Request failed");
-		}
+		callback(r.status === 204);
 	}
 
 	// Extras
