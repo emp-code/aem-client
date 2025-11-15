@@ -1,0 +1,46 @@
+<!doctype html>
+<html>
+<head>
+	<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%20fill='%234188b6'%3E%3Cpolygon%20points='0,4%200,20%208,12'/%3E%3Cpolygon%20points='24,4%2024,20%2016,12'/%3E%3Cpolygon%20points='2,4%2012,14%2022,4'/%3E%3Cpolygon%20points='12,16%209,13%202,20%2022,20%2015,13'/%3E%3C/svg%3E">
+	<link rel="license" href="https://www.gnu.org/licenses/gpl-3.0.html">
+	<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/gh/emp-code/aem-client@022505e9be95f7a098105ba45d1599caa1bb24f1/Manager/main.css" integrity="sha384-W2hxTyPw64F9D9QtygTtkoJQTXb5ahJOvpvc7r2RIEOyq0a1JM3LzJyLqx8tPchd" crossorigin="anonymous">
+
+	<meta name="author" content="EMPcode">
+	<meta name="color-scheme" content="dark">
+	<meta name="description" content="Manager for All-Ears Mail">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+
+	<title>AEM Manager</title>
+</head>
+<body>
+	<fieldset id="fs_entry" disabled inert>
+		<input id="txt_server" type="text" placeholder="aem.example" required autocomplete="username">
+		<input id="txt_smk" type="password" placeholder="Server Master Key (92 char)" pattern="[0-9a-f]{92}" required autocomplete="current-password">
+		<button id="btn_enter" type="button">Manage</button>
+	</fieldset>
+
+	<fieldset id="fs_proc" disabled inert hidden>
+		<div><p>acc</p><button type="button" autocomplete="off"><svg viewbox="0 0 50 50"><use xlink:href="#svg_run"/></svg></button><button type="button" autocomplete="off"><svg viewbox="0 0 50 50"><use xlink:href="#svg_end"/></svg></button></div>
+		<div><p>dlv</p><button type="button" autocomplete="off"><svg viewbox="0 0 50 50"><use xlink:href="#svg_run"/></svg></button><button type="button" autocomplete="off"><svg viewbox="0 0 50 50"><use xlink:href="#svg_end"/></svg></button></div>
+		<div><p>enq</p><button type="button" autocomplete="off"><svg viewbox="0 0 50 50"><use xlink:href="#svg_run"/></svg></button><button type="button" autocomplete="off"><svg viewbox="0 0 50 50"><use xlink:href="#svg_end"/></svg></button></div>
+		<div><p>sto</p><button type="button" autocomplete="off"><svg viewbox="0 0 50 50"><use xlink:href="#svg_run"/></svg></button><button type="button" autocomplete="off"><svg viewbox="0 0 50 50"><use xlink:href="#svg_end"/></svg></button></div>
+		<div><p>reg</p><button type="button" autocomplete="off"><svg viewbox="0 0 50 50"><use xlink:href="#svg_run"/></svg></button><button type="button" autocomplete="off"><svg viewbox="0 0 50 50"><use xlink:href="#svg_end"/></svg></button></div>
+		<div><p>web</p><button type="button" autocomplete="off"><svg viewbox="0 0 50 50"><use xlink:href="#svg_run"/></svg></button><button type="button" autocomplete="off"><svg viewbox="0 0 50 50"><use xlink:href="#svg_end"/></svg></button></div>
+		<div><p>api</p><div><input type="range" min="0" max="256"><button type="button">&minus;</button><button type="button">0</button><button type="button">+</button></div></div>
+		<div><p>mta</p><div><input type="range" min="0" max="256"><button type="button">&minus;</button><button type="button">0</button><button type="button">+</button></div></div>
+	</fieldset>
+
+	<svg hidden>
+		<symbol id="svg_run">
+			<polyline points="15,15 35,25 15,35 15,15" stroke-width="0"/>
+		</symbol>
+
+		<symbol id="svg_end">
+			<rect x="15" y="15" width="20" height="20" stroke-width="0"/>
+		</symbol>
+	</svg>
+
+	<script defer src="https://cdn.jsdelivr.net/gh/emp-code/libsodium.js/dist/browsers-sumo/sodium.js" integrity="sha384-rcw2LBMSpnX4HFY+md42L1aJ+phy3xFtydixbQPd9mt9H4F85shsmqvaGg7maGzf" crossorigin="anonymous"></script>
+	<script defer src="https://cdn.jsdelivr.net/gh/emp-code/aem-client@022505e9be95f7a098105ba45d1599caa1bb24f1/Manager/main.js" integrity="sha384-yMkbaldRjxW8PF1qpVxBRGRLTWZzjMBDWhHX0kvV+Sh27cjzSiZl9LEQAaQz+CbZ" crossorigin="anonymous"></script>
+</body>
+</html>
