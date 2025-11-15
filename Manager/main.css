@@ -1,0 +1,151 @@
+[hidden] {
+	display: none !important;
+}
+
+html, body {
+	margin: 0;
+	padding: 0;
+	height: 100%;
+	width: 100%;
+	background: #000;
+	display: flex;
+}
+
+#fs_entry {
+	display: grid;
+	margin: auto;
+	border: 1px solid red;
+	padding: 0;
+	place-items: center;
+}
+
+#fs_entry * {
+	font-size: 1rem;
+}
+
+#fs_proc {
+	display: grid;
+	margin: auto;
+	border: 0;
+	padding: 0;
+	place-items: center;
+}
+
+@media (width >= 40rem) {#fs_proc {
+	grid-template-columns: repeat(4, 1fr);
+	grid-template-rows: 1fr 1fr;
+	width: min(calc(40rem * 1.2), 100vw);
+	height: min(calc(20rem * 1.2), 100vh);
+}}
+
+@media (width >= 20rem) and (width < 40rem) {#fs_proc {
+	grid-template-columns: 1fr 1fr;
+	grid-template-rows: repeat(4, 1fr);
+	width: min(calc(20rem * 1.2), 100vw);
+	height: min(calc(40rem * 1.2), 100vh);
+}}
+
+@media (width < 20rem) {#fs_proc {
+	grid-template-columns: 1fr
+	grid-template-rows: repeat(8, 1fr);
+	width: min(calc(10rem * 1.2), 100vw);
+	height: min(calc(80rem * 1.2), 100vh);
+}}
+
+#fs_proc > div {
+	display: grid;
+	grid-template-rows: 1fr 1fr;
+	grid-template-columns: 5rem 5rem;
+	width: 10rem;
+	height: 10rem;
+	justify-items: center;
+	border-radius: 2rem;
+}
+
+#fs_proc > div > p:first-of-type {
+	grid-column: 1 / span 2;
+	grid-row: 1;
+	text-align: center;
+	margin: 0;
+	width: 100%;
+	border-radius: 2rem;
+	font-size: 3rem;
+	height: 3.5rem;
+	padding-top: 0.5rem;
+	font-family: monospace;
+	color: oklch(0.9 0 20);
+}
+
+#fs_proc > div:has(>button:first-of-type:disabled),
+#fs_proc > div:has(div button:first-of-type:enabled) {
+	background: oklch(0.2 0.06 140);
+}
+
+#fs_proc > div:has(>button:last-of-type:disabled),
+#fs_proc > div:has(div button:first-of-type:disabled) {
+	background: oklch(0.2 0.06 20);
+}
+
+#fs_proc > div:has(>button:first-of-type:disabled) > p:first-of-type,
+#fs_proc > div:has(div button:first-of-type:enabled) p:first-of-type {
+	background: oklch(0.35 0.11 140);
+}
+
+#fs_proc > div:has(>button:last-of-type:disabled) > p:first-of-type,
+#fs_proc > div:has(div button:first-of-type:disabled) p:first-of-type {
+	background: oklch(0.35 0.11 20);
+}
+
+#fs_proc > div > button {
+	height: 3rem;
+	width: 3rem;
+	border-radius: 1em;
+
+	background: oklch(0.25 0 20);
+}
+
+#fs_proc div div button:first-of-type,
+#fs_proc div div button:last-of-type {
+	width: 1.5rem;
+}
+
+#fs_proc div div button:nth-of-type(2) {
+	width: 3rem;
+}
+
+#fs_proc > div > div p {
+	margin: 0;
+	font-family: monospace;
+}
+
+#fs_proc button svg {
+	height: 100%;
+	width: 100%;
+}
+
+#fs_proc button:enabled svg {
+	fill: oklch(0.9 0 20);
+}
+
+#fs_proc button:disabled svg {
+	fill: oklch(0.45 0 20);
+}
+
+#fs_proc div div {
+	grid-column: 1 / span 2;
+	display: grid;
+	grid-template-columns: 1fr 1fr 1fr;
+	grid-template-rows: 1fr 1fr;
+	place-items: center;
+}
+
+#fs_proc div div p {
+	margin: 0;
+}
+
+#fs_proc input[type=range] {
+	grid-column: 1 / span 3;
+
+	height: 1rem;
+	width: 10rem;
+}
