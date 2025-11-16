@@ -127,7 +127,7 @@ if (window.isSecureContext
 && window.self === window.top
 && window.opener === null
 && document.compatMode != "BackCompat"
-& document.characterSet === "UTF-8") {
+) {
 	document.getElementById("fs_entry").disabled = false;
 	document.getElementById("fs_entry").inert = false;
 	document.getElementById("txt_server").focus();
