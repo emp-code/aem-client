@@ -181,10 +181,14 @@ document.querySelectorAll("#fs_proc div div button:nth-of-type(2)").forEach(func
 });
 
 document.getElementById("btn_enter").onclick = function() {
+	const txtServer = document.getElementById("txt_server");
+	const txtSmk = document.getElementById("txt_smk");
+	if (!txtServer.reportValidity() || !txtSmk.reportValidity()) return;
+
 	document.getElementById("fs_entry").disabled = true;
 
-	_AEM_SERVER = document.getElementById("txt_server").value;
-	_AEM_KEY_MPK = _aem_kdf_smk(sodium.crypto_aead_aegis256_KEYBYTES, _AEM_KDF_KEYID_SMK_MPK, sodium.from_hex(document.getElementById("txt_smk").value));
+	_AEM_SERVER = txtServer.value;
+	_AEM_KEY_MPK = _aem_kdf_smk(sodium.crypto_aead_aegis256_KEYBYTES, _AEM_KDF_KEYID_SMK_MPK, sodium.from_hex(txtSmk.value));
 
 	this.textContent = "Connecting...";
 	_mp(_AEM_MNG_CMD_NOOP, 0, function(status) {
@@ -194,7 +198,8 @@ document.getElementById("btn_enter").onclick = function() {
 		_AEM_KEY_API = _aem_kdf_smk(_AEM_KDF_SUB_KEYLEN, _AEM_KDF_KEYID_SMK_API, sodium.from_hex(document.getElementById("txt_smk").value));
 
 		if (status === 0) {
-			document.getElementById("txt_smk").value = "";
+			txtSmk.value = "";
+			txtServer.value = "";
 
 			document.getElementById("fs_entry").disabled = true;
 			document.getElementById("fs_entry").inert = true;
