@@ -146,6 +146,19 @@ document.querySelectorAll("#fs_proc > div > button:first-of-type").forEach(funct
 	};
 });
 
+document.querySelectorAll("#fs_proc > div > button:last-of-type").forEach(function(btn, i) {
+	btn.onclick = function() {
+		this.disabled = true;
+		document.querySelectorAll("#fs_proc > div > button:first-of-type")[i].disabled = false;
+		_mp(_AEM_MNG_CMD_TERM, i, function(status) {
+			if (status !== 0) {
+				document.querySelectorAll("#fs_proc > div > button:first-of-type")[i].disabled = true;
+				document.querySelectorAll("#fs_proc > div > button:last-of-type")[i].disabled = false;
+			}
+		});
+	};
+});
+
 document.querySelectorAll("#fs_proc input[type=range]").forEach(function(rng, i) {
 	rng.onchange = function() {
 		const v = document.querySelectorAll("#fs_proc input[type=range]")[i].value;
