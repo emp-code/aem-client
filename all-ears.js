@@ -1038,15 +1038,8 @@ function AllEars(readyCallback) {
 				msgSb = msgBin.slice(0, lenSb);
 				msgBd = msgBin.slice(lenSb);
 			} catch(e) {
-				msgSb = "(fail)";
-				msgBd= "Message failed to decode.\n\n" + e + "\n\nBasic decode:\n\n";
-
-				for (let i = 0; i < msgBin.length; i++) {
-					if ((msgBin[i] !== 10 && msgBin[i] <= 31) || msgBin[i] >= 127)
-						msgBd += "[" + msgBin[i] + "]";
-					else
-						msgBd += String.fromCharCode(msgBin[i]);
-				}
+				msgSb = "(error)";
+				msgBd = "Error decoding sent internal message: " + e + "\n\n" + _bestEffortDecode(msgBin);
 			}
 
 			newMsg = new _OutMsg_Int(msgId, msgTs, isE2ee, msgTo, msgFr, msgSb, msgBd);
