@@ -1155,7 +1155,7 @@ function AllEars(readyCallback) {
 
 	const _addMessage = async function(msgData, msgTs, msgType, msgSig, evpId) {
 		if (msgTs >= _newestMsgTs) {_newestEvpId = evpId; _newestMsgTs = msgTs;}
-		if (msgTs <  _oldestMsgTs && _oldestEvpId !== "0000") {_oldestEvpId = evpId; _oldestMsgTs = msgTs;}
+		if (msgTs < _oldestMsgTs || evpId === "0000") {_oldestEvpId = evpId; _oldestMsgTs = msgTs;}
 
 		switch (msgType) {
 			case 0: { // ExtMsg
