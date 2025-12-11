@@ -5,7 +5,7 @@ select,
 button,
 a {
 	background: light-dark(#f6f6f6, #090909);
-	color: light-dark(#222, #ddd);
+	color: light-dark(#444, #bbb);
 }
 
 header,
