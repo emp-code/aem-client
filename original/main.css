@@ -57,6 +57,10 @@ textarea {
 #div_readmsg {
 	max-width: 70rem;
 	margin: auto;
+	background: light-dark(#eee, #111);
+	border-radius: 1rem;
+	border: 0.2rem solid light-dark(#ccc, #333);
+	padding: 1rem;
 }
 
 #div_inbox tr {
