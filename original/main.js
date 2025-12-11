@@ -583,7 +583,7 @@ document.getElementById("btn_refresh").onclick = function() {
 		if (error === 0) {
 			clearMessages();
 			addMessages();
-			for (let i = ae.getUplMsgCount() - 1; i >= 0; i--) {addFile(i);}
+			for (let i = 0; i < ae.getUplMsgCount(); i++) {addFile(i);}
 		} else {
 			console.log("Failed to refresh");
 		}
