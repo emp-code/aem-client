@@ -1,12 +1,12 @@
 header,
 nav {
-	margin-bottom: 1em;
+	margin-bottom: 1rem;
 	text-align: center;
 }
 
 footer,
 .maindiv {
-	margin-top: 1em;
+	margin-top: 1rem;
 	text-align: center;
 }
 
@@ -23,7 +23,7 @@ table {
 
 td,
 th {
-	min-width: 3em;
+	min-width: 3rem;
 }
 
 td {
@@ -32,17 +32,17 @@ td {
 }
 
 textarea {
-	height: 10em;
-	width: 50em;
+	height: 10rem;
+	width: 50rem;
 }
 
 #div_inbox table {
-	max-width: 80em;
+	max-width: 80rem;
 }
 
 #div_inbox tr {
 	display: grid;
-	grid-template-columns: auto 3fr 1fr 1fr 1fr 3em;
+	grid-template-columns: auto 3fr 1fr 1fr 1fr 3rem;
 	border-bottom: 1px solid light-dark(#ddd, #333);
 }
 
@@ -63,7 +63,7 @@ textarea {
 }
 
 .topmargin {
-	margin-top: 1em;
+	margin-top: 1rem;
 }
 
 .center {
@@ -92,11 +92,11 @@ textarea {
 #div_prefs_addresses td:not(:first-child),
 #div_prefs_addresses th:not(:first-child) {
 	text-align: center;
-	width: 3em;
+	width: 3rem;
 }
 
 #tbl_limits input {
-	width: 3em;
+	width: 3rem;
 }
 
 #tbl_limits th,
