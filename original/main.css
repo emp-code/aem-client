@@ -74,9 +74,22 @@ textarea {
 	text-align: left;
 }
 
-#readmsg_title,
+#readmsg_title {
+	white-space: pre-wrap;
+}
+
 #readmsg_body {
 	white-space: pre-wrap;
+	word-wrap: break-word;
+	font-family: sans-serif;
+}
+
+#readmsg_body table {
+	width: 100%;
+}
+
+#readmsg_body td {
+	word-break: break-all;
 }
 
 #send_from {
