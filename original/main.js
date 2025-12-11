@@ -131,7 +131,7 @@ function addExtMessage(i) {
 		document.getElementById("readmsg_country").title = ae.getExtMsgCname(i);
 
 		const flags = document.getElementById("readmsg_flags").children;
-		flags[0].hidden = ae.getExtMsgFlagPExt(i);
+		flags[0].hidden = !ae.getExtMsgFlagPExt(i);
 		flags[1].hidden = !ae.getExtMsgFlagRare(i);
 		flags[2].hidden = !ae.getExtMsgFlagFail(i);
 		flags[3].hidden = !ae.getExtMsgFlagPErr(i);
