@@ -1,3 +1,13 @@
+body,
+input,
+textarea,
+select,
+button,
+a {
+	background: light-dark(#f6f6f6, #090909);
+	color: light-dark(#222, #ddd);
+}
+
 header,
 nav {
 	margin-bottom: 1rem;
@@ -120,16 +130,4 @@ textarea {
 #tbl_limits th,
 #tbl_limits td {
 	text-align: center;
-}
-
-@media (prefers-color-scheme: dark) {
-	body,
-	input,
-	textarea,
-	select,
-	button,
-	a {
-		background: #090909;
-		color: #ddd;
-	}
 }
