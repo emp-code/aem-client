@@ -40,6 +40,11 @@ textarea {
 	max-width: 80rem;
 }
 
+#div_readmsg {
+	max-width: 70rem;
+	margin: auto;
+}
+
 #div_inbox tr {
 	display: grid;
 	grid-template-columns: auto 3fr 1fr 1fr 1fr 3rem;
