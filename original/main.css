@@ -66,6 +66,9 @@ textarea {
 #div_inbox tr {
 	display: grid;
 	grid-template-columns: auto 3fr 1fr 1fr 1fr 3rem;
+}
+
+#div_inbox tr:not(:last-of-type) {
 	border-bottom: 1px solid light-dark(#ddd, #333);
 }
 
