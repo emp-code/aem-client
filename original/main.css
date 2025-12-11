@@ -43,7 +43,7 @@ textarea {
 #div_inbox tr {
 	display: grid;
 	grid-template-columns: auto 3fr 1fr 1fr 1fr 3em;
-	border-bottom: 1px solid #ddd;
+	border-bottom: 1px solid light-dark(#ddd, #333);
 }
 
 #div_inbox td:nth-child(3) {
@@ -113,10 +113,5 @@ textarea {
 	a {
 		background: #090909;
 		color: #ddd;
-	}
-
-	#list_inbox > div,
-	#list_sent > div {
-		border-bottom: 1px solid #333;
 	}
 }
