@@ -48,6 +48,10 @@ textarea {
 
 #div_inbox table {
 	max-width: 80rem;
+	padding: 0.5rem;
+	border-radius: 1rem;
+	border: 0.2rem solid light-dark(#ccc, #333);
+	background: light-dark(#eee, #111);
 }
 
 #div_readmsg {
