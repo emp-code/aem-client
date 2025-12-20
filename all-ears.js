@@ -1355,7 +1355,7 @@ function AllEars(readyCallback) {
 					}
 				}
 
-				_uplMsg.push(new _UplMsg(evpId, msgTs, msgFn, msgBody, msgParent, msgBody.length / 16));
+				_uplMsg.push(new _UplMsg(evpId, msgTs, msgFn, msgBody, msgParent, msgBody.length / _AEM_BLOCKSIZE));
 			break;}
 		}
 
