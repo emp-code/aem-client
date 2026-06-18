@@ -17,6 +17,7 @@ function AllEars(readyCallback) {
 	const _AEM_USERCOUNT = 4096;
 	const _AEM_MAXLEN_OURDOMAIN = 32;
 	const _AEM_TS_BEGIN = 1735689600000n; // 2025-01-01 00:00:00 UTC
+	const _AEM_MSG_HDR_SZ = 32;
 
 	// GET
 	const _AEM_API_ACCOUNT_BROWSE = 0;
@@ -43,15 +44,13 @@ function AllEars(readyCallback) {
 	const _AEM_UAK_TYPE_RES_BODY = 48;
 	const _AEM_UAK_POST = 64;
 
-	const _AEM_KDF_KEYID_UMK_UAK = 1;
-	const _AEM_KDF_KEYID_UMK_SBX = 10;
-	const _AEM_KDF_KEYID_UMK_EHK = 11;
-	const _AEM_KDF_KEYID_UMK_EWS = 12;
-	const _AEM_KDF_KEYID_UMK_ESS = 13;
-	const _AEM_KDF_KEYID_UMK_EQS = 14;
-	const _AEM_KDF_KEYID_UMK_PFK = 4;
-	const _AEM_KDF_KEYID_UMK_ABK = 5;
-	const _AEM_KDF_KEYID_UMK_USK = 6;
+	const _AEM_KDF_KEYID_UMK_UAK = 1; // User API Key
+	const _AEM_KDF_KEYID_UMK_PFK = 2; // Private Field Key
+	const _AEM_KDF_KEYID_UMK_ABK = 3; // Address Base Key
+	const _AEM_KDF_KEYID_UMK_USK = 4; // User Signature Key
+
+	const _AEM_KDF_KEYID_UMK_ESS = 10; // Envelope Secret Seed
+	const _AEM_KDF_KEYID_UMK_EHK = 11; // Envelope Hidden Key
 
 	// 128 reserved, 64 unused
 	const _AEM_ADDR_FLAG_ORIGIN =  32;
@@ -71,13 +70,12 @@ function AllEars(readyCallback) {
 
 	const _AEM_ADDR32_CHARS = "0123456789abcdefghjkmnpqrstuwxyz";
 	const _AEM_ADDRESSES_PER_USER = 31;
-	const _AEM_LEN_PRIVATE = 6174;
+	const _AEM_LEN_PRIVATE = 6614;
 	const _AEM_BLOCKSIZE = 32;
 	const _AEM_MSG_HDR_SIZE = 32;
-	const _AEM_MSG_MINBLOCKS = 3;
-	const _AEM_MSG_SRC_MAXSIZE = 2097183;
+	const _AEM_MSG_MINBLOCKS = 36;
+	const _AEM_MSG_SRC_MAXSIZE = 2097151;
 	const _AEM_USER_MAXLEVEL = 3;
-	const _X25519_PKBYTES = 32;
 
 	const _AEM_EMAIL_CERT_MATCH_HDRFR = 96;
 	const _AEM_EMAIL_CERT_MATCH_ENVFR = 64;
@@ -105,10 +103,11 @@ function AllEars(readyCallback) {
 	// User keys shared with the Server
 	let _own_uak; // User API Key
 	let _own_usk; // User Signature Key
+	let _own_epk; // Envelope Public Key
 
 	// Private user keys
 	let _own_abk; // Address Base Key
-	let _own_ews; // Envelope Weak Secret
+	let _own_esk; // Envelope Secret Key
 	let _own_ehk; // Envelope Hidden Key
 	let _own_pfk; // Private Field Key
 
@@ -1317,7 +1316,6 @@ function AllEars(readyCallback) {
 
 				if ((msgData[0] & 128) !== 0) {
 					// Email attachment, no additional encryption
-
 					msgParent = sodium.to_hex(msgData.slice(1, 3));
 					msgFn = sodium.to_string(msgData.slice(3, 4 + (msgData[0] & 127)));
 					msgBody = msgData.slice(4 + (msgData[0] & 127));
@@ -1838,11 +1836,14 @@ function AllEars(readyCallback) {
 
 		_own_uak = _aem_kdf_umk(43, _AEM_KDF_KEYID_UMK_UAK, umk);
 		_own_usk = _aem_kdf_umk(32, _AEM_KDF_KEYID_UMK_USK, umk);
-		_own_ews = _aem_kdf_umk(32, _AEM_KDF_KEYID_UMK_EWS, umk);
-		_own_ehk = _aem_kdf_umk(43, _AEM_KDF_KEYID_UMK_EHK, umk);
+		_own_ehk = _aem_kdf_umk(32, _AEM_KDF_KEYID_UMK_EHK, umk);
 		_own_pfk = _aem_kdf_umk(40, _AEM_KDF_KEYID_UMK_PFK, umk);
 		_own_abk = _aem_kdf_umk(43, _AEM_KDF_KEYID_UMK_ABK, umk);
 		_own_uid = new Uint16Array(_aem_kdf_uak(2, 0, false, 0).buffer)[0] & 4095;
+
+		const kp = sodium.crypto_kem_seed_keypair(_aem_kdf_umk(sodium.crypto_kem_SEEDBYTES, _AEM_KDF_KEYID_UMK_ESS, umk));
+		_own_epk = kp.publicKey;
+		_own_esk = kp.privateKey;
 
 		callback(true);
 	};
@@ -1910,10 +1911,9 @@ function AllEars(readyCallback) {
 	};
 
 	this.Account_Keyset = function(callback) {if(typeof(callback)!=="function"){return;}
-		let keyset = new Uint8Array(64); // USK:32, EWS:32
-		// TODO: ESS/EQS
-		keyset.set(sodium.crypto_scalarmult_base(_own_usk));
-		keyset.set(sodium.crypto_scalarmult_base(_own_ews), 32);
+		const keyset = new Uint8Array(_own_epk.length + _own_usk.length);
+		keyset.set(_own_epk);
+		keyset.set(_own_usk, _own_epk.length);
 
 		_aemApi(_AEM_API_ACCOUNT_KEYSET, 0, null, keyset, null, function(response) {
 			if (typeof(response) === "number") {callback(response); return;}
@@ -2070,19 +2070,20 @@ function AllEars(readyCallback) {
 					continue;
 				}
 
-				// Create the base for the hash
-				const base = new Uint8Array(sodium.crypto_scalarmult_BYTES + _X25519_PKBYTES + 2);
-				base.set(sodium.crypto_scalarmult(_own_ews, evpData.slice(0, _X25519_PKBYTES))); // Recreate the shared secret - this step cannot be done by the server
-				base.set(sodium.crypto_scalarmult_base(_own_ews), sodium.crypto_scalarmult_BYTES);
-				base.set(new Uint8Array(new Uint16Array([evpBlocks]).buffer), sodium.crypto_scalarmult_BYTES + _X25519_PKBYTES);
+				// Decrypt
+				const evpDec = new Uint8Array(await window.crypto.subtle.decrypt(
+					{name: "AES-CTR", counter: new Uint8Array(16), length: 128},
+					await window.crypto.subtle.importKey(
+						"raw",
+						sodium.crypto_kem_dec(evpData.slice(0, sodium.crypto_kem_CIPHERTEXTBYTES), _own_esk, "uint8array"),
+						{"name": "AES-CTR"},
+						false,
+						["decrypt"]
+					),
+					evpData.slice(sodium.crypto_kem_CIPHERTEXTBYTES)
+				));
 
-				// Re-create the 368 bits of nonce-counter-key to retrieve the Message from the Envelope
-				const nck = sodium.crypto_generichash(sodium.crypto_stream_chacha20_ietf_NONCEBYTES + 2 + sodium.crypto_stream_chacha20_ietf_KEYBYTES, base);
-				const evpDec = sodium.crypto_stream_chacha20_ietf_xor_ic(evpData.slice(_X25519_PKBYTES),
-					/*N*/ nck.slice(0, sodium.crypto_stream_chacha20_ietf_NONCEBYTES),
-					/*C*/ new Uint32Array([new Uint16Array(nck.slice(sodium.crypto_stream_chacha20_ietf_NONCEBYTES).buffer)[0] << 16])[0],
-					/*K*/ nck.slice(sodium.crypto_stream_chacha20_ietf_NONCEBYTES + 2));
-
+				// Read info from Message
 				const lenPadding = evpDec[0];
 				const msgType = (evpDec[27] & 48) >> 4;
 				let msgSig = evpDec.slice(1, 28);
@@ -2091,8 +2092,8 @@ function AllEars(readyCallback) {
 				const msgTs = (BigInt(evpDec[27] & 192) >> 6n) | (BigInt(evpDec[28]) << 2n) | (BigInt(evpDec[29]) << 10n) | (BigInt(evpDec[30]) << 18n) | (BigInt(evpDec[31]) << 26n) | (BigInt(evpDec[32]) << 34n);
 				const msgData = evpDec.slice(33, evpDec.length - lenPadding);
 
+				// Add Message and move on
 				await _addMessage(msgData, msgTs, msgType, msgSig, evpId);
-
 				_readyMsgBytes += evpBytes;
 				offset += evpBytes;
 			}
@@ -2267,7 +2268,7 @@ function AllEars(readyCallback) {
 			if (response.length !== 1) {callback(0x04); return;}
 			if (response[0] !== 0) {callback(response[0]); return;}
 
-			let x = encData.length + 64; // 32 (MsgHeader) + 32 (Envelope)
+			let x = encData.length + crypto_kem_CIPHERTEXTBYTES + _AEM_MSG_HDR_SZ;
 			if (x % _AEM_BLOCKSIZE !== 0) x+= (_AEM_BLOCKSIZE - (x % _AEM_BLOCKSIZE));
 			_totalMsgBytes += x;
 			_readyMsgBytes += x;
