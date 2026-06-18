@@ -296,8 +296,8 @@ function AllEars(readyCallback) {
 
 		// Create one-time keys
 		if (!binTs) binTs = _getBinTs();
-		const data_key = _aem_kdf_uak(21, binTs, postData? true:false, _AEM_UAK_TYPE_URL_DATA);
-		const auth_key = _aem_kdf_uak(32, binTs, postData? true:false, _AEM_UAK_TYPE_URL_AUTH);
+		const data_key = _aem_kdf_uak(21, binTs, !!postData, _AEM_UAK_TYPE_URL_DATA);
+		const auth_key = _aem_kdf_uak(32, binTs, !!postData, _AEM_UAK_TYPE_URL_AUTH);
 
 		// Create URL Base
 		const urlBase = new Uint8Array(42);
