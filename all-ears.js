@@ -1330,27 +1330,25 @@ function AllEars(readyCallback) {
 					msgFn = sodium.to_string(msgData.slice(3, 4 + (msgData[0] & 127)));
 					msgBody = msgData.slice(4 + (msgData[0] & 127));
 				} else {
-					// Uploaded file: AES256-CBC with Envelope Hidden Key (EHK)
-					const nonce = new Uint8Array(16);
-					nonce.set(msgTs);
-					nonce[0] = Number(msgTs & 255n);
-					nonce[1] = Number((msgTs >> 8n) & 255n);
-					nonce[2] = Number((msgTs >> 16n) & 255n);
-					nonce[3] = Number((msgTs >> 24n) & 255n);
-					nonce[4] = Number((msgTs >> 32n) & 255n);
-					nonce[5] = Number((msgTs >> 40n) & 3n) | (_own_ehk[32] & 252);
-					nonce.set(_own_ehk.slice(33), 6);
+					// Uploaded file: AES256-CTR with Envelope Hidden Key (EHK)
+					const nonce = new Uint8Array([0,0,0,0,0,0,0,0,0,0,
+						Number(msgTs & 3n) << 6,
+						Number((msgTs >>  2n) & 255n),
+						Number((msgTs >> 10n) & 255n),
+						Number((msgTs >> 18n) & 255n),
+						Number((msgTs >> 26n) & 255n),
+						Number(msgTs >> 34n)
+					]);
 
 					const dec = new Uint8Array(await window.crypto.subtle.decrypt(
-						{name: "AES-CBC", iv: nonce},
-						await window.crypto.subtle.importKey("raw", _own_ehk.slice(0, 32), {"name": "AES-CBC"}, false, ["decrypt"]),
+						{name: "AES-CTR", counter: nonce, length: 86},
+						await window.crypto.subtle.importKey("raw", _own_ehk, {"name": "AES-CTR"}, false, ["decrypt"]),
 						msgData.slice(1)
 					));
 
 					const lenFn = dec.indexOf(0);
-					try {
-						msgFn = sodium.to_string(dec.slice(0, lenFn));
-					} catch(e) {msgFn = "error";}
+					try {msgFn = sodium.to_string(dec.slice(0, lenFn));}
+					catch(e) {msgFn = "error";}
 					msgBody = dec.slice(lenFn + 1);
 				}
 
@@ -2250,6 +2248,7 @@ function AllEars(readyCallback) {
 	this.Message_Upload = async function(filename, body, callback) {if(typeof(filename)!=="string" || (typeof(body)!=="string" && body.constructor!==Uint8Array) || typeof(callback)!=="function"){return;}
 		if (filename.length < 1) {callback(0x01); return;}
 
+		// Create raw data
 		const u8fn = sodium.from_string(filename);
 		const u8body = (typeof(body) === "string") ? sodium.from_string(body) : body;
 
@@ -2261,24 +2260,30 @@ function AllEars(readyCallback) {
 		rawData[u8fn.length] = 0;
 		rawData.set(u8body, u8fn.length + 1);
 
-		const nonce = new Uint8Array(16);
-		const fileTs = _getBinTs();
-		nonce.set(fileTs);
-		nonce[5] |= _own_ehk[32] & 252;
-		nonce.set(_own_ehk.slice(33), 6);
+		const bts = _getBinTs();
+		const nonce = new Uint8Array([0,0,0,0,0,0,0,0,0,0,
+			(bts[0] & 3) << 6,
+			(bts[0] >> 2) | ((bts[1] & 3) << 6),
+			(bts[1] >> 2) | ((bts[2] & 3) << 6),
+			(bts[2] >> 2) | ((bts[3] & 3) << 6),
+			(bts[3] >> 2) | ((bts[4] & 3) << 6),
+			((bts[4] & 252) >> 2) | (bts[5] << 6)
+		]);
 
+		// Client-side encryption with Envelope Hidden Key (AES256-CTR)
 		const encData = new Uint8Array(await window.crypto.subtle.encrypt(
-			{name: "AES-CBC", iv: nonce},
-			await window.crypto.subtle.importKey("raw", _own_ehk.slice(0, 32), {"name": "AES-CBC"}, false, ["encrypt"]),
+			{name: "AES-CTR", counter: nonce, length: 86},
+			await window.crypto.subtle.importKey("raw", _own_ehk, {"name": "AES-CTR"}, false, ["encrypt"]),
 			rawData)
 		);
 
-		_aemApi(_AEM_API_MESSAGE_UPLOAD, 0, fileTs, encData, null, function(response) {
+		// Send to server
+		_aemApi(_AEM_API_MESSAGE_UPLOAD, 0, bts, encData, null, function(response) {
 			if (typeof(response) === "number") {callback(response); return;}
 			if (response.length !== 1) {callback(0x04); return;}
 			if (response[0] !== 0) {callback(response[0]); return;}
 
-			let x = encData.length + crypto_kem_CIPHERTEXTBYTES + _AEM_MSG_HDR_SZ;
+			let x = encData.length + sodium.crypto_kem_CIPHERTEXTBYTES + _AEM_MSG_HDR_SZ;
 			if (x % _AEM_BLOCKSIZE !== 0) x+= (_AEM_BLOCKSIZE - (x % _AEM_BLOCKSIZE));
 			_totalMsgBytes += x;
 			_readyMsgBytes += x;
