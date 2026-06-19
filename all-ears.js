@@ -240,9 +240,8 @@ function AllEars(readyCallback) {
 
 	async function _decompressBrotli(src) {
 		try {
-			const blob = new Blob([src]);
 			const ds = new DecompressionStream("brotli");
-			return await new Response(blob.stream().pipeThrough(ds)).bytes();
+			return await new Response(new Blob([src]).stream().pipeThrough(ds)).bytes();
 		} catch(e) {
 			return new Uint8Array(window.BrotliDecode(src));
 		}
