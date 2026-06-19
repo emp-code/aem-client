@@ -238,6 +238,16 @@ function AllEars(readyCallback) {
 		this.nick = nick;
 	}
 
+	async function _decompressBrotli(src) {
+		try {
+			const blob = new Blob([src]);
+			const ds = new DecompressionStream("brotli");
+			return await new Response(blob.stream().pipeThrough(ds)).bytes();
+		} catch(e) {
+			return new Uint8Array(window.BrotliDecode(src));
+		}
+	}
+
 	const _bestEffortDecode = function(src) {
 		const h = "0123456789abcdef";
 		let res = "Best effort decode:\n";
@@ -1187,47 +1197,48 @@ function AllEars(readyCallback) {
 				const msgDkim = (dkimCount > 0) ? (msgData.slice(23, 23 + (dkimCount * 12))) : null;
 				const extOffset = (dkimCount > 0) ? (23 + (dkimCount * 12)) : 23;
 
+				let msgBodyU8;
 				try {
-					const msgBodyBr = new Int8Array(msgData.slice(extOffset));
-					const msgBodyU8 = new Uint8Array(window.BrotliDecode(msgBodyBr));
-
-					const d = new TextDecoder("utf-8");
-					let o = 0;
-
-					for (let i = 0; i < dkimCount; i++) {
-						o += (msgDkim[i * 12 + 9] & 127) + (msgDkim[i * 12 + 10] & 127) + (msgDkim[i * 12 + 11] & 127);
-					}
-
-					const dkimTxt = (o > 0) ? d.decode(msgBodyU8.slice(0, o)) : null;
-
-					const msgEnvTo = d.decode(msgBodyU8.slice(o, o + lenEnvTo)) + "@" + _ourDomain; o += lenEnvTo;
-					const    hdrTo = d.decode(msgBodyU8.slice(o, o + lenHdrTo)); o+= lenHdrTo;
-					const msgGreet = d.decode(msgBodyU8.slice(o, o + lenGreet)); o+= lenGreet;
-					const msgRvDns = d.decode(msgBodyU8.slice(o, o + lenRvDns)); o+= lenRvDns;
-					const msgAuSys = d.decode(msgBodyU8.slice(o, o + lenAuSys)); o+= lenAuSys;
-					const msgEnvFr = d.decode(msgBodyU8.slice(o, o + lenEnvFr)); o+= lenEnvFr;
-					const    hdrFr = d.decode(msgBodyU8.slice(o, o + lenHdrFr)); o+= lenHdrFr;
-					const    rplTo = d.decode(msgBodyU8.slice(o, o + lenRplTo)); o+= lenRplTo;
-					const msgMsgId = d.decode(msgBodyU8.slice(o, o + lenMsgId)); o+= lenMsgId;
-					const msgSbjct = d.decode(msgBodyU8.slice(o, o + lenSbjct)); o+= lenSbjct;
-
-					const msgHdrTo = hdrTo.includes("\x7F") ? hdrTo.slice(hdrTo.indexOf("\x7F") + 1) : hdrTo;
-					const msgHdrFr = hdrFr.includes("\x7F") ? hdrFr.slice(hdrFr.indexOf("\x7F") + 1) : hdrFr;
-					const msgRplTo = rplTo.includes("\x7F") ? rplTo.slice(rplTo.indexOf("\x7F") + 1) : rplTo;
-
-					const msgDnTo = hdrTo.includes("\x7F") ? hdrTo.slice(0, hdrTo.indexOf("\x7F")) : null;
-					const msgDnFr = hdrFr.includes("\x7F") ? hdrFr.slice(0, hdrFr.indexOf("\x7F")) : null;
-					const msgDnRt = rplTo.includes("\x7F") ? rplTo.slice(0, rplTo.indexOf("\x7F")) : null;
-
-					const body = d.decode(msgBodyU8.slice(o));
-					const headersEnd = body.indexOf("\x7F");
-					const msgHeaders = (headersEnd > 0) ? body.slice(0, headersEnd) : "";
-					const msgBody = body.slice(headersEnd + 1);
-
-					_extMsg.push(new _ExtMsg(evpId, msgTs, msgHdrTs, msgHdrTz, msgIp, msgCc, msgCs, msgTls, msgEsmtp, msgProtV, msgInval, msgRares, msgAttach, msgGrDom, msgIpBlk, msgDkim, dkimTxt, msgGreet, msgRvDns, msgAuSys, msgEnvFr, msgHdrFr, msgDnFr, msgEnvTo, msgHdrTo, msgDnTo, msgRplTo, msgDnRt, msgMsgId, msgHeaders, msgSbjct, msgBody));
+					msgBodyU8 = await _decompressBrotli(msgData.slice(extOffset));
 				} catch(e) {
 					_extMsg.push(new _ExtMsg(evpId, msgTs, msgHdrTs, msgHdrTz, msgIp, msgCc, msgCs, msgTls, msgEsmtp, msgProtV, msgInval, msgRares, msgAttach, msgGrDom, msgIpBlk, null, null, "", "", "", "", "", "", "", "", "", "", "", "", "", "Failed decompression", e + ". Size: " + msgData.length));
+					return;
 				}
+
+				const d = new TextDecoder("utf-8");
+				let o = 0;
+
+				for (let i = 0; i < dkimCount; i++) {
+					o += (msgDkim[i * 12 + 9] & 127) + (msgDkim[i * 12 + 10] & 127) + (msgDkim[i * 12 + 11] & 127);
+				}
+
+				const dkimTxt = (o > 0) ? d.decode(msgBodyU8.slice(0, o)) : null;
+
+				const msgEnvTo = d.decode(msgBodyU8.slice(o, o + lenEnvTo)) + "@" + _ourDomain; o += lenEnvTo;
+				const    hdrTo = d.decode(msgBodyU8.slice(o, o + lenHdrTo)); o+= lenHdrTo;
+				const msgGreet = d.decode(msgBodyU8.slice(o, o + lenGreet)); o+= lenGreet;
+				const msgRvDns = d.decode(msgBodyU8.slice(o, o + lenRvDns)); o+= lenRvDns;
+				const msgAuSys = d.decode(msgBodyU8.slice(o, o + lenAuSys)); o+= lenAuSys;
+				const msgEnvFr = d.decode(msgBodyU8.slice(o, o + lenEnvFr)); o+= lenEnvFr;
+				const    hdrFr = d.decode(msgBodyU8.slice(o, o + lenHdrFr)); o+= lenHdrFr;
+				const    rplTo = d.decode(msgBodyU8.slice(o, o + lenRplTo)); o+= lenRplTo;
+				const msgMsgId = d.decode(msgBodyU8.slice(o, o + lenMsgId)); o+= lenMsgId;
+				const msgSbjct = d.decode(msgBodyU8.slice(o, o + lenSbjct)); o+= lenSbjct;
+
+				const msgHdrTo = hdrTo.includes("\x7F") ? hdrTo.slice(hdrTo.indexOf("\x7F") + 1) : hdrTo;
+				const msgHdrFr = hdrFr.includes("\x7F") ? hdrFr.slice(hdrFr.indexOf("\x7F") + 1) : hdrFr;
+				const msgRplTo = rplTo.includes("\x7F") ? rplTo.slice(rplTo.indexOf("\x7F") + 1) : rplTo;
+
+				const msgDnTo = hdrTo.includes("\x7F") ? hdrTo.slice(0, hdrTo.indexOf("\x7F")) : null;
+				const msgDnFr = hdrFr.includes("\x7F") ? hdrFr.slice(0, hdrFr.indexOf("\x7F")) : null;
+				const msgDnRt = rplTo.includes("\x7F") ? rplTo.slice(0, rplTo.indexOf("\x7F")) : null;
+
+				const body = d.decode(msgBodyU8.slice(o));
+				const headersEnd = body.indexOf("\x7F");
+				const msgHeaders = (headersEnd > 0) ? body.slice(0, headersEnd) : "";
+				const msgBody = body.slice(headersEnd + 1);
+
+				_extMsg.push(new _ExtMsg(evpId, msgTs, msgHdrTs, msgHdrTz, msgIp, msgCc, msgCs, msgTls, msgEsmtp, msgProtV, msgInval, msgRares, msgAttach, msgGrDom, msgIpBlk, msgDkim, dkimTxt, msgGreet, msgRvDns, msgAuSys, msgEnvFr, msgHdrFr, msgDnFr, msgEnvTo, msgHdrTo, msgDnTo, msgRplTo, msgDnRt, msgMsgId, msgHeaders, msgSbjct, msgBody));
 			break;}
 
 			case 1: { // IntMsg
