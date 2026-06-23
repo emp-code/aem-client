@@ -2080,7 +2080,7 @@ function AllEars(readyCallback) {
 
 				// Decrypt
 				const evpDec = new Uint8Array(await window.crypto.subtle.decrypt(
-					{name: "AES-CTR", counter: new Uint8Array(16), length: 128},
+					{name: "AES-CTR", counter: new Uint8Array([0,0,0,0,0,0,0,0,0,0,0,0,0,0, evpBlocks & 255, evpBlocks >> 8]), length: 112},
 					await window.crypto.subtle.importKey(
 						"raw",
 						sodium.crypto_kem_dec(evpData.slice(0, sodium.crypto_kem_CIPHERTEXTBYTES), _own_esk, "uint8array"),
